@@ -1,0 +1,7 @@
+Speed
+
+walk : 0.031f
+sneak : 0.032f
+dash : 0.1f
+
+--end

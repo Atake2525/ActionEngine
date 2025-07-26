@@ -1,0 +1,21 @@
+Move
+
+WALK : JOYSTICK
+JUMP : A/TRIGGER
+DASH : LEFTSTICK/PUSH
+
+--end
+
+CAMERA
+
+ROTATION : MOUSE 
+VSPEED : 0.3f // 縦の速度
+HSPEED : 0.3f // 横の速度
+
+-- end
+
+META
+
+PAUSE : MENU
+
+--end

@@ -1,0 +1,135 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Engine\Audio\Audio.cpp" />
+    <ClCompile Include="Engine\2d\SpriteBase\SpriteBase.cpp" />
+    <ClCompile Include="Engine\3d\Camera\Camera.cpp" />
+    <ClCompile Include="Engine\BlackBox\LeakChecker\D3DResourceLeakChecker.cpp" />
+    <ClCompile Include="Engine\Core\BaseEngine\DirectXBase.cpp" />
+    <ClCompile Include="externels\imgui\imgui.cpp" />
+    <ClCompile Include="externels\imgui\imgui_demo.cpp" />
+    <ClCompile Include="externels\imgui\imgui_draw.cpp" />
+    <ClCompile Include="externels\imgui\imgui_impl_dx12.cpp" />
+    <ClCompile Include="externels\imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="externels\imgui\imgui_tables.cpp" />
+    <ClCompile Include="externels\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="Engine\Core\Input\Input.cpp" />
+    <ClCompile Include="Engine\Math\kMath.cpp" />
+    <ClCompile Include="Application\FrameWork\main.cpp" />
+    <ClCompile Include="Engine\3d\Model\Model\Model.cpp" />
+    <ClCompile Include="Engine\3d\Model\ModelBase\ModelBase.cpp" />
+    <ClCompile Include="Engine\LoadManager\ModelManager\ModelManager.cpp" />
+    <ClCompile Include="Engine\3d\Object\Object3d\Object3d.cpp" />
+    <ClCompile Include="Engine\3d\Object\Object3dBase\Object3dBase.cpp" />
+    <ClCompile Include="Engine\2d\Sprite\Sprite.cpp" />
+    <ClCompile Include="Engine\LoadManager\TextureManager\TextureManager.cpp" />
+    <ClCompile Include="Engine\Core\WinApp\WinApp.cpp" />
+    <ClCompile Include="Application\FrameWork\FrameWork.cpp" />
+    <ClCompile Include="Engine\3d\Object\WireFrame\WireFrameObjectBase.cpp" />
+    <ClCompile Include="Application\Scene\PlayScene\GameScene.cpp" />
+    <ClCompile Include="Application\Scene\MyGame.cpp" />
+    <ClCompile Include="Engine\Lighting\Light.cpp" />
+    <ClCompile Include="Engine\UI\UI.cpp" />
+    <ClCompile Include="Engine\Core\BaseEngine\OffScreenRnedering.cpp" />
+    <ClCompile Include="Engine\Core\SrvManager\SrvManager.cpp" />
+    <ClCompile Include="Engine\BlackBox\ImGui\ImGuiManager.cpp" />
+    <ClCompile Include="Engine\3d\Object\Skinning\SkinningObject3dBase.cpp" />
+    <ClCompile Include="Engine\LoadManager\ParticleManager\ParticleManager.cpp" />
+    <ClCompile Include="Application\Scene\PlayScene\DemoScene.cpp" />
+    <ClCompile Include="Application\Scene\Manager\BaseScene.cpp" />
+    <ClCompile Include="Application\Scene\Manager\SceneManager.cpp" />
+    <ClCompile Include="Application\Scene\PlayScene\TitleScene.cpp" />
+    <ClCompile Include="Application\Scene\Manager\SceneFactory.cpp" />
+    <ClCompile Include="Engine\Game\Player.cpp" />
+    <ClCompile Include="Engine\3d\SkyBox\SkyBox.cpp" />
+    <ClCompile Include="Engine\BlackBox\Animation\DebugAnimation.cpp" />
+    <ClCompile Include="Engine\BlackBox\Log\Logger.cpp" />
+    <ClCompile Include="Engine\BlackBox\Log\StringUtility.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Engine\Audio\Audio.h" />
+    <ClInclude Include="Engine\2d\SpriteBase\SpriteBase.h" />
+    <ClInclude Include="Engine\3d\Camera\Camera.h" />
+    <ClInclude Include="Engine\BlackBox\LeakChecker\D3DResourceLeakChecker.h" />
+    <ClInclude Include="Engine\Core\BaseEngine\DirectXBase.h" />
+    <ClInclude Include="externels\imgui\imconfig.h" />
+    <ClInclude Include="externels\imgui\imgui.h" />
+    <ClInclude Include="externels\imgui\imgui_impl_dx12.h" />
+    <ClInclude Include="externels\imgui\imgui_impl_win32.h" />
+    <ClInclude Include="externels\imgui\imgui_internal.h" />
+    <ClInclude Include="externels\imgui\imstb_rectpack.h" />
+    <ClInclude Include="externels\imgui\imstb_textedit.h" />
+    <ClInclude Include="externels\imgui\imstb_truetype.h" />
+    <ClInclude Include="Engine\Core\Input\Input.h" />
+    <ClInclude Include="Engine\Math\kMath.h" />
+    <ClInclude Include="Engine\Math\Matrix3x3.h" />
+    <ClInclude Include="Engine\3d\Model\Model\Model.h" />
+    <ClInclude Include="Engine\3d\Model\ModelBase\ModelBase.h" />
+    <ClInclude Include="Engine\LoadManager\ModelManager\ModelManager.h" />
+    <ClInclude Include="Engine\3d\Object\Object3d\Object3d.h" />
+    <ClInclude Include="Engine\3d\Object\Object3dBase\Object3dBase.h" />
+    <ClInclude Include="Engine\2d\Sprite\Sprite.h" />
+    <ClInclude Include="Engine\LoadManager\TextureManager\TextureManager.h" />
+    <ClInclude Include="Engine\Math\Transform.h" />
+    <ClInclude Include="Engine\Math\Vector2.h" />
+    <ClInclude Include="Engine\Math\Vector3.h" />
+    <ClInclude Include="Engine\Math\Vector4.h" />
+    <ClInclude Include="Engine\Math\Matrix4x4.h" />
+    <ClInclude Include="Engine\Core\WinApp\WinApp.h" />
+    <ClInclude Include="Application\FrameWork\FrameWork.h" />
+    <ClInclude Include="Engine\3d\Object\WireFrame\WireFrameObjectBase.h" />
+    <ClInclude Include="Engine\Math\Quaternion.h" />
+    <ClInclude Include="Application\Scene\PlayScene\GameScene.h" />
+    <ClInclude Include="Application\Scene\MyGame.h" />
+    <ClInclude Include="Engine\Lighting\Light.h" />
+    <ClInclude Include="Engine\UI\UI.h" />
+    <ClInclude Include="Engine\Math\Segment.h" />
+    <ClInclude Include="Engine\Core\BaseEngine\OffScreenRnedering.h" />
+    <ClInclude Include="Engine\Math\Animator.h" />
+    <ClInclude Include="Engine\Core\SrvManager\SrvManager.h" />
+    <ClInclude Include="Engine\BlackBox\ImGui\ImGuiManager.h" />
+    <ClInclude Include="Engine\3d\Object\Skinning\SkinningObject3dBase.h" />
+    <ClInclude Include="Engine\LoadManager\ParticleManager\ParticleManager.h" />
+    <ClInclude Include="Application\Scene\PlayScene\DemoScene.h" />
+    <ClInclude Include="Application\Scene\Manager\BaseScene.h" />
+    <ClInclude Include="Application\Scene\Manager\SceneManager.h" />
+    <ClInclude Include="Application\Scene\PlayScene\TitleScene.h" />
+    <ClInclude Include="Application\Scene\Manager\AbstractSceneFactory.h" />
+    <ClInclude Include="Application\Scene\Manager\SceneFactory.h" />
+    <ClInclude Include="Engine\Game\Player.h" />
+    <ClInclude Include="Engine\3d\SkyBox\SkyBox.h" />
+    <ClInclude Include="Engine\BlackBox\Animation\DebugAnimation.h" />
+    <ClInclude Include="Engine\BlackBox\Log\StringUtility.h" />
+    <ClInclude Include="Engine\BlackBox\Log\Logger.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="externels\assimp\lib\Release\assimp-vc143-mtd.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="externels\imgui\LICENSE.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Resources\shaders\BoxFilter.PS.hlsl" />
+    <FxCompile Include="Resources\shaders\Fullscreen.PS.hlsl" />
+    <FxCompile Include="Resources\shaders\Fullscreen.VS.hlsl" />
+    <FxCompile Include="Resources\shaders\Grayscale.PS.hlsl" />
+    <FxCompile Include="Resources\shaders\Object3d.PS.hlsl" />
+    <FxCompile Include="Resources\shaders\Object3d.VS.hlsl" />
+    <FxCompile Include="Resources\shaders\Particle.PS.hlsl" />
+    <FxCompile Include="Resources\shaders\Particle.VS.hlsl" />
+    <FxCompile Include="Resources\shaders\Vignetting.PS.hlsl" />
+    <FxCompile Include="Resources\shaders\GaussianFilter.PS.hlsl" />
+    <FxCompile Include="Resources\shaders\SkinningObject3d.VS.hlsl" />
+    <FxCompile Include="Resources\shaders\Skybox.PS.hlsl" />
+    <FxCompile Include="Resources\shaders\Skybox.VS.hlsl" />
+    <FxCompile Include="Resources\shaders\Sprite.PS.hlsl" />
+    <FxCompile Include="Resources\shaders\Sprite.VS.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\shaders\Fullscreen.hlsli" />
+    <None Include="Resources\shaders\Object3d.hlsli" />
+    <None Include="Resources\shaders\Particle.hlsli" />
+    <None Include="Resources\shaders\Skybox.hlsli" />
+    <None Include="Resources\shaders\Sprite.hlsli" />
+  </ItemGroup>
+</Project>
