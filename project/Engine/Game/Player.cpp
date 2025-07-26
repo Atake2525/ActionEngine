@@ -139,15 +139,18 @@ void Player::Move()
 		maxSpeed_ = sneakSpeed_ * speedLimit_;
 	}
 	else if (input->PushKey(DIK_LSHIFT)) {
-		// プレイヤーの状態をダッシュにする
+		// プレイヤーの状態をダッシュにするのは移動している時なので変更しない
 		// 最高移動速度をdashSpeedにする
-		moveType_ = PlayerMoveType::Dash;
 		maxSpeed_ = dashSpeed_ * speedLimit_;
 	}
 
+	if (jump_)
+	{
+		moveType_ = PlayerMoveType::Jump;
+	}
 	// accelerationを計算する
 	float acceleration = 0.0f;
-	if (moveType_ == PlayerMoveType::Jump)
+	if (moveType_ != PlayerMoveType::Jump)
 	{
 		acceleration = maxSpeed_ * translateAcceleration_;
 	}
@@ -201,18 +204,36 @@ void Player::Move()
 	speed_.x = std::clamp(speed_.x, -maxSpeed_, maxSpeed_);
 	speed_.z = std::clamp(speed_.z, -maxSpeed_, maxSpeed_);
 
+	moveVelocity_ = speed_;
 	// 斜め移動の場合はXとZを正規化する
 	if (speed_.x != 0.0f && speed_.z != 0.0f)
 	{
 		// ジャンプ中の可能性を考慮してNormalizeのときはYの値を別の場所に格納しておく
 		float y = speed_.y;
 		speed_.y = 0.0f;
-		moveVelocity_ = Normalize(speed_);
+		// Normalizeして移動方向を正規化しているのでmaxSpeed_を掛けて速度を期待する数値へもどす
+		moveVelocity_ = Normalize(speed_) * maxSpeed_;
 		speed_.y = y;
+		moveVelocity_.y = speed_.y;
 	}
-	moveVelocity_ = speed_;
 
+	// しゃがみとダッシュは移動しているかどうかでも状態(アニメーション)が変わるため移動処理の後に調べる
+	if (maxSpeed_ == sneakSpeed_ * speedLimit_ && (speed_.x != 0.0f || speed_.z != 0.0f)) // しゃがみの最高速度なら
+	{
+		// プレイヤーの状態をしゃがみにする しゃがみ移動の処理は平行移動処理の後に書く
+		// 最高移動速度をsneakSpeedにする
+		moveType_ = PlayerMoveType::Sneak;
+	}
+	else if (maxSpeed_ == dashSpeed_ * speedLimit_ && (speed_.x != 0.0f || speed_.z != 0.0f)) { // ダッシュの最高速度なら
+		// プレイヤーの状態をダッシュにする
+		// 最高移動速度をdashSpeedにする
+		moveType_ = PlayerMoveType::Dash;
+	}
 
+	if (jump_)
+	{
+		moveType_ = PlayerMoveType::Jump;
+	}
 
 
 	// ジャンプ中や落下中ならジャンプ中の加速度を利用
@@ -357,8 +378,8 @@ void Player::Move()
 	// プレイヤーの回転をカメラの正面を向くように変える
 	playerTransform_.rotate = cameraTransform.rotate;
 
-	// ダッシュ中はFovを上げる
-	if (moveType_ == PlayerMoveType::Dash)
+	// 速度が歩行状態よりも早ければ速度が上がっている感を出すためにFovを上げる(ジャンプ中はFovが増えないようにする)
+	if ((speed_.x > walkSpeed_ * speedLimit_ || speed_.z > walkSpeed_ * speedLimit_) && !jump_)
 	{
 		fovTime_ = 0.0f;
 		afterFovY_ = 0.65f;
