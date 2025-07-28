@@ -6,33 +6,26 @@
 #include "Logger.h"
 #include "SrvManager.h"
 #include "SkyBox.h"
+#include "json.hpp"
 
 using namespace Logger;
 
 void Model::Initialize(std::string directoryPath, std::string filename, bool enableLighting, bool isAnimation) {
+	bool enableAnimationLoad = isAnimation;
 
-	for (size_t i = filename.size(); i > 0; --i)
+	if (filename.ends_with(".obj"))
 	{
-		char c = filename[i];
-		if (c == '.')
-		{
-			char c = filename[i + 1];
-			if (c == 'o')
-			{
-				// モデル読み込み
-				modelData = LoadModelFileOBJ(directoryPath, filename);
-			}
-			if (c == 'g')
-			{
-				// モデル読み込み
-				modelData = LoadModelFile(directoryPath, filename);
-			}
-		}
+		// モデル読み込み
+		modelData = LoadModelFileOBJ(directoryPath, filename);
+	}
+	else if (filename.ends_with(".gltf"))
+	{// モデル読み込み
+		modelData = LoadModelFileGLTF(directoryPath, filename);
 	}
 
 	if (isAnimation)
 	{
-		this->isAnimation = isAnimation;
+		this->isAnimation = enableAnimationLoad;
 		Animation anim = LoadAnimationFile(directoryPath, filename);
 		animation["DefaultAnimation"] = anim;
 	}
@@ -182,12 +175,18 @@ MaterialData Model::LoadMaterialTemplateFile(const std::string& directoryPath, c
 }
 
 // マルチスレッド化予定
-ModelData Model::LoadModelFile(const std::string& directoryPath, const std::string& filename) {
+ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::string& filename) {
 	ModelData modelData;            // 構築するModelData
 	Assimp::Importer importer;
 	std::string filePath = directoryPath + "/" + filename;
 	const aiScene* scene = importer.ReadFile(filePath.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs | aiProcess_Triangulate | aiProcess_JoinIdenticalVertices);
-	assert(scene->HasMeshes()); // メッシュが無いのは対応しない
+	//assert(scene->HasMeshes()); // メッシュが無いのは対応しない
+	if (!scene->HasMeshes())
+	{
+		Log("ファイルの展開に失敗しました\n指定したファイルパスにファイルが存在するか、名前が一致しているか確認してください\n");
+		modelData = LoadModelFileOBJ("Resources/Debug/obj", "box.obj");
+		return modelData;
+	}
 	// ↑パスが間違ってる可能性(大)
 
 	// マルチマテリアル対応のためにメモリを保管しておく
@@ -196,8 +195,14 @@ ModelData Model::LoadModelFile(const std::string& directoryPath, const std::stri
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex)
 	{
 		aiMesh* mesh = scene->mMeshes[meshIndex];
-		assert(mesh->HasNormals()); // 法線が無いMeshは今回は非対応
-		assert(mesh->HasTextureCoords(0)); // TexcoordsがないMeshは今回は非対応
+		//assert(mesh->HasNormals()); // 法線が無いMeshは今回は非対応
+		//assert(mesh->HasTextureCoords(0)); // TexcoordsがないMeshは今回は非対応
+		if (!mesh->HasNormals() || !mesh->HasTextureCoords(0))
+		{
+			Log("指定したファイルには法線またはTexcoordsが存在しません\n上記が存在しないまたは破損したファイルを読み込んでいる可能性があります\n");
+			modelData = LoadModelFileOBJ("Resources/Debug/obj", "box.obj");
+			return modelData;
+		}
 
 		modelData.vertices.resize(mesh->mNumVertices); // 最初に頂点数分のメモリを保管しておく
 		modelData.matVertexData[mesh->mMaterialIndex].vertices.resize(mesh->mNumVertices); // マルチマテリアルでもメモリ保管
@@ -218,7 +223,13 @@ ModelData Model::LoadModelFile(const std::string& directoryPath, const std::stri
 		for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; ++faceIndex)
 		{
 			aiFace& face = mesh->mFaces[faceIndex];
-			assert(face.mNumIndices == 3);
+			//assert(face.mNumIndices == 3);
+			if (face.mNumIndices != 3)
+			{
+				Log("指定したファイルに三角化されていない面が存在します\nフォルダをもう一度確認してください\n");
+				modelData = LoadModelFileOBJ("Resources/Debug/obj", "box.obj");
+				return modelData;
+			}
 
 			for (uint32_t element = 0; element < face.mNumIndices; ++element)
 			{
@@ -411,14 +422,27 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 	Assimp::Importer importer;
 	std::string filePath = directoryPath + "/" + filename;
 	const aiScene* scene = importer.ReadFile(filePath.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs | aiProcess_Triangulate);
-	assert(scene->HasMeshes()); // メッシュが無いのは対応しない
+	//assert(scene->HasMeshes()); 
+	// メッシュが無いのは対応しない
+	if (!scene->HasMeshes())
+	{
+		Log("ファイルの展開に失敗しました\n指定したファイルパスにファイルが存在するか、名前が一致しているか確認してください\n");
+		modelData = LoadModelFileOBJ("Resources/Debug/obj", "box.obj");
+		return modelData;
+	}
 
 	modelData.matVertexData.resize(scene->mNumMeshes + 1);
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex)
 	{
 		aiMesh* mesh = scene->mMeshes[meshIndex];
-		assert(mesh->HasNormals()); // 法線が無いMeshは今回は非対応
-		assert(mesh->HasTextureCoords(0)); // TexcoordsがないMeshは今回は非対応
+		//assert(mesh->HasNormals()); // 法線が無いMeshは今回は非対応
+		//assert(mesh->HasTextureCoords(0)); // TexcoordsがないMeshは今回は非対応
+		if (!mesh->HasNormals() || !mesh->HasTextureCoords(0))
+		{
+			Log("指定したファイルには法線またはTexcoordsが存在しません\n上記が存在しないまたは破損したファイルを読み込んでいる可能性があります\n");
+			modelData = LoadModelFileOBJ("Resources/Debug/obj", "box.obj");
+			return modelData;
+		}
 
 		modelData.vertices.resize(mesh->mNumVertices); // 最初に頂点数分のメモリを保管しておく
 		modelData.matVertexData[meshIndex].vertices.resize(mesh->mNumVertices);
@@ -439,7 +463,13 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 		for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; faceIndex++)
 		{
 			aiFace& face = mesh->mFaces[faceIndex];
-			assert(face.mNumIndices == 3);
+			//assert(face.mNumIndices == 3);
+			if (face.mNumIndices != 3)
+			{
+				Log("指定したファイルに三角化されていない面が存在します\nフォルダをもう一度確認してください\n");
+				modelData = LoadModelFileOBJ("Resources/Debug/obj", "box.obj");
+				return modelData;
+			}
 
 			for (uint32_t element = 0; element < face.mNumIndices; element++)
 			{
