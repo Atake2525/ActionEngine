@@ -69,7 +69,7 @@ void GameScene::Initialize() {
 
 	Audio::GetInstance()->LoadMP3("Resources/sekiranun.mp3", "bgm", 0.1f);
 
-	LevelData levelData = JsonLoader::GetInstance()->LoadJsonTransform("Resources/Debug/json", "CubeVertex.json");
+	//LevelData levelData = JsonLoader::GetInstance()->LoadJsonTransform("Resources/Debug/json", "CubeVertex.json");
 
 
 

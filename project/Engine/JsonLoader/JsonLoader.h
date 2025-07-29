@@ -4,6 +4,7 @@
 #include "json.hpp"
 #include <sstream>
 #include <fstream>
+#include <Windows.h>
 
 struct Children
 {
@@ -33,6 +34,16 @@ struct LevelData
 	std::string name;
 
 	std::vector<JsonData> datas;
+};
+
+struct HotReload
+{
+	std::string directoryPath;
+	std::string filename;
+
+	std::string fullpath;
+
+	FILETIME& lastWriteTime;
 };
 
 class JsonLoader

@@ -30,12 +30,10 @@ void Model::Initialize(std::string directoryPath, std::string filename, bool ena
 		animation["DefaultAnimation"] = anim;
 	}
 
-	//vertexResource.resize(modelData.matVertexData.size());
-	// Resourceの作成
+	// 頂点Resourceの作成
 	CreateVertexResource();
 
-	//vertexBufferView.resize(modelData.matVertexData.size());
-	// BufferResourceの作成
+	// 頂点BufferResourceの作成
 	CreateVertexBufferView();
 
 	vertexData.resize(modelData.matVertexData.size());
@@ -62,9 +60,6 @@ void Model::Initialize(std::string directoryPath, std::string filename, bool ena
 		materialTemplateResource.at(i)->Map(0, nullptr, reinterpret_cast<void**>(&materialTemplateData[i]));
 		std::memcpy(materialTemplateData[i], &modelData.materialTemplate.at(i), sizeof(MaterialTemplate) * modelData.materialTemplate.size());
 	}
-	//vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-	//std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size()); // 頂点データをリソースにコピー
-
 
 	CreateMaterialResouce();
 	//  書き込むためのアドレスを取得
