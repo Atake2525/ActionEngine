@@ -35,7 +35,7 @@ void MyGame::Initialize() {
 
 	ParticleManager::GetInstance()->Initialize(directxBase);
 
-	LoadJson::GetInstance()->Initialize();
+	JsonLoader::GetInstance()->Initialize();
 
 	Light::GetInstance()->Initialize(directxBase);
 
@@ -128,7 +128,7 @@ void MyGame::Finalize() {
 
 	ParticleManager::GetInstance()->Finalize();
 
-	LoadJson::GetInstance()->Finalize();
+	JsonLoader::GetInstance()->Finalize();
 
 	Light::GetInstance()->Finalize();
 

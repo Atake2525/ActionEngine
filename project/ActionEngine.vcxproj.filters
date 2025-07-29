@@ -45,7 +45,7 @@
     <ClCompile Include="Engine\BlackBox\Animation\DebugAnimation.cpp" />
     <ClCompile Include="Engine\BlackBox\Log\Logger.cpp" />
     <ClCompile Include="Engine\BlackBox\Log\StringUtility.cpp" />
-    <ClCompile Include="Engine\JsonLoader\LoadJson.cpp" />
+    <ClCompile Include="Engine\JsonLoader\JsonLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Audio\Audio.h" />
@@ -102,7 +102,6 @@
     <ClInclude Include="Engine\BlackBox\Animation\DebugAnimation.h" />
     <ClInclude Include="Engine\BlackBox\Log\StringUtility.h" />
     <ClInclude Include="Engine\BlackBox\Log\Logger.h" />
-    <ClInclude Include="Engine\JsonLoader\LoadJson.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="externels\assimp\lib\Release\assimp-vc143-mtd.lib" />

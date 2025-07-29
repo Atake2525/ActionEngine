@@ -3,7 +3,7 @@
 #include "externels/imgui/imgui_impl_dx12.h"
 #include "externels/imgui/imgui_impl_win32.h"
 
-#include "LoadJson.h"
+#include "JsonLoader.h"
 
 void GameScene::Initialize() {
 	//BaseScene::Initialize();
@@ -69,7 +69,9 @@ void GameScene::Initialize() {
 
 	Audio::GetInstance()->LoadMP3("Resources/sekiranun.mp3", "bgm", 0.1f);
 
-	LevelData levelData = LoadJson::GetInstance()->LoadJsonTransform("Resources/Debug/json", "CubeVertex.json");
+	LevelData levelData = JsonLoader::GetInstance()->LoadJsonTransform("Resources/Debug/json", "CubeVertex.json");
+
+
 
 	/*sprite = new Sprite();
 	sprite->Initialize("Resources/checkerBoard.png");*/

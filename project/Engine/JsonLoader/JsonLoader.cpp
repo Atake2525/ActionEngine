@@ -1,29 +1,29 @@
-#include "LoadJson.h"
+#include "JsonLoader.h"
 #include <cassert>
 #include "Logger.h"
 
 using namespace Logger;
 
-LoadJson* LoadJson::instance = nullptr;
+JsonLoader* JsonLoader::instance = nullptr;
 
-LoadJson* LoadJson::GetInstance() {
+JsonLoader* JsonLoader::GetInstance() {
     if (instance == nullptr)
     {
-        instance = new LoadJson;
+        instance = new JsonLoader;
     }
     return instance;
 }
 
-void LoadJson::Finalize() {
+void JsonLoader::Finalize() {
     delete instance;
     instance = nullptr;
 }
 
-void LoadJson::Initialize() {
+void JsonLoader::Initialize() {
 
 }
 
-const LevelData LoadJson::LoadJsonTransform(const std::string& directoryPath, const std::string& fileName)
+const LevelData JsonLoader::LoadJsonTransform(const std::string& directoryPath, const std::string& fileName)
 {
     LevelData lvData;
 
@@ -159,6 +159,8 @@ const LevelData LoadJson::LoadJsonTransform(const std::string& directoryPath, co
                     
                     data.transform = transformchild;
                     data.file_name = children["file_name"].get<std::string>();
+                    data.name = children["name"].get<std::string>();
+                    data.type = children["type"].get<std::string>();
                     
                 }
             }

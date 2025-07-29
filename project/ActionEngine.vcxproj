@@ -153,7 +153,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Scene\Manager\SceneFactory.cpp" />
     <ClCompile Include="Engine\Game\Player.cpp" />
     <ClCompile Include="Engine\3d\SkyBox\SkyBox.cpp" />
-    <ClCompile Include="Engine\JsonLoader\LoadJson.cpp" />
+    <ClCompile Include="Engine\JsonLoader\JsonLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Scene\Manager\AbstractSceneFactory.h" />

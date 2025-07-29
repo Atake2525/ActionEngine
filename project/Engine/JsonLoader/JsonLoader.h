@@ -35,25 +35,25 @@ struct LevelData
 	std::vector<JsonData> datas;
 };
 
-class LoadJson
+class JsonLoader
 {
 private:
 	// シングルトンパターンを適用
-	static LoadJson* instance;
+	static JsonLoader* instance;
 
 	// コンストラクタ、デストラクタの隠蔽
-	LoadJson() = default;
-	~LoadJson() = default;
+	JsonLoader() = default;
+	~JsonLoader() = default;
 	// コピーコンストラクタ、コピー代入演算子の封印
-	LoadJson(LoadJson&) = delete;
-	LoadJson& operator=(LoadJson&) = delete;
+	JsonLoader(JsonLoader&) = delete;
+	JsonLoader& operator=(JsonLoader&) = delete;
 
 public:
 	/// <summary>
 	/// インスタンスの取得
 	/// </summary>
 	/// <returns></returns>
-	static LoadJson* GetInstance();
+	static JsonLoader* GetInstance();
 
 	/// <summary>
 	/// 終了処理
