@@ -164,12 +164,12 @@ private:
 private:
 	// .mtlファイルの読み取り
 	static MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& fileName);
-	// .objファイルの読み取り
-	static ModelData LoadModelFile(const std::string& directoryPath, const std::string& fileName);
 	// ノード情報のロード
 	static Node ReadNode(aiNode* node);
 	// アニメーションの読み込み
 	static Animation LoadAnimationFile(const std::string& directoryPath, const std::string& filename);
+	// .gltfファイルの読み取り
+	static ModelData LoadModelFileGLTF(const std::string& directoryPath, const std::string& fileName);
 	// .objファイルの読み取り
 	static ModelData LoadModelFileOBJ(const std::string& directoryPath, const std::string& fileName);
 	// VertexResourceを作成する
