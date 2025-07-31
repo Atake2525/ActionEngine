@@ -5,6 +5,7 @@
 #include <sstream>
 #include <fstream>
 #include <Windows.h>
+#include <map>
 
 struct Children
 {
@@ -33,7 +34,7 @@ struct LevelData
 {
 	std::string name;
 
-	std::vector<JsonData> datas;
+	std::map<std::string, JsonData> datas;
 };
 
 struct HotReload
