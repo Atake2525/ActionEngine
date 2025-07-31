@@ -18,6 +18,7 @@
 #include "ParticleManager.h"
 #include "SkyBox.h"
 #include "JsonLoader.h"
+#include "CollisionManager.h"
 
 #include "algorithm"
 #include "externels/imgui/imgui.h"
