@@ -15,6 +15,7 @@
 #include "SceneManager.h"
 #include "Player.h"
 #include "SkyBox.h"
+#include "CollisionManager.h"
 
 #pragma once
 

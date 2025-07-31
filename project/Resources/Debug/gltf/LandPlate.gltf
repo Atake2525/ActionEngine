@@ -10,7 +10,8 @@
 			"nodes":[
 				0,
 				1,
-				2
+				2,
+				3
 			]
 		}
 	],
@@ -26,12 +27,16 @@
 		{
 			"mesh":2,
 			"name":"\u7acb\u65b9\u4f53.002"
+		},
+		{
+			"mesh":3,
+			"name":"\u7acb\u65b9\u4f53.003"
 		}
 	],
 	"materials":[
 		{
 			"doubleSided":true,
-			"name":"\u30de\u30c6\u30ea\u30a2\u30eb.004",
+			"name":"\u30de\u30c6\u30ea\u30a2\u30eb.011",
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
 					"index":0
@@ -42,7 +47,7 @@
 		},
 		{
 			"doubleSided":true,
-			"name":"\u30de\u30c6\u30ea\u30a2\u30eb.003",
+			"name":"\u30de\u30c6\u30ea\u30a2\u30eb.012",
 			"pbrMetallicRoughness":{
 				"metallicFactor":0.10000000149011612,
 				"roughnessFactor":0.5
@@ -89,6 +94,20 @@
 					},
 					"indices":7,
 					"material":1
+				}
+			]
+		},
+		{
+			"name":"\u7acb\u65b9\u4f53",
+			"primitives":[
+				{
+					"attributes":{
+						"POSITION":11,
+						"NORMAL":12,
+						"TEXCOORD_0":13
+					},
+					"indices":7,
+					"material":0
 				}
 			]
 		}
@@ -202,6 +221,34 @@
 			"componentType":5126,
 			"count":24,
 			"type":"VEC2"
+		},
+		{
+			"bufferView":11,
+			"componentType":5126,
+			"count":24,
+			"max":[
+				1,
+				1,
+				21
+			],
+			"min":[
+				-1,
+				-1,
+				19
+			],
+			"type":"VEC3"
+		},
+		{
+			"bufferView":12,
+			"componentType":5126,
+			"count":24,
+			"type":"VEC3"
+		},
+		{
+			"bufferView":13,
+			"componentType":5126,
+			"count":24,
+			"type":"VEC2"
 		}
 	],
 	"bufferViews":[
@@ -270,6 +317,24 @@
 			"byteLength":192,
 			"byteOffset":1556,
 			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":288,
+			"byteOffset":1748,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":288,
+			"byteOffset":2036,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":192,
+			"byteOffset":2324,
+			"target":34962
 		}
 	],
 	"samplers":[
@@ -280,7 +345,7 @@
 	],
 	"buffers":[
 		{
-			"byteLength":1748,
+			"byteLength":2516,
 			"uri":"LandPlate.bin"
 		}
 	]

@@ -35,6 +35,8 @@ void MyGame::Initialize() {
 
 	ParticleManager::GetInstance()->Initialize(directxBase);
 
+	CollisionManager::GetInstance()->Initialize();
+
 	JsonLoader::GetInstance()->Initialize();
 
 	Light::GetInstance()->Initialize(directxBase);
@@ -68,6 +70,7 @@ void MyGame::Update() {
 	directxBase->Update();
 	Light::GetInstance()->Update();
 	SceneManager::GetInstance()->Update();
+	CollisionManager::GetInstance()->Update();
 	ParticleManager::GetInstance()->Update();
 	//JsonLoader::GetInstance()->Update();
 
@@ -128,6 +131,8 @@ void MyGame::Finalize() {
 	ModelManager::GetInstance()->Finalize();
 
 	ParticleManager::GetInstance()->Finalize();
+
+	CollisionManager::GetInstance()->Finalize();
 
 	JsonLoader::GetInstance()->Finalize();
 

@@ -114,6 +114,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\3d\Object\Skinning\SkinningObject3dBase.cpp" />
     <ClCompile Include="Engine\BlackBox\Log\Logger.cpp" />
     <ClCompile Include="Engine\BlackBox\Log\StringUtility.cpp" />
+    <ClCompile Include="Engine\Collision\CollisionManager.cpp" />
     <ClCompile Include="Engine\Core\BaseEngine\OffScreenRnedering.cpp" />
     <ClCompile Include="Engine\BlackBox\Animation\DebugAnimation.cpp" />
     <ClCompile Include="Engine\LoadManager\ParticleManager\ParticleManager.cpp" />
@@ -164,10 +165,13 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\3d\Object\Skinning\SkinningObject3dBase.h" />
     <ClInclude Include="Engine\BlackBox\Log\Logger.h" />
     <ClInclude Include="Engine\BlackBox\Log\StringUtility.h" />
+    <ClInclude Include="Engine\Collision\CollisionManager.h" />
     <ClInclude Include="Engine\Core\BaseEngine\OffScreenRnedering.h" />
     <ClInclude Include="Engine\BlackBox\Animation\DebugAnimation.h" />
     <ClInclude Include="Engine\LoadManager\ParticleManager\ParticleManager.h" />
+    <ClInclude Include="Engine\Math\AABB.h" />
     <ClInclude Include="Engine\Math\Animator.h" />
+    <ClInclude Include="Engine\Math\Collision.h" />
     <ClInclude Include="Engine\Math\Segment.h" />
     <ClInclude Include="Engine\UI\UI.h" />
     <ClInclude Include="Engine\Audio\Audio.h" />

@@ -67,6 +67,8 @@ void GameScene::Initialize() {
 	land->SetModel("Resources/Debug/gltf", "LandPlate.gltf", true);
 	//land->SetEnvironmentCoefficient(1.0f);
 
+	CollisionManager::GetInstance()->AddCollisionTraget(terrain, "terrain");
+
 	Audio::GetInstance()->LoadMP3("Resources/sekiranun.mp3", "bgm", 0.1f);
 
 	LevelData levelData = JsonLoader::GetInstance()->LoadJsonTransform("Resources/Debug/json", "PlayerStartPoint.json");

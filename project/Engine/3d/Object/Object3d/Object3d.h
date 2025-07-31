@@ -156,8 +156,12 @@ private:
 	// Getterに返すようのAABB(座標を更新する)
 	AABB aabb;
 
+	std::vector<AABB> multiMeshAABB;
+
 	// 初期位置のAABB
 	AABB first;
+
+	std::vector<AABB> firstMultiMeshAABB;
 
 	Matrix4x4 worldMatrix;
 
@@ -229,6 +233,8 @@ public:
 public:
 	// 衝突チェック(AABBとAABB)
 	const bool CheckCollision(Object3d* object) const;
+
+	const std::vector<AABB> GetAABBMultiMeshed();
 
 	//const bool& CheckCollisionSphere(const Sphere& sphere) const;
 
