@@ -48,7 +48,7 @@ private: // ステータス(移動系)宣言
     float speedLimit_ = 2.5f; // 移動速度限界
 
     float translateAcceleration_ = 0.04f; // 慣性(接地状態)
-    float flyAcceleration_ = 0.01f; // 慣性(ジャンプ中)
+    float flyAcceleration_ = 0.015f; // 慣性(ジャンプ中)
 
     // 各アニメーションの速度倍率
     float walkSpeed_ = 0.031f; 
