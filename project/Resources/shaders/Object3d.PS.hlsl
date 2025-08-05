@@ -141,6 +141,11 @@ PixelShaderOutput main(VertexShaderOutput input)
         float NdotLSpotLight = dot(normalize(input.normal), -spotLightDirectionOnSurFace);
         float cosSpotLight = pow(NdotLSpotLight * 0.5f + 0.5f, 2.0f);
         
+        float3 halfVectorSpotLight = normalize(-gSpotLight.direction + toEye);
+        float NDotHSpotLight = dot(normalize(input.normal), halfVectorSpotLight);
+        
+        float specularPowSpotLight = pow(saturate(NDotHSpotLight), gMaterial.shininess);
+        
         //float32_t attenuationFactor = saturate((cosAngle - gSpotLight.distance) / (1.0f - gSpotLight.distance));
         
         float spotLightdistance = length(gSpotLight.position - input.worldPosition); // ポイントライトへの距離
@@ -167,7 +172,8 @@ PixelShaderOutput main(VertexShaderOutput input)
         
         // 鏡面反射                                                                                      ↓ 物体の鏡面反射の色。ここでは白にしている materialで設定できたりすると良い
         //float32_t3 specularSpotLight = gSpotLight.color.rgb * gSpotLight.intensity * attenuationFactor * falloffFactor * gSpotLight.specularColor * specularPow;
-        float3 specularSpotLight = gSpotLight.color.rgb * gSpotLight.intensity * attenuationFactor * gMaterial.specularColor * gSpotLight.specularColor * specularPow;
+        float3 specularSpotLight = gSpotLight.color.rgb * gSpotLight.intensity * attenuationFactor * gMaterial.specularColor * gSpotLight.specularColor * specularPowSpotLight;
+        
         
         // 拡散反射 + 鏡面反射
         output.color.rgb = diffuseDirectionalLight + specularDirectionalLight + diffusePointLight + specularPointLight + diffuseSpotLight + specularSpotLight;
