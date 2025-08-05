@@ -339,6 +339,62 @@ void Object3d::CreateAABB() {
 	first.max.x = modelData.vertices[0].position.x;
 	first.max.y = modelData.vertices[0].position.y;
 	first.max.z = modelData.vertices[0].position.z;
+	//// モデル全体のAABBを作成
+	//for (VertexData vertices : modelData.vertices)
+	//{
+	//	first.min.x = std::min(first.min.x, vertices.position.x);
+	//	first.min.y = std::min(first.min.y, vertices.position.y);
+	//	first.min.z = std::min(first.min.z, vertices.position.z);
+
+	//	first.max.x = std::max(first.max.x, vertices.position.x);
+	//	first.max.y = std::max(first.max.y, vertices.position.y);
+	//	first.max.z = std::max(first.max.z, vertices.position.z);
+	//}
+
+	for (size_t index = 0; index < modelData.matVertexData.size(); ++index)
+	{
+		AABB firstMultimesh;
+		firstMultimesh.min.x = modelData.matVertexData[index].vertices[0].position.x;
+		firstMultimesh.min.y = modelData.matVertexData[index].vertices[0].position.y;
+		firstMultimesh.min.z = modelData.matVertexData[index].vertices[0].position.z;
+		firstMultimesh.max.x = modelData.matVertexData[index].vertices[0].position.x;
+		firstMultimesh.max.y = modelData.matVertexData[index].vertices[0].position.y;
+		firstMultimesh.max.z = modelData.matVertexData[index].vertices[0].position.z;
+
+		for (VertexData vertices : modelData.matVertexData[index].vertices)
+		{
+			firstMultimesh.min.x = std::min(firstMultimesh.min.x, vertices.position.x);
+			firstMultimesh.min.y = std::min(firstMultimesh.min.y, vertices.position.y);
+			firstMultimesh.min.z = std::min(firstMultimesh.min.z, vertices.position.z);
+
+			firstMultimesh.max.x = std::max(firstMultimesh.max.x, vertices.position.x);
+			firstMultimesh.max.y = std::max(firstMultimesh.max.y, vertices.position.y);
+			firstMultimesh.max.z = std::max(firstMultimesh.max.z, vertices.position.z);
+		}
+
+		first.min.x = std::min(first.min.x, firstMultimesh.min.x);
+		first.min.y = std::min(first.min.y, firstMultimesh.min.y);
+		first.min.z = std::min(first.min.z, firstMultimesh.min.z);
+
+		first.max.x = std::max(first.max.x, firstMultimesh.max.x);
+		first.max.y = std::max(first.max.y, firstMultimesh.max.y);
+		first.max.z = std::max(first.max.z, firstMultimesh.max.z);
+
+		firstMultiMeshAABB.push_back(firstMultimesh);
+	}
+
+}
+
+void Object3d::ReCreateAABB() {
+	const ModelData modelData = model_->GetModelData();
+	firstMultiMeshAABB.clear();
+
+	first.min.x = modelData.vertices[0].position.x;
+	first.min.y = modelData.vertices[0].position.y;
+	first.min.z = modelData.vertices[0].position.z;
+	first.max.x = modelData.vertices[0].position.x;
+	first.max.y = modelData.vertices[0].position.y;
+	first.max.z = modelData.vertices[0].position.z;
 	// モデル全体のAABBを作成
 	for (VertexData vertices : modelData.vertices)
 	{
@@ -372,7 +428,17 @@ void Object3d::CreateAABB() {
 		}
 		firstMultiMeshAABB.push_back(firstMultimesh);
 	}
+}
 
+void Object3d::CreateCapsule(){
+	Capsule result;
+	Vector3 center = (first.min + first.max) * 0.5f;
+	result.start = { center.x, first.min.y, center.z };
+	result.end = { center.x, first.max.y, center.z };
+
+	float dist = Distance(center, Vector3{ first.min.x, center.y, first.min.z });
+
+	result.radius = dist;
 }
 
 void Object3d::ApplyAnimation(Skeleton& skeleton, const Animation& animation, float animationTime)
@@ -533,7 +599,7 @@ const Vector3 Object3d::GetJointNormal(const std::string jointName)
 	return { 0.0f, 0.0f, 0.0f };
 }
 
-const bool Object3d::CheckCollision(Object3d* object) const {
+const bool Object3d::CheckCollisionAABB(Object3d* object) const {
 	return CollisionAABB(aabb, object->GetAABB());
 }
 
@@ -547,6 +613,11 @@ const std::vector<AABB> Object3d::GetAABBMultiMeshed()
 		multiMeshAABB[index].max = firstMultiMeshAABB[index].max + worldPos;
 	}
 	return multiMeshAABB;
+}
+
+const bool Object3d::CheckCollisionCapsule(Object3d* object) const
+{
+	return CollisionCapsuleAABB(capsule, object->GetAABB());
 }
 
 const Skeleton Object3d::CreateSkelton(const Node& rootNode)

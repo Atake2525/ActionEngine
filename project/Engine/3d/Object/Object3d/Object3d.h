@@ -12,6 +12,7 @@
 #include "Quaternion.h"
 #include "Animator.h"
 #include "Model.h"
+#include "Capsule.h"
 //#include "DebugAnimation.h"
 
 #pragma once
@@ -165,6 +166,8 @@ private:
 
 	Matrix4x4 worldMatrix;
 
+	Capsule capsule;
+
 public:
 
 	// Getter(Transform)
@@ -230,11 +233,21 @@ public:
 
 	const bool GetEnableMetallic() { return model_->GetEnableMetallic(); }
 
+	// AABBをモデルを参照して再生成
+	void ReCreateAABB();
+
+	// Capsuleをモデルを参照して作成
+	void CreateCapsule();
+
 public:
 	// 衝突チェック(AABBとAABB)
-	const bool CheckCollision(Object3d* object) const;
+	const bool CheckCollisionAABB(Object3d* object) const;
 
 	const std::vector<AABB> GetAABBMultiMeshed();
+
+	const bool CheckCollisionCapsule(Object3d* object) const;
+
+	const bool CheckCollisionCapsuleMultiAABB(Object3d* object) const;
 
 	//const bool& CheckCollisionSphere(const Sphere& sphere) const;
 

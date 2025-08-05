@@ -27,7 +27,7 @@
 #include "externels/DirectXTex/DirectXTex.h"
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-#include "GameScene.h"
+//#include "GameScene.h"
 
 #pragma once
 

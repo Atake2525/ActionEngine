@@ -850,3 +850,18 @@ float Norm(const Quaternion& quaternion) {
 	result = sqrtf((quaternion.w * quaternion.w) + (quaternion.x * quaternion.x) + (quaternion.y * quaternion.y) + (quaternion.z * quaternion.z));
 	return result;
 }
+
+Vector3 ClosestPoint(const AABB& aabb, const Vector3& segment){
+
+	Vector3 result;
+	result.x = std::clamp(segment.x, aabb.min.x, aabb.max.x);
+	result.y = std::clamp(segment.y, aabb.min.y, aabb.max.y);
+	result.z = std::clamp(segment.z, aabb.min.z, aabb.max.z);
+
+	return result;
+}
+
+float LengthSquared(const Vector3& v)
+{
+	return v.x * v.x + v.y * v.y + v.z * v.z;
+}

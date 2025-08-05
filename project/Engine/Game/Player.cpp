@@ -68,6 +68,12 @@ void Player::Update() {
 	}
 	Rotation();
 	Move();
+
+	if (input->TriggerKey(DIK_G))
+	{
+		playerModel_->CreateCapsule();
+	}
+
 	playerModel_->SetAnimationSpeed(1.0f);
 	playerModel_->SetTransform(playerTransform_);
     playerModel_->Update();
@@ -161,6 +167,7 @@ void Player::Move()
 	// 平行移動(前後左右)
 	if (input->PushKey(DIK_W))
 	{
+		moveType_ = PlayerMoveType::Walk;
 		speed_.z += acceleration;
 	}
 	else if (speed_.z > 0.0f)
@@ -182,6 +189,7 @@ void Player::Move()
 
 	if (input->PushKey(DIK_D))
 	{
+		moveType_ = PlayerMoveType::Walk;
 		speed_.x += acceleration;
 	}
 	else if (speed_.x > 0.0f)
@@ -192,6 +200,7 @@ void Player::Move()
 
 	if (input->PushKey(DIK_A))
 	{
+		moveType_ = PlayerMoveType::Walk;
 		speed_.x -= acceleration;
 	}
 	else if (speed_.x < 0.0f)
@@ -249,7 +258,7 @@ void Player::Move()
 	playerTransform_.rotate = cameraTransform.rotate;
 
 	// 速度が歩行状態よりも早ければ速度が上がっている感を出すためにFovを上げる(ジャンプ中はFovが増えないようにする)
-	if ((speed_.x > walkSpeed_ * speedLimit_ || speed_.z > walkSpeed_ * speedLimit_) && !jump_)
+	if (((speed_.x == dashSpeed_ * speedLimit_ || speed_.z == dashSpeed_ * speedLimit_) || (speed_.x == -(dashSpeed_ * speedLimit_) || speed_.z == -(dashSpeed_ * speedLimit_))) && !jump_)
 	{
 		fovTime_ = 0.0f;
 		afterFovY_ = 0.65f;

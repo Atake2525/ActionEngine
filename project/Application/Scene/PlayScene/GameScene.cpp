@@ -158,6 +158,16 @@ void GameScene::Update() {
 		Audio::GetInstance()->Play2D("bgm", { 0.0f, 0.0f }, false);
 	}
 
+	if (box->CheckCollisionAABB(land))
+	{
+		box->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
+	}
+	else
+	{
+		box->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+	}
+
+
 	camera->SetTranslate(cameraTransform.translate);
 	camera->SetRotate(cameraTransform.rotate);
 	//camera->SetTranslateParent(human->GetWorldMatrix());

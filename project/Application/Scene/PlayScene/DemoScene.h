@@ -12,6 +12,8 @@
 #include "ParticleManager.h"
 #include "Audio.h"
 #include "BaseScene.h"
+#include "SceneManager.h"
+#include "SkyBox.h"
 
 #pragma once
 
