@@ -245,9 +245,12 @@ public:
 
 	const std::vector<AABB> GetAABBMultiMeshed();
 
+	// 衝突チェック(AABBと複数AABB)
+	const bool CheckCollisionAABBs(Object3d* object) const;
+
 	const bool CheckCollisionCapsule(Object3d* object) const;
 
-	const bool CheckCollisionCapsuleMultiAABB(Object3d* object) const;
+	//const bool CheckCollisionCapsuleMultiAABB(Object3d* object) const;
 
 	//const bool& CheckCollisionSphere(const Sphere& sphere) const;
 

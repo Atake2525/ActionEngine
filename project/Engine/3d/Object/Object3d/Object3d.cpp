@@ -381,6 +381,7 @@ void Object3d::CreateAABB() {
 		first.max.z = std::max(first.max.z, firstMultimesh.max.z);
 
 		firstMultiMeshAABB.push_back(firstMultimesh);
+		multiMeshAABB.resize(firstMultiMeshAABB.size());
 	}
 
 }
@@ -427,6 +428,7 @@ void Object3d::ReCreateAABB() {
 			firstMultimesh.max.z = std::max(firstMultimesh.max.z, vertices.position.z);
 		}
 		firstMultiMeshAABB.push_back(firstMultimesh);
+		multiMeshAABB.resize(firstMultiMeshAABB.size());
 	}
 }
 
@@ -613,6 +615,18 @@ const std::vector<AABB> Object3d::GetAABBMultiMeshed()
 		multiMeshAABB[index].max = firstMultiMeshAABB[index].max + worldPos;
 	}
 	return multiMeshAABB;
+}
+
+const bool Object3d::CheckCollisionAABBs(Object3d* object) const
+{
+	for (AABB objectAABB : object->GetAABBMultiMeshed())
+	{
+		if (CollisionAABB(aabb, objectAABB))
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 const bool Object3d::CheckCollisionCapsule(Object3d* object) const

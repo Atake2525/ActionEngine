@@ -158,7 +158,7 @@ void GameScene::Update() {
 		Audio::GetInstance()->Play2D("bgm", { 0.0f, 0.0f }, false);
 	}
 
-	if (box->CheckCollisionAABB(land))
+	if (box->CheckCollisionAABBs(land))
 	{
 		box->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
 	}
