@@ -185,3 +185,8 @@ Quaternion Inverse(const Quaternion& quaternion);
 
 // Quaternionのnormを返す
 float Norm(const Quaternion& quaternion);
+
+// 最近接点
+Vector3 ClosestPoint(const AABB& aabb, const Vector3& segment);
+
+float LengthSquared(const Vector3& v);

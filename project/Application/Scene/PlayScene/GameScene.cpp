@@ -67,6 +67,8 @@ void GameScene::Initialize() {
 	land->SetModel("Resources/Debug/gltf", "LandPlate.gltf", true);
 	//land->SetEnvironmentCoefficient(1.0f);
 
+	CollisionManager::GetInstance()->AddCollisionTraget(terrain, "terrain");
+
 	Audio::GetInstance()->LoadMP3("Resources/sekiranun.mp3", "bgm", 0.1f);
 
 	LevelData levelData = JsonLoader::GetInstance()->LoadJsonTransform("Resources/Debug/json", "PlayerStartPoint.json");
@@ -155,6 +157,16 @@ void GameScene::Update() {
 	{
 		Audio::GetInstance()->Play2D("bgm", { 0.0f, 0.0f }, false);
 	}
+
+	if (box->CheckCollisionAABBs(land))
+	{
+		box->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
+	}
+	else
+	{
+		box->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+	}
+
 
 	camera->SetTranslate(cameraTransform.translate);
 	camera->SetRotate(cameraTransform.rotate);

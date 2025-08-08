@@ -8,31 +8,55 @@
 		{
 			"name":"Scene",
 			"nodes":[
-				0
+				0,
+				1,
+				2,
+				3
 			]
 		}
 	],
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"\u5e73\u9762"
+			"name":"\u7acb\u65b9\u4f53"
+		},
+		{
+			"mesh":1,
+			"name":"\u7acb\u65b9\u4f53.001"
+		},
+		{
+			"mesh":2,
+			"name":"\u7acb\u65b9\u4f53.002"
+		},
+		{
+			"mesh":3,
+			"name":"\u7acb\u65b9\u4f53.003"
 		}
 	],
 	"materials":[
 		{
 			"doubleSided":true,
-			"name":"\u30de\u30c6\u30ea\u30a2\u30eb.001",
+			"name":"\u30de\u30c6\u30ea\u30a2\u30eb.011",
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
 					"index":0
 				},
+				"metallicFactor":0.5,
 				"roughnessFactor":0
+			}
+		},
+		{
+			"doubleSided":true,
+			"name":"\u30de\u30c6\u30ea\u30a2\u30eb.012",
+			"pbrMetallicRoughness":{
+				"metallicFactor":0.10000000149011612,
+				"roughnessFactor":0.5
 			}
 		}
 	],
 	"meshes":[
 		{
-			"name":"\u5e73\u9762.002",
+			"name":"\u7acb\u65b9\u4f53.002",
 			"primitives":[
 				{
 					"attributes":{
@@ -41,6 +65,48 @@
 						"TEXCOORD_0":2
 					},
 					"indices":3,
+					"material":0
+				}
+			]
+		},
+		{
+			"name":"\u7acb\u65b9\u4f53.003",
+			"primitives":[
+				{
+					"attributes":{
+						"POSITION":4,
+						"NORMAL":5,
+						"TEXCOORD_0":6
+					},
+					"indices":7,
+					"material":1
+				}
+			]
+		},
+		{
+			"name":"\u7acb\u65b9\u4f53.006",
+			"primitives":[
+				{
+					"attributes":{
+						"POSITION":8,
+						"NORMAL":9,
+						"TEXCOORD_0":10
+					},
+					"indices":7,
+					"material":1
+				}
+			]
+		},
+		{
+			"name":"\u7acb\u65b9\u4f53",
+			"primitives":[
+				{
+					"attributes":{
+						"POSITION":11,
+						"NORMAL":12,
+						"TEXCOORD_0":13
+					},
+					"indices":7,
 					"material":0
 				}
 			]
@@ -65,14 +131,14 @@
 			"componentType":5126,
 			"count":4,
 			"max":[
-				100,
-				7.549790097982623e-06,
-				100
+				10,
+				0,
+				10
 			],
 			"min":[
-				-100,
-				-7.549790097982623e-06,
-				-100
+				-10,
+				0,
+				-5
 			],
 			"type":"VEC3"
 		},
@@ -93,6 +159,96 @@
 			"componentType":5123,
 			"count":6,
 			"type":"SCALAR"
+		},
+		{
+			"bufferView":4,
+			"componentType":5126,
+			"count":24,
+			"max":[
+				6,
+				6,
+				26
+			],
+			"min":[
+				4,
+				-1,
+				14
+			],
+			"type":"VEC3"
+		},
+		{
+			"bufferView":5,
+			"componentType":5126,
+			"count":24,
+			"type":"VEC3"
+		},
+		{
+			"bufferView":6,
+			"componentType":5126,
+			"count":24,
+			"type":"VEC2"
+		},
+		{
+			"bufferView":7,
+			"componentType":5123,
+			"count":36,
+			"type":"SCALAR"
+		},
+		{
+			"bufferView":8,
+			"componentType":5126,
+			"count":24,
+			"max":[
+				-4,
+				6,
+				26
+			],
+			"min":[
+				-6,
+				-1,
+				14
+			],
+			"type":"VEC3"
+		},
+		{
+			"bufferView":9,
+			"componentType":5126,
+			"count":24,
+			"type":"VEC3"
+		},
+		{
+			"bufferView":10,
+			"componentType":5126,
+			"count":24,
+			"type":"VEC2"
+		},
+		{
+			"bufferView":11,
+			"componentType":5126,
+			"count":24,
+			"max":[
+				1,
+				1,
+				21
+			],
+			"min":[
+				-1,
+				-1,
+				19
+			],
+			"type":"VEC3"
+		},
+		{
+			"bufferView":12,
+			"componentType":5126,
+			"count":24,
+			"type":"VEC3"
+		},
+		{
+			"bufferView":13,
+			"componentType":5126,
+			"count":24,
+			"type":"VEC2"
 		}
 	],
 	"bufferViews":[
@@ -119,6 +275,66 @@
 			"byteLength":12,
 			"byteOffset":128,
 			"target":34963
+		},
+		{
+			"buffer":0,
+			"byteLength":288,
+			"byteOffset":140,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":288,
+			"byteOffset":428,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":192,
+			"byteOffset":716,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":72,
+			"byteOffset":908,
+			"target":34963
+		},
+		{
+			"buffer":0,
+			"byteLength":288,
+			"byteOffset":980,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":288,
+			"byteOffset":1268,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":192,
+			"byteOffset":1556,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":288,
+			"byteOffset":1748,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":288,
+			"byteOffset":2036,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":192,
+			"byteOffset":2324,
+			"target":34962
 		}
 	],
 	"samplers":[
@@ -129,7 +345,7 @@
 	],
 	"buffers":[
 		{
-			"byteLength":140,
+			"byteLength":2516,
 			"uri":"LandPlate.bin"
 		}
 	]

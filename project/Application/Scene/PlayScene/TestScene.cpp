@@ -1,10 +1,10 @@
-#include "TitleScene.h"
+#include "TestScene.h"
 #include "externels/imgui/imgui.h"
 #include "externels/imgui/imgui_impl_dx12.h"
 #include "externels/imgui/imgui_impl_win32.h"
 
 
-void TitleScene::Initialize() {
+void TestScene::Initialize() {
 
 	//ModelManager::GetInstance()->LoadModel("Resources/Model/gltf/human", "walkMultiMaterial.gltf", true, true);
 
@@ -31,7 +31,7 @@ void TitleScene::Initialize() {
 
 }
 
-void TitleScene::Update() {
+void TestScene::Update() {
 
 	grid->Update();
 
@@ -47,7 +47,7 @@ void TitleScene::Update() {
 	input->Update();
 }
 
-void TitleScene::Draw() {
+void TestScene::Draw() {
 
 	SpriteBase::GetInstance()->ShaderDraw();
 
@@ -64,7 +64,7 @@ void TitleScene::Draw() {
 
 }
 
-void TitleScene::Finalize() {
+void TestScene::Finalize() {
 
 	delete camera;
 

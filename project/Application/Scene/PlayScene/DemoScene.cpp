@@ -4,7 +4,6 @@
 #include "externels/imgui/imgui_impl_win32.h"
 
 
-
 void DemoScene::Initialize() {
 
 	//ModelManager::GetInstance()->LoadModel("Resources/Model/gltf/human", "walkMultiMaterial.gltf", true, true);
@@ -13,14 +12,23 @@ void DemoScene::Initialize() {
 	camera->SetRotate(Vector3(SwapRadian(10.0f), 0.0f, 0.0f));
 	camera->SetTranslate({ 0.0f, 2.8f, -8.0f });
 
+	TextureManager::GetInstance()->LoadTexture("Resources/rostock_laage_airport_4k.dds");
+
+	SkyBox::GetInstance()->SetCamera(camera);
+	SkyBox::GetInstance()->SetTexture("Resources/rostock_laage_airport_4k.dds");
+
 	input = Input::GetInstance();
 	input->ShowMouseCursor(true);
 
 	Object3dBase::GetInstance()->SetDefaultCamera(camera);
 
+	ParticleManager::GetInstance()->SetCamera(camera);
+
 	grid = new Object3d();
 	grid->Initialize();
 	grid->SetModel("Resources/Debug", "Grid.obj");
+
+
 }
 
 void DemoScene::Update() {
@@ -28,6 +36,13 @@ void DemoScene::Update() {
 	grid->Update();
 
 	camera->Update();
+
+	if (input->TriggerKey(DIK_RETURN))
+	{
+		SceneManager::GetInstance()->SetNextScene("GAMESCENE");
+	}
+
+	SkyBox::GetInstance()->Update();
 
 	input->Update();
 }
@@ -50,6 +65,8 @@ void DemoScene::Draw() {
 }
 
 void DemoScene::Finalize() {
+
+	delete camera;
 
 	delete grid;
 }

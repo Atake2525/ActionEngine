@@ -1,29 +1,30 @@
-//#include "CollisionManager.h"
-//#include "kMath.h"
-//
-////CollisionManager* CollisionManager::instance = nullptr;
-//
-////CollisionManager* CollisionManager::GetInstance() {
-////	if (instance == nullptr)
-////	{
-////		instance = new CollisionManager;
-////	}
-////	return instance;
-////}
-//
-//void CollisionManager::Initialize() {
-//
-//}
-//
-//void CollisionManager::Update() {
-//	
-//}
-//
-////void CollisionManager::Finalize() {
-////	delete instance;
-////	instance = nullptr;
-////}
-//
+#include "CollisionManager.h"
+#include "kMath.h"
+
+CollisionManager* CollisionManager::instance = nullptr;
+
+CollisionManager* CollisionManager::GetInstance() {
+	if (instance == nullptr)
+	{
+		instance = new CollisionManager;
+	}
+	return instance;
+}
+
+void CollisionManager::Initialize() {
+
+}
+
+void CollisionManager::Update() {
+	
+}
+
+void CollisionManager::Finalize() {
+	collisionObject.clear();
+	delete instance;
+	instance = nullptr;
+}
+
 //const bool& CollisionManager::CheckCollision(const AABB& a, const AABB& b) {
 //	if ((a.min.x <= b.max.x && a.max.x >= b.min.x) && 
 //		(a.min.y <= b.max.y && a.max.y >= b.min.y) && 
@@ -49,7 +50,11 @@
 //	}
 //	return false;
 //}
+
+//const bool& CollisionManager::CheckCollision(const AABB& target1, const OBB& target2) {
 //
-////const bool& CollisionManager::CheckCollision(const AABB& target1, const OBB& target2) {
-////
-////}
+//}
+
+void CollisionManager::AddCollisionTraget(Object3d* object3d, const std::string key) {
+	collisionObject[key] = object3d;
+}

@@ -56,9 +56,9 @@ void Model::Initialize(std::string directoryPath, std::string filename, bool ena
 		indexResource.at(i)->Map(0, nullptr, reinterpret_cast<void**>(&mappedIndex));
 		std::memcpy(mappedIndex, modelData.matVertexData.at(i).indices.data(), sizeof(uint32_t) * modelData.matVertexData.at(i).indices.size());
 
-		materialTemplateResource.at(i) = ModelBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(MaterialTemplate) * modelData.materialTemplate.size());
-		materialTemplateResource.at(i)->Map(0, nullptr, reinterpret_cast<void**>(&materialTemplateData[i]));
-		std::memcpy(materialTemplateData[i], &modelData.materialTemplate.at(i), sizeof(MaterialTemplate) * modelData.materialTemplate.size());
+		materialTemplateResource.at(modelData.matVertexData[i].materialIndex) = ModelBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(MaterialTemplate) * modelData.materialTemplate.size());
+		materialTemplateResource.at(modelData.matVertexData[i].materialIndex)->Map(0, nullptr, reinterpret_cast<void**>(&materialTemplateData[modelData.matVertexData[i].materialIndex]));
+		std::memcpy(materialTemplateData[modelData.matVertexData[i].materialIndex], &modelData.materialTemplate.at(modelData.matVertexData[i].materialIndex), sizeof(MaterialTemplate) * modelData.materialTemplate.size());
 	}
 
 	CreateMaterialResouce();
@@ -92,7 +92,7 @@ void Model::Draw() {
 	
 	for (uint32_t index = 0; index < modelData.matVertexData.size(); index++)
 	{
-		ModelBase::GetInstance()->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(8, materialTemplateResource[index]->GetGPUVirtualAddress());
+		ModelBase::GetInstance()->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(8, materialTemplateResource[modelData.matVertexData[index].materialIndex]->GetGPUVirtualAddress());
 		if (isAnimation)
 		{
 			ModelBase::GetInstance()->GetDxBase()->GetCommandList()->SetGraphicsRootDescriptorTable(9, skinCluster[index].paletteSrvHandle.second);
@@ -112,7 +112,7 @@ void Model::Draw() {
 		}
 		else
 		{
-			SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(2, modelData.material.at(index).textureIndex);
+			SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(2, modelData.material[modelData.matVertexData[index].materialIndex].textureIndex);
 		}
 		SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(7, SkyBox::GetInstance()->GetSrvIndex());
 
@@ -200,7 +200,8 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 		}
 
 		modelData.vertices.resize(mesh->mNumVertices); // 最初に頂点数分のメモリを保管しておく
-		modelData.matVertexData[mesh->mMaterialIndex].vertices.resize(mesh->mNumVertices); // マルチマテリアルでもメモリ保管
+		modelData.matVertexData[meshIndex].vertices.resize(mesh->mNumVertices); // マルチマテリアルでもメモリ保管
+		modelData.matVertexData[meshIndex].materialIndex = mesh->mMaterialIndex;
 		for (uint32_t vertexIndex = 0; vertexIndex < mesh->mNumVertices; ++vertexIndex)
 		{
 			aiVector3D& position = mesh->mVertices[vertexIndex];
@@ -327,9 +328,17 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 			// 読み込んだテクスチャの番号尾を取得
 			matData.textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(matData.textureFilePath);
 
-			MaterialTemplate matTempData;
 			// メタリックの数値
-			matTempData.metallic = 0.0f;
+			float metallic = 0.0f;
+			MaterialTemplate matTempData;
+
+			if (material->Get(AI_MATKEY_METALLIC_FACTOR, metallic) == AI_SUCCESS) {
+				matTempData.metallic = metallic;
+			}
+			else
+			{
+				matTempData.metallic = 0.0f;
+			}
 
 			modelData.materialTemplate.push_back(matTempData);
 			modelData.material.push_back(matData);
@@ -440,7 +449,15 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 		}
 
 		modelData.vertices.resize(mesh->mNumVertices); // 最初に頂点数分のメモリを保管しておく
-		modelData.matVertexData[meshIndex].vertices.resize(mesh->mNumVertices);
+		modelData.matVertexData[meshIndex].vertices.resize(mesh->mNumVertices); // マルチマテリアルでもメモリ保管
+		if (mesh->mMaterialIndex != 0)
+		{
+			modelData.matVertexData[meshIndex].materialIndex = mesh->mMaterialIndex - 1;
+		}
+		else
+		{
+			modelData.matVertexData[meshIndex].materialIndex = mesh->mMaterialIndex;
+		}
 		for (uint32_t vertexIndex = 0; vertexIndex < mesh->mNumVertices; ++vertexIndex)
 		{
 			aiVector3D& position = mesh->mVertices[vertexIndex];

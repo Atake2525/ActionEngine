@@ -15,6 +15,7 @@
 #include "SceneManager.h"
 #include "Player.h"
 #include "SkyBox.h"
+#include "CollisionManager.h"
 
 #pragma once
 
@@ -29,7 +30,7 @@ public:
 	/// <summary>
 	/// 終了処理
 	/// </summary>
-	void Finalize();
+	void Finalize() override;
 
 	/// <summary>
 	/// 更新
