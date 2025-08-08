@@ -138,10 +138,6 @@ private:
 	/// </summary>
 	void CreateDXCCompiler();
 	/// <summary>
-	/// ImGuiの初期化
-	/// </summary>
-	void InitializeImgui();
-	/// <summary>
 	/// 指定番号のCPUデスクリプタハンドルを取得する
 	/// </summary>
 	static D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& descriptorHeap, uint32_t descriptorSize, uint32_t index);
@@ -150,10 +146,8 @@ private:
 	/// </summary>
 	static D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& descriptorHeap, uint32_t descriptorSize, uint32_t index);
 
-	//Microsoft::WRL::ComPtr<ID3D12Resource>CreateRenderTextureResource(Microsoft::WRL::ComPtr<ID3D12Device> device, uint32_t width, uint32_t height, DXGI_FORMAT format, const Vector4& clearColor);
-
 	// ポインタ
-	WinApp* winApp_ = nullptr;
+	//WinApp* winApp_ = nullptr;
 
 	HRESULT hr;
 	// DXGIファクトリー
@@ -175,14 +169,6 @@ private:
 	//std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> swapChainResources;
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[2];
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvTextureHandle;
-
-	//Microsoft::WRL::ComPtr<ID3D12Resource> renderTextureResource;
-
-	//const Vector4 renderTargetClearValue{ 1.0f, 0.0f, 0.0f, 1.0f }; // 分かりやすい赤にする
-
-	/*D3D12_CPU_DESCRIPTOR_HANDLE srvCPUHandle;
-	D3D12_GPU_DESCRIPTOR_HANDLE srvGPUHandle;*/
-
 
 	//// フェンス
 	Microsoft::WRL::ComPtr<ID3D12Fence> fence = nullptr;
@@ -220,9 +206,6 @@ private:
 
 	// DSV用のヒープでディスクリプタの数は1。DSVはShader内で触るものではないので、ShaderVisibleはFalse
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvDescriptorHeap = nullptr;
-
-	// offScreenRendering用の3角形の変数宣言
-	void CreatePSO();
 
 	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
 
@@ -266,13 +249,4 @@ private:
 
 	float clearColor[4];
 
-	//struct Monotone
-	//{
-	//	float x, y, z;
-	//};
-
-	////Monotone monotone = { 107.0f, 74.0f, 43.0f };
-	//Monotone monotone;
-
-	//Microsoft::WRL::ComPtr<ID3D12Resource> monotoneResouce;
 };

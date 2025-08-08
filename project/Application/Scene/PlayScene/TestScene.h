@@ -17,7 +17,7 @@
 
 #pragma once
 
-class TitleScene : public BaseScene
+class TestScene : public BaseScene
 {
 public:
 	/// <summary>

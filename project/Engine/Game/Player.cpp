@@ -68,6 +68,12 @@ void Player::Update() {
 	}
 	Rotation();
 	Move();
+
+	if (input->TriggerKey(DIK_G))
+	{
+		playerModel_->CreateCapsule();
+	}
+
 	playerModel_->SetAnimationSpeed(1.0f);
 	playerModel_->SetTransform(playerTransform_);
     playerModel_->Update();
@@ -100,10 +106,8 @@ void Player::Move()
 {
 	// 無操作状態ならば何もしないので毎フレームIdle状態にする
 	moveType_ = PlayerMoveType::Idle;
-	//moveVelocity_ = { 0.0f, 0.0f, 0.0f };
-	//playerModel_->SetStartAnimation(true);
-	// 無操作(移動系)ならspeedを落とす
 
+	// ジャンプ状態の解除(仮)
 	if (playerTransform_.translate.y < 0.0f)
 	{
 		playerTransform_.translate.y = 0.1f;
@@ -111,6 +115,7 @@ void Player::Move()
 		speed_.y = 0.0f;
 	}
 
+	// 一番最初にジャンプ状態の有無を調べる(ジャンプ中か否かで移動系処理が変わるため)
 	if (input->PushKey(DIK_SPACE))
 	{
 		if (!jump_)
@@ -162,6 +167,7 @@ void Player::Move()
 	// 平行移動(前後左右)
 	if (input->PushKey(DIK_W))
 	{
+		moveType_ = PlayerMoveType::Walk;
 		speed_.z += acceleration;
 	}
 	else if (speed_.z > 0.0f)
@@ -183,6 +189,7 @@ void Player::Move()
 
 	if (input->PushKey(DIK_D))
 	{
+		moveType_ = PlayerMoveType::Walk;
 		speed_.x += acceleration;
 	}
 	else if (speed_.x > 0.0f)
@@ -193,6 +200,7 @@ void Player::Move()
 
 	if (input->PushKey(DIK_A))
 	{
+		moveType_ = PlayerMoveType::Walk;
 		speed_.x -= acceleration;
 	}
 	else if (speed_.x < 0.0f)
@@ -235,135 +243,6 @@ void Player::Move()
 		moveType_ = PlayerMoveType::Jump;
 	}
 
-
-	// ジャンプ中や落下中ならジャンプ中の加速度を利用
-	//if(moveType_ == PlayerMoveType::Jump)
-	//{
-	//	acceleration = flyAcceleration_;
-	//}
-	//else // それ以外なら接地中の加速度を利用
-	//{
-	//	acceleration = walkAcceleration_;
-	//}
-
-	//// WASD移動
-	//if (input->PushKey(DIK_W))
-	//{
-	//	speed_.z += acceleration;
-	//	speed_.z = std::clamp(speed_.z, -speedLimit_, speedLimit_);
-	//}
-	//else if (speed_.z > 0.0f)
-	//{
-	//	speed_.z -= acceleration * 1.1f;
-	//	speed_.z = std::clamp(speed_.z, 0.0f, speedLimit_);
-	//}
-	//if (input->PushKey(DIK_S))
-	//{
-	//	speed_.z -= acceleration;
-	//	speed_.z = std::clamp(speed_.z, -speedLimit_, speedLimit_);
-	//}
-	//else if(speed_.z < 0.0f)
-	//{
-	//	speed_.z += acceleration * 1.1f;
-	//	speed_.z = std::clamp(speed_.z, -speedLimit_, 0.0f);
-	//}
-	//if (input->PushKey(DIK_D))
-	//{
-	//	speed_.x += acceleration;
-	//	speed_.x = std::clamp(speed_.x, -speedLimit_, speedLimit_);
-	//}
-	//else if (speed_.x > 0.0f)
-	//{
-	//	speed_.x -= acceleration * 1.1f;
-	//	speed_.x = std::clamp(speed_.x, 0.0f, speedLimit_);
-	//}
-	//if (input->PushKey(DIK_A))
-	//{
-	//	speed_.x -= acceleration;
-	//	speed_.x = std::clamp(speed_.x, -speedLimit_, speedLimit_);
-	//}
-	//else if (speed_.x < 0.0f)
-	//{
-	//	speed_.x += acceleration * 1.1f;
-	//	speed_.x = std::clamp(speed_.x, -speedLimit_, 0.0f);
-	//}
-
-	////moveVelocity_ = Normalize(speed_);
-	//// speed_をmoveVelocity_に代入
-	//moveVelocity_ = speed_;
-	//// 移動方向が斜めだった場合は移動速度が上がるので正規化する
-	//if ((moveVelocity_.x != 0.0f && moveVelocity_.z != 0.0f))
-	//{
-	//	if (moveVelocity_.x < 0.0f)
-	//	{
-	//		float speed = std::fabs(speed_.x);
-	//		moveVelocity_.x = -sqrtf(speed);
-	//	}
-	//	else
-	//	{
-	//		moveVelocity_.x = sqrtf(speed_.x);
-	//	}
-	//	if (moveVelocity_.z < 0.0f)
-	//	{
-	//		float speed = std::fabs(speed_.z);
-	//		moveVelocity_.z = -sqrtf(speed);
-	//	}
-	//	else
-	//	{
-	//		moveVelocity_.z = sqrtf(speed_.z);
-	//	}
-	//}
-
-	//// ジャンプ中以外で移動中の場合はmoveType_をWalkに指定
-	//if ((moveVelocity_.x != 0.0f || moveVelocity_.z != 0.0f) && moveType_ != PlayerMoveType::Jump)
-	//{
-	//	moveType_ = PlayerMoveType::Walk;
-	//}
-	//if (moveVelocity_.z < 0.0f && moveType_ != PlayerMoveType::Jump)
-	//{
-	//	moveType_ = PlayerMoveType::Backwalk;
-	//}
-
-	//// しゃがみ(スニーク) ジャンプはスニークとダッシュが効かないようにする
-	//if (input->PushKey(DIK_LCONTROL) && moveType_ != PlayerMoveType::Jump)
-	//{
-	//	moveType_ = PlayerMoveType::Sneak;
-	//	if (moveVelocity_.x != 0.0f || moveVelocity_.z != 0.0f)
-	//	{
-	//		moveType_ = PlayerMoveType::Sneak;
-	//	}
-	//	else
-	//	{
-	//		moveType_ = PlayerMoveType::Crouch;
-	//	}
-	//} // ダッシュはしゃがみを優先して調べる
-	//else if (input->PushKey(DIK_LSHIFT) && moveType_ != PlayerMoveType::Jump && (moveVelocity_.x != 0.0f || moveVelocity_.z != 0.0f) && moveVelocity_.z > 0.0f)
-	//{
-	//	moveType_ = PlayerMoveType::Dash;
-	//}
-	//
-	//// speed_(速度)に本来の速度を掛ける(ステータスに応じて移動速度を変更しているため)
-	//switch (moveType_)
-	//{
-	//case PlayerMoveType::Idle:
-	//	break;
-	//case PlayerMoveType::Walk:
-	//	moveVelocity_ *= walkSpeed_;
-	//	break;
-	//case PlayerMoveType::Backwalk:
-	//	moveVelocity_ *= walkSpeed_;
-	//	break;
-	//case PlayerMoveType::Sneak:
-	//	moveVelocity_ *= sneakSpeed_;
-	//	break;
-	//case PlayerMoveType::Dash:
-	//	moveVelocity_ *= dashSpeed_;
-	//	break;
-	//case PlayerMoveType::Jump:
-	//	moveVelocity_ *= dashSpeed_;
-	//	break;
-	//}
-
 	// カメラの方向を調べて移動方向を決める
 	cameraTransform = camera->GetTransform();
 	// 上下に移動はしないためrotate.xは0.0fにする
@@ -379,7 +258,7 @@ void Player::Move()
 	playerTransform_.rotate = cameraTransform.rotate;
 
 	// 速度が歩行状態よりも早ければ速度が上がっている感を出すためにFovを上げる(ジャンプ中はFovが増えないようにする)
-	if ((speed_.x > walkSpeed_ * speedLimit_ || speed_.z > walkSpeed_ * speedLimit_) && !jump_)
+	if (((speed_.x == dashSpeed_ * speedLimit_ || speed_.z == dashSpeed_ * speedLimit_) || (speed_.x == -(dashSpeed_ * speedLimit_) || speed_.z == -(dashSpeed_ * speedLimit_))) && !jump_)
 	{
 		fovTime_ = 0.0f;
 		afterFovY_ = 0.65f;

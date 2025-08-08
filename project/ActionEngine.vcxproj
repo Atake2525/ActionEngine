@@ -114,6 +114,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\3d\Object\Skinning\SkinningObject3dBase.cpp" />
     <ClCompile Include="Engine\BlackBox\Log\Logger.cpp" />
     <ClCompile Include="Engine\BlackBox\Log\StringUtility.cpp" />
+    <ClCompile Include="Engine\Collision\CollisionManager.cpp" />
     <ClCompile Include="Engine\Core\BaseEngine\OffScreenRnedering.cpp" />
     <ClCompile Include="Engine\BlackBox\Animation\DebugAnimation.cpp" />
     <ClCompile Include="Engine\LoadManager\ParticleManager\ParticleManager.cpp" />
@@ -154,6 +155,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Game\Player.cpp" />
     <ClCompile Include="Engine\3d\SkyBox\SkyBox.cpp" />
     <ClCompile Include="Engine\JsonLoader\JsonLoader.cpp" />
+    <ClCompile Include="Application\Scene\PlayScene\TestScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Scene\Manager\AbstractSceneFactory.h" />
@@ -164,10 +166,14 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\3d\Object\Skinning\SkinningObject3dBase.h" />
     <ClInclude Include="Engine\BlackBox\Log\Logger.h" />
     <ClInclude Include="Engine\BlackBox\Log\StringUtility.h" />
+    <ClInclude Include="Engine\Collision\CollisionManager.h" />
     <ClInclude Include="Engine\Core\BaseEngine\OffScreenRnedering.h" />
     <ClInclude Include="Engine\BlackBox\Animation\DebugAnimation.h" />
     <ClInclude Include="Engine\LoadManager\ParticleManager\ParticleManager.h" />
+    <ClInclude Include="Engine\Math\AABB.h" />
     <ClInclude Include="Engine\Math\Animator.h" />
+    <ClInclude Include="Engine\Math\Capsule.h" />
+    <ClInclude Include="Engine\Math\Collision.h" />
     <ClInclude Include="Engine\Math\Segment.h" />
     <ClInclude Include="Engine\UI\UI.h" />
     <ClInclude Include="Engine\Audio\Audio.h" />
@@ -212,6 +218,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Scene\Manager\SceneFactory.h" />
     <ClInclude Include="Engine\Game\Player.h" />
     <ClInclude Include="Engine\3d\SkyBox\SkyBox.h" />
+    <ClInclude Include="Application\Scene\PlayScene\TestScene.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externels\imgui\LICENSE.txt" />
