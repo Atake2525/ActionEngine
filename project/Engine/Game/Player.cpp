@@ -1,6 +1,7 @@
 #include "Player.h"
 #include "kMath.h"
 #include "ImGuiManager.h"
+#include "CollisionManager.h"
 
 Player::~Player()
 {
@@ -32,11 +33,14 @@ void Player::Initialize(Camera* camera, Input* input, const Transform startPoint
 	playerModel_->AddAnimation("Resources/Model/gltf/char", "fall.gltf", "fall");
     playerModel_->SetTransform(playerTransform_);
     playerModel_->ToggleStartAnimation();
+
+	CollisionManager::GetInstance()->AddCollisionTarget(playerModel_, "player");
 }
 
 void Player::Update() {
 	cameraTransform = camera->GetTransform();
 	playerTransform_ = playerModel_->GetTransform();
+	CollisionManager::GetInstance()->Update();
 	if (parent_)
 	{
 		// プレイヤーの回転からcameraOffsetを計算してparent
@@ -254,8 +258,16 @@ void Player::Move()
 
 	// プレイヤーの移動量を今のプレイヤーの位置に加算する
 	playerTransform_.translate += moveVelocity_;
+	// オブジェクトに衝突している時のために貫通量を引く
+	Vector3 penetrationAmount = CollisionManager::GetInstance()->GetPenetration();
+	playerTransform_.translate -= penetrationAmount;
 	// プレイヤーの回転をカメラの正面を向くように変える
 	playerTransform_.rotate = cameraTransform.rotate;
+
+	if (penetrationAmount.x != 0.0f || penetrationAmount.z != 0.0f)
+	{
+		moveType_ = PlayerMoveType::Idle;
+	}
 
 	// 速度が歩行状態よりも早ければ速度が上がっている感を出すためにFovを上げる(ジャンプ中はFovが増えないようにする)
 	if (((speed_.x == dashSpeed_ * speedLimit_ || speed_.z == dashSpeed_ * speedLimit_) || (speed_.x == -(dashSpeed_ * speedLimit_) || speed_.z == -(dashSpeed_ * speedLimit_))) && !jump_)
