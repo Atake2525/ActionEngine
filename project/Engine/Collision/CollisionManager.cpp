@@ -1,5 +1,8 @@
 #include "CollisionManager.h"
+#include "Collision.h"
 #include "kMath.h"
+
+#define NOMINMAX
 
 CollisionManager* CollisionManager::instance = nullptr;
 
@@ -12,11 +15,61 @@ CollisionManager* CollisionManager::GetInstance() {
 }
 
 void CollisionManager::Initialize() {
-
+	penetration = { 0.0f, 0.0f, 0.0f };
+	collisionTarget.clear();
+	collisionObject.clear();
 }
 
 void CollisionManager::Update() {
-	
+	penetration = { 0.0f, 0.0f, 0.0f };
+	for (const auto& target : collisionTarget) {
+		for (const auto& object : collisionObject) {
+			// ターゲット(プレイヤーなど)とオブジェクトの距離を全体のAABBから求めて離れていればcontinue
+			float dist = Distance(CenterAABB(target.second->GetAABB()), CenterAABB(object.second->GetAABB()));
+			// オブジェクトの大きさを求める
+			AABB objectAABB = object.second->GetAABB();
+			// ターゲットとの最近接点を取る
+			//Vector3 closestPoint = ClosestPoint(objectAABB, target.second->GetTranslate());
+			// 最近接点とオブジェクトの中心座標の距離を取ってプレイヤーからオブジェクトまでの直線の距離を求める
+			float objectSize = Distance(objectAABB.min, objectAABB.max);
+			// オブジェクトサイズよりも距離が近かったら処理をする(余裕をもって少しだけ広く)
+			if (dist < objectSize + 0.0f)
+			{
+				// オブジェクトのメッシュごとのAABBを取得する
+				const std::vector<AABB> terrains = object.second->GetAABBMultiMeshed();
+				for (AABB terrainAABB : terrains)
+				{
+					// ターゲットとオブジェクトが貫通していたら実行
+					if (CollisionAABB(target.second->GetAABB(), terrainAABB))
+					{
+						penetration = GetPenetrationDepth(target.second->GetAABB(), terrainAABB);
+						float minDepth = std::min(penetration.x, penetration.z);
+						if (minDepth == penetration.x)
+						{
+							//penetration.x += 1.0f;
+							penetration.z = 0.0f;
+						}
+						else if (penetration.z == minDepth)
+						{
+							//penetration.z += 1.0f;
+							penetration.x = 0.0f;
+						}
+						Vector3 center = CenterAABB(terrainAABB);
+						if (target.second->GetTranslate().x > center.x || target.second->GetTranslate().z > center.z)
+						{
+							penetration *= -1.0f;
+						}
+						break;
+					}
+				}
+			}
+			else
+			{
+				// 離れていればcontinue
+				continue;
+			}
+		}
+	}
 }
 
 void CollisionManager::Finalize() {
@@ -55,6 +108,28 @@ void CollisionManager::Finalize() {
 //
 //}
 
-void CollisionManager::AddCollisionTraget(Object3d* object3d, const std::string key) {
+void CollisionManager::AddCollision(Object3d* object3d, const std::string key) {
 	collisionObject[key] = object3d;
+}
+
+void CollisionManager::AddCollisionTarget(Object3d* target, const std::string key)
+{
+	collisionTarget[key] = target;
+}
+
+const Vector3 CollisionManager::GetPenetrationDepth(const AABB& target, const AABB& object)
+{
+	Vector3 result = { 0.0f, 0.0f, 0.0f };
+
+	result.x = std::min(object.max.x, target.max.x) - max(object.min.x, target.min.x);
+	//result.y = std::min(object.max.y, target.max.y) - max(object.min.y, object.min.y);
+	result.z = std::min(object.max.z, target.max.z) - max(object.min.z, target.min.z);
+
+	// 貫通していない場合は0にする
+	if (result.x < 0) { result.x = 0; }
+	if (result.y < 0) { result.y = 0; }
+	if (result.z < 0) { result.z = 0; }
+
+
+	return result;
 }
