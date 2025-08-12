@@ -1,8 +1,11 @@
 #include "CollisionManager.h"
 #include "Collision.h"
 #include "kMath.h"
+#include "Logger.h"
 
 #define NOMINMAX
+
+using namespace Logger;
 
 CollisionManager* CollisionManager::instance = nullptr;
 
@@ -39,6 +42,7 @@ void CollisionManager::Update() {
 				const std::vector<AABB> terrains = object.second->GetAABBMultiMeshed();
 				for (AABB terrainAABB : terrains)
 				{
+					terrainAABB = AddSize(terrainAABB, 0.1f);
 					// ターゲットとオブジェクトが貫通していたら実行
 					if (CollisionAABB(target.second->GetAABB(), terrainAABB))
 					{
@@ -55,9 +59,13 @@ void CollisionManager::Update() {
 							penetration.x = 0.0f;
 						}
 						Vector3 center = CenterAABB(terrainAABB);
-						if (target.second->GetTranslate().x > center.x || target.second->GetTranslate().z > center.z)
+						if (target.second->GetTranslate().x > center.x)
 						{
-							penetration *= -1.0f;
+							penetration.x *= -1.0f;
+						}
+						if (target.second->GetTranslate().z > center.z)
+						{
+							penetration.z *= -1.0f;
 						}
 						break;
 					}
@@ -108,13 +116,29 @@ void CollisionManager::Finalize() {
 //
 //}
 
+// 障害物の追加
 void CollisionManager::AddCollision(Object3d* object3d, const std::string key) {
-	collisionObject[key] = object3d;
+	if (!collisionObject.contains(key))
+	{
+		collisionObject[key] = object3d;
+	}
+	else
+	{
+		Log("既に登録されているキーが指定されています\n実行 : AddCollision\n CollisionManager.cpp\n");
+	}
 }
 
-void CollisionManager::AddCollisionTarget(Object3d* target, const std::string key)
+// 衝突対象の追加
+void CollisionManager::AddCollisionTarget(Object3d* object3d, const std::string key)
 {
-	collisionTarget[key] = target;
+	if (!collisionTarget.contains(key))
+	{
+		collisionTarget[key] = object3d;
+	}
+	else
+	{
+		Log("既に登録されているキーが指定されています\n実行 : AddCollisionTarget コード : CollisionManager.cpp\n");
+	}
 }
 
 const Vector3 CollisionManager::GetPenetrationDepth(const AABB& target, const AABB& object)

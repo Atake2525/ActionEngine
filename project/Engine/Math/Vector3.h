@@ -26,6 +26,42 @@ inline Vector3 operator-=(Vector3& v, const float& n) {
 	return v;
 }
 
+inline Vector3 operator+=(Vector3& v, const float& n) {
+	v.x += n;
+	v.y += n;
+	v.z += n;
+	return v;
+}
+
+inline Vector3 operator*=(Vector3& v, const Vector3& n) {
+	v.x *= n.x;
+	v.y *= n.y;
+	v.z *= n.z;
+	return v;
+}
+
+inline Vector3 operator-=(Vector3& v, const Vector3& n) {
+	v.x -= n.x;
+	v.y -= n.y;
+	v.z -= n.z;
+	return v;
+}
+
+inline Vector3 operator+=(Vector3& v, const Vector3& n) {
+	v.x += n.x;
+	v.y += n.y;
+	v.z += n.z;
+	return v;
+}
+
+inline Vector3 operator+(const Vector3& v1, const Vector3 v2) {
+	Vector3 result;
+	result.x = v1.x + v2.x;
+	result.y = v1.y + v2.y;
+	result.z = v1.z + v2.z;
+	return result;
+}
+
 inline Vector3 Vector3Clamp(Vector3& v, const float min, const float max) {
 	v.x = std::clamp(v.x, min, max);
 	v.y = std::clamp(v.y, min, max);
