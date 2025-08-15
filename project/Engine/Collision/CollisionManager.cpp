@@ -157,3 +157,23 @@ const Vector3 CollisionManager::GetPenetrationDepth(const AABB& target, const AA
 
 	return result;
 }
+
+//const Vector3 CollisionManager::GetPenetrationDepth(const AABB& target, const AABB& object)
+//{
+//	Vector3 result = { 0.0f, 0.0f, 0.0f };
+//
+//	result.x = std::min(object.min.x, target.min.x) - max(object.max.x, target.max.x);
+//	//result.y = std::min(object.max.y, target.max.y) - max(object.min.y, object.min.y);
+//	result.z = std::min(object.min.z, target.min.z) - max(object.max.z, target.max.z);
+//
+//	result *= -1.0f;
+//
+//	// 貫通していない場合は0にする
+//	if (result.x < 0) { result.x = 0; }
+//	if (result.y < 0) { result.y = 0; }
+//	if (result.z < 0) { result.z = 0; }
+//
+//
+//	return result;
+//}
+
