@@ -396,17 +396,6 @@ void Object3d::ReCreateAABB() {
 	first.max.x = modelData.vertices[0].position.x;
 	first.max.y = modelData.vertices[0].position.y;
 	first.max.z = modelData.vertices[0].position.z;
-	// モデル全体のAABBを作成
-	for (VertexData vertices : modelData.vertices)
-	{
-		first.min.x = std::min(first.min.x, vertices.position.x);
-		first.min.y = std::min(first.min.y, vertices.position.y);
-		first.min.z = std::min(first.min.z, vertices.position.z);
-
-		first.max.x = std::max(first.max.x, vertices.position.x);
-		first.max.y = std::max(first.max.y, vertices.position.y);
-		first.max.z = std::max(first.max.z, vertices.position.z);
-	}
 
 	for (size_t index = 0; index < modelData.matVertexData.size(); ++index)
 	{
@@ -427,6 +416,16 @@ void Object3d::ReCreateAABB() {
 			firstMultimesh.max.y = std::max(firstMultimesh.max.y, vertices.position.y);
 			firstMultimesh.max.z = std::max(firstMultimesh.max.z, vertices.position.z);
 		}
+
+		// モデル全体のAABBを作成
+		first.min.x = std::min(first.min.x, firstMultimesh.min.x);
+		first.min.y = std::min(first.min.y, firstMultimesh.min.y);
+		first.min.z = std::min(first.min.z, firstMultimesh.min.z);
+
+		first.max.x = std::max(first.max.x, firstMultimesh.max.x);
+		first.max.y = std::max(first.max.y, firstMultimesh.max.y);
+		first.max.z = std::max(first.max.z, firstMultimesh.max.z);
+
 		firstMultiMeshAABB.push_back(firstMultimesh);
 		multiMeshAABB.resize(firstMultiMeshAABB.size());
 	}

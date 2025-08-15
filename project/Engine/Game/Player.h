@@ -70,7 +70,7 @@ private: // ステータス(カメラ系)宣言
     Vector2 cameraSpeed = { 0.3f, 0.3f };
     Matrix4x4 cameraMatrix;
 
-    Vector3 cameraOffset_ = { 0.0f, -0.08f, 0.4f };
+    Vector3 cameraOffset_ = { 0.0f, -0.08f, 0.0f };
 
     float fovTime_ = 0.0f;
     float fovY_ = 0.45f; // 現在のFov数値
