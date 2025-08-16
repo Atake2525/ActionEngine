@@ -37,6 +37,8 @@ private: // メンバ変数宣言
 
     Object3d* playerModel_ = nullptr;
 
+    Object3d* playerCollisionModel_ = nullptr;
+
 
 private: // ステータス(移動系)宣言
     Transform playerTransform_;

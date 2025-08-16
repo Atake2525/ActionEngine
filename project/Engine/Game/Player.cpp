@@ -5,6 +5,7 @@
 
 Player::~Player()
 {
+	delete playerCollisionModel_;
     delete playerModel_;
 }
 
@@ -34,7 +35,12 @@ void Player::Initialize(Camera* camera, Input* input, const Transform startPoint
     playerModel_->SetTransform(playerTransform_);
     playerModel_->ToggleStartAnimation();
 
-	CollisionManager::GetInstance()->AddCollisionTarget(playerModel_, "player");
+	playerCollisionModel_ = new Object3d();
+	playerCollisionModel_->Initialize();
+	playerCollisionModel_->SetModel("Resources/Model/gltf/char", "idle.gltf", true, true);
+
+
+	CollisionManager::GetInstance()->AddCollisionTarget(playerCollisionModel_, "player");
 }
 
 void Player::Update() {
@@ -80,6 +86,8 @@ void Player::Update() {
 
 	playerModel_->SetAnimationSpeed(1.0f);
 	playerModel_->SetTransform(playerTransform_);
+	playerCollisionModel_->SetTransform(playerTransform_);
+	playerCollisionModel_->Update();
     playerModel_->Update();
 
 	if (debugMode_)
