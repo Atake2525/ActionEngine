@@ -140,11 +140,20 @@ void Object3d::Update() {
 		transformationMatrix->WorldInverseTranspose = Inverse(worldMatrix);
 	}
 
+	aabbPre = aabb;
+	multiMeshAABBPre = multiMeshAABB;
 
 	Vector3 worldPos = { worldMatrix.m[3][0], worldMatrix.m[3][1], worldMatrix.m[3][2] };
 
 	aabb.min = first.min + worldPos;
 	aabb.max = first.max + worldPos;
+
+	for (size_t index = 0; index < multiMeshAABB.size(); index++)
+	{
+		multiMeshAABB[index].min = firstMultiMeshAABB[index].min + worldPos;
+		multiMeshAABB[index].max = firstMultiMeshAABB[index].max + worldPos;
+	}
+
 
 }
 
@@ -606,13 +615,6 @@ const bool Object3d::CheckCollisionAABB(Object3d* object) const {
 
 const std::vector<AABB> Object3d::GetAABBMultiMeshed()
 {
-	Vector3 worldPos = { worldMatrix.m[3][0], worldMatrix.m[3][1], worldMatrix.m[3][2] };
-
-	for (size_t index = 0; index < multiMeshAABB.size(); index++)
-	{
-		multiMeshAABB[index].min = firstMultiMeshAABB[index].min + worldPos;
-		multiMeshAABB[index].max = firstMultiMeshAABB[index].max + worldPos;
-	}
 	return multiMeshAABB;
 }
 

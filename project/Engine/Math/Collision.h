@@ -31,7 +31,7 @@ inline const bool& CollisionAABBSphere(const AABB& target1, const Sphere& target
 	return false;
 }
 
-inline const bool& CollisionCapsuleAABB(const Capsule& capsule, const AABB& aabb) {
+inline const bool CollisionCapsuleAABB(const Capsule& capsule, const AABB& aabb) {
 	// AABB から線分に最も近い点を取るため、
 	// AABB の中心から線分に垂線を落とし、最近接点を取得
 	Vector3 boxCenter = (aabb.min + aabb.max) * 0.5f;
