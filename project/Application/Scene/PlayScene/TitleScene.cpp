@@ -24,6 +24,10 @@ void TitleScene::Initialize() {
 
 	ParticleManager::GetInstance()->SetCamera(camera);
 
+	playerModel = new Object3d();
+	playerModel->Initialize();
+	playerModel->SetModel("Resources/Model/gltf/char", "idle.gltf", true, true);
+
 	grid = new Object3d();
 	grid->Initialize();
 	grid->SetModel("Resources/Debug", "Grid.obj");

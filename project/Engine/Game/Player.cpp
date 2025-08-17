@@ -120,12 +120,12 @@ void Player::Move()
 	moveType_ = PlayerMoveType::Idle;
 
 	// ジャンプ状態の解除(仮)
-	if (playerTransform_.translate.y < 0.0f)
+	/*if (playerTransform_.translate.y < 0.0f)
 	{
 		playerTransform_.translate.y = 0.1f;
 		jump_ = false;
 		speed_.y = 0.0f;
-	}
+	}*/
 
 	// 一番最初にジャンプ状態の有無を調べる(ジャンプ中か否かで移動系処理が変わるため)
 	if (input->PushKey(DIK_SPACE))
@@ -264,10 +264,22 @@ void Player::Move()
 	// 回転行列を参照して移動ベクトルを正規化する
 	moveVelocity_ = TransformNormal(moveVelocity_, matrix);
 
+	Vector3 penetrationAmount = CollisionManager::GetInstance()->GetPenetration();
+
+	if (penetrationAmount.y < 0.0f)
+	{
+		speed_.y = 0.0f;
+		moveVelocity_.y = 0.0f;
+		jump_ = false;
+	}
+	else if (penetrationAmount.y > 0.0f)
+	{
+		speed_.y = 0.0f;
+		moveVelocity_.y = 0.0f;
+	}
 	// プレイヤーの移動量を今のプレイヤーの位置に加算する
 	playerTransform_.translate += moveVelocity_;
 	// オブジェクトに衝突している時のために貫通量を引く
-	Vector3 penetrationAmount = CollisionManager::GetInstance()->GetPenetration();
 	playerTransform_.translate -= penetrationAmount;
 	// プレイヤーの回転をカメラの正面を向くように変える
 	playerTransform_.rotate = cameraTransform.rotate;
