@@ -348,18 +348,7 @@ void Object3d::CreateAABB() {
 	first.max.x = modelData.vertices[0].position.x;
 	first.max.y = modelData.vertices[0].position.y;
 	first.max.z = modelData.vertices[0].position.z;
-	//// モデル全体のAABBを作成
-	//for (VertexData vertices : modelData.vertices)
-	//{
-	//	first.min.x = std::min(first.min.x, vertices.position.x);
-	//	first.min.y = std::min(first.min.y, vertices.position.y);
-	//	first.min.z = std::min(first.min.z, vertices.position.z);
-
-	//	first.max.x = std::max(first.max.x, vertices.position.x);
-	//	first.max.y = std::max(first.max.y, vertices.position.y);
-	//	first.max.z = std::max(first.max.z, vertices.position.z);
-	//}
-
+	
 	for (size_t index = 0; index < modelData.matVertexData.size(); ++index)
 	{
 		AABB firstMultimesh;

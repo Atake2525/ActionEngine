@@ -2,6 +2,7 @@
 #include "kMath.h"
 #include "ImGuiManager.h"
 #include "CollisionManager.h"
+#include "WinApp.h"
 
 Player::~Player()
 {
@@ -24,7 +25,7 @@ void Player::Initialize(Camera* camera, Input* input, const Transform startPoint
 
     playerModel_ = new Object3d();
     playerModel_->Initialize();
-    playerModel_->SetModel("Resources/Model/gltf/char", "noHeadIdle.gltf", true, true);
+    playerModel_->SetModel("Resources/Model/gltf/char", "idle.gltf", true, true);
 	playerModel_->AddAnimation("Resources/Model/gltf/char", "walk.gltf", "walk");
 	playerModel_->AddAnimation("Resources/Model/gltf/char", "sneak.gltf", "sneak");
 	playerModel_->AddAnimation("Resources/Model/gltf/char", "dash.gltf", "dash");
@@ -97,7 +98,7 @@ void Player::Update() {
 }
 
 void Player::Draw() {
-    playerModel_->Draw();
+    //playerModel_->Draw();
 }
 
 void Player::Rotation() {
@@ -118,14 +119,6 @@ void Player::Move()
 {
 	// 無操作状態ならば何もしないので毎フレームIdle状態にする
 	moveType_ = PlayerMoveType::Idle;
-
-	// ジャンプ状態の解除(仮)
-	/*if (playerTransform_.translate.y < 0.0f)
-	{
-		playerTransform_.translate.y = 0.1f;
-		jump_ = false;
-		speed_.y = 0.0f;
-	}*/
 
 	// 一番最初にジャンプ状態の有無を調べる(ジャンプ中か否かで移動系処理が変わるため)
 	if (input->PushKey(DIK_SPACE))
@@ -292,13 +285,15 @@ void Player::Move()
 	// 速度が歩行状態よりも早ければ速度が上がっている感を出すためにFovを上げる(ジャンプ中はFovが増えないようにする)
 	if (((speed_.x == dashSpeed_ * speedLimit_ || speed_.z == dashSpeed_ * speedLimit_) || (speed_.x == -(dashSpeed_ * speedLimit_) || speed_.z == -(dashSpeed_ * speedLimit_))) && !jump_)
 	{
+		// ダッシュ
 		fovTime_ = 0.0f;
-		afterFovY_ = 0.65f;
+		afterFovY_ = normalFovY_ + fovYBoost_;
 	}
-	else
+	else if (((speed_.x <= walkSpeed_ || speed_.z <= walkSpeed_) || (speed_.x <= -walkSpeed_ || speed_.z <= -walkSpeed_)) && !jump_)
 	{
+		// 歩行
 		fovTime_ = 0.0f;
-		afterFovY_ = 0.45f;
+		afterFovY_ = normalFovY_;
 	}
 	// Fovの保管計算(一瞬でFovの数値が変わらないようにする)
 	fovTime_ += (1.0f / 60.0f) / 0.2f;
@@ -334,12 +329,12 @@ void Player::Move()
 			playerModel_->ChangePlayAnimation("sneak");
 			break;
 		case PlayerMoveType::Dash:
-			playerModel_->SetChangeAnimationSpeed(0.2f);
-			playerModel_->ChangePlayAnimation("dash");
+			//playerModel_->SetChangeAnimationSpeed(0.2f);
+			//playerModel_->ChangePlayAnimation("dash");
 			break;
 		case PlayerMoveType::Jump:
-			playerModel_->SetChangeAnimationSpeed(0.1f);
-			playerModel_->ChangePlayAnimation("fall");
+			//playerModel_->SetChangeAnimationSpeed(0.1f);
+			//playerModel_->ChangePlayAnimation("fall");
 			break;
 		}
 	}
@@ -354,6 +349,8 @@ void Player::DebugUpdate()
 {
 	Transform transform = camera->GetTransform();
 	ImGui::Begin("Animation");
+	ImGui::SetWindowPos(ImVec2{ 0.0f, 18.0f * 3.0f });
+	ImGui::SetWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) - 18.0f * 3.0f });
 	if (ImGui::Button("Idle"))
 	{
 		moveType_ = PlayerMoveType::Idle;
@@ -381,6 +378,8 @@ void Player::DebugUpdate()
 	ImGui::DragFloat("最大落下速度", &fallLimit_, 0.1f);
 	ImGui::DragFloat("ジャンプ量", &jumpAcceleration_, 0.1f);
 	ImGui::DragFloat("落下量", &fallAcceleration_, 0.1f);
+	ImGui::DragFloat("視野角", &normalFovY_, 0.01f);
+	ImGui::DragFloat("視野角の上昇値", &fovYBoost_, 0.01f);
 
 
 	ImGui::End();
