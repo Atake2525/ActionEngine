@@ -18,21 +18,19 @@ CollisionManager* CollisionManager::GetInstance() {
 }
 
 void CollisionManager::Initialize() {
-	penetration = { 0.0f, 0.0f, 0.0f };
+	penetration_ = { 0.0f, 0.0f, 0.0f };
 	collisionTarget.clear();
 	collisionObject.clear();
 }
 
 void CollisionManager::Update() {
-	penetration = { 0.0f, 0.0f, 0.0f };
+	penetration_ = { 0.0f, 0.0f, 0.0f };
 	for (const auto& target : collisionTarget) {
 		for (const auto& object : collisionObject) {
 			// ターゲット(プレイヤーなど)とオブジェクトの距離を全体のAABBから求めて離れていればcontinue
 			float dist = Distance(CenterAABB(target.second->GetAABB()), CenterAABB(object.second->GetAABB()));
 			// オブジェクトの大きさを求める
 			AABB objectAABB = object.second->GetAABB();
-			// ターゲットとの最近接点を取る
-			//Vector3 closestPoint = ClosestPoint(objectAABB, target.second->GetTranslate());
 			// 最近接点とオブジェクトの中心座標の距離を取ってプレイヤーからオブジェクトまでの直線の距離を求める
 			float objectSize = Distance(objectAABB.min, objectAABB.max);
 			// オブジェクトサイズよりも距離が近かったら処理をする(余裕をもって少しだけ広く)
@@ -46,17 +44,15 @@ void CollisionManager::Update() {
 					// ターゲットとオブジェクトが貫通していたら実行
 					if (CollisionAABB(target.second->GetAABB(), terrainAABB))
 					{
-						penetration = GetPenetrationDepth(target.second->GetAABB(), terrainAABB);
+						Vector3 penetration = GetPenetrationDepth(target.second->GetAABB(), terrainAABB);
 						float minDepth = std::min(penetration.x, std::min(penetration.z, penetration.y));
 						if (minDepth == penetration.x)
 						{
-							//penetration.x += 1.0f;
 							penetration.y = 0.0f;
 							penetration.z = 0.0f;
 						}
 						else if (penetration.z == minDepth)
 						{
-							//penetration.z += 1.0f;
 							penetration.x = 0.0f;
 							penetration.y = 0.0f;
 						}
@@ -65,20 +61,24 @@ void CollisionManager::Update() {
 							penetration.x = 0.0f;
 							penetration.z = 0.0f;
 						}
+
+						// 方向に応じて押し出す方向が変わるので確認する
 						Vector3 center = CenterAABB(terrainAABB);
 						if (target.second->GetTranslate().x > center.x)
 						{
 							penetration.x *= -1.0f;
 						}
-						if (target.second->GetTranslate().y > center.y)
-						{
-							penetration.y *= -1.0f;
-						}
 						if (target.second->GetTranslate().z > center.z)
 						{
 							penetration.z *= -1.0f;
 						}
-						break;
+						if (target.second->GetTranslate().y > center.y)
+						{
+							penetration.y *= -1.0f;
+						}
+						
+						// 押し出しの量を格納する
+						penetration_ += penetration;
 					}
 				}
 			}
@@ -96,36 +96,6 @@ void CollisionManager::Finalize() {
 	delete instance;
 	instance = nullptr;
 }
-
-//const bool& CollisionManager::CheckCollision(const AABB& a, const AABB& b) {
-//	if ((a.min.x <= b.max.x && a.max.x >= b.min.x) && 
-//		(a.min.y <= b.max.y && a.max.y >= b.min.y) && 
-//		(a.min.z <= b.max.z && a.max.z >= b.min.z)) {
-//		return true;
-//	}
-//	return false;
-//}
-//
-//const bool& CollisionManager::CheckCollision(const AABB& target1, const Sphere& target2) {
-//	// 最近接点を求める
-//	Vector3 closestPoint{
-//		std::clamp(target2.center.x, target1.min.x, target1.max.x),
-//		std::clamp(target2.center.y, target1.min.y, target1.max.y),
-//		std::clamp(target2.center.z, target1.min.z, target1.max.z)
-//	};
-//	// 最近接点と球の中心との距離を求める
-//	float distance = Length(closestPoint - target2.center);
-//	// 距離が半径よりも小さければ衝突
-//	if (distance <= target2.radius)
-//	{
-//		return true;
-//	}
-//	return false;
-//}
-
-//const bool& CollisionManager::CheckCollision(const AABB& target1, const OBB& target2) {
-//
-//}
 
 // 障害物の追加
 void CollisionManager::AddCollision(Object3d* object3d, const std::string key) {

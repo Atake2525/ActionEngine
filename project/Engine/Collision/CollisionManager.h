@@ -44,7 +44,7 @@ public:
 
 	void Finalize();
 
-	const Vector3& GetPenetration() const { return penetration; }
+	const Vector3& GetPenetration() const { return penetration_; }
 
 	// 当たり判定の追加
 	//const bool& CheckCollision(const AABB& a, const AABB& b);
@@ -73,5 +73,5 @@ private:
 	std::map<std::string, Object3d*> collisionTarget;
 
 	// 貫通量を示す変数
-	Vector3 penetration;
+	Vector3 penetration_;
 };
