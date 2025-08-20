@@ -124,6 +124,7 @@ void Player::Move()
 	// 無操作状態ならば何もしないので毎フレームIdle状態にする
 	moveType_ = PlayerMoveType::Idle;
 
+	// 地面との高さを求めて落下処理を行う
 	float dist = CollisionManager::GetInstance()->GetGroundDistance("player");
 	if (dist > 0.0f)
 	{
