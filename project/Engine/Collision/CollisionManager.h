@@ -40,11 +40,14 @@ public:
 
 	void Initialize();
 
-	void Update();
+	void Update(const std::string& targetName);
 
 	void Finalize();
 
 	const Vector3& GetPenetration() const { return penetration_; }
+
+	// 対象と地面との距離を求める
+	const float GetGroundDistance(const std::string& targetName) const;
 
 	// 当たり判定の追加
 	//const bool& CheckCollision(const AABB& a, const AABB& b);
