@@ -25,7 +25,7 @@ void Player::Initialize(Camera* camera, Input* input, const Transform startPoint
 
     playerModel_ = new Object3d();
     playerModel_->Initialize();
-    playerModel_->SetModel("Resources/Model/gltf/char", "idle.gltf", true, true);
+    playerModel_->SetModel("Resources/Model/gltf/char", "onlyBodyIdle.gltf", true, true);
 	playerModel_->AddAnimation("Resources/Model/gltf/char", "walk.gltf", "walk");
 	playerModel_->AddAnimation("Resources/Model/gltf/char", "sneak.gltf", "sneak");
 	playerModel_->AddAnimation("Resources/Model/gltf/char", "dash.gltf", "dash");
@@ -39,6 +39,14 @@ void Player::Initialize(Camera* camera, Input* input, const Transform startPoint
 	playerCollisionModel_ = new Object3d();
 	playerCollisionModel_->Initialize();
 	playerCollisionModel_->SetModel("Resources/Model/gltf/char", "idle.gltf", true, true);
+	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "walk.gltf", "walk");
+	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "sneak.gltf", "sneak");
+	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "dash.gltf", "dash");
+	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "jump.gltf", "jump");
+	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "crouch.gltf", "crouch");
+	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "walk_back.gltf", "backwalk");
+	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "fall.gltf", "fall");
+	playerCollisionModel_->ToggleStartAnimation();
 
 
 	CollisionManager::GetInstance()->AddCollisionTarget(playerCollisionModel_, "player");
@@ -47,11 +55,11 @@ void Player::Initialize(Camera* camera, Input* input, const Transform startPoint
 void Player::Update() {
 	cameraTransform = camera->GetTransform();
 	playerTransform_ = playerModel_->GetTransform();
-	CollisionManager::GetInstance()->Update();
+	CollisionManager::GetInstance()->Update("player");
 	if (parent_)
 	{
 		// プレイヤーの回転からcameraOffsetを計算してparent
-		Vector3 position = playerModel_->GetJointPosition("Head");
+		Vector3 position = playerCollisionModel_->GetJointPosition("Head");
 
 		Vector3	camOffset = cameraOffset_;
 
@@ -80,13 +88,9 @@ void Player::Update() {
 	Rotation();
 	Move();
 
-	if (input->TriggerKey(DIK_G))
-	{
-		playerModel_->CreateCapsule();
-	}
-
 	playerModel_->SetAnimationSpeed(1.0f);
 	playerModel_->SetTransform(playerTransform_);
+	playerCollisionModel_->SetAnimationSpeed(1.0f);
 	playerCollisionModel_->SetTransform(playerTransform_);
 	playerCollisionModel_->Update();
     playerModel_->Update();
@@ -98,7 +102,7 @@ void Player::Update() {
 }
 
 void Player::Draw() {
-    //playerModel_->Draw();
+    playerModel_->Draw();
 }
 
 void Player::Rotation() {
@@ -120,6 +124,11 @@ void Player::Move()
 	// 無操作状態ならば何もしないので毎フレームIdle状態にする
 	moveType_ = PlayerMoveType::Idle;
 
+	float dist = CollisionManager::GetInstance()->GetGroundDistance("player");
+	if (dist > 0.0f)
+	{
+		jump_ = true;
+	}
 	// 一番最初にジャンプ状態の有無を調べる(ジャンプ中か否かで移動系処理が変わるため)
 	if (input->PushKey(DIK_SPACE))
 	{
@@ -310,31 +319,45 @@ void Player::Move()
 		{
 		case PlayerMoveType::Idle:
 			playerModel_->ChangePlayAnimation();
+			playerCollisionModel_->ChangePlayAnimation();
 			break;
 		case PlayerMoveType::Crouch:
 			playerModel_->SetChangeAnimationSpeed(0.14f);
 			playerModel_->ChangePlayAnimation("crouch");
+			playerCollisionModel_->SetChangeAnimationSpeed(0.14f);
+			playerCollisionModel_->ChangePlayAnimation("crouch");
 			break;
 		case PlayerMoveType::Walk:
 			playerModel_->SetChangeAnimationSpeed();
 			playerModel_->ChangePlayAnimation("walk");
+			playerCollisionModel_->SetChangeAnimationSpeed();
+			playerCollisionModel_->ChangePlayAnimation("walk");
 			break;
 		case PlayerMoveType::Backwalk:
 			playerModel_->SetChangeAnimationSpeed();
 			playerModel_->SetAnimationSpeed(20.0f);
 			playerModel_->ChangePlayAnimation("backwalk");
+			playerCollisionModel_->SetChangeAnimationSpeed();
+			playerCollisionModel_->SetAnimationSpeed(20.0f);
+			playerCollisionModel_->ChangePlayAnimation("backwalk");
 			break;
 		case PlayerMoveType::Sneak:
 			playerModel_->SetChangeAnimationSpeed(0.18f);
 			playerModel_->ChangePlayAnimation("sneak");
+			playerCollisionModel_->SetChangeAnimationSpeed(0.18f);
+			playerCollisionModel_->ChangePlayAnimation("sneak");
 			break;
 		case PlayerMoveType::Dash:
-			//playerModel_->SetChangeAnimationSpeed(0.2f);
-			//playerModel_->ChangePlayAnimation("dash");
+			playerModel_->SetChangeAnimationSpeed(0.2f);
+			playerModel_->ChangePlayAnimation("dash");
+			playerCollisionModel_->SetChangeAnimationSpeed(0.2f);
+			playerCollisionModel_->ChangePlayAnimation("dash");
 			break;
 		case PlayerMoveType::Jump:
-			//playerModel_->SetChangeAnimationSpeed(0.1f);
-			//playerModel_->ChangePlayAnimation("fall");
+			playerModel_->SetChangeAnimationSpeed(0.1f);
+			playerModel_->ChangePlayAnimation("fall");
+			playerCollisionModel_->SetChangeAnimationSpeed(0.1f);
+			playerCollisionModel_->ChangePlayAnimation("fall");
 			break;
 		}
 	}
@@ -380,7 +403,8 @@ void Player::DebugUpdate()
 	ImGui::DragFloat("落下量", &fallAcceleration_, 0.1f);
 	ImGui::DragFloat("視野角", &normalFovY_, 0.01f);
 	ImGui::DragFloat("視野角の上昇値", &fovYBoost_, 0.01f);
-
+	float dist = CollisionManager::GetInstance()->GetGroundDistance("player");
+	ImGui::TextColored({ 1.0f, 1.0f, 1.0f, 1.0f }, "GroundDistance: %.1f", dist);
 
 	ImGui::End();
 

@@ -70,7 +70,6 @@ void MyGame::Update() {
 	directxBase->Update();
 	Light::GetInstance()->Update();
 	SceneManager::GetInstance()->Update();
-	CollisionManager::GetInstance()->Update();
 	ParticleManager::GetInstance()->Update();
 	//JsonLoader::GetInstance()->Update();
 

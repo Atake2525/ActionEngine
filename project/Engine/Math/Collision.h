@@ -14,6 +14,14 @@ inline const bool CollisionAABB(const AABB& a, const AABB& b) {
 	return false;
 }
 
+inline const bool CollisionAABBXZ(const AABB& a, const AABB& b) {
+	if ((a.min.x < b.max.x && a.max.x > b.min.x) &&
+		(a.min.z < b.max.z && a.max.z > b.min.z)) {
+		return true;
+	}
+	return false;
+}
+
 inline const bool& CollisionAABBSphere(const AABB& target1, const Sphere& target2) {
 	// 最近接点を求める
 	Vector3 closestPoint{
