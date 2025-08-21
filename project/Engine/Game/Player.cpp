@@ -130,6 +130,10 @@ void Player::Move()
 	{
 		jump_ = true;
 	}
+	if (dist < 0.0f)
+	{
+		moveTypePre_ = PlayerMoveType::Idle;
+	}
 	// 一番最初にジャンプ状態の有無を調べる(ジャンプ中か否かで移動系処理が変わるため)
 	if (input->PushKey(DIK_SPACE))
 	{
@@ -279,6 +283,10 @@ void Player::Move()
 	{
 		speed_.y = 0.0f;
 		moveVelocity_.y = 0.0f;
+	}
+	if (dist >= -0.3f && dist < -0.1f && !jump_ && (moveVelocity_.x != 0.0f || moveVelocity_.z != 0.0f || moveVelocity_.y != 0.0f))
+	{
+		playerTransform_.translate.y += -dist;
 	}
 	// プレイヤーの移動量を今のプレイヤーの位置に加算する
 	playerTransform_.translate += moveVelocity_;
