@@ -115,18 +115,22 @@ const float CollisionManager::GetGroundDistance(const std::string& targetName) c
 		// キーが存在しない場合の処理
 	}
 
-	float distance = 1000.0f;
+	float distance = 100.0f;
 	for (const auto& object : collisionObject) {
 		// オブジェクトのメッシュごとのAABBを取得する
-		const std::vector<AABB> terrains = object.second->GetAABBMultiMeshed();
-		for (AABB terrainAABB : terrains)
+		float serchDistance = Distance(object.second->GetAABB().max, target->second->GetAABB().min);
+		if (serchDistance <= distance)
 		{
-			terrainAABB = AddSize(terrainAABB, 0.1f);
-			// ターゲットとオブジェクトが貫通していたら実行
-			if (CollisionAABBXZ(target->second->GetAABB(), terrainAABB))
+			const std::vector<AABB> terrains = object.second->GetAABBMultiMeshed();
+			for (AABB terrainAABB : terrains)
 			{
-				float dist = target->second->GetAABB().min.y - terrainAABB.max.y;
-				distance = std::min(distance, dist);
+				terrainAABB = AddSize(terrainAABB, 0.1f);
+				// ターゲットとオブジェクトが貫通していたら実行
+				if (CollisionAABBXZ(target->second->GetAABB(), terrainAABB))
+				{
+					float dist = target->second->GetAABB().min.y - terrainAABB.max.y;
+					distance = std::min(distance, dist);
+				}
 			}
 		}
 	}
