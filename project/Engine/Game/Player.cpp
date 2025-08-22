@@ -102,7 +102,10 @@ void Player::Update() {
 }
 
 void Player::Draw() {
-    playerModel_->Draw();
+	if (moveType_ != PlayerMoveType::Jump)
+	{
+		playerModel_->Draw();
+	}
 }
 
 void Player::Rotation() {
@@ -115,6 +118,8 @@ void Player::Rotation() {
 	cameraTransform.rotate.x += mouseVelocity.y;
 	cameraTransform.rotate.y += mouseVelocity.x;
 
+	cameraTransform.rotate.x = std::clamp(cameraTransform.rotate.x, SwapRadian(-90.0f), SwapRadian(90.0f));
+
 	camera->SetTransform(cameraTransform);
 
 }
@@ -126,13 +131,9 @@ void Player::Move()
 
 	// 地面との高さを求めて落下処理を行う
 	float dist = CollisionManager::GetInstance()->GetGroundDistance("player");
-	if (dist > 0.0f)
+	if (dist > 0.0f && !wallDash_)
 	{
 		jump_ = true;
-	}
-	if (dist < 0.0f)
-	{
-		moveTypePre_ = PlayerMoveType::Idle;
 	}
 	// 一番最初にジャンプ状態の有無を調べる(ジャンプ中か否かで移動系処理が変わるため)
 	if (input->PushKey(DIK_SPACE))
@@ -365,8 +366,8 @@ void Player::Move()
 		case PlayerMoveType::Jump:
 			playerModel_->SetChangeAnimationSpeed(0.1f);
 			playerModel_->ChangePlayAnimation("fall");
-			playerCollisionModel_->SetChangeAnimationSpeed(0.1f);
-			playerCollisionModel_->ChangePlayAnimation("fall");
+			//playerCollisionModel_->SetChangeAnimationSpeed(0.1f);
+			//playerCollisionModel_->ChangePlayAnimation("fall");
 			break;
 		}
 	}
@@ -414,6 +415,8 @@ void Player::DebugUpdate()
 	ImGui::DragFloat("視野角の上昇値", &fovYBoost_, 0.01f);
 	float dist = CollisionManager::GetInstance()->GetGroundDistance("player");
 	ImGui::TextColored({ 1.0f, 1.0f, 1.0f, 1.0f }, "GroundDistance: %.1f", dist);
+	Vector3 penetrationAmount = CollisionManager::GetInstance()->GetPenetration();
+	ImGui::TextColored({ 1.0f, 1.0f, 1.0f, 1.0f }, "PenetrationAmount : X=%.1f Y=%.1f  Z=%.1f", penetrationAmount.x, penetrationAmount.y, penetrationAmount.z);
 
 	ImGui::End();
 
