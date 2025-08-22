@@ -157,7 +157,11 @@ private:
 	// Getterに返すようのAABB(座標を更新する)
 	AABB aabb;
 
+	AABB aabbPre;
+
 	std::vector<AABB> multiMeshAABB;
+
+	std::vector<AABB> multiMeshAABBPre;
 
 	// 初期位置のAABB
 	AABB first;

@@ -140,11 +140,20 @@ void Object3d::Update() {
 		transformationMatrix->WorldInverseTranspose = Inverse(worldMatrix);
 	}
 
+	aabbPre = aabb;
+	multiMeshAABBPre = multiMeshAABB;
 
 	Vector3 worldPos = { worldMatrix.m[3][0], worldMatrix.m[3][1], worldMatrix.m[3][2] };
 
 	aabb.min = first.min + worldPos;
 	aabb.max = first.max + worldPos;
+
+	for (size_t index = 0; index < multiMeshAABB.size(); index++)
+	{
+		multiMeshAABB[index].min = firstMultiMeshAABB[index].min + worldPos;
+		multiMeshAABB[index].max = firstMultiMeshAABB[index].max + worldPos;
+	}
+
 
 }
 
@@ -339,18 +348,7 @@ void Object3d::CreateAABB() {
 	first.max.x = modelData.vertices[0].position.x;
 	first.max.y = modelData.vertices[0].position.y;
 	first.max.z = modelData.vertices[0].position.z;
-	//// モデル全体のAABBを作成
-	//for (VertexData vertices : modelData.vertices)
-	//{
-	//	first.min.x = std::min(first.min.x, vertices.position.x);
-	//	first.min.y = std::min(first.min.y, vertices.position.y);
-	//	first.min.z = std::min(first.min.z, vertices.position.z);
-
-	//	first.max.x = std::max(first.max.x, vertices.position.x);
-	//	first.max.y = std::max(first.max.y, vertices.position.y);
-	//	first.max.z = std::max(first.max.z, vertices.position.z);
-	//}
-
+	
 	for (size_t index = 0; index < modelData.matVertexData.size(); ++index)
 	{
 		AABB firstMultimesh;
@@ -606,13 +604,6 @@ const bool Object3d::CheckCollisionAABB(Object3d* object) const {
 
 const std::vector<AABB> Object3d::GetAABBMultiMeshed()
 {
-	Vector3 worldPos = { worldMatrix.m[3][0], worldMatrix.m[3][1], worldMatrix.m[3][2] };
-
-	for (size_t index = 0; index < multiMeshAABB.size(); index++)
-	{
-		multiMeshAABB[index].min = firstMultiMeshAABB[index].min + worldPos;
-		multiMeshAABB[index].max = firstMultiMeshAABB[index].max + worldPos;
-	}
 	return multiMeshAABB;
 }
 

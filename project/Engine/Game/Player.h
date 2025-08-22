@@ -37,6 +37,8 @@ private: // メンバ変数宣言
 
     Object3d* playerModel_ = nullptr;
 
+    Object3d* playerCollisionModel_ = nullptr;
+
 
 private: // ステータス(移動系)宣言
     Transform playerTransform_;
@@ -48,7 +50,7 @@ private: // ステータス(移動系)宣言
     float speedLimit_ = 2.5f; // 移動速度限界
 
     float translateAcceleration_ = 0.04f; // 慣性(接地状態)
-    float flyAcceleration_ = 0.015f; // 慣性(ジャンプ中)
+    float flyAcceleration_ = 0.03f; // 慣性(ジャンプ中)
 
     // 各アニメーションの速度倍率
     float walkSpeed_ = 0.031f; 
@@ -59,6 +61,8 @@ private: // ステータス(移動系)宣言
     float easingTime = 0.0f;
 
     bool jump_ = false;
+
+    bool wallDash_ = false;
 
     float jumpAcceleration_ = 0.24f; // ジャンプの移動量
     float fallLimit_ = -3.4f; // 落下速度上限
@@ -78,8 +82,8 @@ private: // ステータス(カメラ系)宣言
 
     float fovChangeSpeed_ = 0.2f;
 
-    float normalFovY_ = 0.55f; // ダッシュ中以外のFov数値
-    float dashFovY_ = 0.75f; // ダッシュ中のFov数値
+    float normalFovY_ = 0.75f; // ダッシュ中以外のFov数値
+    float fovYBoost_ = 0.3f; // ダッシュ中のFovの上昇値(normalFovY_を参照)
 
 private: // ステータス関係の関数宣言
 

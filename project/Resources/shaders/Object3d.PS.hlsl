@@ -185,6 +185,7 @@ PixelShaderOutput main(VertexShaderOutput input)
         output.color = gMaterial.color * textureColor;
     }
     output.color.rgb = RoadMaterialTemplate(output, input).color.rgb;
+
     
     return output;
 }

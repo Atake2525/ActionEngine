@@ -6,6 +6,7 @@ void MyGame::Initialize() {
 
 #pragma region 基盤システムの初期化
 
+	/*WinApp::GetInstance()->Initialize(1920, 1080, WindowMode::FullScreen, L"Engine");*/
 	WinApp::GetInstance()->Initialize();
 
 	directxBase = new DirectXBase();
@@ -70,7 +71,6 @@ void MyGame::Update() {
 	directxBase->Update();
 	Light::GetInstance()->Update();
 	SceneManager::GetInstance()->Update();
-	CollisionManager::GetInstance()->Update();
 	ParticleManager::GetInstance()->Update();
 	//JsonLoader::GetInstance()->Update();
 

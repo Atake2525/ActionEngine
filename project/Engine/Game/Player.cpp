@@ -2,9 +2,11 @@
 #include "kMath.h"
 #include "ImGuiManager.h"
 #include "CollisionManager.h"
+#include "WinApp.h"
 
 Player::~Player()
 {
+	delete playerCollisionModel_;
     delete playerModel_;
 }
 
@@ -23,7 +25,7 @@ void Player::Initialize(Camera* camera, Input* input, const Transform startPoint
 
     playerModel_ = new Object3d();
     playerModel_->Initialize();
-    playerModel_->SetModel("Resources/Model/gltf/char", "noHeadIdle.gltf", true, true);
+    playerModel_->SetModel("Resources/Model/gltf/char", "onlyBodyIdle.gltf", true, true);
 	playerModel_->AddAnimation("Resources/Model/gltf/char", "walk.gltf", "walk");
 	playerModel_->AddAnimation("Resources/Model/gltf/char", "sneak.gltf", "sneak");
 	playerModel_->AddAnimation("Resources/Model/gltf/char", "dash.gltf", "dash");
@@ -34,17 +36,30 @@ void Player::Initialize(Camera* camera, Input* input, const Transform startPoint
     playerModel_->SetTransform(playerTransform_);
     playerModel_->ToggleStartAnimation();
 
-	CollisionManager::GetInstance()->AddCollisionTarget(playerModel_, "player");
+	playerCollisionModel_ = new Object3d();
+	playerCollisionModel_->Initialize();
+	playerCollisionModel_->SetModel("Resources/Model/gltf/char", "idle.gltf", true, true);
+	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "walk.gltf", "walk");
+	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "sneak.gltf", "sneak");
+	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "dash.gltf", "dash");
+	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "jump.gltf", "jump");
+	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "crouch.gltf", "crouch");
+	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "walk_back.gltf", "backwalk");
+	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "fall.gltf", "fall");
+	playerCollisionModel_->ToggleStartAnimation();
+
+
+	CollisionManager::GetInstance()->AddCollisionTarget(playerCollisionModel_, "player");
 }
 
 void Player::Update() {
 	cameraTransform = camera->GetTransform();
 	playerTransform_ = playerModel_->GetTransform();
-	CollisionManager::GetInstance()->Update();
+	CollisionManager::GetInstance()->Update("player");
 	if (parent_)
 	{
 		// プレイヤーの回転からcameraOffsetを計算してparent
-		Vector3 position = playerModel_->GetJointPosition("Head");
+		Vector3 position = playerCollisionModel_->GetJointPosition("Head");
 
 		Vector3	camOffset = cameraOffset_;
 
@@ -73,13 +88,11 @@ void Player::Update() {
 	Rotation();
 	Move();
 
-	if (input->TriggerKey(DIK_G))
-	{
-		playerModel_->CreateCapsule();
-	}
-
 	playerModel_->SetAnimationSpeed(1.0f);
 	playerModel_->SetTransform(playerTransform_);
+	playerCollisionModel_->SetAnimationSpeed(1.0f);
+	playerCollisionModel_->SetTransform(playerTransform_);
+	playerCollisionModel_->Update();
     playerModel_->Update();
 
 	if (debugMode_)
@@ -89,7 +102,10 @@ void Player::Update() {
 }
 
 void Player::Draw() {
-    playerModel_->Draw();
+	if (moveType_ != PlayerMoveType::Jump)
+	{
+		playerModel_->Draw();
+	}
 }
 
 void Player::Rotation() {
@@ -102,6 +118,8 @@ void Player::Rotation() {
 	cameraTransform.rotate.x += mouseVelocity.y;
 	cameraTransform.rotate.y += mouseVelocity.x;
 
+	cameraTransform.rotate.x = std::clamp(cameraTransform.rotate.x, SwapRadian(-90.0f), SwapRadian(90.0f));
+
 	camera->SetTransform(cameraTransform);
 
 }
@@ -111,14 +129,12 @@ void Player::Move()
 	// 無操作状態ならば何もしないので毎フレームIdle状態にする
 	moveType_ = PlayerMoveType::Idle;
 
-	// ジャンプ状態の解除(仮)
-	if (playerTransform_.translate.y < 0.0f)
+	// 地面との高さを求めて落下処理を行う
+	float dist = CollisionManager::GetInstance()->GetGroundDistance("player");
+	if (dist > 0.0f && !wallDash_)
 	{
-		playerTransform_.translate.y = 0.1f;
-		jump_ = false;
-		speed_.y = 0.0f;
+		jump_ = true;
 	}
-
 	// 一番最初にジャンプ状態の有無を調べる(ジャンプ中か否かで移動系処理が変わるため)
 	if (input->PushKey(DIK_SPACE))
 	{
@@ -256,10 +272,26 @@ void Player::Move()
 	// 回転行列を参照して移動ベクトルを正規化する
 	moveVelocity_ = TransformNormal(moveVelocity_, matrix);
 
+	Vector3 penetrationAmount = CollisionManager::GetInstance()->GetPenetration();
+
+	if (penetrationAmount.y < 0.0f)
+	{
+		speed_.y = 0.0f;
+		moveVelocity_.y = 0.0f;
+		jump_ = false;
+	}
+	else if (penetrationAmount.y > 0.0f)
+	{
+		speed_.y = 0.0f;
+		moveVelocity_.y = 0.0f;
+	}
+	if (dist >= -0.3f && dist < -0.1f && !jump_ && (moveVelocity_.x != 0.0f || moveVelocity_.z != 0.0f || moveVelocity_.y != 0.0f))
+	{
+		playerTransform_.translate.y += -dist;
+	}
 	// プレイヤーの移動量を今のプレイヤーの位置に加算する
 	playerTransform_.translate += moveVelocity_;
 	// オブジェクトに衝突している時のために貫通量を引く
-	Vector3 penetrationAmount = CollisionManager::GetInstance()->GetPenetration();
 	playerTransform_.translate -= penetrationAmount;
 	// プレイヤーの回転をカメラの正面を向くように変える
 	playerTransform_.rotate = cameraTransform.rotate;
@@ -272,13 +304,15 @@ void Player::Move()
 	// 速度が歩行状態よりも早ければ速度が上がっている感を出すためにFovを上げる(ジャンプ中はFovが増えないようにする)
 	if (((speed_.x == dashSpeed_ * speedLimit_ || speed_.z == dashSpeed_ * speedLimit_) || (speed_.x == -(dashSpeed_ * speedLimit_) || speed_.z == -(dashSpeed_ * speedLimit_))) && !jump_)
 	{
+		// ダッシュ
 		fovTime_ = 0.0f;
-		afterFovY_ = 0.65f;
+		afterFovY_ = normalFovY_ + fovYBoost_;
 	}
-	else
+	else if (((speed_.x <= walkSpeed_ || speed_.z <= walkSpeed_) || (speed_.x <= -walkSpeed_ || speed_.z <= -walkSpeed_)) && !jump_)
 	{
+		// 歩行
 		fovTime_ = 0.0f;
-		afterFovY_ = 0.45f;
+		afterFovY_ = normalFovY_;
 	}
 	// Fovの保管計算(一瞬でFovの数値が変わらないようにする)
 	fovTime_ += (1.0f / 60.0f) / 0.2f;
@@ -295,31 +329,45 @@ void Player::Move()
 		{
 		case PlayerMoveType::Idle:
 			playerModel_->ChangePlayAnimation();
+			playerCollisionModel_->ChangePlayAnimation();
 			break;
 		case PlayerMoveType::Crouch:
 			playerModel_->SetChangeAnimationSpeed(0.14f);
 			playerModel_->ChangePlayAnimation("crouch");
+			playerCollisionModel_->SetChangeAnimationSpeed(0.14f);
+			playerCollisionModel_->ChangePlayAnimation("crouch");
 			break;
 		case PlayerMoveType::Walk:
 			playerModel_->SetChangeAnimationSpeed();
 			playerModel_->ChangePlayAnimation("walk");
+			playerCollisionModel_->SetChangeAnimationSpeed();
+			playerCollisionModel_->ChangePlayAnimation("walk");
 			break;
 		case PlayerMoveType::Backwalk:
 			playerModel_->SetChangeAnimationSpeed();
 			playerModel_->SetAnimationSpeed(20.0f);
 			playerModel_->ChangePlayAnimation("backwalk");
+			playerCollisionModel_->SetChangeAnimationSpeed();
+			playerCollisionModel_->SetAnimationSpeed(20.0f);
+			playerCollisionModel_->ChangePlayAnimation("backwalk");
 			break;
 		case PlayerMoveType::Sneak:
 			playerModel_->SetChangeAnimationSpeed(0.18f);
 			playerModel_->ChangePlayAnimation("sneak");
+			playerCollisionModel_->SetChangeAnimationSpeed(0.18f);
+			playerCollisionModel_->ChangePlayAnimation("sneak");
 			break;
 		case PlayerMoveType::Dash:
 			playerModel_->SetChangeAnimationSpeed(0.2f);
 			playerModel_->ChangePlayAnimation("dash");
+			playerCollisionModel_->SetChangeAnimationSpeed(0.2f);
+			playerCollisionModel_->ChangePlayAnimation("dash");
 			break;
 		case PlayerMoveType::Jump:
 			playerModel_->SetChangeAnimationSpeed(0.1f);
 			playerModel_->ChangePlayAnimation("fall");
+			//playerCollisionModel_->SetChangeAnimationSpeed(0.1f);
+			//playerCollisionModel_->ChangePlayAnimation("fall");
 			break;
 		}
 	}
@@ -334,6 +382,8 @@ void Player::DebugUpdate()
 {
 	Transform transform = camera->GetTransform();
 	ImGui::Begin("Animation");
+	ImGui::SetWindowPos(ImVec2{ 0.0f, 18.0f * 3.0f });
+	ImGui::SetWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) - 18.0f * 3.0f });
 	if (ImGui::Button("Idle"))
 	{
 		moveType_ = PlayerMoveType::Idle;
@@ -361,7 +411,12 @@ void Player::DebugUpdate()
 	ImGui::DragFloat("最大落下速度", &fallLimit_, 0.1f);
 	ImGui::DragFloat("ジャンプ量", &jumpAcceleration_, 0.1f);
 	ImGui::DragFloat("落下量", &fallAcceleration_, 0.1f);
-
+	ImGui::DragFloat("視野角", &normalFovY_, 0.01f);
+	ImGui::DragFloat("視野角の上昇値", &fovYBoost_, 0.01f);
+	float dist = CollisionManager::GetInstance()->GetGroundDistance("player");
+	ImGui::TextColored({ 1.0f, 1.0f, 1.0f, 1.0f }, "GroundDistance: %.1f", dist);
+	Vector3 penetrationAmount = CollisionManager::GetInstance()->GetPenetration();
+	ImGui::TextColored({ 1.0f, 1.0f, 1.0f, 1.0f }, "PenetrationAmount : X=%.1f Y=%.1f  Z=%.1f", penetrationAmount.x, penetrationAmount.y, penetrationAmount.z);
 
 	ImGui::End();
 
