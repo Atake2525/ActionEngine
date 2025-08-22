@@ -49,5 +49,7 @@ private:
 
 	Object3d* grid = nullptr;
 
+	Object3d* playerModel = nullptr;
+
 };
 

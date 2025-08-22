@@ -62,6 +62,22 @@ inline Vector3 operator+(const Vector3& v1, const Vector3 v2) {
 	return result;
 }
 
+inline bool operator!=(const Vector3& v, const float f) {
+	if (v.x != f && v.y != f && v.z != f)
+	{
+		return true;
+	}
+	return false;
+}
+
+inline bool operator==(const Vector3& v, const float f) {
+	if (v.x == f && v.y == f && v.z == f)
+	{
+		return true;
+	}
+	return false;
+}
+
 inline Vector3 Vector3Clamp(Vector3& v, const float min, const float max) {
 	v.x = std::clamp(v.x, min, max);
 	v.y = std::clamp(v.y, min, max);

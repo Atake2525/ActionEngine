@@ -14,6 +14,13 @@ enum class CollisionType {
 	Plat,
 };
 
+enum class CollisionDirection {
+	None,
+	FromAbove,  // プレイヤーが下から上にぶつかった（天井）
+	FromBelow   // プレイヤーが上から下にぶつかった（地面）
+};
+
+
 
 class CollisionManager {
 private:
@@ -33,11 +40,14 @@ public:
 
 	void Initialize();
 
-	void Update();
+	void Update(const std::string& targetName);
 
 	void Finalize();
 
-	const Vector3& GetPenetration() const { return penetration; }
+	const Vector3& GetPenetration() const { return penetration_; }
+
+	// 対象と地面との距離を求める
+	const float GetGroundDistance(const std::string& targetName) const;
 
 	// 当たり判定の追加
 	//const bool& CheckCollision(const AABB& a, const AABB& b);
@@ -53,14 +63,18 @@ public:
 	void AddCollisionTarget(Object3d* target, const std::string key);
 
 //private:
-	// 貫通量の計算(当たり判定)
+	// 貫通量の計算(当たり判定)横
 	const Vector3 GetPenetrationDepth(const AABB& target, const AABB& object);
 
+	CollisionDirection GetVerticalCollisionDirection(const AABB& target, const AABB& object);
+
+
 private:
+
 	std::map<std::string, Object3d*> collisionObject;
 
 	std::map<std::string, Object3d*> collisionTarget;
 
 	// 貫通量を示す変数
-	Vector3 penetration;
+	Vector3 penetration_;
 };

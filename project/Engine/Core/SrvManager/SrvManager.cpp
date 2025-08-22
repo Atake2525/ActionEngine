@@ -95,7 +95,7 @@ void SrvManager::CreateSRVforTexture2D(uint32_t srvIndex, Microsoft::WRL::ComPtr
 	else
 	{
 		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // 2Dテクスチャ
-		srvDesc.Texture2D.MipLevels = metadata.mipLevels;
+		srvDesc.Texture2D.MipLevels = UINT(metadata.mipLevels);
 	}
 
 	directxBase_->GetDevice()->CreateShaderResourceView(pResource.Get(), &srvDesc, GetCPUDescriptorHandle(srvIndex));
@@ -120,7 +120,7 @@ void SrvManager::CreateSRVforTexture2D(uint32_t srvIndex, Microsoft::WRL::ComPtr
 	else
 	{
 		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // 2Dテクスチャ
-		srvDesc.Texture2D.MipLevels = metaData.mipLevels;
+		srvDesc.Texture2D.MipLevels = UINT(metaData.mipLevels);
 	}
 
 	directxBase_->GetDevice()->CreateShaderResourceView(pResource.Get(), &srvDesc, GetCPUDescriptorHandle(srvIndex));
