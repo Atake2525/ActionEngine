@@ -99,6 +99,83 @@ void CollisionManager::Update(const std::string& targetName) {
 	}
 }
 
+void CollisionManager::UpdateCupsulCollision(const std::string& targetName)
+{
+	auto target = collisionTarget.find(targetName);
+
+	if (target != collisionTarget.end()) {
+		// obj を使って処理
+	}
+	else {
+		Log("対象のキーが存在しません Error:CollisionManager/UpdateCupsulCollision\n");
+	}
+
+	penetration_ = { 0.0f, 0.0f, 0.0f };
+	for (const auto& object : collisionObject) {
+		// ターゲット(プレイヤーなど)とオブジェクトの距離を全体のAABBから求めて離れていればcontinue
+		float dist = Distance(CenterAABB(target->second->GetAABB()), CenterAABB(object.second->GetAABB()));
+		// オブジェクトの大きさを求める
+		AABB objectAABB = object.second->GetAABB();
+		// 最近接点とオブジェクトの中心座標の距離を取ってプレイヤーからオブジェクトまでの直線の距離を求める
+		float objectSize = Distance(objectAABB.min, objectAABB.max);
+		// オブジェクトサイズよりも距離が近かったら処理をする(余裕をもって少しだけ広く)
+		if (dist < objectSize + 0.0f)
+		{
+			// オブジェクトのメッシュごとのAABBを取得する
+			const std::vector<AABB> terrains = object.second->GetAABBMultiMeshed();
+			for (AABB terrainAABB : terrains)
+			{
+				//terrainAABB = AddSize(terrainAABB, 0.1f);
+				// ターゲットとオブジェクトが貫通していたら実行
+				if (CollisionCapsuleAABB(target->second->GetCapsule(), terrainAABB))
+				{
+					//Vector3 penetration = GetPenetrationDepth(target->second->GetAABB(), terrainAABB);
+					//float minDepth = std::min(penetration.x, std::min(penetration.z, penetration.y));
+					//if (minDepth == penetration.x)
+					//{
+					//	penetration.y = 0.0f;
+					//	penetration.z = 0.0f;
+					//}
+					//else if (penetration.z == minDepth)
+					//{
+					//	penetration.x = 0.0f;
+					//	penetration.y = 0.0f;
+					//}
+					//else if (penetration.y == minDepth)
+					//{
+					//	penetration.x = 0.0f;
+					//	penetration.z = 0.0f;
+					//}
+
+					//// 方向に応じて押し出す方向が変わるので確認する
+					//Vector3 center = CenterAABB(terrainAABB);
+					//if (target->second->GetTranslate().x > center.x)
+					//{
+					//	penetration.x *= -1.0f;
+					//}
+					//if (target->second->GetTranslate().z > center.z)
+					//{
+					//	penetration.z *= -1.0f;
+					//}
+					//if (target->second->GetTranslate().y > center.y)
+					//{
+					//	penetration.y *= -1.0f;
+					//}
+
+					//// 押し出しの量を格納する
+					//penetration_ += penetration;
+					break;
+				}
+			}
+		}
+		else
+		{
+			// 離れていればcontinue
+			continue;
+		}
+	}
+}
+
 void CollisionManager::Finalize() {
 	collisionObject.clear();
 	delete instance;
@@ -112,7 +189,7 @@ const float CollisionManager::GetGroundDistance(const std::string& targetName) c
 		// obj を使って処理
 	}
 	else {
-		// キーが存在しない場合の処理
+		Log("対象のキーが存在しません Error:CollisionManager/GetGrpimdDistance\n");
 	}
 
 	float distance = 100.0f;
@@ -160,6 +237,24 @@ void CollisionManager::AddCollisionTarget(Object3d* object3d, const std::string 
 	{
 		Log("既に登録されているキーが指定されています\n実行 : AddCollisionTarget コード : CollisionManager.cpp\n");
 	}
+}
+
+void CollisionManager::DeleteCollision(const std::string key)
+{
+	if (!collisionObject.contains(key))
+	{
+		Log("指定されたキーは現在登録されていません\n実行 : DeleteCollision コード : CollisionManager.cpp\n");
+	}
+	collisionObject[key] = nullptr;
+}
+
+void CollisionManager::DeleteCollisionTarget(const std::string key)
+{
+	if (!collisionTarget.contains(key))
+	{
+		Log("指定されたキーは現在登録されていません\n実行 : DeleteCollisionTarget コード : CollisionManager.cpp\n");
+	}
+	collisionTarget[key] = nullptr;
 }
 
 const Vector3 CollisionManager::GetPenetrationDepth(const AABB& target, const AABB& object)

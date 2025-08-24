@@ -42,6 +42,10 @@ public:
 
 	void Update(const std::string& targetName);
 
+	// 対象(Capsule)と障害物(AABB)の衝突量を求める
+	void UpdateCupsulCollision(const std::string& targetName);
+
+
 	void Finalize();
 
 	const Vector3& GetPenetration() const { return penetration_; }
@@ -61,6 +65,12 @@ public:
 
 	// 当たり判定を計算する対象の追加(念のため複数指定できるようにしておく)
 	void AddCollisionTarget(Object3d* target, const std::string key);
+
+	// 判定対象オブジェクトの削除
+	void DeleteCollision(const std::string key);
+
+	// 判定対象の削除
+	void DeleteCollisionTarget(const std::string key);
 
 //private:
 	// 貫通量の計算(当たり判定)横

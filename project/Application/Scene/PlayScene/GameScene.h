@@ -55,10 +55,7 @@ private:
 
 	Object3d* terrain = nullptr;
 
-	Object3d* box = nullptr;
-
 	Camera* camera = nullptr;
-	Object3d* cameraObject = nullptr;
 
 	bool finished = false;
 
@@ -72,9 +69,6 @@ private:
 	bool enableLighting = true;
 
 	bool cursorshow = true;
-
-	//Sprite* sprite = nullptr;
-
 
 	Vector2 leftTop;
 	Transform transformSprite;

@@ -40,27 +40,38 @@ inline const bool& CollisionAABBSphere(const AABB& target1, const Sphere& target
 }
 
 inline const bool CollisionCapsuleAABB(const Capsule& capsule, const AABB& aabb) {
-	// AABB から線分に最も近い点を取るため、
-	// AABB の中心から線分に垂線を落とし、最近接点を取得
-	Vector3 boxCenter = (aabb.min + aabb.max) * 0.5f;
+    // 線分方向と長さ
+    Vector3 segDir = capsule.end - capsule.start;
+    float segLengthSq = Dot(segDir, segDir);
 
-	// 線分上で boxCenter に最も近い点
-	Vector3 segDir = capsule.end - capsule.start;
-	float t = Dot(boxCenter - capsule.start, segDir) / Dot(segDir, segDir);
-	t = std::clamp(t, 0.0f, 1.0f);  // 線分内にクランプ
-	Vector3	closestOnSegment = capsule.start + segDir * t;
-	
+    // 線分が退化している場合（start == end）
+    if (segLengthSq == 0.0f) {
+        // 点と AABB の最近接点を比較
+        Vector3 clamped = {
+            std::clamp(capsule.start.x, aabb.min.x, aabb.max.x),
+            std::clamp(capsule.start.y, aabb.min.y, aabb.max.y),
+            std::clamp(capsule.start.z, aabb.min.z, aabb.max.z)
+        };
+        float distSq = LengthSquared(capsule.start - clamped);
+        return distSq <= capsule.radius * capsule.radius;
+    }
 
-	// その点を AABB の内部にクランプする
-	Vector3 clampedPoint;
-	clampedPoint.x = std::clamp(closestOnSegment.x, aabb.min.x, aabb.max.x);
-	clampedPoint.y = std::clamp(closestOnSegment.y, aabb.min.y, aabb.max.y);
-	clampedPoint.z = std::clamp(closestOnSegment.z, aabb.min.z, aabb.max.z);
+    // 線分上で AABB に最も近い点を求める
+    // AABB の中心から線分への垂線を使って近似
+    Vector3 boxCenter = (aabb.min + aabb.max) * 0.5f;
+    float t = Dot(boxCenter - capsule.start, segDir) / segLengthSq;
+    t = std::clamp(t, 0.0f, 1.0f);
+    Vector3 closestOnSegment = capsule.start + segDir * t;
 
-	// 線分との距離を判定
-	float distSq = LengthSquared(closestOnSegment - clampedPoint);
-	return distSq <= (capsule.radius * capsule.radius);
+    // AABB 内にクランプ
+    Vector3 clampedPoint = {
+        std::clamp(closestOnSegment.x, aabb.min.x, aabb.max.x),
+        std::clamp(closestOnSegment.y, aabb.min.y, aabb.max.y),
+        std::clamp(closestOnSegment.z, aabb.min.z, aabb.max.z)
+    };
 
-
+    // 距離判定
+    float distSq = LengthSquared(closestOnSegment - clampedPoint);
+    return distSq <= capsule.radius * capsule.radius;
 }
 

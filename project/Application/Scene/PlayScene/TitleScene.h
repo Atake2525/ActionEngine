@@ -14,6 +14,8 @@
 #include "BaseScene.h"
 #include "SceneManager.h"
 #include "SkyBox.h"
+#include <map>
+#include "UI.h"
 
 #pragma once
 
@@ -47,9 +49,24 @@ private:
 	Camera* camera = nullptr;
 	Input* input = nullptr;
 
-	Object3d* grid = nullptr;
+	Object3d* stageModel = nullptr;
 
 	Object3d* playerModel = nullptr;
+
+	enum class Select {
+		Start,
+		Stage,
+		Setting,
+		Exit,
+	};
+
+	Select select = Select::Start;
+
+	UI* startUI = nullptr;
+
+	UI* stageUI = nullptr;
+
+	UI* exitUI = nullptr;
 
 };
 

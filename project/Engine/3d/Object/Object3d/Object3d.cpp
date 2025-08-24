@@ -25,6 +25,7 @@ using namespace Microsoft::WRL;
 
 Object3d::~Object3d()
 {
+
 }
 
 void Object3d::Initialize() {
@@ -195,6 +196,7 @@ void Object3d::SetModel(const std::string& filePath) {
 	// モデルを検索してセットする
 	model_ = ModelManager::GetInstance()->FindModel(filePath);
 	CreateAABB();
+	CreateCapsule();
 	if (model_->IsAnimation())
 	{
 		animation = model_->GetAnimation();
@@ -235,6 +237,7 @@ void Object3d::SetModel(const std::string& directoryPath, const std::string& fil
 	// モデルを検索してセットする
 	model_ = ModelManager::GetInstance()->FindModel(filename);
 	CreateAABB();
+	CreateCapsule();
 	if (model_->IsAnimation())
 	{
 		animation = model_->GetAnimation();
@@ -430,14 +433,13 @@ void Object3d::ReCreateAABB() {
 }
 
 void Object3d::CreateCapsule(){
-	Capsule result;
-	Vector3 center = (first.min + first.max) * 0.5f;
-	result.start = { center.x, first.min.y, center.z };
-	result.end = { center.x, first.max.y, center.z };
+	Vector3 center = CenterAABB(first);
+	float dist = Distance(center, Vector3{ center.x, center.y, first.min.z });
+	capsule.start = { center.x, first.min.y + dist, center.z };
+	capsule.end = { center.x, first.max.y - dist, center.z };
 
-	float dist = Distance(center, Vector3{ first.min.x, center.y, first.min.z });
+	capsule.radius = dist;
 
-	result.radius = dist;
 }
 
 void Object3d::ApplyAnimation(Skeleton& skeleton, const Animation& animation, float animationTime)
