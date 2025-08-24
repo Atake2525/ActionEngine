@@ -420,6 +420,10 @@ void Player::DebugUpdate()
 
 	ImGui::End();
 
+	if (input->TriggerKey(DIK_R))
+	{
+		playerModel_->SetTranslate({ 0.0f, 1.0f, 0.0f });
+	}
 	if (cameraMove_)
 	{
 		float speed = 0.4f;
