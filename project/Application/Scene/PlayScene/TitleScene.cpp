@@ -39,8 +39,8 @@ void TitleScene::Initialize() {
 	stageUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0), float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) }, Origin::Center, "Resources/Sprite/start.png");
 
 	startUI = new UI();
+	startUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0), float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) }, Origin::Center, "Resources/Sprite/start.png");
 	exitUI = new UI();
-	
 
 }
 

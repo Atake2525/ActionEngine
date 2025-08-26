@@ -37,44 +37,44 @@ void UI::CreateButton(const Vector2& spritePosition, const Origin& origin, const
 	switch (origin)
 	{
 	case Origin::Center:
-		sprite->SetTextureLeftTop({ 0.5f, 0.5f });
+		sprite->SetAnchorPoint({ 0.5f, 0.5f });
 		break;
 	case Origin::Top:
-		sprite->SetTextureLeftTop({ 0.5f, 0.0f });
+		sprite->SetAnchorPoint({ 0.5f, 0.0f });
 		break;
 	case Origin::Bottom:
-		sprite->SetTextureLeftTop({ 0.5f, 1.0f });
+		sprite->SetAnchorPoint({ 0.5f, 1.0f });
 		break;
 	case Origin::LeftTop:
-		sprite->SetTextureLeftTop({ 0.0f, 0.0f });
+		sprite->SetAnchorPoint({ 0.0f, 0.0f });
 		break;
 	case Origin::RightTop:
-		sprite->SetTextureLeftTop({ 1.0f, 0.0f });
+		sprite->SetAnchorPoint({ 1.0f, 0.0f });
 		break;
 	case Origin::LeftBottom:
-		sprite->SetTextureLeftTop({ 0.0f, 1.0f });
+		sprite->SetAnchorPoint({ 0.0f, 1.0f });
 		break;
 	case Origin::RightBottom:
-		sprite->SetTextureLeftTop({ 1.0f, 1.0f });
+		sprite->SetAnchorPoint({ 1.0f, 1.0f });
 		break;
 	case Origin::LeftCenter:
-		sprite->SetTextureLeftTop({ 0.0f, 0.5f });
+		sprite->SetAnchorPoint({ 0.0f, 0.5f });
 		break;
 	case Origin::RightCenter:
-		sprite->SetTextureLeftTop({ 1.0f, 0.5f });
+		sprite->SetAnchorPoint({ 1.0f, 0.5f });
 		break;
 	}
 }
 
 bool UI::OnButton() {
 	sprite->Update();
-	Vector2 spriteOrigin = sprite->GetTextureLeftTop();
+	Vector2 spriteOrigin = sprite->GetAnchorPoint();
 	Vector2 spriteSize = sprite->GetScale();
 	Vector2 spritePos = sprite->GetPosition();
 	Vector3 mousePos = input->GetMousePos3();
 	AABB spriteAABB = {
-		{spritePos.x, spritePos.y, 0.0f},
-		{spritePos.x + spriteSize.x, spritePos.y + spriteSize.y, 0.0f},
+		{spritePos.x - (spriteSize.x * spriteOrigin.x), spritePos.y - (spriteSize.y * spriteOrigin.y), 0.0f},
+		{spritePos.x + (spriteSize.x * spriteOrigin.x), spritePos.y + (spriteSize.y * spriteOrigin.y), 0.0f},
 	};
 	AABB windowAABB = WinApp::GetInstance()->GetWindowAABB();
 	AABB mousePosAABB = {
@@ -95,7 +95,7 @@ bool UI::OnButton() {
 
 const bool UI::InCursor() const {
 	sprite->Update();
-	Vector2 spriteOrigin = sprite->GetTextureLeftTop();
+	Vector2 spriteOrigin = sprite->GetAnchorPoint();
 	Vector2 spriteSize = sprite->GetScale();
 	Vector2 spritePos = sprite->GetPosition();
 	Vector3 mousePos = input->GetMousePos3();
