@@ -245,7 +245,7 @@ void CollisionManager::DeleteCollision(const std::string key)
 	{
 		Log("指定されたキーは現在登録されていません\n実行 : DeleteCollision コード : CollisionManager.cpp\n");
 	}
-	collisionObject[key] = nullptr;
+	collisionObject.erase(key);
 }
 
 void CollisionManager::DeleteCollisionTarget(const std::string key)
@@ -254,7 +254,7 @@ void CollisionManager::DeleteCollisionTarget(const std::string key)
 	{
 		Log("指定されたキーは現在登録されていません\n実行 : DeleteCollisionTarget コード : CollisionManager.cpp\n");
 	}
-	collisionTarget[key] = nullptr;
+	collisionTarget.erase(key);
 }
 
 const Vector3 CollisionManager::GetPenetrationDepth(const AABB& target, const AABB& object)

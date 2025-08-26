@@ -101,6 +101,10 @@ void GameScene::Update() {
 		ImGui::TextColored({ 1.0f, 0.0f, 0.0f, 1.0f }, "FPS: %.1f", io.Framerate);
 	}
 	ImGui::Checkbox("マウスカーソル表示", &cursorshow);
+	if (ImGui::Button("タイトルへ"))
+	{
+		SceneManager::GetInstance()->SetNextScene("TITLE");
+	}
 	ImGui::End();
 
 #endif // _DEBUG
@@ -175,5 +179,7 @@ void GameScene::Finalize() {
 	delete terrain;
 
 	delete land;
+
+	CollisionManager::GetInstance()->DeleteCollision("land");
 
 }

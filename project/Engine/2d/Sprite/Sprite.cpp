@@ -125,9 +125,9 @@ void Sprite::Update() {
 	indexData[5] = 2;
 
 	Transform transform{
-	      {1.0f, 1.0f, 1.0f},
-          {0.0f, 0.0f, 0.0f},
-          {0.0f, 0.0f, 0.0f}
+		{1.0f, 1.0f, 1.0f},
+		{0.0f, 0.0f, 0.0f},
+		{0.0f, 0.0f, 0.0f}
     };
 
 	Transform uvTransform{
