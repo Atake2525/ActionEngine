@@ -59,8 +59,9 @@ private:
 		Play = 0,
 		Setting = 1,
 		Exit = 2,
+		Credit = 3,
 	};
-	int maxSelectNum = 2;
+	int maxSelectNum = 3;
 
 	Select select = Select::Play;
 	Select selectPre = Select::Play;
@@ -73,11 +74,15 @@ private:
 
 	UI* settingUI = nullptr;
 
+	UI* creditUI = nullptr;
+
 	Sprite* uiFrame = nullptr;
 
 	Sprite* gamePad = nullptr;
 
 	Sprite* gamePadOnFrame = nullptr;
+
+	Sprite* credit_sound = nullptr;
 
 	Vector3 uiFrameStartPoint = { 0.0f, 0.0f, 0.0f };
 
@@ -88,6 +93,8 @@ private:
 	float uiFrameMoveLImitTime = 0.6f;
 
 	bool isUIFrameMove = false;
+
+	bool showCredit = false;
 
 };
 
