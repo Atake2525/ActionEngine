@@ -3,6 +3,8 @@
 #include "Input.h"
 #include <string>
 #include "AABB.h"
+#include <functional>
+
 
 #pragma once
 
@@ -56,12 +58,17 @@ public:
 
 	void SetTransform(const Transform& transform) { sprite->SetTransform(transform); }
 
-	const Transform& GetTransform() const { return sprite->GetTransform(); }
+	const Transform GetTransform() const { return sprite->GetTransform(); }
 
 	void SetSprite(const std::string& filename);
 
 	// 追加
 	void SetSpriteAlpha(float alpha);
+
+	std::function<void()> function;
+
+	// functionに保存した関数を実行
+	void TriggerFunction();
 
 private:
 	bool CollisionAABB(const AABB& a, const AABB& b) const;

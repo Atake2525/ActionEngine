@@ -172,6 +172,9 @@ public:
 
 	bool IsMoveRightJoyStick();
 
+	// コントローラーが接続されているかどうか
+	const bool& IsConnectedController() const { return isControllerConnected; }
+
 
 	/// <summary>
 	/// 十字キー(コントローラー)の押下をチェック

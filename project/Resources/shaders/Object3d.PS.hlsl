@@ -187,5 +187,10 @@ PixelShaderOutput main(VertexShaderOutput input)
     output.color.rgb = RoadMaterialTemplate(output, input).color.rgb;
 
     
+    if (output.color.a < 0.2f)
+    {
+        discard;
+    }
+    
     return output;
 }
