@@ -72,6 +72,7 @@ void MyGame::Update() {
 	Light::GetInstance()->Update();
 	SceneManager::GetInstance()->Update();
 	ParticleManager::GetInstance()->Update();
+	Audio::GetInstance()->Update();
 	//JsonLoader::GetInstance()->Update();
 
 	if (SceneManager::GetInstance()->EndRequest())

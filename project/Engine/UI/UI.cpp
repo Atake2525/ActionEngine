@@ -64,6 +64,7 @@ void UI::CreateButton(const Vector2& spritePosition, const Origin& origin, const
 		sprite->SetAnchorPoint({ 1.0f, 0.5f });
 		break;
 	}
+	OnButton();
 }
 
 bool UI::OnButton() {
@@ -100,8 +101,8 @@ const bool UI::InCursor() const {
 	Vector2 spritePos = sprite->GetPosition();
 	Vector3 mousePos = input->GetMousePos3();
 	AABB spriteAABB = {
-		{spritePos.x, spritePos.y, 0.0f},
-		{spritePos.x + spriteSize.x, spritePos.y + spriteSize.y, 0.0f},
+		{spritePos.x - (spriteSize.x * spriteOrigin.x), spritePos.y - (spriteSize.y * spriteOrigin.y), 0.0f},
+		{spritePos.x + (spriteSize.x * spriteOrigin.x), spritePos.y + (spriteSize.y * spriteOrigin.y), 0.0f},
 	};
 	AABB windowAABB = WinApp::GetInstance()->GetWindowAABB();
 	AABB mousePosAABB = {
@@ -122,6 +123,13 @@ const bool UI::InCursor() const {
 
 void UI::Draw() {
 	sprite->Draw();
+}
+
+void UI::TriggerFunction() {
+	if (function)
+	{
+		function();
+	}
 }
 
 bool UI::CollisionAABB(const AABB& a, const AABB& b) const {
