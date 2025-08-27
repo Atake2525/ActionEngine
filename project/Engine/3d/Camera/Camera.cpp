@@ -73,7 +73,7 @@ void Camera::Update() {
 
 	viewMatrix = Inverse(worldMatrix);
 	projectionMatrix = MakePrespectiveFovMatrix(fovY, aspect, nearClipDistance, farClipDistance);
-	// ここがエラーの可能性あり
+
 	viewProjectionMatrix = Multiply(viewMatrix, projectionMatrix);
 }
 

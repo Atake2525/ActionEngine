@@ -49,24 +49,45 @@ private:
 	Camera* camera = nullptr;
 	Input* input = nullptr;
 
+	bool start = false;
+
 	Object3d* stageModel = nullptr;
 
 	Object3d* playerModel = nullptr;
 
 	enum class Select {
-		Start,
-		Stage,
-		Setting,
-		Exit,
+		Play = 0,
+		Setting = 1,
+		Exit = 2,
 	};
+	int maxSelectNum = 2;
 
-	Select select = Select::Start;
+	Select select = Select::Play;
+	Select selectPre = Select::Play;
 
 	UI* startUI = nullptr;
 
-	UI* stageUI = nullptr;
+	UI* playUI = nullptr;
 
 	UI* exitUI = nullptr;
+
+	UI* settingUI = nullptr;
+
+	Sprite* uiFrame = nullptr;
+
+	Sprite* gamePad = nullptr;
+
+	Sprite* gamePadOnFrame = nullptr;
+
+	Vector3 uiFrameStartPoint = { 0.0f, 0.0f, 0.0f };
+
+	Vector3 uiFrameEndPoint = { 0.0f, 0.0f, 0.0f };
+
+	float uiFrameMoveTimer = 0.0f;
+
+	float uiFrameMoveLImitTime = 0.6f;
+
+	bool isUIFrameMove = false;
 
 };
 
