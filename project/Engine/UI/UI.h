@@ -62,6 +62,8 @@ public:
 
 	void SetSprite(const std::string& filename);
 
+	const Vector2 GetTextureSize() const { return sprite->GetTextureSize(); }
+
 	// 追加
 	void SetSpriteAlpha(float alpha);
 
