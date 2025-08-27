@@ -65,7 +65,7 @@ private: // ステータス(移動系)宣言
     bool wallDash_ = false;
 
     float jumpAcceleration_ = 0.24f; // ジャンプの移動量
-    float fallLimit_ = -3.4f; // 落下速度上限
+    float fallLimit_ = -2.4f; // 落下速度上限
 
     float fallAcceleration_ = 0.008f; // 落下の加速度
 

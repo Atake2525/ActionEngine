@@ -33,7 +33,7 @@ public:
 	// Getter(Translate)
 	const Vector3& GetTranslate() const { return transform.translate; }
 	// Getter(Direction)
-	const Vector3& GetDirectin() const { return direction; }
+	const Vector3& GetDirection() const { return direction; }
 	// Getter(farClipDistance)
 	const float& GetFarClipDistance() const { return farClipDistance; }
 	// Getter(fovY)

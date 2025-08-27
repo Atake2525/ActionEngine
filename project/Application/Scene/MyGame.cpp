@@ -50,7 +50,7 @@ void MyGame::Initialize() {
 
 	SceneManager::GetInstance();
 	
-	SceneManager::GetInstance()->SetNextScene("GAMESCENE");
+	SceneManager::GetInstance()->SetNextScene("TITLE");
 
 	//gameScene->Initialize();
 
@@ -72,6 +72,7 @@ void MyGame::Update() {
 	Light::GetInstance()->Update();
 	SceneManager::GetInstance()->Update();
 	ParticleManager::GetInstance()->Update();
+	Audio::GetInstance()->Update();
 	//JsonLoader::GetInstance()->Update();
 
 	if (SceneManager::GetInstance()->EndRequest())

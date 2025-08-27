@@ -243,6 +243,9 @@ public:
 	// Capsuleをモデルを参照して作成
 	void CreateCapsule();
 
+	// Capsuleを取得
+	const Capsule& GetCapsule() const { return capsule; }
+
 public:
 	// 衝突チェック(AABBとAABB)
 	const bool CheckCollisionAABB(Object3d* object) const;

@@ -8,6 +8,7 @@ Player::~Player()
 {
 	delete playerCollisionModel_;
     delete playerModel_;
+	CollisionManager::GetInstance()->DeleteCollisionTarget("player");
 }
 
 void Player::Initialize(Camera* camera, Input* input, const Transform startPoint, const bool DebugMode)
@@ -102,10 +103,10 @@ void Player::Update() {
 }
 
 void Player::Draw() {
-	if (moveType_ != PlayerMoveType::Jump)
+	/*if (moveType_ != PlayerMoveType::Jump)
 	{
 		playerModel_->Draw();
-	}
+	}*/
 }
 
 void Player::Rotation() {
@@ -265,14 +266,47 @@ void Player::Move()
 
 	// カメラの方向を調べて移動方向を決める
 	cameraTransform = camera->GetTransform();
-	// 上下に移動はしないためrotate.xは0.0fにする
+	// 上下斜めに移動はしないためrotate.xzは0.0fにする
 	cameraTransform.rotate.x = 0.0f;
+	cameraTransform.rotate.z = 0.0f;
 	// TransformNormalのために3次元アフィン変換行列を作成
 	Matrix4x4 matrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
 	// 回転行列を参照して移動ベクトルを正規化する
 	moveVelocity_ = TransformNormal(moveVelocity_, matrix);
 
 	Vector3 penetrationAmount = CollisionManager::GetInstance()->GetPenetration();
+
+	// 壁走りの処理
+	if (input->PressMouse(1) && (penetrationAmount.x != 0.0f || penetrationAmount.z != 0.0f) && moveVelocity_.y < 0.0f)
+	{
+		wallDash_ = true;
+		jump_ = false;
+		moveVelocity_.y = 0.0f;
+		// 向ている方向に応じてカメラを傾ける
+		Vector3	cameraDirection = camera->GetDirection();
+		if (penetrationAmount.x < 0.0f || penetrationAmount.z < 0.0f)
+		{
+			camera->SetRotate({ cameraTransform.rotate.x, cameraTransform.rotate.y, SwapRadian(-45.0f) });
+		}
+	}
+	else if(wallDash_)
+	{
+		moveType_ = PlayerMoveType::Dash;
+		wallDash_ = false;
+		camera->SetRotate({ cameraTransform.rotate.x, cameraTransform.rotate.y, 0.0f });
+	}
+
+	//if (wallDash_)
+	//{
+	//	// 向ている方向に応じてカメラを傾ける
+	//	Vector3	cameraDirection = camera->GetDirection();
+	//	if (penetrationAmount.x < 0.0f || penetrationAmount.z < 0.0f)
+	//	{
+	//		
+	//	}
+
+	//}
+
 
 	if (penetrationAmount.y < 0.0f)
 	{
@@ -420,6 +454,10 @@ void Player::DebugUpdate()
 
 	ImGui::End();
 
+	if (input->TriggerKey(DIK_R))
+	{
+		playerModel_->SetTranslate({ 0.0f, 1.0f, 0.0f });
+	}
 	if (cameraMove_)
 	{
 		float speed = 0.4f;
