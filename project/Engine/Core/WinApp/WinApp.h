@@ -50,13 +50,14 @@ public:
 	const int32_t& GetkClientWidth() const { return kClientWidth; }
 	const int32_t& GetkClientHeight() const { return kClientHeight; }
 
-	WindowMode windowMode = WindowMode::FullScreen;
+	const WindowMode& GetWindowMode() const { return windowMode; }
 
 	// getter
 	HWND GetHwnd() const { return hwnd; }
 	HINSTANCE GetHInstance() const { return wc.hInstance; }
 
 private:
+	WindowMode windowMode = WindowMode::FullScreen;
 	// ウィンドウハンドル
 	HWND hwnd = nullptr;
 

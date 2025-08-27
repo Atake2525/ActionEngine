@@ -49,11 +49,7 @@ private:
 
 	bool sneak = false;
 
-	Object3d* grid = nullptr;
-
 	Object3d* land = nullptr;
-
-	Object3d* terrain = nullptr;
 
 	Camera* camera = nullptr;
 

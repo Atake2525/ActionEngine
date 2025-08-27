@@ -269,7 +269,7 @@ Vector3 Input::GetMousePos3() {
 Vector2 Input::GetWindowMousePos2() {
 	Vector2 pos = GetMousePos2();
 	Vector2 mousePos = { 0.0f, 0.0f };
-	if (WinApp::GetInstance()->windowMode == WindowMode::Window)
+	if (WinApp::GetInstance()->GetWindowMode() == WindowMode::Window)
 	{
 		Vector3 window = WinApp::GetInstance()->GetWindowAABB().min;
 		mousePos = { pos.x - window.x - 8.0f, pos.y - window.y - 30.0f };
@@ -285,7 +285,7 @@ Vector2 Input::GetWindowMousePos2() {
 Vector3 Input::GetWindowMousePos3() {
 	Vector3 pos = GetMousePos3();
 	Vector3 mousePos = { 0.0f, 0.0f, 0.0f };
-	if (WinApp::GetInstance()->windowMode == WindowMode::Window)
+	if (WinApp::GetInstance()->GetWindowMode() == WindowMode::Window)
 	{
 		Vector3 window = WinApp::GetInstance()->GetWindowAABB().min;
 		mousePos = {pos.x - window.x - 8.0f, pos.y - window.y - 30.0f};
