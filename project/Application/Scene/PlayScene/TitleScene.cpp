@@ -35,34 +35,43 @@ void TitleScene::Initialize() {
 	stageModel->Initialize();
 	stageModel->SetModel("Resources/Debug/gltf", "LandPlate.gltf", true);
 
-	playUI = new UI();
-	playUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f), float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) }, Origin::Center, "Resources/Sprite/UI/play.png");
-	playUI->function = []() {
-		SceneManager::GetInstance()->SetNextScene("GAMESCENE");
-	};
-
 	startUI = new UI();
-	startUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f), float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) }, Origin::Center, "Resources/Sprite/UI/start.png");
+	startUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f), float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) - 64.0f * 3.0f }, Origin::Center, "Resources/Sprite/UI/start.png");
 	startUI->function = [this]() {
+		Audio::GetInstance()->Play("enter");
 		start = true;
 	};
 
+	playUI = new UI();
+	playUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f) + 128.0f, float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) }, Origin::Center, "Resources/Sprite/UI/play.png");
+	playUI->function = []() {
+		Audio::GetInstance()->Play("enter");
+		SceneManager::GetInstance()->SetNextScene("GAMESCENE");
+	};
+
+	settingUI = new UI();
+	settingUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f) + 128.0f, float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) + 72.0f }, Origin::Center, "Resources/Sprite/UI/setting.png");
+	settingUI->function = [this]() {
+		Audio::GetInstance()->Play("enter");
+	};
+
 	exitUI = new UI();
-	exitUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f), float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) + 128.0f * 2.0f }, Origin::Center, "Resources/Sprite/UI/exit.png");
+	exitUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f) + 128.0f, float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) + 72.0f * 2.0f }, Origin::Center, "Resources/Sprite/UI/exit.png");
 	exitUI->function = [this]() {
 		finished = true;
 	};
 
-	settingUI = new UI();
-	settingUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f), float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) + 128.0f }, Origin::Center, "Resources/Sprite/UI/setting.png");
-	settingUI->function = [this]() {
-		return;
+	creditUI = new UI();
+	creditUI->CreateButton({ 64.0f + 16.0f, float(WinApp::GetInstance()->GetkClientHeight() - 24.0f - 16.0f) }, Origin::Center, "Resources/Sprite/UI/credit.png");
+	creditUI->function = [this]() {
+		showCredit = !showCredit;
+		Audio::GetInstance()->Play("enter");
 	};
 
 	uiFrame = new Sprite();
 	uiFrame->Initialize("Resources/Sprite/UI/uiFrame.png");
 	uiFrame->SetAnchorPoint({ 0.5f, 0.5f });
-	uiFrame->SetPosition({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f), float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) });
+	uiFrame->SetPosition({playUI->GetTransform().translate.x, playUI->GetTransform().translate.y });
 
 	gamePad = new Sprite();
 	gamePad->Initialize("Resources/Sprite/UI/gamepad.png");
@@ -74,7 +83,18 @@ void TitleScene::Initialize() {
 	//gamePadOnFrame->SetAnchorPoint({ 0.5f, 0.5f });
 	gamePadOnFrame->SetPosition({ float(WinApp::GetInstance()->GetkClientWidth() - gamePad->GetTextureSize().x - 10.0f), float(WinApp::GetInstance()->GetkClientHeight() - gamePad->GetTextureSize().y - 10.0f) });
 
-	Audio::GetInstance()->LoadMP3("Resources/sound/select.mp3", "select", 0.2f);
+	credit_sound = new Sprite();
+	credit_sound->Initialize("Resources/Sprite/UI/credit_sound.png");
+	credit_sound->SetAnchorPoint({ 0.5f, 0.5f });
+	credit_sound->SetPosition({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f), float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) });
+
+	Audio::GetInstance()->LoadMP3("Resources/sound/select.mp3", "select", 1.0f);
+	Audio::GetInstance()->LoadMP3("Resources/sound/enter.mp3", "enter", 1.0f);
+	Audio::GetInstance()->LoadMP3("Resources/sound/Experimenta_Model_short.mp3", "bgm", 0.2f);
+
+	//Audio::GetInstance()->Play("bgm", true);
+
+	Audio::GetInstance()->SetMasterVolume(0.2f);
 }
 
 void TitleScene::Update() {
@@ -113,17 +133,21 @@ void TitleScene::Update() {
 			Audio::GetInstance()->Play("select");
 			switch (select)
 			{
-			case TitleScene::Select::Play:
+			case Select::Play:
 				uiFrameStartPoint = uiFrame->GetTransform().translate;
 				uiFrameEndPoint = playUI->GetTransform().translate;
 				break;
-			case TitleScene::Select::Setting:
+			case Select::Setting:
 				uiFrameStartPoint = uiFrame->GetTransform().translate;
 				uiFrameEndPoint = settingUI->GetTransform().translate;
 				break;
-			case TitleScene::Select::Exit:
+			case Select::Exit:
 				uiFrameStartPoint = uiFrame->GetTransform().translate;
 				uiFrameEndPoint = exitUI->GetTransform().translate;
+				break;
+			case Select::Credit:
+				uiFrameStartPoint = uiFrame->GetTransform().translate;
+				uiFrameEndPoint = creditUI->GetTransform().translate;
 				break;
 			}
 		}
@@ -151,6 +175,15 @@ void TitleScene::Update() {
 			select = Select::Exit;
 			uiFrameStartPoint = uiFrame->GetTransform().translate;
 			uiFrameEndPoint = exitUI->GetTransform().translate;
+			Audio::GetInstance()->Play("select");
+			isUIFrameMove = true;
+			uiFrameMoveTimer = 0.0f;
+		}
+		if (creditUI->InCursor() && select != Select::Credit)
+		{
+			select = Select::Credit;
+			uiFrameStartPoint = uiFrame->GetTransform().translate;
+			uiFrameEndPoint = creditUI->GetTransform().translate;
 			Audio::GetInstance()->Play("select");
 			isUIFrameMove = true;
 			uiFrameMoveTimer = 0.0f;
@@ -185,6 +218,9 @@ void TitleScene::Update() {
 			case TitleScene::Select::Exit:
 				exitUI->TriggerFunction();
 				break;
+			case TitleScene::Select::Credit:
+				creditUI->TriggerFunction();
+				break;
 			}
 		}
 		if (playUI->OnButton())
@@ -199,13 +235,17 @@ void TitleScene::Update() {
 		{
 			exitUI->TriggerFunction();
 		}
+		else if (creditUI->OnButton())
+		{
+			creditUI->TriggerFunction();
+		}
 
 	}
 	else
 	{
 		if (startUI->OnButton())
 		{
-			start = true;
+			startUI->TriggerFunction();
 		}
 	}
 
@@ -228,6 +268,8 @@ void TitleScene::Update() {
 	gamePad->Update();
 
 	gamePadOnFrame->Update();
+
+	credit_sound->Update();
 
 	stageModel->Update();
 
@@ -268,6 +310,7 @@ void TitleScene::Draw() {
 		playUI->Draw();
 		settingUI->Draw();
 		exitUI->Draw();
+		creditUI->Draw();
 
 		uiFrame->Draw();
 		gamePad->Draw();
@@ -276,9 +319,30 @@ void TitleScene::Draw() {
 			gamePadOnFrame->Draw();
 		}
 
+		if (showCredit)
+		{
+			credit_sound->Draw();
+		}
 	}
 	else
 	{
+		SpriteBase::GetInstance()->ShaderDraw();
+
+
+
+		Object3dBase::GetInstance()->ShaderDraw();
+
+		stageModel->Draw();
+
+		SkinningObject3dBase::GetInstance()->ShaderDraw();
+
+		playerModel->Draw();
+
+		WireFrameObjectBase::GetInstance()->ShaderDraw();
+
+
+		ParticleManager::GetInstance()->Draw();
+
 		SpriteBase::GetInstance()->ShaderDraw();
 
 		startUI->Draw();
@@ -302,9 +366,13 @@ void TitleScene::Finalize() {
 
 	delete settingUI;
 
+	delete creditUI;
+
 	delete uiFrame;
 
 	delete gamePad;
 
 	delete gamePadOnFrame;
+
+	delete credit_sound;
 }

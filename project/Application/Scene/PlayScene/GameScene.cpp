@@ -33,17 +33,6 @@ void GameScene::Initialize() {
 	player_ = new Player();
 	player_->Initialize(camera, input, pl, true);
 
-	grid = new Object3d();
-	grid->Initialize();
-	grid->SetModel("Resources/Debug", "Grid.obj");
-	grid->SetColor({ 0.0f, 1.0f, 0.0f, 1.0f });
-
-	terrain = new Object3d();
-	terrain->Initialize();
-	terrain->SetModel("Resources/Debug/obj", "terrain.obj");
-	terrain->SetTranslate({ 20.0f, 0.01f, 0.0f });
-	terrain->SetEnableLighting(true);
-
 	land = new Object3d();
 	land->Initialize();
 	land->SetModel("Resources/Debug/gltf", "LandPlate.gltf", true);
@@ -127,16 +116,11 @@ void GameScene::Update() {
 
 	camera->SetTranslate(cameraTransform.translate);
 	camera->SetRotate(cameraTransform.rotate);
-	//camera->SetTranslateParent(human->GetWorldMatrix());
 	camera->Update();
 
 	SkyBox::GetInstance()->Update();
 
 	player_->Update();
-
-	grid->Update();
-
-	terrain->Update();
 
 	land->Update();
 
@@ -151,18 +135,11 @@ void GameScene::Draw() {
 
 	Object3dBase::GetInstance()->ShaderDraw();
 
-	terrain->Draw();
-
 	land->Draw();
-
 
 	SkinningObject3dBase::GetInstance()->ShaderDraw();
 
 	player_->Draw();
-
-	WireFrameObjectBase::GetInstance()->ShaderDraw();
-
-	grid->Draw();
 
 	SpriteBase::GetInstance()->ShaderDraw();
 
@@ -173,10 +150,6 @@ void GameScene::Finalize() {
 	delete camera;
 
 	delete player_;
-
-	delete grid;
-
-	delete terrain;
 
 	delete land;
 

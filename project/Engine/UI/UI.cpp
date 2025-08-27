@@ -77,13 +77,39 @@ bool UI::OnButton() {
 		{spritePos.x - (spriteSize.x * spriteOrigin.x), spritePos.y - (spriteSize.y * spriteOrigin.y), 0.0f},
 		{spritePos.x + (spriteSize.x * spriteOrigin.x), spritePos.y + (spriteSize.y * spriteOrigin.y), 0.0f},
 	};
+	if (spriteOrigin.x == 0.0f)
+	{
+		spriteAABB = {
+			{spritePos.x - (spriteSize.x), spritePos.y - (spriteSize.y * spriteOrigin.y), 0.0f},
+			{spritePos.x + (spriteSize.x), spritePos.y + (spriteSize.y * spriteOrigin.y), 0.0f},
+		};
+	}
+	if (spriteOrigin.y == 0.0f)
+	{
+		spriteAABB = {
+			{spritePos.x - (spriteSize.x * spriteOrigin.x), spritePos.y - (spriteSize.y), 0.0f},
+			{spritePos.x + (spriteSize.x * spriteOrigin.x), spritePos.y + (spriteSize.y), 0.0f},
+		};
+	}
 	AABB windowAABB = WinApp::GetInstance()->GetWindowAABB();
-	AABB mousePosAABB = {
+	AABB mousePosAABB;
+	// ウィンドウモードに応じて値を少しいじる(ウィンドウの部分を計算に入れる)
+	if (WinApp::GetInstance()->GetWindowMode() == WindowMode::Window)
+	{
+		mousePosAABB = {
 		{mousePos.x - windowAABB.min.x - 8.0f, mousePos.y - windowAABB.min.y - 30.0f},
 		{mousePos.x - windowAABB.min.x - 8.0f, mousePos.y - windowAABB.min.y - 30.0f},
-	};
+		};
+	}
+	else if (WinApp::GetInstance()->GetWindowMode() == WindowMode::FullScreen)
+	{
+		mousePosAABB = {
+			{mousePos.x - windowAABB.min.x, mousePos.y - windowAABB.min.y},
+			{mousePos.x - windowAABB.min.x, mousePos.y - windowAABB.min.y},
+		};
+	}
 
-	if (CollisionAABB(spriteAABB, mousePosAABB) == true && GetAsyncKeyState(VK_LBUTTON) == -32768)
+	if (CollisionAABB(spriteAABB, mousePosAABB) == true && GetAsyncKeyState(VK_LBUTTON) & 0x0001 && GetAsyncKeyState(VK_LBUTTON) == -32768)
 	{
 		return true;
 	}
@@ -104,19 +130,45 @@ const bool UI::InCursor() const {
 		{spritePos.x - (spriteSize.x * spriteOrigin.x), spritePos.y - (spriteSize.y * spriteOrigin.y), 0.0f},
 		{spritePos.x + (spriteSize.x * spriteOrigin.x), spritePos.y + (spriteSize.y * spriteOrigin.y), 0.0f},
 	};
+	if (spriteOrigin.x == 0.0f)
+	{
+		spriteAABB = {
+			{spritePos.x - (spriteSize.x), spritePos.y - (spriteSize.y * spriteOrigin.y), 0.0f},
+			{spritePos.x + (spriteSize.x), spritePos.y + (spriteSize.y * spriteOrigin.y), 0.0f},
+		};
+	}
+	if (spriteOrigin.y == 0.0f)
+	{
+		spriteAABB = {
+			{spritePos.x - (spriteSize.x * spriteOrigin.x), spritePos.y - (spriteSize.y), 0.0f},
+			{spritePos.x + (spriteSize.x * spriteOrigin.x), spritePos.y + (spriteSize.y), 0.0f},
+		};
+	}
 	AABB windowAABB = WinApp::GetInstance()->GetWindowAABB();
-	AABB mousePosAABB = {
-		{mousePos.x - windowAABB.min.x - 8.0f, mousePos.y - windowAABB.min.y - 30.0f},
-		{mousePos.x - windowAABB.min.x - 8.0f, mousePos.y - windowAABB.min.y - 30.0f},
-	};
+	AABB mousePosAABB;
+	// ウィンドウモードに応じて値を少しいじる(ウィンドウの部分を計算に入れる)
+	if (WinApp::GetInstance()->GetWindowMode() == WindowMode::Window)
+	{
+		mousePosAABB = {
+			{mousePos.x - windowAABB.min.x - 8.0f, mousePos.y - windowAABB.min.y - 30.0f},
+			{mousePos.x - windowAABB.min.x - 8.0f, mousePos.y - windowAABB.min.y - 30.0f},
+		};
+	}
+	else if (WinApp::GetInstance()->GetWindowMode() == WindowMode::FullScreen)
+	{
+		mousePosAABB = {
+			{mousePos.x - windowAABB.min.x, mousePos.y - windowAABB.min.y},
+			{mousePos.x - windowAABB.min.x, mousePos.y - windowAABB.min.y},
+		};
+	}
 
 	if (CollisionAABB(spriteAABB, mousePosAABB) == true)
 	{
 		return true;
 	}
-	//ImGui::Begin("Button");
-	//ImGui::DragFloat2("mousePos", &mousePosAABB.min.x, 0.1f);
-	//ImGui::End();
+	/*ImGui::Begin("Button");
+	ImGui::DragFloat2("mousePos", &mousePosAABB.min.x, 0.1f);
+	ImGui::End();*/
 
 	return false;
 }
