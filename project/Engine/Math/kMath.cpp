@@ -865,3 +865,15 @@ float LengthSquared(const Vector3& v)
 {
 	return v.x * v.x + v.y * v.y + v.z * v.z;
 }
+
+float Sign(float value)
+{
+	if (value < 0.0f)
+	{
+		return -1.0f;
+	}
+	else
+	{
+		return 1.0f;
+	}
+}
