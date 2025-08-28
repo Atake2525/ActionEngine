@@ -210,7 +210,11 @@ void TitleScene::Update() {
 			switch (select)
 			{
 			case TitleScene::Select::Play:
-				playUI->TriggerFunction();
+				SceneFadeManager::GetInstance()->FadeOut(1.0f);
+				if (SceneFadeManager::GetInstance()->CompleteFade())
+				{
+					playUI->TriggerFunction();
+				}
 				break;
 			case TitleScene::Select::Setting:
 				settingUI->TriggerFunction();
@@ -225,7 +229,9 @@ void TitleScene::Update() {
 		}
 		if (playUI->OnButton())
 		{
-			playUI->TriggerFunction();
+			SceneFadeManager::GetInstance()->FadeOut(1.0f);
+			
+				playUI->TriggerFunction();
 		}
 		else if (settingUI->OnButton())
 		{
@@ -346,7 +352,11 @@ void TitleScene::Draw() {
 		SpriteBase::GetInstance()->ShaderDraw();
 
 		startUI->Draw();
+		
 	}
+
+	SpriteBase::GetInstance()->ShaderDraw();
+	SceneFadeManager::GetInstance()->Draw();
 
 }
 
