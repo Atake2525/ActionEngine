@@ -44,6 +44,8 @@ void GameScene::Initialize() {
 
 	LevelData levelData = JsonLoader::GetInstance()->LoadJsonTransform("Resources/Debug/json", "PlayerStartPoint.json");
 
+
+	SceneFadeManager::GetInstance()->FadeIn(1.0f);
 }
 
 void GameScene::Update() {
@@ -142,6 +144,8 @@ void GameScene::Draw() {
 	player_->Draw();
 
 	SpriteBase::GetInstance()->ShaderDraw();
+
+	SceneFadeManager::GetInstance()->Draw();
 
 }
 

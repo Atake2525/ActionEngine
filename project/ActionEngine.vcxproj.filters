@@ -48,6 +48,7 @@
     <ClCompile Include="Engine\JsonLoader\JsonLoader.cpp" />
     <ClCompile Include="Engine\Collision\CollisionManager.cpp" />
     <ClCompile Include="Application\Scene\PlayScene\TestScene.cpp" />
+    <ClCompile Include="Engine\Presentation\Cinematic\SceneFadeManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Audio\Audio.h" />
@@ -109,6 +110,7 @@
     <ClInclude Include="Engine\Math\AABB.h" />
     <ClInclude Include="Application\Scene\PlayScene\TestScene.h" />
     <ClInclude Include="Engine\Math\Capsule.h" />
+    <ClInclude Include="Engine\Presentation\Cinematic\SceneFadeManager.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="externels\assimp\lib\Release\assimp-vc143-mtd.lib" />

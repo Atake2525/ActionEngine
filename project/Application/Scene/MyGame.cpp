@@ -46,6 +46,8 @@ void MyGame::Initialize() {
 
 	Audio::GetInstance()->Initialize();
 
+	SceneFadeManager::GetInstance()->Initialize();
+
 	//// ↓---- シーンの初期化 ----↓ ////
 
 	SceneManager::GetInstance();
@@ -73,6 +75,7 @@ void MyGame::Update() {
 	SceneManager::GetInstance()->Update();
 	ParticleManager::GetInstance()->Update();
 	Audio::GetInstance()->Update();
+	SceneFadeManager::GetInstance()->Update();
 	//JsonLoader::GetInstance()->Update();
 
 	if (SceneManager::GetInstance()->EndRequest())
@@ -142,6 +145,8 @@ void MyGame::Finalize() {
 	Input::GetInstance()->Finalize();
 
 	Audio::GetInstance()->Finalize();
+
+	SceneFadeManager::GetInstance()->Finalize();
 
 	//// ↓---- シーンの解放 ----↓ ////
 
