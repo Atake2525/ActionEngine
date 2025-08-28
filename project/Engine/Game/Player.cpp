@@ -130,6 +130,41 @@ void Player::Move()
 	// 無操作状態ならば何もしないので毎フレームIdle状態にする
 	moveType_ = PlayerMoveType::Idle;
 
+	Vector3 penetrationAmount = CollisionManager::GetInstance()->GetPenetration();
+
+	// 壁走りの処理
+	if (input->PressMouse(1) && (penetrationAmount.x != 0.0f || penetrationAmount.z != 0.0f) && moveVelocity_.y < 0.0f)
+	{
+		wallDash_ = true;
+		jump_ = false;
+		moveVelocity_.y = -0.04f;
+		speed_.y = -0.04f;
+		// 向ている方向に応じてカメラを傾ける
+		/*Vector3	cameraDirection = camera->GetDirection();
+		if (penetrationAmount.x > 0.0f)
+		{
+			playerTransform_.rotate.z = SwapRadian(25.0f);
+		}
+		else if(penetrationAmount.x < 0.0f)
+		{
+			playerTransform_.rotate.z = SwapRadian(-25.0f);
+		}
+		if (penetrationAmount.z > 0.0f)
+		{
+			playerTransform_.rotate.z = SwapRadian(25.0f);
+		}
+		else if (penetrationAmount.z < 0.0f)
+		{
+			playerTransform_.rotate.z = SwapRadian(-25.0f);
+		}*/
+	}
+	else if (wallDash_)
+	{
+		moveType_ = PlayerMoveType::Dash;
+		wallDash_ = false;
+		camera->SetRotate({ cameraTransform.rotate.x, cameraTransform.rotate.y, 0.0f });
+	}
+
 	// 地面との高さを求めて落下処理を行う
 	float dist = CollisionManager::GetInstance()->GetGroundDistance("player");
 	if (dist > 0.0f && !wallDash_)
@@ -142,6 +177,26 @@ void Player::Move()
 		if (!jump_)
 		{
 			speed_.y = jumpAcceleration_;
+			if (wallDash_)
+			{
+				Vector3	cameraDirection = camera->GetDirection();
+				if (penetrationAmount.x > 0.0f)
+				{
+					speed_.x = -speedLimit_ * Sign(cameraDirection.z);
+				}
+				else if (penetrationAmount.x < 0.0f)
+				{
+					speed_.x = speedLimit_ * Sign(cameraDirection.z);
+				}
+				else if (penetrationAmount.z > 0.0f)
+				{
+					speed_.x = speedLimit_ * Sign(cameraDirection.x);
+				}
+				else if (penetrationAmount.z < 0.0f)
+				{
+					speed_.x = -speedLimit_ * Sign(cameraDirection.x);
+				}
+			}
 		}
 		jump_ = true;
 	}
@@ -273,39 +328,6 @@ void Player::Move()
 	Matrix4x4 matrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
 	// 回転行列を参照して移動ベクトルを正規化する
 	moveVelocity_ = TransformNormal(moveVelocity_, matrix);
-
-	Vector3 penetrationAmount = CollisionManager::GetInstance()->GetPenetration();
-
-	// 壁走りの処理
-	if (input->PressMouse(1) && (penetrationAmount.x != 0.0f || penetrationAmount.z != 0.0f) && moveVelocity_.y < 0.0f)
-	{
-		wallDash_ = true;
-		jump_ = false;
-		moveVelocity_.y = 0.0f;
-		// 向ている方向に応じてカメラを傾ける
-		Vector3	cameraDirection = camera->GetDirection();
-		if (penetrationAmount.x < 0.0f || penetrationAmount.z < 0.0f)
-		{
-			camera->SetRotate({ cameraTransform.rotate.x, cameraTransform.rotate.y, SwapRadian(-45.0f) });
-		}
-	}
-	else if(wallDash_)
-	{
-		moveType_ = PlayerMoveType::Dash;
-		wallDash_ = false;
-		camera->SetRotate({ cameraTransform.rotate.x, cameraTransform.rotate.y, 0.0f });
-	}
-
-	//if (wallDash_)
-	//{
-	//	// 向ている方向に応じてカメラを傾ける
-	//	Vector3	cameraDirection = camera->GetDirection();
-	//	if (penetrationAmount.x < 0.0f || penetrationAmount.z < 0.0f)
-	//	{
-	//		
-	//	}
-
-	//}
 
 
 	if (penetrationAmount.y < 0.0f)
