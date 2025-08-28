@@ -190,3 +190,5 @@ float Norm(const Quaternion& quaternion);
 Vector3 ClosestPoint(const AABB& aabb, const Vector3& segment);
 
 float LengthSquared(const Vector3& v);
+
+float Sign(float value);
