@@ -1,5 +1,5 @@
 #pragma once
-#include "SceneFadeManager.h"
+#include "FadeManager.h"
 
 class SceneManager;
 

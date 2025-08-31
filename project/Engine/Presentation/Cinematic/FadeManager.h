@@ -3,17 +3,17 @@
 #include "Sprite.h"
 #include "SpriteBase.h"
 
-class SceneFadeManager
+class FadeManager
 {
 private:
-	static SceneFadeManager* instance;
+	static FadeManager* instance;
 
 	// コンストラクタ、デストラクタの隠蔽
-	SceneFadeManager() = default;
-	~SceneFadeManager() = default;
+	FadeManager() = default;
+	~FadeManager() = default;
 	// コピーコンストラクタ、コピー代入演算子の封印
-	SceneFadeManager(SceneFadeManager&) = delete;
-	SceneFadeManager& operator=(SceneFadeManager&) = delete;
+	FadeManager(FadeManager&) = delete;
+	FadeManager& operator=(FadeManager&) = delete;
 
 public:
 
@@ -21,7 +21,7 @@ public:
 	/// シングルトンインスタンスの取得
 	/// </summary>
 	/// <returns>TextureManager* instance</returns>
-	static SceneFadeManager* GetInstance();
+	static FadeManager* GetInstance();
 
 	void Finalize();
 
