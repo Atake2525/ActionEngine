@@ -36,7 +36,8 @@ void GameScene::Initialize() {
 
 	land = new Object3d();
 	land->Initialize();
-	land->SetModel("Resources/Debug/gltf", "LandPlate.gltf", true);
+	//land->SetModel("Resources/Debug/gltf", "LandPlate.gltf", true);
+	land->SetModel("Resources/Model/gltf/Stage/map01", "map01.gltf", true);
 
 	CollisionManager::GetInstance()->AddCollision(land, "land");
 
