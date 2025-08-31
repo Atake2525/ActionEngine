@@ -64,10 +64,10 @@ void UI::CreateButton(const Vector2& spritePosition, const Origin& origin, const
 		sprite->SetAnchorPoint({ 1.0f, 0.5f });
 		break;
 	}
-	OnButton();
+	TriggerOnButton();
 }
 
-bool UI::OnButton() {
+bool UI::TriggerOnButton() {
 	sprite->Update();
 	Vector2 spriteOrigin = sprite->GetAnchorPoint();
 	Vector2 spriteSize = sprite->GetScale();
@@ -111,6 +111,7 @@ bool UI::OnButton() {
 
 	if (CollisionAABB(spriteAABB, mousePosAABB) == true && GetAsyncKeyState(VK_LBUTTON) & 0x0001 && GetAsyncKeyState(VK_LBUTTON) == -32768)
 	{
+		onButton_ = !onButton_;
 		return true;
 	}
 	/*ImGui::Begin("Button");

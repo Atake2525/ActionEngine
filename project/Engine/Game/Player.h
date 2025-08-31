@@ -27,6 +27,10 @@ public:
 
     void Draw();
 
+    void SetClearDistance(const float clearDistance) { clearDistance_ = clearDistance; }
+
+    const bool IsClear() const;
+
 private: // メンバ変数宣言
 
     bool debugMode_ = false;
@@ -82,8 +86,12 @@ private: // ステータス(カメラ系)宣言
 
     float fovChangeSpeed_ = 0.2f;
 
-    float normalFovY_ = 0.75f; // ダッシュ中以外のFov数値
+    float normalFovY_ = 1.0f; // ダッシュ中以外のFov数値
     float fovYBoost_ = 0.3f; // ダッシュ中のFovの上昇値(normalFovY_を参照)
+
+private: // 中心からクリアまでの距離
+
+    float clearDistance_ = 1000.0f;
 
 private: // ステータス関係の関数宣言
 

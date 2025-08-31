@@ -19,11 +19,10 @@ void SceneFadeManager::Finalize() {
 
 void SceneFadeManager::Initialize(const Vector3 color) {
 	color_ = color;
-	TextureManager::GetInstance()->LoadTexture("Resources/Sprite/white1x1.png");
 	sprite_ = new Sprite();
 	sprite_->Initialize("Resources/Sprite/white1x1.png");
 	sprite_->SetColor({ color_.x, color_.y, color_.z, alpha_ });
-	sprite_->SetTextureSize({ float(WinApp::GetInstance()->GetkClientWidth()), float(WinApp::GetInstance()->GetkClientHeight()) });
+	sprite_->SetScale({ float(WinApp::GetInstance()->GetkClientWidth()), float(WinApp::GetInstance()->GetkClientHeight()) });
 }
 
 void SceneFadeManager::Update() {
@@ -39,6 +38,15 @@ void SceneFadeManager::Update() {
 		}
 		sprite_->SetColor({ color_.x, color_.y, color_.z, alpha_ });
 	}
+	else if (!fade_ && completeFade_)
+	{
+		fadeTimer_ += 1.0f;
+		if (fadeTimer_ > 2.0f)
+		{
+			fadeTimer_ = 0.0f;
+			completeFade_ = false;
+		}
+	}
 	sprite_->Update();
 }
 
@@ -51,6 +59,7 @@ void SceneFadeManager::FadeOut(const float time) {
 		alphaPre_ = alpha_;
 		goalAlpha_ = 1.0f;
 		fadeTime_ = time;
+		fadeTimer_ = 0.0f;
 	}
 }
 
@@ -62,9 +71,11 @@ void SceneFadeManager::FadeIn(const float time) {
 		alphaPre_ = alpha_;
 		goalAlpha_ = 0.0f;
 		fadeTime_ = time;
+		fadeTimer_ = 0.0f;
 	}
 }
 
 void SceneFadeManager::Draw() {
+	SpriteBase::GetInstance()->ShaderDraw();
 	sprite_->Draw();
 }

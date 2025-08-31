@@ -145,7 +145,6 @@ void GameScene::Draw() {
 
 	SpriteBase::GetInstance()->ShaderDraw();
 
-	SceneFadeManager::GetInstance()->Draw();
 
 }
 

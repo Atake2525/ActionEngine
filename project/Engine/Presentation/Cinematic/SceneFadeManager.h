@@ -49,7 +49,7 @@ private:
 
 	float goalAlpha_ = 0.0f;
 
-	float alpha_ = 1.0f;
+	float alpha_ = 0.0f;
 	float alphaPre_ = 0.0f;
 
 	Vector3 color_ = { 1.0f, 1.0f, 1.0f };
