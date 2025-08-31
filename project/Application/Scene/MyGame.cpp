@@ -46,7 +46,7 @@ void MyGame::Initialize() {
 
 	Audio::GetInstance()->Initialize();
 
-	SceneFadeManager::GetInstance()->Initialize({0.0f, 0.0f, 0.0f});
+	FadeManager::GetInstance()->Initialize({0.0f, 0.0f, 0.0f});
 
 	//// ↓---- シーンの初期化 ----↓ ////
 
@@ -75,7 +75,7 @@ void MyGame::Update() {
 	SceneManager::GetInstance()->Update();
 	ParticleManager::GetInstance()->Update();
 	Audio::GetInstance()->Update();
-	SceneFadeManager::GetInstance()->Update();
+	FadeManager::GetInstance()->Update();
 	//JsonLoader::GetInstance()->Update();
 
 	if (SceneManager::GetInstance()->EndRequest())
@@ -93,7 +93,7 @@ void MyGame::Draw() {
 
 	SkyBox::GetInstance()->Draw();
 	SceneManager::GetInstance()->Draw();
-	SceneFadeManager::GetInstance()->Draw();
+	FadeManager::GetInstance()->Draw();
 
 	directxBase->PostDrawRenderTexture();
 
@@ -146,7 +146,7 @@ void MyGame::Finalize() {
 
 	Audio::GetInstance()->Finalize();
 
-	SceneFadeManager::GetInstance()->Finalize();
+	FadeManager::GetInstance()->Finalize();
 
 	//// ↓---- シーンの解放 ----↓ ////
 
