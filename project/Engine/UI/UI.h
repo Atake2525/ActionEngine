@@ -47,8 +47,14 @@ public:
 	/// <summary>
 	/// ボタンが押されたかどうか
 	/// </summary>
-	/// <returns>押下のbool</returns>
-	bool OnButton();
+	/// <returns>押下Triggerのbool</returns>
+	/// <param name="toggle">オンオフを切り替える</param>
+	bool TriggerOnButton();
+
+	/// <summary>
+	/// ボタンがONになっているかどうかを返す
+	/// </summary>
+	const bool& GetButtonOn() const { return onButton_; }
 
 	/// <summary>
 	/// ボタンにカーソルが合わせられているかどうか
@@ -77,5 +83,7 @@ private:
 
 	Sprite* sprite = nullptr;
 	Input* input = nullptr;
+
+	bool onButton_ = false;
 };
 
