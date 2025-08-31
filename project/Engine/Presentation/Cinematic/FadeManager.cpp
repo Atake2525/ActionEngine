@@ -1,23 +1,23 @@
-#include "SceneFadeManager.h"
+#include "FadeManager.h"
 #include "kMath.h"
 #include "TextureManager.h"
 
-SceneFadeManager* SceneFadeManager::instance = nullptr;
+FadeManager* FadeManager::instance = nullptr;
 
-SceneFadeManager* SceneFadeManager::GetInstance() {
+FadeManager* FadeManager::GetInstance() {
 	if (instance == nullptr) {
-		instance = new SceneFadeManager;
+		instance = new FadeManager;
 	}
 	return instance;
 }
 
-void SceneFadeManager::Finalize() {
+void FadeManager::Finalize() {
 	delete sprite_;
 	delete instance;
 	instance = nullptr;
 }
 
-void SceneFadeManager::Initialize(const Vector3 color) {
+void FadeManager::Initialize(const Vector3 color) {
 	color_ = color;
 	sprite_ = new Sprite();
 	sprite_->Initialize("Resources/Sprite/white1x1.png");
@@ -25,7 +25,7 @@ void SceneFadeManager::Initialize(const Vector3 color) {
 	sprite_->SetScale({ float(WinApp::GetInstance()->GetkClientWidth()), float(WinApp::GetInstance()->GetkClientHeight()) });
 }
 
-void SceneFadeManager::Update() {
+void FadeManager::Update() {
 	if (fade_)
 	{
 		fadeTimer_ += 1.0f / 60.0f / fadeTime_;
@@ -51,7 +51,7 @@ void SceneFadeManager::Update() {
 }
 
 
-void SceneFadeManager::FadeOut(const float time) {
+void FadeManager::FadeOut(const float time) {
 	if (!fade_)
 	{
 		completeFade_ = false;
@@ -63,7 +63,7 @@ void SceneFadeManager::FadeOut(const float time) {
 	}
 }
 
-void SceneFadeManager::FadeIn(const float time) {
+void FadeManager::FadeIn(const float time) {
 	if (!fade_)
 	{
 		completeFade_ = false;
@@ -75,7 +75,7 @@ void SceneFadeManager::FadeIn(const float time) {
 	}
 }
 
-void SceneFadeManager::Draw() {
+void FadeManager::Draw() {
 	SpriteBase::GetInstance()->ShaderDraw();
 	sprite_->Draw();
 }

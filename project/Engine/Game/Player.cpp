@@ -150,24 +150,6 @@ void Player::Move()
 		jump_ = false;
 		moveVelocity_.y = -0.04f;
 		speed_.y = -0.04f;
-		// 向ている方向に応じてカメラを傾ける
-		/*Vector3	cameraDirection = camera->GetDirection();
-		if (penetrationAmount.x > 0.0f)
-		{
-			playerTransform_.rotate.z = SwapRadian(25.0f);
-		}
-		else if(penetrationAmount.x < 0.0f)
-		{
-			playerTransform_.rotate.z = SwapRadian(-25.0f);
-		}
-		if (penetrationAmount.z > 0.0f)
-		{
-			playerTransform_.rotate.z = SwapRadian(25.0f);
-		}
-		else if (penetrationAmount.z < 0.0f)
-		{
-			playerTransform_.rotate.z = SwapRadian(-25.0f);
-		}*/
 	}
 	else if (wallDash_)
 	{

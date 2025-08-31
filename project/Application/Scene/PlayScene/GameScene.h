@@ -16,6 +16,7 @@
 #include "Player.h"
 #include "SkyBox.h"
 #include "CollisionManager.h"
+#include "Goal.h"
 
 #pragma once
 
@@ -70,5 +71,9 @@ private:
 	Transform transformSprite;
 
 	Player* player_ = nullptr;
+
+	bool isGoal_ = false;
+
+	Goal* goal_ = nullptr;
 };
 
