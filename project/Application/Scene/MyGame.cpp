@@ -6,8 +6,8 @@ void MyGame::Initialize() {
 
 #pragma region 基盤システムの初期化
 
-	//WinApp::GetInstance()->Initialize(1920, 1080, WindowMode::FullScreen, L"Engine");
-	WinApp::GetInstance()->Initialize();
+	WinApp::GetInstance()->Initialize(1920, 1080, WindowMode::FullScreen, L"Engine");
+	//WinApp::GetInstance()->Initialize();
 
 	directxBase = new DirectXBase();
 	directxBase->Initialize();
@@ -46,6 +46,8 @@ void MyGame::Initialize() {
 
 	Audio::GetInstance()->Initialize();
 
+	SceneFadeManager::GetInstance()->Initialize({0.0f, 0.0f, 0.0f});
+
 	//// ↓---- シーンの初期化 ----↓ ////
 
 	SceneManager::GetInstance();
@@ -73,6 +75,7 @@ void MyGame::Update() {
 	SceneManager::GetInstance()->Update();
 	ParticleManager::GetInstance()->Update();
 	Audio::GetInstance()->Update();
+	SceneFadeManager::GetInstance()->Update();
 	//JsonLoader::GetInstance()->Update();
 
 	if (SceneManager::GetInstance()->EndRequest())
@@ -88,9 +91,9 @@ void MyGame::Draw() {
 
 	directxBase->PreDrawRenderTexture();
 
-	//gameScene->Draw();
 	SkyBox::GetInstance()->Draw();
 	SceneManager::GetInstance()->Draw();
+	SceneFadeManager::GetInstance()->Draw();
 
 	directxBase->PostDrawRenderTexture();
 
@@ -142,6 +145,8 @@ void MyGame::Finalize() {
 	Input::GetInstance()->Finalize();
 
 	Audio::GetInstance()->Finalize();
+
+	SceneFadeManager::GetInstance()->Finalize();
 
 	//// ↓---- シーンの解放 ----↓ ////
 

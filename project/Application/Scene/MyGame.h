@@ -19,6 +19,7 @@
 #include "SkyBox.h"
 #include "JsonLoader.h"
 #include "CollisionManager.h"
+#include "SceneFadeManager.h"
 
 #include "algorithm"
 #include "externels/imgui/imgui.h"

@@ -205,12 +205,12 @@ void TitleScene::Update() {
 			uiFrame->SetPosition({ position.x, position.y });
 		}
 		
-		if (input->TriggerKey(DIK_RETURN) || input->TriggerKey(DIK_SPACE))
+		if (input->TriggerKey(DIK_RETURN) || input->TriggerKey(DIK_SPACE) || input->TriggerButton(Controller::A))
 		{
 			switch (select)
 			{
 			case TitleScene::Select::Play:
-				playUI->TriggerFunction();
+				SceneFadeManager::GetInstance()->FadeOut(1.0f);
 				break;
 			case TitleScene::Select::Setting:
 				settingUI->TriggerFunction();
@@ -223,27 +223,41 @@ void TitleScene::Update() {
 				break;
 			}
 		}
-		if (playUI->OnButton())
+
+		if (SceneFadeManager::GetInstance()->CompleteFade())
 		{
 			playUI->TriggerFunction();
 		}
-		else if (settingUI->OnButton())
+
+		if (playUI->TriggerOnButton())
+		{
+			SceneFadeManager::GetInstance()->FadeOut(1.0f);
+		}
+		else if (settingUI->TriggerOnButton())
 		{
 			settingUI->TriggerFunction();
 		}
-		else if (exitUI->OnButton())
+		else if (exitUI->TriggerOnButton())
 		{
 			exitUI->TriggerFunction();
 		}
-		else if (creditUI->OnButton())
+		else if (creditUI->TriggerOnButton())
 		{
 			creditUI->TriggerFunction();
+		}
+
+		if (playUI->GetButtonOn())
+		{
+			if (SceneFadeManager::GetInstance()->CompleteFade())
+			{
+				playUI->TriggerFunction();
+			}
 		}
 
 	}
 	else
 	{
-		if (startUI->OnButton())
+		if (startUI->TriggerOnButton())
 		{
 			startUI->TriggerFunction();
 		}
@@ -282,6 +296,8 @@ void TitleScene::Update() {
 	input->Update();
 
 	selectPre = select;
+
+	
 }
 
 void TitleScene::Draw() {
@@ -346,7 +362,11 @@ void TitleScene::Draw() {
 		SpriteBase::GetInstance()->ShaderDraw();
 
 		startUI->Draw();
+		
 	}
+
+	SpriteBase::GetInstance()->ShaderDraw();
+	//SceneFadeManager::GetInstance()->Draw();
 
 }
 
