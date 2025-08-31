@@ -63,36 +63,36 @@ void OffScreenRnedering::Initialize(DirectXBase* directxBase) {
 
 void OffScreenRnedering::Update() {
 #ifdef _DEBUG
-	ImGui::Begin("PostEffect");
-	/*if (ImGui::IsPopupOpen("PostEffect"))
-	{
-		Log("openPostEffect");
-	}*/
-	ImGui::SetWindowPos(ImVec2{ 0.0f, 18.0f });
-	ImGui::SetWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) - 18.0f });
-	if (ImGui::TreeNode("Grayscale / グレイスケール")) {
-		ImGui::Checkbox("有効化", &grayscale->enableGrayscale);
-		ImGui::ColorEdit3("ColTone", &grayscale->toneColor.x);
-		ImGui::DragFloat("Alpha", &grayscale->alpah);
-		ImGui::TreePop();
-	}
-	if (ImGui::TreeNode("Vignette / ビネット")) {
-		ImGui::Checkbox("有効化", &vignette->enableVignette);
-		ImGui::DragFloat("intensity", &vignette->intensity, 0.1f);
-		ImGui::DragFloat("scale", &vignette->scale, 0.1f);
-		ImGui::TreePop();
-	}
-	if (ImGui::TreeNode("BoxFilter / ボックスフィルター")) {
-		ImGui::Checkbox("有効化", &boxFilter->enableBoxFilter);
-		ImGui::SliderInt("size", &boxFilter->size, 1, 25);
-		ImGui::TreePop();
-	}
-	if (ImGui::TreeNode("GaussianFilter / ガウシアンフィルター")) {
-		ImGui::Checkbox("有効化", &gaussianFilter->enableGaussianFilter);
-		ImGui::SliderFloat("size", &gaussianFilter->sigma, 1.0f, 10.0f);
-		ImGui::TreePop();
-	}
-	ImGui::End();
+	//ImGui::Begin("PostEffect");
+	///*if (ImGui::IsPopupOpen("PostEffect"))
+	//{
+	//	Log("openPostEffect");
+	//}*/
+	//ImGui::SetWindowPos(ImVec2{ 0.0f, 18.0f });
+	//ImGui::SetWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) - 18.0f });
+	//if (ImGui::TreeNode("Grayscale / グレイスケール")) {
+	//	ImGui::Checkbox("有効化", &grayscale->enableGrayscale);
+	//	ImGui::ColorEdit3("ColTone", &grayscale->toneColor.x);
+	//	ImGui::DragFloat("Alpha", &grayscale->alpah);
+	//	ImGui::TreePop();
+	//}
+	//if (ImGui::TreeNode("Vignette / ビネット")) {
+	//	ImGui::Checkbox("有効化", &vignette->enableVignette);
+	//	ImGui::DragFloat("intensity", &vignette->intensity, 0.1f);
+	//	ImGui::DragFloat("scale", &vignette->scale, 0.1f);
+	//	ImGui::TreePop();
+	//}
+	//if (ImGui::TreeNode("BoxFilter / ボックスフィルター")) {
+	//	ImGui::Checkbox("有効化", &boxFilter->enableBoxFilter);
+	//	ImGui::SliderInt("size", &boxFilter->size, 1, 25);
+	//	ImGui::TreePop();
+	//}
+	//if (ImGui::TreeNode("GaussianFilter / ガウシアンフィルター")) {
+	//	ImGui::Checkbox("有効化", &gaussianFilter->enableGaussianFilter);
+	//	ImGui::SliderFloat("size", &gaussianFilter->sigma, 1.0f, 10.0f);
+	//	ImGui::TreePop();
+	//}
+	//ImGui::End();
 #endif _DEBUG
 
 

@@ -31,7 +31,7 @@ void GameScene::Initialize() {
 		{0.0f, 0.01f, 0.0f}
 	};
 	player_ = new Player();
-	player_->Initialize(camera, input, pl, true);
+	player_->Initialize(camera, input, pl, false);
 	player_->SetClearDistance(50.0f);
 
 	land = new Object3d();
@@ -56,7 +56,7 @@ void GameScene::Update() {
 	cameraTransform = camera->GetTransform();
 
 #ifdef _DEBUG
-	ImGui::Begin("State");
+	/*ImGui::Begin("State");
 	ImGui::SetWindowPos(ImVec2{ 0.0f, 0.0f });
 	ImGui::SetWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) });
 	if (ImGui::TreeNode("Camera")) {
@@ -97,7 +97,7 @@ void GameScene::Update() {
 	{
 		SceneManager::GetInstance()->SetNextScene("TITLE");
 	}
-	ImGui::End();
+	ImGui::End();*/
 
 #endif // _DEBUG
 

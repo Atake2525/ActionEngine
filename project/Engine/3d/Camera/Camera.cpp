@@ -23,7 +23,7 @@ void Camera::Update() {
 
 	Vector3 dirc = { -worldMatrix.m[0][2], -worldMatrix.m[1][2], worldMatrix.m[2][2] };
 
-	ImGui::Begin("CameraStatus");
+	/*ImGui::Begin("CameraStatus");
 	ImGui::SetWindowPos(ImVec2{ float(WinApp::GetInstance()->GetkClientWidth()) - 300.0f, 18.0f * number });
 	ImGui::SetWindowSize(ImVec2{ 300.0f, 128.0f });
 	ImGui::DragFloat3("Position", &transform.translate.x, 0.1f);
@@ -32,7 +32,7 @@ void Camera::Update() {
 	ImGui::DragFloat3("Direction2", &dirc.x);
 	ImGui::DragFloat("Fov", &fovY, 0.01f);
 	ImGui::DragFloat("farClipDist", &farClipDistance, 1.0f);
-	ImGui::End();
+	ImGui::End();*/
 
 	rotate = SwapRadian(rotate);
 	transform.rotate = rotate;
