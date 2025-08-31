@@ -11,7 +11,7 @@ void TitleScene::Initialize() {
 
 	camera = new Camera();
 	camera->SetRotate(Vector3(SwapRadian(10.0f), 0.0f, 0.0f));
-	camera->SetTranslate({ 0.0f, 2.8f, -8.0f });
+	camera->SetTranslate({ 0.0f, 2.8f, -4.4f });
 
 	TextureManager::GetInstance()->LoadTexture("Resources/rostock_laage_airport_4k.dds");
 
@@ -33,7 +33,7 @@ void TitleScene::Initialize() {
 
 	stageModel = new Object3d();
 	stageModel->Initialize();
-	stageModel->SetModel("Resources/Debug/gltf", "LandPlate.gltf", true);
+	stageModel->SetModel("Resources/Model/gltf/Stage/map01", "map01.gltf", true);
 
 	startUI = new UI();
 	startUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f), float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) - 64.0f * 3.0f }, Origin::Center, "Resources/Sprite/UI/start.png");
