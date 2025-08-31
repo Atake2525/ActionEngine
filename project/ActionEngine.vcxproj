@@ -156,7 +156,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\3d\SkyBox\SkyBox.cpp" />
     <ClCompile Include="Engine\JsonLoader\JsonLoader.cpp" />
     <ClCompile Include="Application\Scene\PlayScene\TestScene.cpp" />
-    <ClCompile Include="Engine\Presentation\Cinematic\SceneFadeManager.cpp" />
+    <ClCompile Include="Engine\Presentation\Cinematic\FadeManager.cpp" />
+    <ClCompile Include="Engine\Game\Goal.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Scene\Manager\AbstractSceneFactory.h" />
@@ -220,7 +221,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Game\Player.h" />
     <ClInclude Include="Engine\3d\SkyBox\SkyBox.h" />
     <ClInclude Include="Application\Scene\PlayScene\TestScene.h" />
-    <ClInclude Include="Engine\Presentation\Cinematic\SceneFadeManager.h" />
+    <ClInclude Include="Engine\Presentation\Cinematic\FadeManager.h" />
+    <ClInclude Include="Engine\Game\Goal.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externels\imgui\LICENSE.txt" />

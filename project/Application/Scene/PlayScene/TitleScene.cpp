@@ -38,21 +38,18 @@ void TitleScene::Initialize() {
 	startUI = new UI();
 	startUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f), float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) - 64.0f * 3.0f }, Origin::Center, "Resources/Sprite/UI/start.png");
 	startUI->function = [this]() {
-		Audio::GetInstance()->Play("enter");
 		start = true;
 	};
 
 	playUI = new UI();
 	playUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f) + 128.0f, float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) }, Origin::Center, "Resources/Sprite/UI/play.png");
 	playUI->function = []() {
-		Audio::GetInstance()->Play("enter");
 		SceneManager::GetInstance()->SetNextScene("GAMESCENE");
 	};
 
 	settingUI = new UI();
 	settingUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f) + 128.0f, float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) + 72.0f }, Origin::Center, "Resources/Sprite/UI/setting.png");
 	settingUI->function = [this]() {
-		Audio::GetInstance()->Play("enter");
 	};
 
 	exitUI = new UI();
@@ -65,13 +62,12 @@ void TitleScene::Initialize() {
 	creditUI->CreateButton({ 64.0f + 16.0f, float(WinApp::GetInstance()->GetkClientHeight() - 24.0f - 16.0f) }, Origin::Center, "Resources/Sprite/UI/credit.png");
 	creditUI->function = [this]() {
 		showCredit = !showCredit;
-		Audio::GetInstance()->Play("enter");
 	};
 
 	uiFrame = new Sprite();
 	uiFrame->Initialize("Resources/Sprite/UI/uiFrame.png");
 	uiFrame->SetAnchorPoint({ 0.5f, 0.5f });
-	uiFrame->SetPosition({playUI->GetTransform().translate.x, playUI->GetTransform().translate.y });
+	uiFrame->SetPosition({ startUI->GetTransform().translate.x, startUI->GetTransform().translate.y });
 
 	gamePad = new Sprite();
 	gamePad->Initialize("Resources/Sprite/UI/gamepad.png");
@@ -92,7 +88,7 @@ void TitleScene::Initialize() {
 	Audio::GetInstance()->LoadMP3("Resources/sound/enter.mp3", "enter", 1.0f);
 	Audio::GetInstance()->LoadMP3("Resources/sound/Experimenta_Model_short.mp3", "bgm", 0.2f);
 
-	//Audio::GetInstance()->Play("bgm", true);
+	Audio::GetInstance()->Play("bgm", true);
 
 	Audio::GetInstance()->SetMasterVolume(0.2f);
 }
@@ -207,10 +203,11 @@ void TitleScene::Update() {
 		
 		if (input->TriggerKey(DIK_RETURN) || input->TriggerKey(DIK_SPACE) || input->TriggerButton(Controller::A))
 		{
+			Audio::GetInstance()->Play("enter");
 			switch (select)
 			{
 			case TitleScene::Select::Play:
-				SceneFadeManager::GetInstance()->FadeOut(1.0f);
+				FadeManager::GetInstance()->FadeOut(1.0f);
 				break;
 			case TitleScene::Select::Setting:
 				settingUI->TriggerFunction();
@@ -224,31 +221,35 @@ void TitleScene::Update() {
 			}
 		}
 
-		if (SceneFadeManager::GetInstance()->CompleteFade())
+		if (FadeManager::GetInstance()->CompleteFade())
 		{
 			playUI->TriggerFunction();
 		}
 
 		if (playUI->TriggerOnButton())
 		{
-			SceneFadeManager::GetInstance()->FadeOut(1.0f);
+			FadeManager::GetInstance()->FadeOut(1.0f);
+			Audio::GetInstance()->Play("enter");
 		}
 		else if (settingUI->TriggerOnButton())
 		{
 			settingUI->TriggerFunction();
+			Audio::GetInstance()->Play("enter");
 		}
 		else if (exitUI->TriggerOnButton())
 		{
 			exitUI->TriggerFunction();
+			Audio::GetInstance()->Play("enter");
 		}
 		else if (creditUI->TriggerOnButton())
 		{
 			creditUI->TriggerFunction();
+			Audio::GetInstance()->Play("enter");
 		}
 
 		if (playUI->GetButtonOn())
 		{
-			if (SceneFadeManager::GetInstance()->CompleteFade())
+			if (FadeManager::GetInstance()->CompleteFade())
 			{
 				playUI->TriggerFunction();
 			}
@@ -257,9 +258,11 @@ void TitleScene::Update() {
 	}
 	else
 	{
-		if (startUI->TriggerOnButton())
+		if (startUI->TriggerOnButton() || input->TriggerKey(DIK_RETURN) || input->TriggerKey(DIK_SPACE) || input->TriggerButton(Controller::A))
 		{
 			startUI->TriggerFunction();
+			Audio::GetInstance()->Play("enter");
+			uiFrame->SetPosition({ playUI->GetTransform().translate.x, playUI->GetTransform().translate.y });
 		}
 	}
 
@@ -366,6 +369,7 @@ void TitleScene::Draw() {
 	}
 
 	SpriteBase::GetInstance()->ShaderDraw();
+	uiFrame->Draw();
 	//SceneFadeManager::GetInstance()->Draw();
 
 }
