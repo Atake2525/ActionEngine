@@ -50,10 +50,16 @@ void CollisionManager::Update(const std::string& targetName) {
 			for (AABB terrainAABB : terrains)
 			{
 				terrainAABB = AddSize(terrainAABB, 0.1f);
+				AABB target = collisionTarget[targetName]->GetAABB();
+				target.min.z -= 0.3f;
+				target.min.x += 0.2f;
+				target.max.z += 0.5f;
+				target.max.z -= 0.2f;
+
 				// ターゲットとオブジェクトが貫通していたら実行
-				if (CollisionAABB(collisionTarget[targetName]->GetAABB(), terrainAABB))
+				if (CollisionAABB(target, terrainAABB))
 				{
-					Vector3 penetration = GetPenetrationDepth(collisionTarget[targetName]->GetAABB(), terrainAABB);
+					Vector3 penetration = GetPenetrationDepth(target, terrainAABB);
 					float minDepth = std::min(penetration.x, std::min(penetration.z, penetration.y));
 					if (minDepth == penetration.x)
 					{
@@ -202,10 +208,15 @@ const float CollisionManager::GetGroundDistance(const std::string& targetName) c
 			for (AABB terrainAABB : terrains)
 			{
 				terrainAABB = AddSize(terrainAABB, 0.1f);
+				AABB targetAABB = target->second->GetAABB();
+				targetAABB.min.z -= 0.3f;
+				targetAABB.min.x += 0.2f;
+				targetAABB.max.z += 0.5f;
+				targetAABB.max.z -= 0.2f;
 				// ターゲットとオブジェクトが貫通していたら実行
-				if (CollisionAABBXZ(target->second->GetAABB(), terrainAABB))
+				if (CollisionAABBXZ(targetAABB, terrainAABB))
 				{
-					float dist = target->second->GetAABB().min.y - terrainAABB.max.y;
+					float dist = targetAABB.min.y - terrainAABB.max.y;
 					distance = std::min(distance, dist);
 				}
 			}
