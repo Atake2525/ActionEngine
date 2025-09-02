@@ -43,7 +43,7 @@ public:
 	void Update(const std::string& targetName);
 
 	// 対象(Capsule)と障害物(AABB)の衝突量を求める
-	void UpdateCupsulCollision(const std::string& targetName);
+	//void UpdateCupsulCollision(const std::string& targetName);
 
 
 	void Finalize();
@@ -52,6 +52,9 @@ public:
 
 	// 対象と地面との距離を求める
 	const float GetGroundDistance(const std::string& targetName) const;
+
+	// 対象と地面との最大距離を求める
+	const float GetGroundMAXDistance(const std::string& targetName) const;
 
 	// 当たり判定の追加
 	//const bool& CheckCollision(const AABB& a, const AABB& b);
@@ -64,7 +67,9 @@ public:
 	void AddCollision(Object3d* object3d, const std::string key);
 
 	// 当たり判定を計算する対象の追加(念のため複数指定できるようにしておく)
-	void AddCollisionTarget(Object3d* target, const std::string key);
+	void AddCollisionTarget(AABB aabb, const std::string key);
+
+	void UpdateCollisionTarget(AABB aabb, const std::string key);
 
 	// 判定対象オブジェクトの削除
 	void DeleteCollision(const std::string key);
@@ -72,8 +77,8 @@ public:
 	// 判定対象の削除
 	void DeleteCollisionTarget(const std::string key);
 
-//private:
-	// 貫通量の計算(当たり判定)横
+	//private:
+		// 貫通量の計算(当たり判定)横
 	const Vector3 GetPenetrationDepth(const AABB& target, const AABB& object);
 
 	CollisionDirection GetVerticalCollisionDirection(const AABB& target, const AABB& object);
@@ -83,7 +88,7 @@ private:
 
 	std::map<std::string, Object3d*> collisionObject;
 
-	std::map<std::string, Object3d*> collisionTarget;
+	std::map<std::string, AABB> collisionTarget;
 
 	// 貫通量を示す変数
 	Vector3 penetration_;
