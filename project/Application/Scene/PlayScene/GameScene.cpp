@@ -28,15 +28,16 @@ void GameScene::Initialize() {
 	Transform pl = {
 		{1.0f, 1.0f, 1.0f},
 		{0.0f, 0.0f, 0.0f},
-		{0.0f, 0.01f, 0.0f}
+		{0.0f, 0.1f, 0.0f}
 	};
 	player_ = new Player();
 	player_->Initialize(camera, input, pl, true);
+	player_->SetClearDistance(50.0f);
 
 	land = new Object3d();
 	land->Initialize();
-	land->SetModel("Resources/Debug/gltf", "LandPlate.gltf", true);
-	//land->SetEnvironmentCoefficient(1.0f);
+	//land->SetModel("Resources/Debug/gltf", "LandPlate.gltf", true);
+	land->SetModel("Resources/Model/gltf/Stage/map01", "map01.gltf", true);
 
 	CollisionManager::GetInstance()->AddCollision(land, "land");
 
@@ -44,13 +45,15 @@ void GameScene::Initialize() {
 
 	LevelData levelData = JsonLoader::GetInstance()->LoadJsonTransform("Resources/Debug/json", "PlayerStartPoint.json");
 
+	goal_ = new Goal();
+	goal_->Initalize();
+
+	FadeManager::GetInstance()->FadeIn(1.0f);
 }
 
 void GameScene::Update() {
 
-	//ImGui::ShowDemoWindow();
 	cameraTransform = camera->GetTransform();
-	//sprite->Update();
 
 #ifdef _DEBUG
 	ImGui::Begin("State");
@@ -114,13 +117,23 @@ void GameScene::Update() {
 		Audio::GetInstance()->Play2D("bgm", { 0.0f, 0.0f }, false);
 	}
 
-	camera->SetTranslate(cameraTransform.translate);
-	camera->SetRotate(cameraTransform.rotate);
-	camera->Update();
 
 	SkyBox::GetInstance()->Update();
 
-	player_->Update();
+	if (isGoal_)
+	{
+		goal_->Update();
+	}
+	else
+	{
+		player_->Update();
+		if (player_->IsClear())
+		{
+			isGoal_ = true;
+			Audio::GetInstance()->Stop("bgm");
+		}
+		camera->Update();
+	}
 
 	land->Update();
 
@@ -130,19 +143,23 @@ void GameScene::Update() {
 
 void GameScene::Draw() {
 
-	SpriteBase::GetInstance()->ShaderDraw();
+		SpriteBase::GetInstance()->ShaderDraw();
 
 
-	Object3dBase::GetInstance()->ShaderDraw();
+		Object3dBase::GetInstance()->ShaderDraw();
 
-	land->Draw();
+		land->Draw();
 
-	SkinningObject3dBase::GetInstance()->ShaderDraw();
+		SkinningObject3dBase::GetInstance()->ShaderDraw();
 
-	player_->Draw();
+		player_->Draw();
 
-	SpriteBase::GetInstance()->ShaderDraw();
+		SpriteBase::GetInstance()->ShaderDraw();
 
+		if (isGoal_)
+		{
+			goal_->Draw();
+		}
 }
 
 void GameScene::Finalize() {
@@ -152,6 +169,8 @@ void GameScene::Finalize() {
 	delete player_;
 
 	delete land;
+
+	delete goal_;
 
 	CollisionManager::GetInstance()->DeleteCollision("land");
 
