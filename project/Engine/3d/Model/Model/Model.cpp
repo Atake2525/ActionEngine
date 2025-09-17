@@ -190,6 +190,11 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex)
 	{
 		aiMesh* mesh = scene->mMeshes[meshIndex];
+		std::string utf8 = mesh->mName.C_Str();
+		int len = MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), -1, nullptr, 0);
+		std::wstring wide(len, L'\0');
+		MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), -1, &wide[0], len);
+
 		//assert(mesh->HasNormals()); // 法線が無いMeshは今回は非対応
 		//assert(mesh->HasTextureCoords(0)); // TexcoordsがないMeshは今回は非対応
 		if (!mesh->HasNormals() || !mesh->HasTextureCoords(0))
