@@ -7,26 +7,26 @@
 Player::~Player()
 {
 	delete playerCollisionModel_;
-    delete playerModel_;
+	delete playerModel_;
 	CollisionManager::GetInstance()->DeleteCollisionTarget("player");
 }
 
 void Player::Initialize(Camera* camera, Input* input, const Transform startPoint, const bool DebugMode)
 {
-    debugMode_ = DebugMode;
-    this->camera = camera;
+	debugMode_ = DebugMode;
+	this->camera = camera;
 	fovY_ = this->camera->GetfovY();
-    //this->camera->SetTranslate({ 0.0f, 1.7f, 0.15f });
+	//this->camera->SetTranslate({ 0.0f, 1.7f, 0.15f });
 	this->input = input;
 	parent_ = !DebugMode;
 
-    playerTransform_ = startPoint;
+	playerTransform_ = startPoint;
 
 	moveVelocity_ = { 0.0f, 0.0f, 0.0f };
 
-    playerModel_ = new Object3d();
-    playerModel_->Initialize();
-    playerModel_->SetModel("Resources/Model/gltf/char", "onlyBodyIdle.gltf", true, true);
+	playerModel_ = new Object3d();
+	playerModel_->Initialize();
+	playerModel_->SetModel("Resources/Model/gltf/char", "onlyBodyIdle.gltf", true, true);
 	playerModel_->AddAnimation("Resources/Model/gltf/char", "walk.gltf", "walk");
 	playerModel_->AddAnimation("Resources/Model/gltf/char", "sneak.gltf", "sneak");
 	playerModel_->AddAnimation("Resources/Model/gltf/char", "dash.gltf", "dash");
@@ -34,8 +34,8 @@ void Player::Initialize(Camera* camera, Input* input, const Transform startPoint
 	playerModel_->AddAnimation("Resources/Model/gltf/char", "crouch.gltf", "crouch");
 	playerModel_->AddAnimation("Resources/Model/gltf/char", "walk_back.gltf", "backwalk");
 	playerModel_->AddAnimation("Resources/Model/gltf/char", "fall.gltf", "fall");
-    playerModel_->SetTransform(playerTransform_);
-    playerModel_->ToggleStartAnimation();
+	playerModel_->SetTransform(playerTransform_);
+	playerModel_->ToggleStartAnimation();
 
 	playerCollisionModel_ = new Object3d();
 	playerCollisionModel_->Initialize();
@@ -49,14 +49,15 @@ void Player::Initialize(Camera* camera, Input* input, const Transform startPoint
 	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "fall.gltf", "fall");
 	playerCollisionModel_->ToggleStartAnimation();
 
+	playerAABB_ = playerCollisionModel_->GetAABB();
 
-	CollisionManager::GetInstance()->AddCollisionTarget(playerCollisionModel_, "player");
+	CollisionManager::GetInstance()->AddCollisionTarget(playerAABB_, "player");
 }
 
 void Player::Update() {
 	cameraTransform = camera->GetTransform();
 	playerTransform_ = playerModel_->GetTransform();
-	CollisionManager::GetInstance()->Update("player");
+	playerAABB_ = playerModel_->GetAABB();
 	if (parent_)
 	{
 		// プレイヤーの回転からcameraOffsetを計算してparent
@@ -94,7 +95,7 @@ void Player::Update() {
 	playerCollisionModel_->SetAnimationSpeed(1.0f);
 	playerCollisionModel_->SetTransform(playerTransform_);
 	playerCollisionModel_->Update();
-    playerModel_->Update();
+	playerModel_->Update();
 
 	if (debugMode_)
 	{
@@ -136,7 +137,7 @@ void Player::Rotation() {
 
 }
 
-void Player::Move() 
+void Player::Move()
 {
 	// 無操作状態ならば何もしないので毎フレームIdle状態にする
 	moveType_ = PlayerMoveType::Idle;
@@ -158,8 +159,13 @@ void Player::Move()
 		camera->SetRotate({ cameraTransform.rotate.x, cameraTransform.rotate.y, 0.0f });
 	}
 
+
 	// 地面との高さを求めて落下処理を行う
 	float dist = CollisionManager::GetInstance()->GetGroundDistance("player");
+	if (dist < -0.2f)
+	{
+		dist = CollisionManager::GetInstance()->GetGroundMAXDistance("player");
+	}
 	if (dist > 0.0f && !wallDash_)
 	{
 		jump_ = true;
@@ -199,7 +205,7 @@ void Player::Move()
 		speed_.y -= fallAcceleration_;
 	}
 	speed_.y = std::clamp(speed_.y, fallLimit_, jumpAcceleration_);
-	
+
 	// 移動の最高速度をここに格納する
 	float maxSpeed_ = walkSpeed_ * speedLimit_;
 
@@ -314,13 +320,29 @@ void Player::Move()
 
 	// カメラの方向を調べて移動方向を決める
 	cameraTransform = camera->GetTransform();
-	// 上下斜めに移動はしないためrotate.xzは0.0fにする
-	cameraTransform.rotate.x = 0.0f;
-	cameraTransform.rotate.z = 0.0f;
-	// TransformNormalのために3次元アフィン変換行列を作成
-	Matrix4x4 matrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
-	// 回転行列を参照して移動ベクトルを正規化する
-	moveVelocity_ = TransformNormal(moveVelocity_, matrix);
+
+	// カメラのY軸回転角度のみを使用（上下の視点は完全に無視）
+	float cameraYRotation = cameraTransform.rotate.y;
+
+	// 前後左右の移動を水平面のみで直接計算
+	// 前後移動（Z軸）
+	Vector3 forward = {
+		sinf(cameraYRotation) * speed_.z,
+		0.0f,
+		cosf(cameraYRotation) * speed_.z
+	};
+
+	// 左右移動（X軸）
+	Vector3 right = {
+		cosf(cameraYRotation) * speed_.x,
+		0.0f,
+		-sinf(cameraYRotation) * speed_.x
+	};
+
+	// 水平移動と垂直移動を組み合わせる
+	moveVelocity_.x = forward.x + right.x;
+	moveVelocity_.y = speed_.y;  // ジャンプ・落下はそのまま
+	moveVelocity_.z = forward.z + right.z;
 
 
 	if (penetrationAmount.y < 0.0f)
@@ -340,10 +362,17 @@ void Player::Move()
 	}
 	// プレイヤーの移動量を今のプレイヤーの位置に加算する
 	playerTransform_.translate += moveVelocity_;
+	playerAABB_ += moveVelocity_;
+	CollisionManager::GetInstance()->UpdateCollisionTarget(playerAABB_, "player");
+	CollisionManager::GetInstance()->Update("player");
+	penetrationAmount = CollisionManager::GetInstance()->GetPenetration();
 	// オブジェクトに衝突している時のために貫通量を引く
 	playerTransform_.translate -= penetrationAmount;
-	// プレイヤーの回転をカメラの正面を向くように変える
-	playerTransform_.rotate = cameraTransform.rotate;
+	// プレイヤーの回転をカメラの正面を向くように変える（Y軸回転のみ）
+	playerTransform_.rotate.y = cameraTransform.rotate.y;
+	// X軸（上下の視点）とZ軸（ロール）は0に固定
+	playerTransform_.rotate.x = 0.0f;
+	playerTransform_.rotate.z = 0.0f;
 
 	if (penetrationAmount.x != 0.0f || penetrationAmount.z != 0.0f)
 	{
@@ -476,21 +505,34 @@ void Player::DebugUpdate()
 	if (cameraMove_)
 	{
 		float speed = 0.4f;
-		Vector3 velocity(0.0f, 0.0f, speed);
-		velocity = TransformNormal(velocity, camera->GetWorldMatrix());
+		// カメラのY軸回転角度のみを使用
+		float cameraYRotation = transform.rotate.y;
+
+		// 前後移動（水平面のみ）
+		Vector3 forward = {
+			sinf(cameraYRotation) * speed,
+			0.0f,
+			cosf(cameraYRotation) * speed
+		};
+
+		// 左右移動（水平面のみ）
+		Vector3 right = {
+			cosf(cameraYRotation) * speed,
+			0.0f,
+			-sinf(cameraYRotation) * speed
+		};
+
 		if (input->PushKey(DIK_W)) {
-			transform.translate += velocity;
+			transform.translate += forward;
 		}
 		if (input->PushKey(DIK_S)) {
-			transform.translate -= velocity;
+			transform.translate -= forward;
 		}
-		velocity = { speed, 0.0f, 0.0f };
-		velocity = TransformNormal(velocity, camera->GetWorldMatrix());
 		if (input->PushKey(DIK_A)) {
-			transform.translate -= velocity;
+			transform.translate -= right;
 		}
 		if (input->PushKey(DIK_D)) {
-			transform.translate += velocity;
+			transform.translate += right;
 		}
 		if (input->PushKey(DIK_SPACE)) {
 			transform.translate.y += speed;

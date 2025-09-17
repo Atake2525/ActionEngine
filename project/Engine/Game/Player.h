@@ -43,6 +43,7 @@ private: // メンバ変数宣言
 
     Object3d* playerCollisionModel_ = nullptr;
 
+    AABB playerAABB_;
 
 private: // ステータス(移動系)宣言
     Transform playerTransform_;
@@ -57,7 +58,7 @@ private: // ステータス(移動系)宣言
     float flyAcceleration_ = 0.03f; // 慣性(ジャンプ中)
 
     // 各アニメーションの速度倍率
-    float walkSpeed_ = 0.031f; 
+    float walkSpeed_ = 0.031f;
     float backwalkSpeed_ = 0.031f;
     float sneakSpeed_ = 0.032f;
     float dashSpeed_ = 0.1f;
@@ -98,9 +99,9 @@ private: // ステータス関係の関数宣言
     void Rotation();
 
     void Move();
-    
+
     void Sneak();
-     
+
 private:
     void DebugUpdate();
 };
