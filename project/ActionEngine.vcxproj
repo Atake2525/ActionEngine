@@ -64,7 +64,7 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)\Engine\JsonLoader;$(ProjectDir)\Engine\Game;$(ProjectDir)\Application\Scene\PlayScene;$(ProjectDir)\Application\Scene\Manager;$(ProjectDir)\Engine\BlackBox\Log;$(ProjectDir)\Engine\BlackBox;$(ProjectDir)\Engine\BlackBox\ImGui;$(ProjectDir)\Engine\3d\SkyBox;$(ProjectDir)\Engine\3d\Object\Skinning;$(ProjectDir)\Engine\BlackBox\Animation;$(ProjectDir)\Engine\UI;$(ProjectDir)\Engine\Lighting;$(ProjectDir)externels\assimp\include;$(ProjectDir)\Engine\LoadManager\ParticleManager;$(ProjectDir)\Engine\LoadManager\TextureManager;$(ProjectDir)\Engine\LoadManager\ModelManager;$(ProjectDir)\Engine\Core\WinApp;$(ProjectDir)\Engine\Core\Input;$(ProjectDir)\Engine\Core\SrvManager;$(ProjectDir)\Engine\Core\BaseEngine;$(ProjectDir)\Engine\Collision;$(ProjectDir)\Engine\BlackBox\ImGui;$(ProjectDir)\Engine\BlackBox\Log;$(ProjectDir)\Engine\BlackBox\LeakChecker;$(ProjectDir)\Engine\Audio;$(ProjectDir)\Engine\2d\SpriteBase;$(ProjectDir)\Engine\2d\Sprite;$(ProjectDir)\Engine\Math;$(ProjectDir)\Engine\3d\Object\WireFrame;$(ProjectDir)\Engine\3d\Object\Object3dBase;$(ProjectDir)\Engine\3d\Object\Object3d;$(ProjectDir)\Engine\3d\Model\ModelBase;$(ProjectDir)\Engine\3d\Model\Model;$(ProjectDir)\Engine\3d\Camera;$(ProjectDir)\Application\Scene;$(ProjectDir)\Application\FrameWork;$(ProjectDir)\Application;$(ProjectDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\Engine\Presentation\Cinematic;$(ProjectDir)\Engine\JsonLoader;$(ProjectDir)\Engine\Game;$(ProjectDir)\Application\Scene\PlayScene;$(ProjectDir)\Application\Scene\Manager;$(ProjectDir)\Engine\BlackBox\Log;$(ProjectDir)\Engine\BlackBox;$(ProjectDir)\Engine\BlackBox\ImGui;$(ProjectDir)\Engine\3d\SkyBox;$(ProjectDir)\Engine\3d\Object\Skinning;$(ProjectDir)\Engine\BlackBox\Animation;$(ProjectDir)\Engine\UI;$(ProjectDir)\Engine\Lighting;$(ProjectDir)externels\assimp\include;$(ProjectDir)\Engine\LoadManager\ParticleManager;$(ProjectDir)\Engine\LoadManager\TextureManager;$(ProjectDir)\Engine\LoadManager\ModelManager;$(ProjectDir)\Engine\Core\WinApp;$(ProjectDir)\Engine\Core\Input;$(ProjectDir)\Engine\Core\SrvManager;$(ProjectDir)\Engine\Core\BaseEngine;$(ProjectDir)\Engine\Collision;$(ProjectDir)\Engine\BlackBox\LeakChecker;$(ProjectDir)\Engine\Audio;$(ProjectDir)\Engine\2d\SpriteBase;$(ProjectDir)\Engine\2d\Sprite;$(ProjectDir)\Engine\Math;$(ProjectDir)\Engine\3d\Object\WireFrame;$(ProjectDir)\Engine\3d\Object\Object3dBase;$(ProjectDir)\Engine\3d\Object\Object3d;$(ProjectDir)\Engine\3d\Model\ModelBase;$(ProjectDir)\Engine\3d\Model\Model;$(ProjectDir)\Engine\3d\Camera;$(ProjectDir)\Application\Scene;$(ProjectDir)\Application\FrameWork;$(ProjectDir)\Application;$(ProjectDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -156,6 +156,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\3d\SkyBox\SkyBox.cpp" />
     <ClCompile Include="Engine\JsonLoader\JsonLoader.cpp" />
     <ClCompile Include="Application\Scene\PlayScene\TestScene.cpp" />
+    <ClCompile Include="Engine\Presentation\Cinematic\FadeManager.cpp" />
+    <ClCompile Include="Engine\Game\Goal.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Scene\Manager\AbstractSceneFactory.h" />
@@ -219,6 +221,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Game\Player.h" />
     <ClInclude Include="Engine\3d\SkyBox\SkyBox.h" />
     <ClInclude Include="Application\Scene\PlayScene\TestScene.h" />
+    <ClInclude Include="Engine\Presentation\Cinematic\FadeManager.h" />
+    <ClInclude Include="Engine\Game\Goal.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externels\imgui\LICENSE.txt" />

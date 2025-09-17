@@ -11,7 +11,7 @@ void TitleScene::Initialize() {
 
 	camera = new Camera();
 	camera->SetRotate(Vector3(SwapRadian(10.0f), 0.0f, 0.0f));
-	camera->SetTranslate({ 0.0f, 2.8f, -8.0f });
+	camera->SetTranslate({ 0.0f, 2.8f, -4.4f });
 
 	TextureManager::GetInstance()->LoadTexture("Resources/rostock_laage_airport_4k.dds");
 
@@ -33,26 +33,23 @@ void TitleScene::Initialize() {
 
 	stageModel = new Object3d();
 	stageModel->Initialize();
-	stageModel->SetModel("Resources/Debug/gltf", "LandPlate.gltf", true);
+	stageModel->SetModel("Resources/Model/gltf/Stage/map01", "map01.gltf", true);
 
 	startUI = new UI();
 	startUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f), float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) - 64.0f * 3.0f }, Origin::Center, "Resources/Sprite/UI/start.png");
 	startUI->function = [this]() {
-		Audio::GetInstance()->Play("enter");
 		start = true;
 	};
 
 	playUI = new UI();
 	playUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f) + 128.0f, float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) }, Origin::Center, "Resources/Sprite/UI/play.png");
 	playUI->function = []() {
-		Audio::GetInstance()->Play("enter");
 		SceneManager::GetInstance()->SetNextScene("GAMESCENE");
 	};
 
 	settingUI = new UI();
 	settingUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f) + 128.0f, float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) + 72.0f }, Origin::Center, "Resources/Sprite/UI/setting.png");
 	settingUI->function = [this]() {
-		Audio::GetInstance()->Play("enter");
 	};
 
 	exitUI = new UI();
@@ -65,13 +62,12 @@ void TitleScene::Initialize() {
 	creditUI->CreateButton({ 64.0f + 16.0f, float(WinApp::GetInstance()->GetkClientHeight() - 24.0f - 16.0f) }, Origin::Center, "Resources/Sprite/UI/credit.png");
 	creditUI->function = [this]() {
 		showCredit = !showCredit;
-		Audio::GetInstance()->Play("enter");
 	};
 
 	uiFrame = new Sprite();
 	uiFrame->Initialize("Resources/Sprite/UI/uiFrame.png");
 	uiFrame->SetAnchorPoint({ 0.5f, 0.5f });
-	uiFrame->SetPosition({playUI->GetTransform().translate.x, playUI->GetTransform().translate.y });
+	uiFrame->SetPosition({ startUI->GetTransform().translate.x, startUI->GetTransform().translate.y });
 
 	gamePad = new Sprite();
 	gamePad->Initialize("Resources/Sprite/UI/gamepad.png");
@@ -92,7 +88,7 @@ void TitleScene::Initialize() {
 	Audio::GetInstance()->LoadMP3("Resources/sound/enter.mp3", "enter", 1.0f);
 	Audio::GetInstance()->LoadMP3("Resources/sound/Experimenta_Model_short.mp3", "bgm", 0.2f);
 
-	//Audio::GetInstance()->Play("bgm", true);
+	Audio::GetInstance()->Play("bgm", true);
 
 	Audio::GetInstance()->SetMasterVolume(0.2f);
 }
@@ -205,12 +201,13 @@ void TitleScene::Update() {
 			uiFrame->SetPosition({ position.x, position.y });
 		}
 		
-		if (input->TriggerKey(DIK_RETURN) || input->TriggerKey(DIK_SPACE))
+		if (input->TriggerKey(DIK_RETURN) || input->TriggerKey(DIK_SPACE) || input->TriggerButton(Controller::A))
 		{
+			Audio::GetInstance()->Play("enter");
 			switch (select)
 			{
 			case TitleScene::Select::Play:
-				playUI->TriggerFunction();
+				FadeManager::GetInstance()->FadeOut(1.0f);
 				break;
 			case TitleScene::Select::Setting:
 				settingUI->TriggerFunction();
@@ -223,29 +220,49 @@ void TitleScene::Update() {
 				break;
 			}
 		}
-		if (playUI->OnButton())
+
+		if (FadeManager::GetInstance()->CompleteFade())
 		{
 			playUI->TriggerFunction();
 		}
-		else if (settingUI->OnButton())
+
+		if (playUI->TriggerOnButton())
+		{
+			FadeManager::GetInstance()->FadeOut(1.0f);
+			Audio::GetInstance()->Play("enter");
+		}
+		else if (settingUI->TriggerOnButton())
 		{
 			settingUI->TriggerFunction();
+			Audio::GetInstance()->Play("enter");
 		}
-		else if (exitUI->OnButton())
+		else if (exitUI->TriggerOnButton())
 		{
 			exitUI->TriggerFunction();
+			Audio::GetInstance()->Play("enter");
 		}
-		else if (creditUI->OnButton())
+		else if (creditUI->TriggerOnButton())
 		{
 			creditUI->TriggerFunction();
+			Audio::GetInstance()->Play("enter");
+		}
+
+		if (playUI->GetButtonOn())
+		{
+			if (FadeManager::GetInstance()->CompleteFade())
+			{
+				playUI->TriggerFunction();
+			}
 		}
 
 	}
 	else
 	{
-		if (startUI->OnButton())
+		if (startUI->TriggerOnButton() || input->TriggerKey(DIK_RETURN) || input->TriggerKey(DIK_SPACE) || input->TriggerButton(Controller::A))
 		{
 			startUI->TriggerFunction();
+			Audio::GetInstance()->Play("enter");
+			uiFrame->SetPosition({ playUI->GetTransform().translate.x, playUI->GetTransform().translate.y });
 		}
 	}
 
@@ -282,6 +299,8 @@ void TitleScene::Update() {
 	input->Update();
 
 	selectPre = select;
+
+	
 }
 
 void TitleScene::Draw() {
@@ -346,7 +365,12 @@ void TitleScene::Draw() {
 		SpriteBase::GetInstance()->ShaderDraw();
 
 		startUI->Draw();
+		
 	}
+
+	SpriteBase::GetInstance()->ShaderDraw();
+	uiFrame->Draw();
+	//SceneFadeManager::GetInstance()->Draw();
 
 }
 
