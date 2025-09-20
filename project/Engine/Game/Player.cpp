@@ -149,8 +149,8 @@ void Player::Move()
 	{
 		wallDash_ = true;
 		jump_ = false;
-		moveVelocity_.y = -0.04f;
-		speed_.y = -0.04f;
+		moveVelocity_.y = wallDashAcceleration_;
+		speed_.y = wallDashAcceleration_;
 	}
 	else if (wallDash_)
 	{

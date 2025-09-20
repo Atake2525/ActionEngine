@@ -15,7 +15,7 @@ void GameScene::Initialize() {
 	SkyBox::GetInstance()->SetTexture("Resources/rostock_laage_airport_4k.dds");
 
 	input = Input::GetInstance();
-	input->ShowMouseCursor(true);
+	input->ShowMouseCursor(false);
 
 	ParticleManager::GetInstance()->SetCamera(camera);
 
