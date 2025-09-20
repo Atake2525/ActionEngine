@@ -56,6 +56,7 @@ private: // ステータス(移動系)宣言
 
     float translateAcceleration_ = 0.04f; // 慣性(接地状態)
     float flyAcceleration_ = 0.03f; // 慣性(ジャンプ中)
+    float wallDashAcceleration_ = -0.04f; // 壁走り中の落下速度(固定)
 
     // 各アニメーションの速度倍率
     float walkSpeed_ = 0.031f;
