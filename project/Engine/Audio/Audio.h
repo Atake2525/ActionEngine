@@ -119,6 +119,7 @@ private:
 	// audio test
 	Microsoft::WRL::ComPtr<IXAudio2> xAudio2;
 	IXAudio2MasteringVoice* masterVoice = nullptr;
+	float masterVolume = 1.0f;
 
 	std::vector<AudioList> audioList;
 
