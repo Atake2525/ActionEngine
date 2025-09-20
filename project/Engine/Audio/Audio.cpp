@@ -2,6 +2,7 @@
 #include <cassert>
 #include <algorithm>
 #include "Logger.h"
+#include "WinApp.h"
 
 #include "externels/imgui/imgui.h"
 #include "externels/imgui/imgui_impl_dx12.h"
@@ -589,6 +590,17 @@ void Audio::Update() {
 		index++;
 	}
 	frameTime++;
+
+#ifdef _DEBUG
+	ImGui::Begin("Audio");
+	ImGui::SetWindowPos(ImVec2{ 0.0f, 18.0f * 4 });
+	ImGui::SetWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) - 18.0f * 2 });
+	ImGui::SliderFloat("MasterVolume", &masterVolume, 0.0f, 1.0f);
+	ImGui::End();
+
+	masterVoice->SetVolume(masterVolume);
+
+#endif // _DEBUG
 }
 
 // 音声データ解放
