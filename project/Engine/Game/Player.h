@@ -41,39 +41,14 @@ private: // メンバ変数宣言
 
     Object3d* playerModel_ = nullptr;
 
-    Object3d* playerCollisionModel_ = nullptr;
-
     AABB playerAABB_;
 
 private: // ステータス(移動系)宣言
     Transform playerTransform_;
-    PlayerMoveType moveType_ = PlayerMoveType::Idle;
-    PlayerMoveType moveTypePre_ = PlayerMoveType::Idle;
-
+    
     Vector3 moveVelocity_;
-    Vector3 speed_ = { 0.0f, 0.0f, 0.0f }; // 移動速度
-    float speedLimit_ = 2.5f; // 移動速度限界
 
-    float translateAcceleration_ = 0.04f; // 慣性(接地状態)
-    float flyAcceleration_ = 0.03f; // 慣性(ジャンプ中)
-    float wallDashAcceleration_ = -0.04f; // 壁走り中の落下速度(固定)
-
-    // 各アニメーションの速度倍率
-    float walkSpeed_ = 0.031f;
-    float backwalkSpeed_ = 0.031f;
-    float sneakSpeed_ = 0.032f;
-    float dashSpeed_ = 0.1f;
-
-    float easingTime = 0.0f;
-
-    bool jump_ = false;
-
-    bool wallDash_ = false;
-
-    float jumpAcceleration_ = 0.24f; // ジャンプの移動量
-    float fallLimit_ = -2.4f; // 落下速度上限
-
-    float fallAcceleration_ = 0.008f; // 落下の加速度
+    float translateSpeed_ = 0.0f; // 
 
 private: // ステータス(カメラ系)宣言
     Transform cameraTransform;
