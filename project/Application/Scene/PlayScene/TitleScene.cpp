@@ -95,7 +95,7 @@ void TitleScene::Initialize() {
 
 void TitleScene::Update() {
 
-	if (start)
+	if (start && !FadeManager::GetInstance()->IsFade())
 	{
 		Vector3 position;
 
