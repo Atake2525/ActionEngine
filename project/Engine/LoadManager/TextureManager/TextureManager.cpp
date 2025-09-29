@@ -26,8 +26,7 @@ void TextureManager::Finalize() {
 	instance = nullptr;
 }
 
-void TextureManager::Initialize(DirectXBase* directxBase) {
-	directxBase_ = directxBase;
+void TextureManager::Initialize() {
 	// SRVの数と同数
 	textureDatas.reserve(SrvManager::GetInstance()->kMaxSRVCount);
 }
@@ -92,9 +91,9 @@ void TextureManager::LoadTexture(const std::string& filePath) {
 		// テクスチャデータをtextureDatasの末尾に追加する
 		textureData.filePath = filePath;
 		textureData.metadata = mipImages.GetMetadata();
-		textureData.resource = directxBase_->CreateTextureResource(textureData.metadata);
+		textureData.resource = DirectXBase::GetInstance()->CreateTextureResource(textureData.metadata);
 
-		textureData.intermediateResource = directxBase_->UploadTextureData(textureData.resource, mipImages);
+		textureData.intermediateResource = DirectXBase::GetInstance()->UploadTextureData(textureData.resource, mipImages);
 	}
 	else
 	{
@@ -102,9 +101,9 @@ void TextureManager::LoadTexture(const std::string& filePath) {
 		// テクスチャデータをtextureDatasの末尾に追加する
 		textureData.filePath = filePath;
 		textureData.metadata = image.GetMetadata();
-		textureData.resource = directxBase_->CreateTextureResource(textureData.metadata);
+		textureData.resource = DirectXBase::GetInstance()->CreateTextureResource(textureData.metadata);
 
-		textureData.intermediateResource = directxBase_->UploadTextureData(textureData.resource, image);
+		textureData.intermediateResource = DirectXBase::GetInstance()->UploadTextureData(textureData.resource, image);
 	}
 
 	// テクスチャデータを追加
