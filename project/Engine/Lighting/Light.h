@@ -37,7 +37,6 @@ struct SpotLight {
 	float padding2;
 };
 
-class DirectXBase;
 
 class Light {
 	// シングルトンパターンを適用
@@ -62,7 +61,7 @@ public:
 	/// </summary>
 	void Finalize();
 
-	void Initialize(DirectXBase* directxBase);
+	void Initialize();
 
 	void Update();
 
@@ -87,8 +86,6 @@ private:
 	PointLight* pointLightData = nullptr;
 
 	SpotLight* spotLightData = nullptr;
-
-	DirectXBase* directxBase_ = nullptr;
 
 public:
 	/// ↓----- Getter -----↓ ///

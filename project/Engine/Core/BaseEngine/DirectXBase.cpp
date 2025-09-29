@@ -14,6 +14,24 @@ using namespace Microsoft::WRL;
 using namespace Logger;
 using namespace StringUtility;
 
+DirectXBase* DirectXBase::instance = nullptr;
+
+DirectXBase* DirectXBase::GetInstance() {
+	if (instance == nullptr) {
+		instance = new DirectXBase;
+	}
+	return instance;
+}
+
+void DirectXBase::Finalize() {
+	CloseHandle(fenceEvent);
+	delete offscreen;
+
+	delete instance;
+	instance = nullptr;
+}
+
+
 ComPtr<ID3D12Resource> DirectXBase::CreateDepthStencilTextureResource(Microsoft::WRL::ComPtr<ID3D12Device> device, int32_t width, int32_t height) {
 	// 生成するResouceの設定
 	D3D12_RESOURCE_DESC resourceDesc{};
@@ -191,7 +209,7 @@ void DirectXBase::Initialize() {
 
 void DirectXBase::InitializePosteffect() {
 	offscreen = new OffScreenRnedering();
-	offscreen->Initialize(this);
+	offscreen->Initialize();
 
 	Vector4 col = offscreen->GetRenderTargetClearValue();
 	// 指定した色で画面全体をクリアする
@@ -661,12 +679,6 @@ void DirectXBase::UpdateFixFPS() {
 	reference_ = std::chrono::steady_clock::now();
 }
 
-// 終了処理
-void DirectXBase::Finalize() {
-	CloseHandle(fenceEvent);
-	delete offscreen;
-}
-
 D3D12_CPU_DESCRIPTOR_HANDLE DirectXBase::GetCPUDescriptorHandle(const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& descriptorHeap, uint32_t descriptorSize, uint32_t index) {
 	D3D12_CPU_DESCRIPTOR_HANDLE handleCPU = descriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	handleCPU.ptr += (descriptorSize * index);
@@ -677,4 +689,12 @@ D3D12_GPU_DESCRIPTOR_HANDLE DirectXBase::GetGPUDescriptorHandle(const Microsoft:
 	D3D12_GPU_DESCRIPTOR_HANDLE handleGPU = descriptorHeap->GetGPUDescriptorHandleForHeapStart();
 	handleGPU.ptr += (descriptorSize * index);
 	return handleGPU;
+}
+
+float DirectXBase::GetDeltaTime() {
+	static auto lastTime = std::chrono::high_resolution_clock::now();
+	auto currentTime = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<float> delta = currentTime - lastTime;
+	lastTime = currentTime;
+	return delta.count(); // 秒単位の float
 }

@@ -9,38 +9,37 @@ void MyGame::Initialize() {
 	WinApp::GetInstance()->Initialize(1920, 1080, WindowMode::FullScreen, L"Engine");
 	//WinApp::GetInstance()->Initialize();
 
-	directxBase = new DirectXBase();
-	directxBase->Initialize();
+	DirectXBase::GetInstance()->Initialize();
 
-	SrvManager::GetInstance()->Initialize(directxBase);
+	SrvManager::GetInstance()->Initialize();
 
-	directxBase->InitializePosteffect();
+	DirectXBase::GetInstance()->InitializePosteffect();
 
-	ImGuiManager::GetInstance()->Initialize(directxBase);
+	ImGuiManager::GetInstance()->Initialize();
 
-	SpriteBase::GetInstance()->Initialize(directxBase);
+	SpriteBase::GetInstance()->Initialize();
 
-	Object3dBase::GetInstance()->Initialize(directxBase);
+	Object3dBase::GetInstance()->Initialize();
 
-	SkinningObject3dBase::GetInstance()->Initialize(directxBase);
+	SkinningObject3dBase::GetInstance()->Initialize();
 
-	WireFrameObjectBase::GetInstance()->Initialize(directxBase);
+	WireFrameObjectBase::GetInstance()->Initialize();
 
-	SkyBox::GetInstance()->Initialize(directxBase);
+	SkyBox::GetInstance()->Initialize();
 
-	ModelBase::GetInstance()->Initialize(directxBase);
+	ModelBase::GetInstance()->Initialize();
 
-	TextureManager::GetInstance()->Initialize(directxBase);
+	TextureManager::GetInstance()->Initialize();
 
-	ModelManager::GetInstance()->Initialize(directxBase);
+	ModelManager::GetInstance()->Initialize();
 
-	ParticleManager::GetInstance()->Initialize(directxBase);
+	ParticleManager::GetInstance()->Initialize();
 
 	CollisionManager::GetInstance()->Initialize();
 
 	JsonLoader::GetInstance()->Initialize();
 
-	Light::GetInstance()->Initialize(directxBase);
+	Light::GetInstance()->Initialize();
 
 	Input::GetInstance()->Initialize();
 
@@ -70,7 +69,7 @@ void MyGame::Update() {
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
-	directxBase->Update();
+	DirectXBase::GetInstance()->Update();
 	Light::GetInstance()->Update();
 	SceneManager::GetInstance()->Update();
 	ParticleManager::GetInstance()->Update();
@@ -89,30 +88,29 @@ void MyGame::Draw() {
 	// ImGuiの内部コマンドを生成する
 	ImGui::Render();
 
-	directxBase->PreDrawRenderTexture();
+	DirectXBase::GetInstance()->PreDrawRenderTexture();
 
 	SkyBox::GetInstance()->Draw();
 	SceneManager::GetInstance()->Draw();
 	FadeManager::GetInstance()->Draw();
 
-	directxBase->PostDrawRenderTexture();
+	DirectXBase::GetInstance()->PostDrawRenderTexture();
 
-	directxBase->PreDraw();
+	DirectXBase::GetInstance()->PreDraw();
 
 	ParticleManager::GetInstance()->Draw();
 
 	// 実際のcommandListのImGuiの描画コマンドを積む
-	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), directxBase->GetCommandList().Get());
+	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), DirectXBase::GetInstance()->GetCommandList().Get());
 
-	directxBase->PostDraw();
+	DirectXBase::GetInstance()->PostDraw();
 }
 
 void MyGame::Finalize() {
 
 	WinApp::GetInstance()->Finalize();
 
-	directxBase->Finalize();
-	delete directxBase;
+	DirectXBase::GetInstance()->Finalize();
 
 	SrvManager::GetInstance()->Finalize();
 
