@@ -26,9 +26,8 @@ void ImGuiManager::Finalize()
 	ImGui::DestroyContext();
 }
 
-void ImGuiManager::Initialize(DirectXBase* directxBase)
+void ImGuiManager::Initialize()
 {
-	directxBase_ = directxBase;
 
 	uint32_t srvIndex = SrvManager::GetInstance()->Allocate();
 
@@ -44,7 +43,7 @@ void ImGuiManager::Initialize(DirectXBase* directxBase)
 	ImGui::StyleColorsDark();
 	ImGui_ImplWin32_Init(WinApp::GetInstance()->GetHwnd());
 	ImGui_ImplDX12_Init(
-		directxBase_->GetDevice().Get(), directxBase_->GetSwapChainDesc().BufferCount, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, SrvManager::GetInstance()->GetDescriptorHeap().Get(), SrvManager::GetInstance()->GetCPUDescriptorHandle(srvIndex),
+		DirectXBase::GetInstance()->GetDevice().Get(), DirectXBase::GetInstance()->GetSwapChainDesc().BufferCount, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, SrvManager::GetInstance()->GetDescriptorHeap().Get(), SrvManager::GetInstance()->GetCPUDescriptorHandle(srvIndex),
 		SrvManager::GetInstance()->GetGPUDescriptorHandle(srvIndex));
 	
 	// 日本語化

@@ -59,8 +59,6 @@ private:
 
 #pragma region 基盤システム
 
-	DirectXBase* directxBase = nullptr;
-
 	bool finished = false;
 
 	//BaseScene* gameScene = nullptr;

@@ -5,8 +5,6 @@
 #include <vector>
 #include <unordered_map>
 
-class DirectXBase;
-
 #pragma once
 class TextureManager {
 private:
@@ -31,7 +29,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(DirectXBase* directxBase);
+	void Initialize();
 
 	/// <summary>
 	/// テクスチャファイルの読み込み
@@ -78,7 +76,5 @@ private:
 
 	// SRVインデックスの開始番号
 	static uint32_t kSRVIndexTop;
-
-	DirectXBase* directxBase_ = nullptr;
 
 };

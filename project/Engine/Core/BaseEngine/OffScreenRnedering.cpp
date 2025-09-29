@@ -12,11 +12,10 @@ using namespace Microsoft::WRL;
 using namespace Logger;
 
 
-void OffScreenRnedering::Initialize(DirectXBase* directxBase) {
-	directxBase_ = directxBase;
+void OffScreenRnedering::Initialize() {
 	CreateGraphicsPipeLineState();
 
-	renderTextureResource = directxBase->CreateRenderTextureResource(directxBase_->GetDevice(), WinApp::GetInstance()->GetkClientWidth(), WinApp::GetInstance()->GetkClientHeight(), DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, renderTargetClearValue);
+	renderTextureResource = DirectXBase::GetInstance()->CreateRenderTextureResource(DirectXBase::GetInstance()->GetDevice(), WinApp::GetInstance()->GetkClientWidth(), WinApp::GetInstance()->GetkClientHeight(), DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, renderTargetClearValue);
 
 	// SRVの設定。FormatはResourceと同じにしておく
 	D3D12_SHADER_RESOURCE_VIEW_DESC renderTextureSrvDesc{};
@@ -38,24 +37,24 @@ void OffScreenRnedering::Initialize(DirectXBase* directxBase) {
 
 	SrvManager::GetInstance()->CreateSRVforTexture2D(srvIndex, renderTextureResource, metadata, D3D12_SRV_DIMENSION_TEXTURE2D);
 
-	grayscaleResouce = directxBase_->CreateBufferResource(sizeof(Grayscale));
+	grayscaleResouce = DirectXBase::GetInstance()->CreateBufferResource(sizeof(Grayscale));
 	grayscaleResouce->Map(0, nullptr, reinterpret_cast<void**>(&grayscale));
 	grayscale->enableGrayscale = false;
 	grayscale->toneColor = { 1.0f, 73.0f / 107.0f, 43.0f / 107.0f };
 	grayscale->alpah = 1.0f;
 
-	vignetteResource = directxBase_->CreateBufferResource(sizeof(Vignette));
+	vignetteResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(Vignette));
 	vignetteResource->Map(0, nullptr, reinterpret_cast<void**>(&vignette));
 	vignette->enableVignette = false;
 	vignette->intensity = 16.0f;
 	vignette->scale = 0.8f;
 
-	boxFilterResource = directxBase_->CreateBufferResource(sizeof(BoxFilter));
+	boxFilterResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(BoxFilter));
 	boxFilterResource->Map(0, nullptr, reinterpret_cast<void**>(&boxFilter));
 	boxFilter->enableBoxFilter = false;
 	boxFilter->size = 5;
 
-	gaussianFilterResource = directxBase_->CreateBufferResource(sizeof(GaussianFilter));
+	gaussianFilterResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(GaussianFilter));
 	gaussianFilterResource->Map(0, nullptr, reinterpret_cast<void**>(&gaussianFilter));
 	gaussianFilter->enableGaussianFilter = false;
 	gaussianFilter->sigma = 2.0f;
@@ -153,7 +152,7 @@ void OffScreenRnedering::CreateRootSignature() {
 		assert(false);
 	}
 	// バイナリをもとに作成
-	hr = directxBase_->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
+	hr = DirectXBase::GetInstance()->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
 	assert(SUCCEEDED(hr));
 	// InputLayout
 	inputElementDescs[0].SemanticName = "POSITION";
@@ -184,9 +183,9 @@ void OffScreenRnedering::CreateRootSignature() {
 	// 三角形の中を塗りつぶす
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 	// Shaderをコンパイルする
-	vertexShaderBlob = directxBase_->CompileShader(L"Resources/shaders/Fullscreen.VS.hlsl", L"vs_6_0");
+	vertexShaderBlob = DirectXBase::GetInstance()->CompileShader(L"Resources/shaders/Fullscreen.VS.hlsl", L"vs_6_0");
 	assert(vertexShaderBlob != nullptr);
-	pixelShaderBlob = directxBase_->CompileShader(L"Resources/shaders/GaussianFilter.PS.hlsl", L"ps_6_0");
+	pixelShaderBlob = DirectXBase::GetInstance()->CompileShader(L"Resources/shaders/GaussianFilter.PS.hlsl", L"ps_6_0");
 	assert(pixelShaderBlob != nullptr);
 
 	// DepthStencilStateの設定
@@ -219,27 +218,27 @@ void OffScreenRnedering::CreateGraphicsPipeLineState() {
 	graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc;
 	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	// 実際に生成
-	HRESULT hr = directxBase_->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPilelineState));
+	HRESULT hr = DirectXBase::GetInstance()->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPilelineState));
 	assert(SUCCEEDED(hr));
 }
 
 void OffScreenRnedering::Draw() {
 
 	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-	directxBase_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
+	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
 	// PSOを設定
-	directxBase_->GetCommandList()->SetPipelineState(graphicsPilelineState.Get());
+	DirectXBase::GetInstance()->GetCommandList()->SetPipelineState(graphicsPilelineState.Get());
 	// grayscale
-	directxBase_->GetCommandList()->SetGraphicsRootConstantBufferView(2, grayscaleResouce->GetGPUVirtualAddress());
+	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(2, grayscaleResouce->GetGPUVirtualAddress());
 	// vignetting
-	directxBase_->GetCommandList()->SetGraphicsRootConstantBufferView(3, vignetteResource->GetGPUVirtualAddress());
+	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(3, vignetteResource->GetGPUVirtualAddress());
 	// boxFilter
-	directxBase_->GetCommandList()->SetGraphicsRootConstantBufferView(4, boxFilterResource->GetGPUVirtualAddress());
+	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(4, boxFilterResource->GetGPUVirtualAddress());
 	// gaussianFilter
-	directxBase_->GetCommandList()->SetGraphicsRootConstantBufferView(5, gaussianFilterResource->GetGPUVirtualAddress());
+	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(5, gaussianFilterResource->GetGPUVirtualAddress());
 	// srvGPUHandleの設定
 	SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(1, srvIndex);
 	//directxBase_->GetCommandList()->SetGraphicsRootDescriptorTable(1, srvGPUHandle);
 	// Draw call
-	directxBase_->GetCommandList()->DrawInstanced(3, 1, 0, 0);
+	DirectXBase::GetInstance()->GetCommandList()->DrawInstanced(3, 1, 0, 0);
 }

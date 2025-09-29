@@ -3,6 +3,7 @@
 #include "ImGuiManager.h"
 #include "CollisionManager.h"
 #include "WinApp.h"
+#include "DirectXBase.h"
 
 Player::~Player()
 {
@@ -51,10 +52,6 @@ void Player::Update() {
 
 		Vector3	camOffset = cameraOffset_;
 
-		if (moveType_ == PlayerMoveType::Dash)
-		{
-			camOffset.z += 0.04f;
-		}
 		// 一時的にrotate.xを格納しておく(上下の計算をしないため)
 		float rotx = playerTransform_.rotate.x;
 		playerTransform_.rotate.x = 0.0f;
@@ -125,7 +122,10 @@ void Player::Rotation() {
 
 void Player::Move()
 {
-	
+	if (input->PushKey(DIK_W))
+	{
+		playerTransform_.translate += camera->GetDirection() * translateSpeed_ * DirectXBase::GetInstance()->GetDeltaTime();
+	}
 }
 
 void Player::Sneak()
@@ -138,33 +138,23 @@ void Player::DebugUpdate()
 	ImGui::Begin("Animation");
 	ImGui::SetWindowPos(ImVec2{ 0.0f, 18.0f * 3.0f });
 	ImGui::SetWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) - 18.0f * 3.0f });
-	if (ImGui::Button("Idle"))
-	{
-		moveType_ = PlayerMoveType::Idle;
-	}
-	if (ImGui::Button("Walk"))
-	{
-		moveType_ = PlayerMoveType::Walk;
-	}
-	if (ImGui::Button("Sneak"))
-	{
-		moveType_ = PlayerMoveType::Sneak;
-	}
-	if (ImGui::Button("Dash"))
-	{
-		moveType_ = PlayerMoveType::Dash;
-	}
 	ImGui::Checkbox("カメラ移動", &cameraMove_);
 	ImGui::Checkbox("カメラ追従", &parent_);
 	ImGui::DragFloat3("カメラオフセット", &cameraOffset_.x, 0.1f);
-	ImGui::DragFloat3("移動量", &speed_.x);
+	//ImGui::DragFloat3("移動量", &speed_.x);
 	ImGui::DragFloat3("MoveVelocity", &moveVelocity_.x, 0.1f);
 	ImGui::DragFloat3("Translate", &playerTransform_.translate.x, 0.1f);
 	ImGui::DragFloat3("Rotate", &playerTransform_.rotate.x, 0.1f);
 	ImGui::DragFloat3("Scale", &playerTransform_.scale.x, 0.1f);
-	ImGui::DragFloat("最大落下速度", &fallLimit_, 0.1f);
-	ImGui::DragFloat("ジャンプ量", &jumpAcceleration_, 0.1f);
-	ImGui::DragFloat("落下量", &fallAcceleration_, 0.1f);
+	static auto lastTime = std::chrono::high_resolution_clock::now();
+	auto currentTime = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<float> delta = currentTime - lastTime;
+	lastTime = currentTime;
+	float time = delta.count();
+	ImGui::DragFloat("DeltaTime", &time, 0.1f);
+	//ImGui::DragFloat("最大落下速度", &fallLimit_, 0.1f);
+	//ImGui::DragFloat("ジャンプ量", &jumpAcceleration_, 0.1f);
+	//ImGui::DragFloat("落下量", &fallAcceleration_, 0.1f);
 	ImGui::DragFloat("視野角", &normalFovY_, 0.01f);
 	ImGui::DragFloat("視野角の上昇値", &fovYBoost_, 0.01f);
 	float dist = CollisionManager::GetInstance()->GetGroundDistance("player");

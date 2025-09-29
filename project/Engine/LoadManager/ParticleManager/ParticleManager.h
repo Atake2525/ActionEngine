@@ -14,7 +14,6 @@
 
 #pragma once
 
-class DirectXBase;
 class Camera;
 
 struct Particle {
@@ -117,7 +116,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(DirectXBase* directxBase);
+	void Initialize();
 
 	ModelData LoadModelFile(const std::string& directoryPath, const std::string& filename);
 
@@ -171,7 +170,6 @@ private:
 
 
 private:
-	DirectXBase* directxBase_ = nullptr;
 
 	std::mt19937 randomEngine;
 

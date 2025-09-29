@@ -16,7 +16,29 @@
 #include "OffScreenRnedering.h"
 
 class DirectXBase {
+private:
+	// シングルトンパターンを適用
+	static DirectXBase* instance;
+
+	// コンストラクタ、デストラクタの隠蔽
+	DirectXBase() = default;
+	~DirectXBase() = default;
+	// コピーコンストラクタ、コピー代入演算子の封印
+	DirectXBase(DirectXBase&) = delete;
+	DirectXBase& operator=(DirectXBase&) = delete;
+
 public:
+
+	/// <summary>
+	/// シングルトンインスタンスの取得
+	/// </summary>
+	/// <returns>Input* instance</returns>
+	static DirectXBase* GetInstance();
+
+	/// <summary>
+	/// 終了
+	/// </summary>
+	void Finalize();
 
 	void Update();
 	/// <summary>
@@ -25,6 +47,8 @@ public:
 	void Initialize();
 
 	void InitializePosteffect();
+
+	float GetDeltaTime();
 
 	// 描画前処理
 	void PreDraw();
@@ -37,10 +61,6 @@ public:
 
 	// 描画後処理
 	void PostDrawRenderTexture();
-
-
-	// 終了処理
-	void Finalize();
 
 	const DXGI_SWAP_CHAIN_DESC1 GetSwapChainDesc() const { return swapChainDesc; }
 

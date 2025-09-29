@@ -5,8 +5,6 @@
 #include <dxcapi.h>
 #include "Model.h"
 
-
-class DirectXBase;
 class Camera;
 
 struct SkyBoXData
@@ -42,7 +40,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(DirectXBase* directxBase);
+	void Initialize();
 
 	void SetTexture(const std::string& filePath);
 
@@ -69,9 +67,6 @@ private:
 	void CreateGraphicsPipeLineState();
 
 private:
-
-	DirectXBase* directxBase_ = nullptr;
-
 
 	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
