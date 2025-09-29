@@ -146,13 +146,22 @@ void Object3d::Update() {
 
 	Vector3 worldPos = { worldMatrix.m[3][0], worldMatrix.m[3][1], worldMatrix.m[3][2] };
 
-	aabb.min = first.min + worldPos;
-	aabb.max = first.max + worldPos;
+	aabb.min = (first.min + worldPos) * transform.scale;
+	aabb.max = (first.max + worldPos) * transform.scale;
 
+	Vector3 halfSize = { (aabb.max.x - aabb.min.x) / 2.0f, (aabb.max.y - aabb.min.y) / 2.0f, (aabb.max.z - aabb.min.z) / 2.0f };
+
+	obb = CreateOBB(worldMatrix, halfSize);
+
+	multiMeshOBB.clear();
 	for (size_t index = 0; index < multiMeshAABB.size(); index++)
 	{
-		multiMeshAABB[index].min = firstMultiMeshAABB[index].min + worldPos;
-		multiMeshAABB[index].max = firstMultiMeshAABB[index].max + worldPos;
+		multiMeshAABB[index].min = (firstMultiMeshAABB[index].min + worldPos) * transform.scale;
+		multiMeshAABB[index].max = (firstMultiMeshAABB[index].max + worldPos) * transform.scale;
+
+		Vector3 multiHalfSize = { (multiMeshAABB[index].max.x - multiMeshAABB[index].min.x) / 2.0f, (multiMeshAABB[index].max.y - multiMeshAABB[index].min.y) / 2.0f, (multiMeshAABB[index].max.z - multiMeshAABB[index].min.z) / 2.0f };
+
+		multiMeshOBB.push_back(CreateOBB(worldMatrix, multiHalfSize, CenterAABB(multiMeshAABB[index])));
 	}
 
 
