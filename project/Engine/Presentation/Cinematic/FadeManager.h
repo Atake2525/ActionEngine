@@ -31,6 +31,7 @@ public:
 	void Initialize(const Vector3 color = {1.0f, 1.0f, 1.0f});
 
 	const bool& CompleteFade() const { return completeFade_; }
+	const bool& IsFade() const { return fade_; }
 
 	void Update();
 
