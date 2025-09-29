@@ -28,7 +28,15 @@ void TestScene::Initialize() {
 	grid->Initialize();
 	grid->SetModel("Resources/Debug", "Grid.obj");
 
+	box1 = std::make_unique<Object3d>();
+	box1->Initialize();
+	box1->SetModel("Resources/Debug/gltf", "hunmer.gltf", true);
+	box1->SetTranslate({ 5.0f, 0.0f, 5.0f });
 
+	box2 = std::make_unique<Object3d>();
+	box2->Initialize();
+	box2->SetModel("Resources/Debug/gltf", "Box.gltf", true);
+	box2->SetTranslate({ 0.0f, 0.0f, 5.0f });
 }
 
 void TestScene::Update() {
@@ -44,6 +52,44 @@ void TestScene::Update() {
 
 	SkyBox::GetInstance()->Update();
 
+	Transform t = box1->GetTransform();
+	AABB aabb = box1->GetAABB();
+	ImGui::Begin("Box");
+	ImGui::DragFloat3("Translate", &t.translate.x, 0.1f);
+	ImGui::DragFloat3("Scale", &t.scale.x, 0.1f);
+	ImGui::DragFloat3("Rotate", &t.rotate.x, SwapRadian(1.0f));
+	ImGui::DragFloat3("MIN", &aabb.min.x, 0.0f);
+	ImGui::DragFloat3("MAX", &aabb.max.x, 0.0f);
+	ImGui::End();
+
+	box1->SetTransform(t);
+	box1->Update();
+	box2->Update();
+
+	bool flag = false;
+
+	for (const OBB obb : box1->GetMultiMeshOBB())
+	{
+		if (CheckOBBCollision(obb, box2->GetOBB()))
+		{
+			flag = true;
+		}
+	}
+
+	//if (CheckOBBCollision(box1->GetOBB(), box2->GetOBB()))
+	//{
+	//	flag = true;
+	//}
+
+	if (flag)
+	{
+		box1->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
+	}
+	else
+	{
+		box1->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+	}
+
 	input->Update();
 }
 
@@ -53,6 +99,9 @@ void TestScene::Draw() {
 
 
 	Object3dBase::GetInstance()->ShaderDraw();
+
+	box1->Draw();
+	box2->Draw();
 
 	SkinningObject3dBase::GetInstance()->ShaderDraw();
 
