@@ -1,3 +1,4 @@
+#define NOMINMAX
 #include "Model.h"
 #include "ModelBase.h"
 #include "DirectXBase.h"
@@ -29,7 +30,7 @@ void Model::Initialize(std::string directoryPath, std::string filename, bool ena
 		Animation anim = LoadAnimationFile(directoryPath, filename);
 		animation["DefaultAnimation"] = anim;
 	}
-
+	CreateAABB();
 	// 頂点Resourceの作成
 	CreateVertexResource();
 
@@ -42,23 +43,25 @@ void Model::Initialize(std::string directoryPath, std::string filename, bool ena
 	materialTemplateData.resize(modelData.materialTemplate.size());
 	materialTemplateResource.resize(modelData.materialTemplate.size());
 	// VertexResourceにデータを書き込むためのアドレスを取得してvertexDataに割り当てる
-	for (uint32_t i = 0; i < modelData.matVertexData.size(); i++)
+	int num = 0;
+	for (const auto& matData : modelData.matVertexData)
 	{
-		vertexResource.at(i)->Map(0, nullptr, reinterpret_cast<void**>(&vertexData[i]));
-		std::memcpy(vertexData[i], modelData.matVertexData.at(i).vertices.data(), sizeof(VertexData) * modelData.matVertexData.at(i).vertices.size()); // 頂点データをリソースにコピー
+		vertexResource.at(num)->Map(0, nullptr, reinterpret_cast<void**>(&vertexData[num]));
+		std::memcpy(vertexData[num], matData.second.vertices.data(), sizeof(VertexData) * matData.second.vertices.size()); // 頂点データをリソースにコピー
 
-		indexResource.at(i) = ModelBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(uint32_t) * modelData.matVertexData.at(i).indices.size());
+		indexResource.at(num) = ModelBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(uint32_t) * matData.second.indices.size());
 
-		indexBufferView.at(i).BufferLocation = indexResource.at(i)->GetGPUVirtualAddress();
-		indexBufferView.at(i).SizeInBytes = UINT(sizeof(uint32_t) * modelData.matVertexData.at(i).indices.size());
-		indexBufferView.at(i).Format = DXGI_FORMAT_R32_UINT;
+		indexBufferView.at(num).BufferLocation = indexResource.at(num)->GetGPUVirtualAddress();
+		indexBufferView.at(num).SizeInBytes = UINT(sizeof(uint32_t) * matData.second.indices.size());
+		indexBufferView.at(num).Format = DXGI_FORMAT_R32_UINT;
 
-		indexResource.at(i)->Map(0, nullptr, reinterpret_cast<void**>(&mappedIndex));
-		std::memcpy(mappedIndex, modelData.matVertexData.at(i).indices.data(), sizeof(uint32_t) * modelData.matVertexData.at(i).indices.size());
+		indexResource.at(num)->Map(0, nullptr, reinterpret_cast<void**>(&mappedIndex));
+		std::memcpy(mappedIndex, matData.second.indices.data(), sizeof(uint32_t) * matData.second.indices.size());
 
-		materialTemplateResource.at(modelData.matVertexData[i].materialIndex) = ModelBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(MaterialTemplate) * modelData.materialTemplate.size());
-		materialTemplateResource.at(modelData.matVertexData[i].materialIndex)->Map(0, nullptr, reinterpret_cast<void**>(&materialTemplateData[modelData.matVertexData[i].materialIndex]));
-		std::memcpy(materialTemplateData[modelData.matVertexData[i].materialIndex], &modelData.materialTemplate.at(modelData.matVertexData[i].materialIndex), sizeof(MaterialTemplate) * modelData.materialTemplate.size());
+		materialTemplateResource.at(matData.second.materialIndex) = ModelBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(MaterialTemplate) * modelData.materialTemplate.size());
+		materialTemplateResource.at(matData.second.materialIndex)->Map(0, nullptr, reinterpret_cast<void**>(&materialTemplateData[matData.second.materialIndex]));
+		std::memcpy(materialTemplateData[matData.second.materialIndex], &modelData.materialTemplate.at(matData.second.materialIndex), sizeof(MaterialTemplate) * modelData.materialTemplate.size());
+		num++;
 	}
 
 	CreateMaterialResouce();
@@ -89,10 +92,11 @@ void Model::Draw() {
 
 	// wvp用のCBufferの場所を設定
 	ModelBase::GetInstance()->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
-	
-	for (uint32_t index = 0; index < modelData.matVertexData.size(); index++)
+
+	int index = 0;
+	for (const auto& matData : modelData.matVertexData)
 	{
-		ModelBase::GetInstance()->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(8, materialTemplateResource[modelData.matVertexData[index].materialIndex]->GetGPUVirtualAddress());
+		ModelBase::GetInstance()->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(8, materialTemplateResource[matData.second.materialIndex]->GetGPUVirtualAddress());
 		if (isAnimation)
 		{
 			ModelBase::GetInstance()->GetDxBase()->GetCommandList()->SetGraphicsRootDescriptorTable(9, skinCluster[index].paletteSrvHandle.second);
@@ -112,12 +116,13 @@ void Model::Draw() {
 		}
 		else
 		{
-			SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(2, modelData.material[modelData.matVertexData[index].materialIndex].textureIndex);
+			SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(2, modelData.material[matData.second.materialIndex].textureIndex);
 		}
 		SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(7, SkyBox::GetInstance()->GetSrvIndex());
 
+		ModelBase::GetInstance()->GetDxBase()->GetCommandList()->DrawIndexedInstanced(UINT(matData.second.indices.size()), 1, 0, 0, 0);
 
-		ModelBase::GetInstance()->GetDxBase()->GetCommandList()->DrawIndexedInstanced(UINT(modelData.matVertexData.at(index).indices.size()), 1, 0, 0, 0);
+		index++;
 	}
 
 }
@@ -185,15 +190,18 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 	// ↑パスが間違ってる可能性(大)
 
 	// マルチマテリアル対応のためにメモリを保管しておく
-	modelData.matVertexData.resize(scene->mNumMeshes);
+	//modelData.matVertexData.resize(scene->mNumMeshes);
 
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex)
 	{
 		aiMesh* mesh = scene->mMeshes[meshIndex];
+
+		// メッシュ名を取得(日本語に対応させるために変換)
 		std::string utf8 = mesh->mName.C_Str();
 		int len = MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), -1, nullptr, 0);
-		std::wstring wide(len, L'\0');
-		MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), -1, &wide[0], len);
+		std::wstring meshName(len, L'\0');
+		MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), -1, &meshName[0], len);
+		modelData.matVertexData[meshName];
 
 		//assert(mesh->HasNormals()); // 法線が無いMeshは今回は非対応
 		//assert(mesh->HasTextureCoords(0)); // TexcoordsがないMeshは今回は非対応
@@ -205,8 +213,8 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 		}
 
 		modelData.vertices.resize(mesh->mNumVertices); // 最初に頂点数分のメモリを保管しておく
-		modelData.matVertexData[meshIndex].vertices.resize(mesh->mNumVertices); // マルチマテリアルでもメモリ保管
-		modelData.matVertexData[meshIndex].materialIndex = mesh->mMaterialIndex;
+		modelData.matVertexData[meshName].vertices.resize(mesh->mNumVertices); // マルチマテリアルでもメモリ保管
+		modelData.matVertexData[meshName].materialIndex = mesh->mMaterialIndex;
 		for (uint32_t vertexIndex = 0; vertexIndex < mesh->mNumVertices; ++vertexIndex)
 		{
 			aiVector3D& position = mesh->mVertices[vertexIndex];
@@ -216,9 +224,9 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 			modelData.vertices[vertexIndex].position = { -position.x, position.y, position.z, 1.0f };
 			modelData.vertices[vertexIndex].normal = { -normal.x, normal.y, normal.z };
 			modelData.vertices[vertexIndex].texcoord = { texcoord.x, texcoord.y };
-			modelData.matVertexData[meshIndex].vertices[vertexIndex].position = { -position.x, position.y, position.z, 1.0f };
-			modelData.matVertexData[meshIndex].vertices[vertexIndex].normal = { -normal.x, normal.y, normal.z };
-			modelData.matVertexData[meshIndex].vertices[vertexIndex].texcoord = { texcoord.x, texcoord.y };
+			modelData.matVertexData[meshName].vertices[vertexIndex].position = { -position.x, position.y, position.z, 1.0f };
+			modelData.matVertexData[meshName].vertices[vertexIndex].normal = { -normal.x, normal.y, normal.z };
+			modelData.matVertexData[meshName].vertices[vertexIndex].texcoord = { texcoord.x, texcoord.y };
 		}
 		// Indexの解析
 		for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; ++faceIndex)
@@ -236,7 +244,7 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 			{
 				uint32_t vertexIndex = face.mIndices[element];
 				modelData.indices.push_back(vertexIndex);
-				modelData.matVertexData[meshIndex].indices.push_back(vertexIndex);
+				modelData.matVertexData[meshName].indices.push_back(vertexIndex);
 			}
 		}
 
@@ -262,7 +270,7 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 				jointWeightData.vertexWeights.push_back({ bone->mWeights[weightIndex].mWeight , bone->mWeights[weightIndex].mVertexId });
 			}
 			modelData.skinClusterData[JointName] = jointWeightData;
-			modelData.matVertexData[meshIndex].skinClusterData[JointName] = jointWeightData;
+			modelData.matVertexData[meshName].skinClusterData[JointName] = jointWeightData;
 		}
 	}
 	// テクスチャが無い場合white1x1を張るようにする
@@ -440,10 +448,18 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 		return modelData;
 	}
 
-	modelData.matVertexData.resize(scene->mNumMeshes + 1);
+	//modelData.matVertexData.resize(scene->mNumMeshes + 1);
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex)
 	{
 		aiMesh* mesh = scene->mMeshes[meshIndex];
+
+		// メッシュ名を取得(日本語に対応させるために変換)
+		std::string utf8 = mesh->mName.C_Str();
+		int len = MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), -1, nullptr, 0);
+		std::wstring meshName(len, L'\0');
+		MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), -1, &meshName[0], len);
+		modelData.matVertexData[meshName];
+
 		//assert(mesh->HasNormals()); // 法線が無いMeshは今回は非対応
 		//assert(mesh->HasTextureCoords(0)); // TexcoordsがないMeshは今回は非対応
 		if (!mesh->HasNormals() || !mesh->HasTextureCoords(0))
@@ -454,14 +470,15 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 		}
 
 		modelData.vertices.resize(mesh->mNumVertices); // 最初に頂点数分のメモリを保管しておく
-		modelData.matVertexData[meshIndex].vertices.resize(mesh->mNumVertices); // マルチマテリアルでもメモリ保管
+		modelData.matVertexData[meshName].vertices.resize(mesh->mNumVertices); // マルチマテリアルでもメモリ保管
+
 		if (mesh->mMaterialIndex != 0)
 		{
-			modelData.matVertexData[meshIndex].materialIndex = mesh->mMaterialIndex - 1;
+			modelData.matVertexData[meshName].materialIndex = mesh->mMaterialIndex - 1;
 		}
 		else
 		{
-			modelData.matVertexData[meshIndex].materialIndex = mesh->mMaterialIndex;
+			modelData.matVertexData[meshName].materialIndex = mesh->mMaterialIndex;
 		}
 		for (uint32_t vertexIndex = 0; vertexIndex < mesh->mNumVertices; ++vertexIndex)
 		{
@@ -472,9 +489,9 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 			modelData.vertices[vertexIndex].position = { -position.x, position.y, position.z, 1.0f };
 			modelData.vertices[vertexIndex].normal = { -normal.x, normal.y, normal.z };
 			modelData.vertices[vertexIndex].texcoord = { texcoord.x, texcoord.y };
-			modelData.matVertexData[meshIndex].vertices[vertexIndex].position = { -position.x, position.y, position.z, 1.0f };
-			modelData.matVertexData[meshIndex].vertices[vertexIndex].normal = { -normal.x, normal.y, normal.z };
-			modelData.matVertexData[meshIndex].vertices[vertexIndex].texcoord = { texcoord.x, texcoord.y };
+			modelData.matVertexData[meshName].vertices[vertexIndex].position = { -position.x, position.y, position.z, 1.0f };
+			modelData.matVertexData[meshName].vertices[vertexIndex].normal = { -normal.x, normal.y, normal.z };
+			modelData.matVertexData[meshName].vertices[vertexIndex].texcoord = { texcoord.x, texcoord.y };
 		}
 		// Indexの解析
 		for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; faceIndex++)
@@ -492,7 +509,7 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 			{
 				uint32_t vertexIndex = face.mIndices[element];
 				modelData.indices.push_back(vertexIndex);
-				modelData.matVertexData[meshIndex].indices.push_back(vertexIndex);
+				modelData.matVertexData[meshName].indices.push_back(vertexIndex);
 			}
 		}
 
@@ -570,11 +587,13 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 		}
 	}
 
-	for (size_t i = 0; i < modelData.matVertexData.size(); i++)
+
+
+	for (const auto& matData : modelData.matVertexData)
 	{
-		if (modelData.matVertexData.at(i).vertices.empty())
+		if (matData.second.vertices.empty())
 		{
-			modelData.matVertexData.erase(modelData.matVertexData.begin() + i);
+			modelData.matVertexData.erase(matData.first);
 		}
 	}
 	modelData.rootNode = ReadNode(scene->mRootNode);
@@ -583,27 +602,68 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 
 void Model::CreateVertexResource() {
 	vertexResource.resize(modelData.matVertexData.size());
-	for (uint32_t i = 0; i < modelData.matVertexData.size(); i++)
+	int index = 0;
+	for (const auto& matData : modelData.matVertexData)
 	{
 		// 頂点リソースの作成
-		vertexResource.at(i) = ModelBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(VertexData) * modelData.matVertexData.at(i).vertices.size());
+		vertexResource.at(index) = ModelBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(VertexData) * matData.second.vertices.size());
+		index++;
 	}
 }
 
 void Model::CreateVertexBufferView() {
 	vertexBufferView[0].resize(modelData.matVertexData.size());
-	for (uint32_t i = 0; i < modelData.matVertexData.size(); i++)
+	int index = 0;
+	for (const auto& matData : modelData.matVertexData)
 	{
-		// 頂点バッファビューを作成する
-		D3D12_VERTEX_BUFFER_VIEW vBv;
-		vBv.BufferLocation = vertexResource.at(i)->GetGPUVirtualAddress();
-		vBv.SizeInBytes = UINT(sizeof(VertexData) * modelData.matVertexData.at(i).vertices.size());
-		vBv.StrideInBytes = sizeof(VertexData);
-
-		vertexBufferView[0][i] = vBv;
+		vertexBufferView[0][index].BufferLocation = vertexResource.at(index)->GetGPUVirtualAddress();
+		vertexBufferView[0][index].SizeInBytes = UINT(sizeof(VertexData) * matData.second.vertices.size());
+		vertexBufferView[0][index].StrideInBytes = sizeof(VertexData);
+		index++;
 	}
 }
 
 void Model::CreateMaterialResouce() {
 	materialResource = ModelBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(Material));
+}
+
+void Model::CreateAABB() {
+	meshAABB.min.x = modelData.vertices[0].position.x;
+	meshAABB.min.y = modelData.vertices[0].position.y;
+	meshAABB.min.z = modelData.vertices[0].position.z;
+	meshAABB.max.x = modelData.vertices[0].position.x;
+	meshAABB.max.y = modelData.vertices[0].position.y;
+	meshAABB.max.z = modelData.vertices[0].position.z;
+
+	for (const auto matVData : modelData.matVertexData)
+	{
+		AABB firstMultimesh;
+		firstMultimesh.min.x = matVData.second.vertices[0].position.x;
+		firstMultimesh.min.y = matVData.second.vertices[0].position.y;
+		firstMultimesh.min.z = matVData.second.vertices[0].position.z;
+		firstMultimesh.max.x = matVData.second.vertices[0].position.x;
+		firstMultimesh.max.y = matVData.second.vertices[0].position.y;
+		firstMultimesh.max.z = matVData.second.vertices[0].position.z;
+
+		for (VertexData vertices : matVData.second.vertices)
+		{
+			firstMultimesh.min.x = std::min(firstMultimesh.min.x, vertices.position.x);
+			firstMultimesh.min.y = std::min(firstMultimesh.min.y, vertices.position.y);
+			firstMultimesh.min.z = std::min(firstMultimesh.min.z, vertices.position.z);
+
+			firstMultimesh.max.x = std::max(firstMultimesh.max.x, vertices.position.x);
+			firstMultimesh.max.y = std::max(firstMultimesh.max.y, vertices.position.y);
+			firstMultimesh.max.z = std::max(firstMultimesh.max.z, vertices.position.z);
+		}
+
+		meshAABB.min.x = std::min(meshAABB.min.x, firstMultimesh.min.x);
+		meshAABB.min.y = std::min(meshAABB.min.y, firstMultimesh.min.y);
+		meshAABB.min.z = std::min(meshAABB.min.z, firstMultimesh.min.z);
+
+		meshAABB.max.x = std::max(meshAABB.max.x, firstMultimesh.max.x);
+		meshAABB.max.y = std::max(meshAABB.max.y, firstMultimesh.max.y);
+		meshAABB.max.z = std::max(meshAABB.max.z, firstMultimesh.max.z);
+
+		multiMeshAABB[matVData.first] = firstMultimesh;
+	}
 }

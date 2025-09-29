@@ -195,7 +195,13 @@ void Object3d::CreateCameraResource() {
 void Object3d::SetModel(const std::string& filePath) {
 	// モデルを検索してセットする
 	model_ = ModelManager::GetInstance()->FindModel(filePath);
-	CreateAABB();
+	first = model_->GetMeshAABB();
+	auto multimeshAABBData = model_->GetMultiMeshAABB();
+	multiMeshAABB.resize(model_->GetMultiMeshAABB().size());
+	for (const auto data : multimeshAABBData)
+	{
+		firstMultiMeshAABB.push_back(data.second);
+	}
 	CreateCapsule();
 	if (model_->IsAnimation())
 	{
@@ -236,7 +242,13 @@ void Object3d::SetModel(const std::string& directoryPath, const std::string& fil
 
 	// モデルを検索してセットする
 	model_ = ModelManager::GetInstance()->FindModel(filename);
-	CreateAABB();
+	first = model_->GetMeshAABB();
+	auto multimeshAABBData = model_->GetMultiMeshAABB();
+	multiMeshAABB.resize(model_->GetMultiMeshAABB().size());
+	for (const auto data : multimeshAABBData)
+	{
+		firstMultiMeshAABB.push_back(data.second);
+	}
 	CreateCapsule();
 	if (model_->IsAnimation())
 	{
@@ -340,96 +352,6 @@ const float& Object3d::GetShininess() const {
 
 void Object3d::SetShininess(const float& shininess) {
 	model_->SetShininess(shininess);
-}
-
-void Object3d::CreateAABB() {
-	const ModelData modelData = model_->GetModelData();
-
-	first.min.x = modelData.vertices[0].position.x;
-	first.min.y = modelData.vertices[0].position.y;
-	first.min.z = modelData.vertices[0].position.z;
-	first.max.x = modelData.vertices[0].position.x;
-	first.max.y = modelData.vertices[0].position.y;
-	first.max.z = modelData.vertices[0].position.z;
-	
-	for (size_t index = 0; index < modelData.matVertexData.size(); ++index)
-	{
-		AABB firstMultimesh;
-		firstMultimesh.min.x = modelData.matVertexData[index].vertices[0].position.x;
-		firstMultimesh.min.y = modelData.matVertexData[index].vertices[0].position.y;
-		firstMultimesh.min.z = modelData.matVertexData[index].vertices[0].position.z;
-		firstMultimesh.max.x = modelData.matVertexData[index].vertices[0].position.x;
-		firstMultimesh.max.y = modelData.matVertexData[index].vertices[0].position.y;
-		firstMultimesh.max.z = modelData.matVertexData[index].vertices[0].position.z;
-
-		for (VertexData vertices : modelData.matVertexData[index].vertices)
-		{
-			firstMultimesh.min.x = std::min(firstMultimesh.min.x, vertices.position.x);
-			firstMultimesh.min.y = std::min(firstMultimesh.min.y, vertices.position.y);
-			firstMultimesh.min.z = std::min(firstMultimesh.min.z, vertices.position.z);
-
-			firstMultimesh.max.x = std::max(firstMultimesh.max.x, vertices.position.x);
-			firstMultimesh.max.y = std::max(firstMultimesh.max.y, vertices.position.y);
-			firstMultimesh.max.z = std::max(firstMultimesh.max.z, vertices.position.z);
-		}
-
-		first.min.x = std::min(first.min.x, firstMultimesh.min.x);
-		first.min.y = std::min(first.min.y, firstMultimesh.min.y);
-		first.min.z = std::min(first.min.z, firstMultimesh.min.z);
-
-		first.max.x = std::max(first.max.x, firstMultimesh.max.x);
-		first.max.y = std::max(first.max.y, firstMultimesh.max.y);
-		first.max.z = std::max(first.max.z, firstMultimesh.max.z);
-
-		firstMultiMeshAABB.push_back(firstMultimesh);
-		multiMeshAABB.resize(firstMultiMeshAABB.size());
-	}
-
-}
-
-void Object3d::ReCreateAABB() {
-	const ModelData modelData = model_->GetModelData();
-	firstMultiMeshAABB.clear();
-
-	first.min.x = modelData.vertices[0].position.x;
-	first.min.y = modelData.vertices[0].position.y;
-	first.min.z = modelData.vertices[0].position.z;
-	first.max.x = modelData.vertices[0].position.x;
-	first.max.y = modelData.vertices[0].position.y;
-	first.max.z = modelData.vertices[0].position.z;
-
-	for (size_t index = 0; index < modelData.matVertexData.size(); ++index)
-	{
-		AABB firstMultimesh;
-		firstMultimesh.min.x = modelData.matVertexData[index].vertices[0].position.x;
-		firstMultimesh.min.y = modelData.matVertexData[index].vertices[0].position.y;
-		firstMultimesh.min.z = modelData.matVertexData[index].vertices[0].position.z;
-		firstMultimesh.max.x = modelData.matVertexData[index].vertices[0].position.x;
-		firstMultimesh.max.y = modelData.matVertexData[index].vertices[0].position.y;
-		firstMultimesh.max.z = modelData.matVertexData[index].vertices[0].position.z;
-		for (VertexData vertices : modelData.matVertexData[index].vertices)
-		{
-			firstMultimesh.min.x = std::min(firstMultimesh.min.x, vertices.position.x);
-			firstMultimesh.min.y = std::min(firstMultimesh.min.y, vertices.position.y);
-			firstMultimesh.min.z = std::min(firstMultimesh.min.z, vertices.position.z);
-
-			firstMultimesh.max.x = std::max(firstMultimesh.max.x, vertices.position.x);
-			firstMultimesh.max.y = std::max(firstMultimesh.max.y, vertices.position.y);
-			firstMultimesh.max.z = std::max(firstMultimesh.max.z, vertices.position.z);
-		}
-
-		// モデル全体のAABBを作成
-		first.min.x = std::min(first.min.x, firstMultimesh.min.x);
-		first.min.y = std::min(first.min.y, firstMultimesh.min.y);
-		first.min.z = std::min(first.min.z, firstMultimesh.min.z);
-
-		first.max.x = std::max(first.max.x, firstMultimesh.max.x);
-		first.max.y = std::max(first.max.y, firstMultimesh.max.y);
-		first.max.z = std::max(first.max.z, firstMultimesh.max.z);
-
-		firstMultiMeshAABB.push_back(firstMultimesh);
-		multiMeshAABB.resize(firstMultiMeshAABB.size());
-	}
 }
 
 void Object3d::CreateCapsule(){
@@ -685,20 +607,21 @@ std::vector<SkinCluster> Object3d::CreateSkinCluster(const Skeleton& skeleton, c
 	std::vector<SkinCluster> skinCluster;
 	skinCluster.resize(modelData.matVertexData.size());
 
-	for (int i = 0; i < modelData.matVertexData.size(); i++)
+	int index = 0;
+	for (const auto& matVData : modelData.matVertexData)
 	{
 		// palette用のResourceを確保
-		skinCluster[i].paletteResource = Object3dBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(WellForGPU) * skeleton.joints.size());
+		skinCluster[index].paletteResource = Object3dBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(WellForGPU) * skeleton.joints.size());
 		WellForGPU* mappedPalette = nullptr;
-		skinCluster[i].paletteResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedPalette));
-		skinCluster[i].mappedPalette = { mappedPalette, skeleton.joints.size() }; // spanを使ってアクセスするようにする
+		skinCluster[index].paletteResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedPalette));
+		skinCluster[index].mappedPalette = { mappedPalette, skeleton.joints.size() }; // spanを使ってアクセスするようにする
 
 		uint32_t srvIndex = SrvManager::GetInstance()->Allocate();
 
 		assert(SrvManager::GetInstance()->CheckAllocate());
 
-		skinCluster[i].paletteSrvHandle.first = SrvManager::GetInstance()->GetCPUDescriptorHandle(srvIndex);
-		skinCluster[i].paletteSrvHandle.second = SrvManager::GetInstance()->GetGPUDescriptorHandle(srvIndex);
+		skinCluster[index].paletteSrvHandle.first = SrvManager::GetInstance()->GetCPUDescriptorHandle(srvIndex);
+		skinCluster[index].paletteSrvHandle.second = SrvManager::GetInstance()->GetGPUDescriptorHandle(srvIndex);
 
 		// palette用のsrvを作成
 		D3D12_SHADER_RESOURCE_VIEW_DESC paletteSrvDesc{};
@@ -709,25 +632,25 @@ std::vector<SkinCluster> Object3d::CreateSkinCluster(const Skeleton& skeleton, c
 		paletteSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 		paletteSrvDesc.Buffer.NumElements = UINT(skeleton.joints.size());
 		paletteSrvDesc.Buffer.StructureByteStride = sizeof(WellForGPU);
-		Object3dBase::GetInstance()->GetDxBase()->GetDevice()->CreateShaderResourceView(skinCluster[i].paletteResource.Get(), &paletteSrvDesc, skinCluster[i].paletteSrvHandle.first);
+		Object3dBase::GetInstance()->GetDxBase()->GetDevice()->CreateShaderResourceView(skinCluster[index].paletteResource.Get(), &paletteSrvDesc, skinCluster[index].paletteSrvHandle.first);
 
 		// influence用のResourceを確保
-		skinCluster[i].influenceResource = Object3dBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(VertexInfluence) * modelData.matVertexData[i].vertices.size());
+		skinCluster[index].influenceResource = Object3dBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(VertexInfluence) * matVData.second.vertices.size());
 		VertexInfluence* mappedInfluence = nullptr;
-		skinCluster[i].influenceResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedInfluence));
-		std::memset(mappedInfluence, 0, sizeof(VertexInfluence) * modelData.matVertexData[i].vertices.size()); // 0埋め。weightを0にしておく
-		skinCluster[i].mappedInfluence = { mappedInfluence, modelData.matVertexData[i].vertices.size() };
+		skinCluster[index].influenceResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedInfluence));
+		std::memset(mappedInfluence, 0, sizeof(VertexInfluence) * matVData.second.vertices.size()); // 0埋め。weightを0にしておく
+		skinCluster[index].mappedInfluence = { mappedInfluence, matVData.second.vertices.size() };
 
 		// influence用のVBVを作成
-		skinCluster[i].influenceBufferView.BufferLocation = skinCluster[i].influenceResource->GetGPUVirtualAddress();
-		skinCluster[i].influenceBufferView.SizeInBytes = UINT(sizeof(VertexInfluence) * modelData.matVertexData[i].vertices.size());
-		skinCluster[i].influenceBufferView.StrideInBytes = sizeof(VertexInfluence);
+		skinCluster[index].influenceBufferView.BufferLocation = skinCluster[index].influenceResource->GetGPUVirtualAddress();
+		skinCluster[index].influenceBufferView.SizeInBytes = UINT(sizeof(VertexInfluence) * matVData.second.vertices.size());
+		skinCluster[index].influenceBufferView.StrideInBytes = sizeof(VertexInfluence);
 
 		// InverseBindPoseMatrixの保存領域を作成
-		skinCluster[i].inverseBindPoseMatrices.resize(skeleton.joints.size());
-		std::generate(skinCluster[i].inverseBindPoseMatrices.begin(), skinCluster[i].inverseBindPoseMatrices.end(), MakeIdentity4x4);
+		skinCluster[index].inverseBindPoseMatrices.resize(skeleton.joints.size());
+		std::generate(skinCluster[index].inverseBindPoseMatrices.begin(), skinCluster[index].inverseBindPoseMatrices.end(), MakeIdentity4x4);
 		// ModelDataのSkinCluster情報を解析してInfluenceの中身を埋める
-		for (const auto& jointWeight : modelData.matVertexData[i].skinClusterData) // ModelのSkinClusterの方法を解析
+		for (const auto& jointWeight : matVData.second.skinClusterData) // ModelのSkinClusterの方法を解析
 		{
 			auto it = skeleton.jointMap.find(jointWeight.first); // jointWeight.firstはjoint名なので、skeletonに対象となるJointが含まれているか判断
 			if (it == skeleton.jointMap.end()) // そんな名前のJointは存在しない。なので次に回す
@@ -735,22 +658,23 @@ std::vector<SkinCluster> Object3d::CreateSkinCluster(const Skeleton& skeleton, c
 				continue;
 			}
 			// (*it).secondにはjointのindexが入っているので、外套のindexのinverseBindPoseMatrixを代入
-			skinCluster[i].inverseBindPoseMatrices[(*it).second] = jointWeight.second.inverseBindPoseMatrix;
+			skinCluster[index].inverseBindPoseMatrices[(*it).second] = jointWeight.second.inverseBindPoseMatrix;
 			for (const auto& vertexWeight : jointWeight.second.vertexWeights)
 			{
-				auto& currentInfluence = skinCluster[i].mappedInfluence[vertexWeight.vertexIndex]; // 外套のvertexIndexのinfluence情報を参照しておく
-				for (uint32_t index = 0; index < numMaxInfluence; ++index) // 空いているところに入れる
+				auto& currentInfluence = skinCluster[index].mappedInfluence[vertexWeight.vertexIndex]; // 外套のvertexIndexのinfluence情報を参照しておく
+				for (uint32_t i = 0; i < numMaxInfluence; ++i) // 空いているところに入れる
 				{
-					if (currentInfluence.weights[index] == 0.0f) // weight==0が空いている状態なので、その場所にweightとjointのindexを代入
+					if (currentInfluence.weights[i] == 0.0f) // weight==0が空いている状態なので、その場所にweightとjointのindexを代入
 					{
-						currentInfluence.weights[index] = vertexWeight.weight;
-						currentInfluence.jointIndices[index] = (*it).second;
-						skinCluster[i].mappedInfluence[vertexWeight.vertexIndex] = currentInfluence;
+						currentInfluence.weights[i] = vertexWeight.weight;
+						currentInfluence.jointIndices[i] = (*it).second;
+						skinCluster[index].mappedInfluence[vertexWeight.vertexIndex] = currentInfluence;
 						break;
 					}
 				}
 			}
 		}
+		index++;
 	}
 
 	return skinCluster;
