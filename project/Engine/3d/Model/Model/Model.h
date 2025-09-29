@@ -67,7 +67,7 @@ struct ModelData {
 	std::map<std::string, JointWeightData> skinClusterData;
 	std::vector<uint32_t> indices;
 	std::vector<VertexData> vertices;
-	std::vector<MaterialVertexData> matVertexData;
+	std::map<std::wstring, MaterialVertexData> matVertexData;
 	std::vector<MaterialData> material;
 	std::vector<MaterialTemplate> materialTemplate;
 	Node rootNode;
@@ -127,6 +127,10 @@ public:
 
 	const bool GetEnableMetallic() const { return materialData->enableMetallic; }
 
+	// AABBの取得
+	const AABB& GetMeshAABB() const { return meshAABB; }
+	const std::map<std::wstring, AABB>& GetMultiMeshAABB() const { return multiMeshAABB; }
+
 private:
 
 	std::map<std::string, Animation> animation;
@@ -179,6 +183,13 @@ private:
 	void CreateMaterialResouce();
 	// VertexBufferViewを作成する(値を設定するだけ)
 	void CreateVertexBufferView();
+
+	// ModelのAABBを作成する
+	void CreateAABB();
+	
+
+	AABB meshAABB;
+	std::map<std::wstring, AABB> multiMeshAABB;
 
 	bool useWireFrameTexture;
 	uint32_t whiteTextureIndex;

@@ -237,9 +237,6 @@ public:
 
 	const bool GetEnableMetallic() { return model_->GetEnableMetallic(); }
 
-	// AABBをモデルを参照して再生成
-	void ReCreateAABB();
-
 	// Capsuleをモデルを参照して作成
 	void CreateCapsule();
 
@@ -267,9 +264,6 @@ private:
 	void CreateTransformationMatrixResource();
 	// CameraResourceを作る
 	void CreateCameraResource();
-
-	// AABBをモデルを参照して自動的に作成
-	void CreateAABB();
 
 	// アニメーションの適用(Skeltonに対してAnimationの適用を行う)
 	void ApplyAnimation(Skeleton& skeleton, const Animation& animation, float animationTime);
