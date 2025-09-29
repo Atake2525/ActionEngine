@@ -54,10 +54,12 @@ void Audio::Finalize() {
 	instance = nullptr;
 }
 
-void Audio::Initialize() {
+void Audio::Initialize(const float masterVolume) {
 	xAudio2.Reset();
 	HRESULT hr = XAudio2Create(&xAudio2, 0, XAUDIO2_DEFAULT_PROCESSOR);
 	hr = xAudio2->CreateMasteringVoice(&masterVoice);
+
+	this->masterVolume = masterVolume;
 
 	// mp3読み込みのためのMedia Foundationの初期化
 	CoInitializeEx(nullptr, COINIT_MULTITHREADED);

@@ -345,7 +345,7 @@ void Player::Move()
 	moveVelocity_.z = forward.z + right.z;
 
 
-	if (penetrationAmount.y < 0.0f)
+	if (penetrationAmount.y < 0.0f && speed_.y < 0.0f)
 	{
 		speed_.y = 0.0f;
 		moveVelocity_.y = 0.0f;

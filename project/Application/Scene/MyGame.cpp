@@ -6,8 +6,8 @@ void MyGame::Initialize() {
 
 #pragma region 基盤システムの初期化
 
-	WinApp::GetInstance()->Initialize(1920, 1080, WindowMode::FullScreen, L"Engine");
-	//WinApp::GetInstance()->Initialize();
+	//WinApp::GetInstance()->Initialize(1920, 1080, WindowMode::FullScreen, L"Engine");
+	WinApp::GetInstance()->Initialize();
 
 	directxBase = new DirectXBase();
 	directxBase->Initialize();
@@ -44,7 +44,7 @@ void MyGame::Initialize() {
 
 	Input::GetInstance()->Initialize();
 
-	Audio::GetInstance()->Initialize();
+	Audio::GetInstance()->Initialize(0.0f);
 
 	FadeManager::GetInstance()->Initialize({0.0f, 0.0f, 0.0f});
 

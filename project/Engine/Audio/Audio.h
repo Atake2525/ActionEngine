@@ -60,7 +60,7 @@ private:
 public:
 
 	// 初期化
-	void Initialize();
+	void Initialize(const float masterVolume = 1.0f);
 
 	// 更新
 	void Update();
