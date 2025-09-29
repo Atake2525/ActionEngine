@@ -6,7 +6,6 @@
 #include <stdint.h>
 #pragma once
 
-class DirectXBase;
 
 struct Grayscale
 {
@@ -40,7 +39,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(DirectXBase* directxBase);
+	void Initialize();
 
 
 	void Update();
@@ -50,14 +49,11 @@ public:
 	/// </summary>
 	void Draw();
 
-	DirectXBase* GetDxBase() const { return directxBase_; }
-
 	Microsoft::WRL::ComPtr<ID3D12Resource> GetRenderTextureResource() const { return renderTextureResource; }
 
 	const Vector4 GetRenderTargetClearValue() const { return renderTargetClearValue; }
 
 private:
-	DirectXBase* directxBase_ = nullptr;
 
 	uint32_t srvIndex;
 

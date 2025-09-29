@@ -30,8 +30,7 @@ void ParticleManager::Finalize() {
 	instance = nullptr;
 }
 
-void ParticleManager::Initialize(DirectXBase* directxBase) {
-	directxBase_ = directxBase;
+void ParticleManager::Initialize() {
 	InitializeRandomEngine();
 	CreateGraphicsPipeLineState();
 }
@@ -57,7 +56,7 @@ void ParticleManager::CreateParticleGroupFromOBJ(std::string directoryPath, std:
 	{
 #pragma region InitializeMaterialResource
 
-		group.materialResource = directxBase_->CreateBufferResource(sizeof(Material));
+		group.materialResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(Material));
 
 		//  書き込むためのアドレスを取得
 		group.materialResource->Map(0, nullptr, reinterpret_cast<void**>(&group.material));
@@ -78,7 +77,7 @@ void ParticleManager::CreateParticleGroupFromOBJ(std::string directoryPath, std:
 		size_t size = sizeof(VertexData) * matVData.second.vertices.size();
 
 		// VertexResourceの初期化
-		group.callData[index].vertexResource = directxBase_->CreateBufferResource(sizeof(VertexData) * matVData.second.vertices.size());
+		group.callData[index].vertexResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(VertexData) * matVData.second.vertices.size());
 
 		group.callData[index].vertexBufferView.BufferLocation = group.callData[index].vertexResource->GetGPUVirtualAddress();
 		// 使用するリソースのサイズは頂点6つ分のサイズ
@@ -94,7 +93,7 @@ void ParticleManager::CreateParticleGroupFromOBJ(std::string directoryPath, std:
 
 		size = sizeof(ParticleForGPU) * maxNumInstance;
 
-		group.callData[index].instancingResource = directxBase_->CreateBufferResource(sizeof(ParticleForGPU) * maxNumInstance);
+		group.callData[index].instancingResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(ParticleForGPU) * maxNumInstance);
 		group.callData[index].instancingResource->Map(0, nullptr, reinterpret_cast<void**>(&group.callData[index].instancingData));
 		for (uint32_t index = 0; index < group.numInstance; index++)
 		{
@@ -129,7 +128,7 @@ void ParticleManager::CreateParticleGroupFromOBJ(std::string directoryPath, std:
 
 		D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU = SrvManager::GetInstance()->GetCPUDescriptorHandle(group.callData[i].srvIndex);
 		D3D12_GPU_DESCRIPTOR_HANDLE instancingSrvHandleGPU = SrvManager::GetInstance()->GetGPUDescriptorHandle(group.callData[i].srvIndex);
-		directxBase_->GetDevice()->CreateShaderResourceView(group.callData[i].instancingResource.Get(), &instancingSrvDesc, instancingSrvHandleCPU);
+		DirectXBase::GetInstance()->GetDevice()->CreateShaderResourceView(group.callData[i].instancingResource.Get(), &instancingSrvDesc, instancingSrvHandleCPU);
 	}
 
 	group.instancingSrvDesc = instancingSrvDesc;
@@ -181,7 +180,7 @@ void ParticleManager::CreateParticleGroup(ParticleType particleType, std::string
 	{
 #pragma region InitializeMaterialResource
 
-		group.materialResource = directxBase_->CreateBufferResource(sizeof(Material));
+		group.materialResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(Material));
 
 		//  書き込むためのアドレスを取得
 		group.materialResource->Map(0, nullptr, reinterpret_cast<void**>(&group.material));
@@ -202,7 +201,7 @@ void ParticleManager::CreateParticleGroup(ParticleType particleType, std::string
 		size_t size = sizeof(VertexData) * matVData.second.vertices.size();
 
 		// VertexResourceの初期化
-		group.callData[index].vertexResource = directxBase_->CreateBufferResource(sizeof(VertexData) * matVData.second.vertices.size());
+		group.callData[index].vertexResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(VertexData) * matVData.second.vertices.size());
 
 		group.callData[index].vertexBufferView.BufferLocation = group.callData[index].vertexResource->GetGPUVirtualAddress();
 		// 使用するリソースのサイズは頂点6つ分のサイズ
@@ -218,7 +217,7 @@ void ParticleManager::CreateParticleGroup(ParticleType particleType, std::string
 
 		size = sizeof(ParticleForGPU) * maxNumInstance;
 
-		group.callData[index].instancingResource = directxBase_->CreateBufferResource(sizeof(ParticleForGPU) * maxNumInstance);
+		group.callData[index].instancingResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(ParticleForGPU) * maxNumInstance);
 		group.callData[index].instancingResource->Map(0, nullptr, reinterpret_cast<void**>(&group.callData[index].instancingData));
 		for (uint32_t index = 0; index < group.numInstance; index++)
 		{
@@ -253,7 +252,7 @@ void ParticleManager::CreateParticleGroup(ParticleType particleType, std::string
 
 		D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU = SrvManager::GetInstance()->GetCPUDescriptorHandle(group.callData[i].srvIndex);
 		D3D12_GPU_DESCRIPTOR_HANDLE instancingSrvHandleGPU = SrvManager::GetInstance()->GetGPUDescriptorHandle(group.callData[i].srvIndex);
-		directxBase_->GetDevice()->CreateShaderResourceView(group.callData[i].instancingResource.Get(), &instancingSrvDesc, instancingSrvHandleCPU);
+		DirectXBase::GetInstance()->GetDevice()->CreateShaderResourceView(group.callData[i].instancingResource.Get(), &instancingSrvDesc, instancingSrvHandleCPU);
 	}
 
 	group.instancingSrvDesc = instancingSrvDesc;
@@ -380,11 +379,11 @@ void ParticleManager::Update() {
 
 void ParticleManager::Draw() {
 	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-	directxBase_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
+	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
 	// PSOを設定
-	directxBase_->GetCommandList()->SetPipelineState(graphicsPipelineState.Get());
+	DirectXBase::GetInstance()->GetCommandList()->SetPipelineState(graphicsPipelineState.Get());
 	// 形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけば良い
-	directxBase_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	DirectXBase::GetInstance()->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// 全パーティクルについての処理
 	for (std::unordered_map<std::string, ParticleGroup>::iterator particleGroup = particleGroups.begin(); particleGroup != particleGroups.end(); ++particleGroup)
@@ -392,13 +391,13 @@ void ParticleManager::Draw() {
 		// 描画に必要なときのみ以下の処理を行うようにする
 		if (particleGroup->second.numInstance > 0)
 		{
-			directxBase_->GetCommandList()->SetGraphicsRootConstantBufferView(0, particleGroup->second.materialResource->GetGPUVirtualAddress());
+			DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(0, particleGroup->second.materialResource->GetGPUVirtualAddress());
 
 			int index = 0;
 			for (const auto& matVData : particleGroup->second.modelData.matVertexData)
 			{
 				// VBVを設定
-				directxBase_->GetCommandList()->IASetVertexBuffers(0, 1, &particleGroup->second.callData[index].vertexBufferView);
+				DirectXBase::GetInstance()->GetCommandList()->IASetVertexBuffers(0, 1, &particleGroup->second.callData[index].vertexBufferView);
 
 				// インスタンシングデータのSRVのDescriptorTableを設定
 				SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(1, particleGroup->second.callData[index].srvIndex);
@@ -408,7 +407,7 @@ void ParticleManager::Draw() {
 				SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(2, particleGroup->second.modelData.material[index].textureIndex);
 
 				// DrawCall
-				directxBase_->GetCommandList()->DrawInstanced(UINT(matVData.second.vertices.size()), particleGroup->second.numInstance, 0, 0);
+				DirectXBase::GetInstance()->GetCommandList()->DrawInstanced(UINT(matVData.second.vertices.size()), particleGroup->second.numInstance, 0, 0);
 				index++;
 			}
 		}
@@ -470,7 +469,7 @@ void ParticleManager::CreateRootSignature() {
 		assert(false);
 	}
 	// バイナリをもとに作成
-	hr = directxBase_->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
+	hr = DirectXBase::GetInstance()->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
 	assert(SUCCEEDED(hr));
 	// InputLayout
 	inputElementDescs[0].SemanticName = "POSITION";
@@ -504,9 +503,9 @@ void ParticleManager::CreateRootSignature() {
 	// 三角形の中を塗りつぶす
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 	// Shaderをコンパイルする
-	vertexShaderBlob = directxBase_->CompileShader(L"Resources/shaders/Particle.VS.hlsl", L"vs_6_0");
+	vertexShaderBlob = DirectXBase::GetInstance()->CompileShader(L"Resources/shaders/Particle.VS.hlsl", L"vs_6_0");
 	assert(vertexShaderBlob != nullptr);
-	pixelShaderBlob = directxBase_->CompileShader(L"Resources/shaders/Particle.PS.hlsl", L"ps_6_0");
+	pixelShaderBlob = DirectXBase::GetInstance()->CompileShader(L"Resources/shaders/Particle.PS.hlsl", L"ps_6_0");
 	assert(pixelShaderBlob != nullptr);
 
 	// DepthStencilStateの設定
@@ -539,7 +538,7 @@ void ParticleManager::CreateGraphicsPipeLineState() {
 	graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc;
 	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	// 実際に生成
-	HRESULT hr = directxBase_->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState));
+	HRESULT hr = DirectXBase::GetInstance()->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState));
 	assert(SUCCEEDED(hr));
 
 }

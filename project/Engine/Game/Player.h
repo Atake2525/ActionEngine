@@ -48,7 +48,7 @@ private: // ステータス(移動系)宣言
     
     Vector3 moveVelocity_;
 
-    float translateSpeed_ = 0.0f; // 
+    float translateSpeed_ = 1.0f; // 秒速
 
 private: // ステータス(カメラ系)宣言
     Transform cameraTransform;

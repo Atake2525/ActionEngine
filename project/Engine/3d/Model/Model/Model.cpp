@@ -49,7 +49,7 @@ void Model::Initialize(std::string directoryPath, std::string filename, bool ena
 		vertexResource.at(num)->Map(0, nullptr, reinterpret_cast<void**>(&vertexData[num]));
 		std::memcpy(vertexData[num], matData.second.vertices.data(), sizeof(VertexData) * matData.second.vertices.size()); // 頂点データをリソースにコピー
 
-		indexResource.at(num) = ModelBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(uint32_t) * matData.second.indices.size());
+		indexResource.at(num) = DirectXBase::GetInstance()->CreateBufferResource(sizeof(uint32_t) * matData.second.indices.size());
 
 		indexBufferView.at(num).BufferLocation = indexResource.at(num)->GetGPUVirtualAddress();
 		indexBufferView.at(num).SizeInBytes = UINT(sizeof(uint32_t) * matData.second.indices.size());
@@ -58,7 +58,7 @@ void Model::Initialize(std::string directoryPath, std::string filename, bool ena
 		indexResource.at(num)->Map(0, nullptr, reinterpret_cast<void**>(&mappedIndex));
 		std::memcpy(mappedIndex, matData.second.indices.data(), sizeof(uint32_t) * matData.second.indices.size());
 
-		materialTemplateResource.at(matData.second.materialIndex) = ModelBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(MaterialTemplate) * modelData.materialTemplate.size());
+		materialTemplateResource.at(matData.second.materialIndex) = DirectXBase::GetInstance()->CreateBufferResource(sizeof(MaterialTemplate) * modelData.materialTemplate.size());
 		materialTemplateResource.at(matData.second.materialIndex)->Map(0, nullptr, reinterpret_cast<void**>(&materialTemplateData[matData.second.materialIndex]));
 		std::memcpy(materialTemplateData[matData.second.materialIndex], &modelData.materialTemplate.at(matData.second.materialIndex), sizeof(MaterialTemplate) * modelData.materialTemplate.size());
 		num++;
@@ -91,24 +91,24 @@ void Model::Initialize(std::string directoryPath, std::string filename, bool ena
 void Model::Draw() {
 
 	// wvp用のCBufferの場所を設定
-	ModelBase::GetInstance()->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
 
 	int index = 0;
 	for (const auto& matData : modelData.matVertexData)
 	{
-		ModelBase::GetInstance()->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(8, materialTemplateResource[matData.second.materialIndex]->GetGPUVirtualAddress());
+		DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(8, materialTemplateResource[matData.second.materialIndex]->GetGPUVirtualAddress());
 		if (isAnimation)
 		{
-			ModelBase::GetInstance()->GetDxBase()->GetCommandList()->SetGraphicsRootDescriptorTable(9, skinCluster[index].paletteSrvHandle.second);
-			ModelBase::GetInstance()->GetDxBase()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView[0][index]); // VBVを設定
-			ModelBase::GetInstance()->GetDxBase()->GetCommandList()->IASetVertexBuffers(1, 1, &vertexBufferView[1][index]); // VBVを設定
+			DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootDescriptorTable(9, skinCluster[index].paletteSrvHandle.second);
+			DirectXBase::GetInstance()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView[0][index]); // VBVを設定
+			DirectXBase::GetInstance()->GetCommandList()->IASetVertexBuffers(1, 1, &vertexBufferView[1][index]); // VBVを設定
 		}
 		else
 		{
-			ModelBase::GetInstance()->GetDxBase()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView[0][index]); // VBVを設定
+			DirectXBase::GetInstance()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView[0][index]); // VBVを設定
 		}
 
-		ModelBase::GetInstance()->GetDxBase()->GetCommandList()->IASetIndexBuffer(&indexBufferView.at(index)); // VBVを設定
+		DirectXBase::GetInstance()->GetCommandList()->IASetIndexBuffer(&indexBufferView.at(index)); // VBVを設定
 
 		if (useWireFrameTexture)
 		{
@@ -120,7 +120,7 @@ void Model::Draw() {
 		}
 		SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(7, SkyBox::GetInstance()->GetSrvIndex());
 
-		ModelBase::GetInstance()->GetDxBase()->GetCommandList()->DrawIndexedInstanced(UINT(matData.second.indices.size()), 1, 0, 0, 0);
+		DirectXBase::GetInstance()->GetCommandList()->DrawIndexedInstanced(UINT(matData.second.indices.size()), 1, 0, 0, 0);
 
 		index++;
 	}
@@ -606,7 +606,7 @@ void Model::CreateVertexResource() {
 	for (const auto& matData : modelData.matVertexData)
 	{
 		// 頂点リソースの作成
-		vertexResource.at(index) = ModelBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(VertexData) * matData.second.vertices.size());
+		vertexResource.at(index) = DirectXBase::GetInstance()->CreateBufferResource(sizeof(VertexData) * matData.second.vertices.size());
 		index++;
 	}
 }
@@ -624,7 +624,7 @@ void Model::CreateVertexBufferView() {
 }
 
 void Model::CreateMaterialResouce() {
-	materialResource = ModelBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(Material));
+	materialResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(Material));
 }
 
 void Model::CreateAABB() {

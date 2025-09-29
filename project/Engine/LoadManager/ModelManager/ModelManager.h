@@ -6,7 +6,6 @@
 
 class Model;
 class ModelBase;
-class DirectXBase;
 
 class ModelManager {
 private:
@@ -28,7 +27,7 @@ public:
 	void Finalize();
 
 	// 初期化
-	void Initialize(DirectXBase* directxBase);
+	void Initialize();
 
 	/// <summary>
 	/// モデルファイルの読み込み

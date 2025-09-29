@@ -5,7 +5,6 @@
 
 #pragma once
 
-class DirectXBase;
 class Camera;
 
 class SkinningObject3dBase {
@@ -31,14 +30,12 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(DirectXBase* directxBase);
+	void Initialize();
 
 	/// <summary>
 	/// 共通描画設定
 	/// </summary>
 	void ShaderDraw();
-
-	DirectXBase* GetDxBase() const { return directxBase_; }
 
 	// Getter(Camera)
 	Camera* GetDefaultCamera() const { return defaultCamera; }
@@ -47,7 +44,6 @@ public:
 	void SetDefaultCamera(Camera* camera) { defaultCamera = camera; }
 
 private:
-	DirectXBase* directxBase_ = nullptr;
 
 	Camera* defaultCamera = nullptr;
 

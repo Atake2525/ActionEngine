@@ -8,8 +8,6 @@
 #include "externels/DirectXTex/DirectXTex.h"
 #pragma once
 
-class DirectXBase;
-
 class SrvManager
 {
 private:
@@ -36,7 +34,7 @@ public:
     void PreDraw();
 
     // 初期化
-    void Initialize(DirectXBase* directxBase);
+    void Initialize();
 
     uint32_t Allocate();
 
@@ -66,7 +64,6 @@ private:
     void CreateDescriptorHeap();
 
 private:
-    DirectXBase* directxBase_ = nullptr;
 
     // SRV用のデスクリプタサイズ
     uint32_t descriptorSize;

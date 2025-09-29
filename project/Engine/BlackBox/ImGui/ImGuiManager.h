@@ -11,8 +11,6 @@
 #pragma once
 
 
-class DirectXBase;
-
 class ImGuiManager
 {
 private:
@@ -34,9 +32,7 @@ public:
     void Finalize();
 
     // 初期化
-    void Initialize(DirectXBase* directxBase);
+    void Initialize();
 
-private:
-    DirectXBase* directxBase_;
 };
 

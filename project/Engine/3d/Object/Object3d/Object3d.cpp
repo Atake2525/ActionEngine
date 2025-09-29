@@ -174,9 +174,9 @@ void Object3d::UpdateSkinCluster(std::vector<SkinCluster>& skinCluster, const Sk
 void Object3d::Draw() {
 
 	// wvp用のCBufferの場所を設定
-	Object3dBase::GetInstance()->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
+	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
 
-	Object3dBase::GetInstance()->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(3, cameraResource->GetGPUVirtualAddress());
+	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(3, cameraResource->GetGPUVirtualAddress());
 
 	// 3Dモデルが割り当てられていれば描画する
 	if (model_) {
@@ -185,11 +185,11 @@ void Object3d::Draw() {
 }
 
 void Object3d::CreateTransformationMatrixResource() {
-	transformationMatrixResource = Object3dBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(TransformationMatrix));
+	transformationMatrixResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(TransformationMatrix));
 }
 
 void Object3d::CreateCameraResource() {
-	cameraResource = Object3dBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(CameraForGPU));
+	cameraResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(CameraForGPU));
 }
 
 void Object3d::SetModel(const std::string& filePath) {
@@ -611,7 +611,7 @@ std::vector<SkinCluster> Object3d::CreateSkinCluster(const Skeleton& skeleton, c
 	for (const auto& matVData : modelData.matVertexData)
 	{
 		// palette用のResourceを確保
-		skinCluster[index].paletteResource = Object3dBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(WellForGPU) * skeleton.joints.size());
+		skinCluster[index].paletteResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(WellForGPU) * skeleton.joints.size());
 		WellForGPU* mappedPalette = nullptr;
 		skinCluster[index].paletteResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedPalette));
 		skinCluster[index].mappedPalette = { mappedPalette, skeleton.joints.size() }; // spanを使ってアクセスするようにする
@@ -632,10 +632,10 @@ std::vector<SkinCluster> Object3d::CreateSkinCluster(const Skeleton& skeleton, c
 		paletteSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 		paletteSrvDesc.Buffer.NumElements = UINT(skeleton.joints.size());
 		paletteSrvDesc.Buffer.StructureByteStride = sizeof(WellForGPU);
-		Object3dBase::GetInstance()->GetDxBase()->GetDevice()->CreateShaderResourceView(skinCluster[index].paletteResource.Get(), &paletteSrvDesc, skinCluster[index].paletteSrvHandle.first);
+		DirectXBase::GetInstance()->GetDevice()->CreateShaderResourceView(skinCluster[index].paletteResource.Get(), &paletteSrvDesc, skinCluster[index].paletteSrvHandle.first);
 
 		// influence用のResourceを確保
-		skinCluster[index].influenceResource = Object3dBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(VertexInfluence) * matVData.second.vertices.size());
+		skinCluster[index].influenceResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(VertexInfluence) * matVData.second.vertices.size());
 		VertexInfluence* mappedInfluence = nullptr;
 		skinCluster[index].influenceResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedInfluence));
 		std::memset(mappedInfluence, 0, sizeof(VertexInfluence) * matVData.second.vertices.size()); // 0埋め。weightを0にしておく

@@ -3,8 +3,6 @@
 #include <dxcapi.h>
 #pragma once
 
-class DirectXBase;
-
 class SpriteBase {
 private:
 	// シングルトンパターンを適用
@@ -21,7 +19,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(DirectXBase* directxBase);
+	void Initialize();
 
 	// インスタンスの取得
 	static SpriteBase* GetInstance();
@@ -33,11 +31,6 @@ public:
 	/// 共通描画設定
 	/// </summary>
 	void ShaderDraw();
-
-	DirectXBase* GetDxBase() const { return directxBase_; }
-
-private:
-	DirectXBase* directxBase_ = nullptr;
 
 private:
 	// ルートシグネチャの作成

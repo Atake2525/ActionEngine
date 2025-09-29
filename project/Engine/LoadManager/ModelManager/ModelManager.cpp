@@ -17,8 +17,8 @@ void ModelManager::Finalize() {
 	instance = nullptr;
 }
 
-void ModelManager::Initialize(DirectXBase* directxBase) { 
-	ModelBase::GetInstance()->Initialize(directxBase); 
+void ModelManager::Initialize() { 
+	ModelBase::GetInstance()->Initialize(); 
 }
 
 void ModelManager::LoadModel(const std::string& directoryPath, const std::string& filePath, const bool& enableLighting, const bool isAnimation) {

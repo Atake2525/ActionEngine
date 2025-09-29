@@ -21,12 +21,10 @@ void Light::Finalize() {
 	instance = nullptr;
 }
 
-void Light::Initialize(DirectXBase* directxBase) {
-
-	directxBase_ = directxBase;
+void Light::Initialize() {
 
 	// ライト関係の初期化
-	directionalLightResource = directxBase_->CreateBufferResource(sizeof(DirectionalLight));
+	directionalLightResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(DirectionalLight));
 
 	directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightData));
 
@@ -35,7 +33,7 @@ void Light::Initialize(DirectXBase* directxBase) {
 	directionalLightData->intensity = 1.0f;
 	directionalLightData->specularColor = { 1.0f, 1.0f, 1.0f };
 
-	pointLightResource = directxBase_->CreateBufferResource(sizeof(PointLight));
+	pointLightResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(PointLight));
 
 	pointLightResource->Map(0, nullptr, reinterpret_cast<void**>(&pointLightData));
 
@@ -46,7 +44,7 @@ void Light::Initialize(DirectXBase* directxBase) {
 	pointLightData->dacay = 5.0f;
 	pointLightData->specularColor = { 1.0f, 1.0f, 1.0f };
 
-	spotLightResource = directxBase_->CreateBufferResource(sizeof(SpotLight));
+	spotLightResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(SpotLight));
 
 	spotLightResource->Map(0, nullptr, reinterpret_cast<void**>(&spotLightData));
 
