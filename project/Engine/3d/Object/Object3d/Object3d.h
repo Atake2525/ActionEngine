@@ -8,6 +8,7 @@
 #include "Matrix4x4.h"
 #include "Transform.h"
 #include "AABB.h"
+#include "OBB.h"
 #include "kMath.h"
 #include "Quaternion.h"
 #include "Animator.h"
@@ -172,6 +173,10 @@ private:
 
 	Capsule capsule;
 
+	OBB obb;
+
+	std::vector<OBB> multiMeshOBB;
+
 public:
 
 	// Getter(Transform)
@@ -198,6 +203,9 @@ public:
 	const Matrix4x4& GetWorldMatrix() const { return worldMatrix; }
 	// アニメーションの再生速度を取得
 	const float& GetAnimationSpeed() const { return animationSpeed; }
+
+	const OBB& GetOBB() const { return obb; }
+	const std::vector<OBB>& GetMultiMeshOBB() const { return multiMeshOBB; }
 
 	// Setter(Transform)
 	void SetTransform(const Transform& transform) { this->transform = transform; }
