@@ -3,10 +3,10 @@
 #include "ImGuiManager.h"
 #include "CollisionManager.h"
 #include "WinApp.h"
-#include "DirectXBase.h"
 
 Player::~Player()
 {
+	delete playerCollisionModel_;
 	delete playerModel_;
 	CollisionManager::GetInstance()->DeleteCollisionTarget("player");
 }
@@ -26,7 +26,7 @@ void Player::Initialize(Camera* camera, Input* input, const Transform startPoint
 
 	playerModel_ = new Object3d();
 	playerModel_->Initialize();
-	playerModel_->SetModel("Resources/Model/gltf/char", "idle.gltf", true, true);
+	playerModel_->SetModel("Resources/Model/gltf/char", "onlyBodyIdle.gltf", true, true);
 	playerModel_->AddAnimation("Resources/Model/gltf/char", "walk.gltf", "walk");
 	playerModel_->AddAnimation("Resources/Model/gltf/char", "sneak.gltf", "sneak");
 	playerModel_->AddAnimation("Resources/Model/gltf/char", "dash.gltf", "dash");
@@ -34,9 +34,22 @@ void Player::Initialize(Camera* camera, Input* input, const Transform startPoint
 	playerModel_->AddAnimation("Resources/Model/gltf/char", "crouch.gltf", "crouch");
 	playerModel_->AddAnimation("Resources/Model/gltf/char", "walk_back.gltf", "backwalk");
 	playerModel_->AddAnimation("Resources/Model/gltf/char", "fall.gltf", "fall");
+	playerModel_->SetTransform(playerTransform_);
 	playerModel_->ToggleStartAnimation();
 
-	playerAABB_ = playerModel_->GetAABB();
+	playerCollisionModel_ = new Object3d();
+	playerCollisionModel_->Initialize();
+	playerCollisionModel_->SetModel("Resources/Model/gltf/char", "idle.gltf", true, true);
+	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "walk.gltf", "walk");
+	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "sneak.gltf", "sneak");
+	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "dash.gltf", "dash");
+	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "jump.gltf", "jump");
+	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "crouch.gltf", "crouch");
+	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "walk_back.gltf", "backwalk");
+	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "fall.gltf", "fall");
+	playerCollisionModel_->ToggleStartAnimation();
+
+	playerAABB_ = playerCollisionModel_->GetAABB();
 
 	CollisionManager::GetInstance()->AddCollisionTarget(playerAABB_, "player");
 }
@@ -48,10 +61,14 @@ void Player::Update() {
 	if (parent_)
 	{
 		// プレイヤーの回転からcameraOffsetを計算してparent
-		Vector3 position = playerModel_->GetJointPosition("Head");
+		Vector3 position = playerCollisionModel_->GetJointPosition("Head");
 
 		Vector3	camOffset = cameraOffset_;
 
+		if (moveType_ == PlayerMoveType::Dash)
+		{
+			camOffset.z += 0.04f;
+		}
 		// 一時的にrotate.xを格納しておく(上下の計算をしないため)
 		float rotx = playerTransform_.rotate.x;
 		playerTransform_.rotate.x = 0.0f;
@@ -75,9 +92,9 @@ void Player::Update() {
 
 	playerModel_->SetAnimationSpeed(1.0f);
 	playerModel_->SetTransform(playerTransform_);
-	playerModel_->SetAnimationSpeed(1.0f);
-	playerModel_->SetTransform(playerTransform_);
-	playerModel_->Update();
+	playerCollisionModel_->SetAnimationSpeed(1.0f);
+	playerCollisionModel_->SetTransform(playerTransform_);
+	playerCollisionModel_->Update();
 	playerModel_->Update();
 
 	if (debugMode_)
@@ -122,10 +139,317 @@ void Player::Rotation() {
 
 void Player::Move()
 {
+	// 無操作状態ならば何もしないので毎フレームIdle状態にする
+	moveType_ = PlayerMoveType::Idle;
+
+	Vector3 penetrationAmount = CollisionManager::GetInstance()->GetPenetration();
+
+	// 壁走りの処理
+	if (input->PressMouse(1) && (penetrationAmount.x != 0.0f || penetrationAmount.z != 0.0f) && moveVelocity_.y < 0.0f)
+	{
+		wallDash_ = true;
+		jump_ = false;
+		moveVelocity_.y = wallDashAcceleration_;
+		speed_.y = wallDashAcceleration_;
+	}
+	else if (wallDash_)
+	{
+		moveType_ = PlayerMoveType::Dash;
+		wallDash_ = false;
+		camera->SetRotate({ cameraTransform.rotate.x, cameraTransform.rotate.y, 0.0f });
+	}
+
+
+	// 地面との高さを求めて落下処理を行う
+	float dist = CollisionManager::GetInstance()->GetGroundDistance("player");
+	if (dist < -0.2f)
+	{
+		dist = CollisionManager::GetInstance()->GetGroundMAXDistance("player");
+	}
+	if (dist > 0.0f && !wallDash_)
+	{
+		jump_ = true;
+	}
+	// 一番最初にジャンプ状態の有無を調べる(ジャンプ中か否かで移動系処理が変わるため)
+	if (input->PushKey(DIK_SPACE))
+	{
+		if (!jump_)
+		{
+			speed_.y = jumpAcceleration_;
+			if (wallDash_)
+			{
+				Vector3	cameraDirection = camera->GetDirection();
+				if (penetrationAmount.x > 0.0f)
+				{
+					speed_.x = -speedLimit_ * Sign(cameraDirection.z);
+				}
+				else if (penetrationAmount.x < 0.0f)
+				{
+					speed_.x = speedLimit_ * Sign(cameraDirection.z);
+				}
+				else if (penetrationAmount.z > 0.0f)
+				{
+					speed_.x = speedLimit_ * Sign(cameraDirection.x);
+				}
+				else if (penetrationAmount.z < 0.0f)
+				{
+					speed_.x = -speedLimit_ * Sign(cameraDirection.x);
+				}
+			}
+		}
+		jump_ = true;
+	}
+	if (jump_)
+	{
+		moveType_ = PlayerMoveType::Jump;
+		speed_.y -= fallAcceleration_;
+	}
+	speed_.y = std::clamp(speed_.y, fallLimit_, jumpAcceleration_);
+
+	// 移動の最高速度をここに格納する
+	float maxSpeed_ = walkSpeed_ * speedLimit_;
+
+	// ダッシュとスニークの判定
+	// ダッシュよりもスニークを優先して判定させる
+	if (input->PushKey(DIK_LCONTROL))
+	{
+		// プレイヤーの状態をしゃがみにする しゃがみ移動の処理は平行移動処理の後に書く
+		// 最高移動速度をsneakSpeedにする
+		moveType_ = PlayerMoveType::Crouch;
+		maxSpeed_ = sneakSpeed_ * speedLimit_;
+	}
+	else if (input->PushKey(DIK_LSHIFT)) {
+		// プレイヤーの状態をダッシュにするのは移動している時なので変更しない
+		// 最高移動速度をdashSpeedにする
+		maxSpeed_ = dashSpeed_ * speedLimit_;
+	}
+
+	if (jump_)
+	{
+		moveType_ = PlayerMoveType::Jump;
+	}
+	// accelerationを計算する
+	float acceleration = 0.0f;
+	if (moveType_ != PlayerMoveType::Jump)
+	{
+		acceleration = maxSpeed_ * translateAcceleration_;
+	}
+	else
+	{
+		acceleration = maxSpeed_ * flyAcceleration_;
+	}
+
+	// 平行移動(前後左右)
 	if (input->PushKey(DIK_W))
 	{
-		playerTransform_.translate += camera->GetDirection() * translateSpeed_ * DirectXBase::GetInstance()->GetDeltaTime();
+		moveType_ = PlayerMoveType::Walk;
+		speed_.z += acceleration;
 	}
+	else if (speed_.z > 0.0f)
+	{
+		speed_.z -= acceleration * 1.5f;
+		speed_.z = std::clamp(speed_.z, 0.0f, maxSpeed_);
+	}
+
+	if (input->PushKey(DIK_S))
+	{
+		moveType_ = PlayerMoveType::Backwalk;
+		speed_.z -= acceleration;
+	}
+	else if (speed_.z < 0.0f)
+	{
+		speed_.z += acceleration * 1.5f;
+		speed_.z = std::clamp(speed_.z, -maxSpeed_, 0.0f);
+	}
+
+	if (input->PushKey(DIK_D))
+	{
+		moveType_ = PlayerMoveType::Walk;
+		speed_.x += acceleration;
+	}
+	else if (speed_.x > 0.0f)
+	{
+		speed_.x -= acceleration * 1.5f;
+		speed_.x = std::clamp(speed_.x, 0.0f, maxSpeed_);
+	}
+
+	if (input->PushKey(DIK_A))
+	{
+		moveType_ = PlayerMoveType::Walk;
+		speed_.x -= acceleration;
+	}
+	else if (speed_.x < 0.0f)
+	{
+		speed_.x += acceleration * 1.5f;
+		speed_.x = std::clamp(speed_.x, -maxSpeed_, 0.0f);
+	}
+
+	speed_.x = std::clamp(speed_.x, -maxSpeed_, maxSpeed_);
+	speed_.z = std::clamp(speed_.z, -maxSpeed_, maxSpeed_);
+
+	moveVelocity_ = speed_;
+	// 斜め移動の場合はXとZを正規化する
+	if (speed_.x != 0.0f && speed_.z != 0.0f)
+	{
+		// ジャンプ中の可能性を考慮してNormalizeのときはYの値を別の場所に格納しておく
+		float y = speed_.y;
+		speed_.y = 0.0f;
+		// Normalizeして移動方向を正規化しているのでmaxSpeed_を掛けて速度を期待する数値へもどす
+		moveVelocity_ = Normalize(speed_) * maxSpeed_;
+		speed_.y = y;
+		moveVelocity_.y = speed_.y;
+	}
+
+	// しゃがみとダッシュは移動しているかどうかでも状態(アニメーション)が変わるため移動処理の後に調べる
+	if (maxSpeed_ == sneakSpeed_ * speedLimit_ && (speed_.x != 0.0f || speed_.z != 0.0f)) // しゃがみの最高速度なら
+	{
+		// プレイヤーの状態をしゃがみにする しゃがみ移動の処理は平行移動処理の後に書く
+		// 最高移動速度をsneakSpeedにする
+		moveType_ = PlayerMoveType::Sneak;
+	}
+	else if (maxSpeed_ == dashSpeed_ * speedLimit_ && (speed_.x != 0.0f || speed_.z != 0.0f)) { // ダッシュの最高速度なら
+		// プレイヤーの状態をダッシュにする
+		// 最高移動速度をdashSpeedにする
+		moveType_ = PlayerMoveType::Dash;
+	}
+
+	if (jump_)
+	{
+		moveType_ = PlayerMoveType::Jump;
+	}
+
+	// カメラの方向を調べて移動方向を決める
+	cameraTransform = camera->GetTransform();
+
+	// カメラのY軸回転角度のみを使用（上下の視点は完全に無視）
+	float cameraYRotation = cameraTransform.rotate.y;
+
+	// 前後左右の移動を水平面のみで直接計算
+	// 前後移動（Z軸）
+	Vector3 forward = {
+		sinf(cameraYRotation) * speed_.z,
+		0.0f,
+		cosf(cameraYRotation) * speed_.z
+	};
+
+	// 左右移動（X軸）
+	Vector3 right = {
+		cosf(cameraYRotation) * speed_.x,
+		0.0f,
+		-sinf(cameraYRotation) * speed_.x
+	};
+
+	// 水平移動と垂直移動を組み合わせる
+	moveVelocity_.x = forward.x + right.x;
+	moveVelocity_.y = speed_.y;  // ジャンプ・落下はそのまま
+	moveVelocity_.z = forward.z + right.z;
+
+
+	if (penetrationAmount.y < 0.0f)
+	{
+		speed_.y = 0.0f;
+		moveVelocity_.y = 0.0f;
+		jump_ = false;
+	}
+	else if (penetrationAmount.y > 0.0f)
+	{
+		speed_.y = 0.0f;
+		moveVelocity_.y = 0.0f;
+	}
+	if (dist >= -0.3f && dist < -0.1f && !jump_ && (moveVelocity_.x != 0.0f || moveVelocity_.z != 0.0f || moveVelocity_.y != 0.0f))
+	{
+		playerTransform_.translate.y += -dist;
+	}
+	// プレイヤーの移動量を今のプレイヤーの位置に加算する
+	playerTransform_.translate += moveVelocity_;
+	playerAABB_ += moveVelocity_;
+	CollisionManager::GetInstance()->UpdateCollisionTarget(playerAABB_, "player");
+	CollisionManager::GetInstance()->Update("player");
+	penetrationAmount = CollisionManager::GetInstance()->GetPenetration();
+	// オブジェクトに衝突している時のために貫通量を引く
+	playerTransform_.translate -= penetrationAmount;
+	// プレイヤーの回転をカメラの正面を向くように変える（Y軸回転のみ）
+	playerTransform_.rotate.y = cameraTransform.rotate.y;
+	// X軸（上下の視点）とZ軸（ロール）は0に固定
+	playerTransform_.rotate.x = 0.0f;
+	playerTransform_.rotate.z = 0.0f;
+
+	if (penetrationAmount.x != 0.0f || penetrationAmount.z != 0.0f)
+	{
+		moveType_ = PlayerMoveType::Idle;
+	}
+
+	// 速度が歩行状態よりも早ければ速度が上がっている感を出すためにFovを上げる(ジャンプ中はFovが増えないようにする)
+	if (((speed_.x == dashSpeed_ * speedLimit_ || speed_.z == dashSpeed_ * speedLimit_) || (speed_.x == -(dashSpeed_ * speedLimit_) || speed_.z == -(dashSpeed_ * speedLimit_))) && !jump_)
+	{
+		// ダッシュ
+		fovTime_ = 0.0f;
+		afterFovY_ = normalFovY_ + fovYBoost_;
+	}
+	else if (((speed_.x <= walkSpeed_ || speed_.z <= walkSpeed_) || (speed_.x <= -walkSpeed_ || speed_.z <= -walkSpeed_)) && !jump_)
+	{
+		// 歩行
+		fovTime_ = 0.0f;
+		afterFovY_ = normalFovY_;
+	}
+	// Fovの保管計算(一瞬でFovの数値が変わらないようにする)
+	fovTime_ += (1.0f / 60.0f) / 0.2f;
+	fovTime_ = std::clamp(fovTime_, 0.0f, 1.0f);
+	fovY_ = Lerp(camera->GetfovY(), afterFovY_, fovTime_);
+
+	// 計算結果をカメラにセット
+	camera->SetFovY(fovY_);
+
+	// プレイヤーの入力に応じてアニメーションを変える
+	if (moveType_ != moveTypePre_)
+	{
+		switch (moveType_)
+		{
+		case PlayerMoveType::Idle:
+			playerModel_->ChangePlayAnimation();
+			playerCollisionModel_->ChangePlayAnimation();
+			break;
+		case PlayerMoveType::Crouch:
+			playerModel_->SetChangeAnimationSpeed(0.14f);
+			playerModel_->ChangePlayAnimation("crouch");
+			playerCollisionModel_->SetChangeAnimationSpeed(0.14f);
+			playerCollisionModel_->ChangePlayAnimation("crouch");
+			break;
+		case PlayerMoveType::Walk:
+			playerModel_->SetChangeAnimationSpeed();
+			playerModel_->ChangePlayAnimation("walk");
+			playerCollisionModel_->SetChangeAnimationSpeed();
+			playerCollisionModel_->ChangePlayAnimation("walk");
+			break;
+		case PlayerMoveType::Backwalk:
+			playerModel_->SetChangeAnimationSpeed();
+			playerModel_->SetAnimationSpeed(20.0f);
+			playerModel_->ChangePlayAnimation("backwalk");
+			playerCollisionModel_->SetChangeAnimationSpeed();
+			playerCollisionModel_->SetAnimationSpeed(20.0f);
+			playerCollisionModel_->ChangePlayAnimation("backwalk");
+			break;
+		case PlayerMoveType::Sneak:
+			playerModel_->SetChangeAnimationSpeed(0.18f);
+			playerModel_->ChangePlayAnimation("sneak");
+			playerCollisionModel_->SetChangeAnimationSpeed(0.18f);
+			playerCollisionModel_->ChangePlayAnimation("sneak");
+			break;
+		case PlayerMoveType::Dash:
+			playerModel_->SetChangeAnimationSpeed(0.2f);
+			playerModel_->ChangePlayAnimation("dash");
+			playerCollisionModel_->SetChangeAnimationSpeed(0.2f);
+			playerCollisionModel_->ChangePlayAnimation("dash");
+			break;
+		case PlayerMoveType::Jump:
+			playerModel_->SetChangeAnimationSpeed(0.1f);
+			playerModel_->ChangePlayAnimation("fall");
+			//playerCollisionModel_->SetChangeAnimationSpeed(0.1f);
+			//playerCollisionModel_->ChangePlayAnimation("fall");
+			break;
+		}
+	}
+	moveTypePre_ = moveType_;
 }
 
 void Player::Sneak()
@@ -138,23 +462,33 @@ void Player::DebugUpdate()
 	ImGui::Begin("Animation");
 	ImGui::SetWindowPos(ImVec2{ 0.0f, 18.0f * 3.0f });
 	ImGui::SetWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) - 18.0f * 3.0f });
+	if (ImGui::Button("Idle"))
+	{
+		moveType_ = PlayerMoveType::Idle;
+	}
+	if (ImGui::Button("Walk"))
+	{
+		moveType_ = PlayerMoveType::Walk;
+	}
+	if (ImGui::Button("Sneak"))
+	{
+		moveType_ = PlayerMoveType::Sneak;
+	}
+	if (ImGui::Button("Dash"))
+	{
+		moveType_ = PlayerMoveType::Dash;
+	}
 	ImGui::Checkbox("カメラ移動", &cameraMove_);
 	ImGui::Checkbox("カメラ追従", &parent_);
 	ImGui::DragFloat3("カメラオフセット", &cameraOffset_.x, 0.1f);
-	//ImGui::DragFloat3("移動量", &speed_.x);
+	ImGui::DragFloat3("移動量", &speed_.x);
 	ImGui::DragFloat3("MoveVelocity", &moveVelocity_.x, 0.1f);
 	ImGui::DragFloat3("Translate", &playerTransform_.translate.x, 0.1f);
 	ImGui::DragFloat3("Rotate", &playerTransform_.rotate.x, 0.1f);
 	ImGui::DragFloat3("Scale", &playerTransform_.scale.x, 0.1f);
-	static auto lastTime = std::chrono::high_resolution_clock::now();
-	auto currentTime = std::chrono::high_resolution_clock::now();
-	std::chrono::duration<float> delta = currentTime - lastTime;
-	lastTime = currentTime;
-	float time = delta.count();
-	ImGui::DragFloat("DeltaTime", &time, 0.1f);
-	//ImGui::DragFloat("最大落下速度", &fallLimit_, 0.1f);
-	//ImGui::DragFloat("ジャンプ量", &jumpAcceleration_, 0.1f);
-	//ImGui::DragFloat("落下量", &fallAcceleration_, 0.1f);
+	ImGui::DragFloat("最大落下速度", &fallLimit_, 0.1f);
+	ImGui::DragFloat("ジャンプ量", &jumpAcceleration_, 0.1f);
+	ImGui::DragFloat("落下量", &fallAcceleration_, 0.1f);
 	ImGui::DragFloat("視野角", &normalFovY_, 0.01f);
 	ImGui::DragFloat("視野角の上昇値", &fovYBoost_, 0.01f);
 	float dist = CollisionManager::GetInstance()->GetGroundDistance("player");
