@@ -5,47 +5,49 @@
 
 #include "JsonLoader.h"
 
+using namespace std;
+
 void GameScene::Initialize() {
 
 	TextureManager::GetInstance()->LoadTexture("Resources/rostock_laage_airport_4k.dds");
 
-	camera = new Camera();
+	camera = make_unique<Camera>();
 
-	SkyBox::GetInstance()->SetCamera(camera);
+	SkyBox::GetInstance()->SetCamera(camera.get());
 	SkyBox::GetInstance()->SetTexture("Resources/rostock_laage_airport_4k.dds");
 
 	input = Input::GetInstance();
 	input->ShowMouseCursor(false);
 
-	ParticleManager::GetInstance()->SetCamera(camera);
+	ParticleManager::GetInstance()->SetCamera(camera.get());
 
 	ParticleManager::GetInstance()->CreateParticleGroupFromOBJ("Resources/Debug/obj", "plane.obj", "plane");
 
 	ParticleManager::GetInstance()->CreateParticleGroup(ParticleType::plane, "Resources/Particle/circle2.png", "circle");
 
-	Object3dBase::GetInstance()->SetDefaultCamera(camera);
+	Object3dBase::GetInstance()->SetDefaultCamera(camera.get());
 
 	Transform pl = {
 		{1.0f, 1.0f, 1.0f},
 		{0.0f, 0.0f, 0.0f},
 		{0.0f, 0.1f, 0.0f}
 	};
-	player_ = new Player();
-	player_->Initialize(camera, input, pl, true);
+	player_ = make_unique<Player>();
+	player_->Initialize(camera.get(), input, pl, true);
 	player_->SetClearDistance(50.0f);
 
-	land = new Object3d();
+	land = make_unique<Object3d>();
 	land->Initialize();
 	//land->SetModel("Resources/Debug/gltf", "LandPlate.gltf", true);
 	land->SetModel("Resources/Model/gltf/Stage/map01", "map01.gltf", true);
 
-	CollisionManager::GetInstance()->AddCollision(land, "land");
+	CollisionManager::GetInstance()->AddCollision(land.get(), "land");
 
 	Audio::GetInstance()->LoadMP3("Resources/sekiranun.mp3", "bgm", 0.1f);
 
 	LevelData levelData = JsonLoader::GetInstance()->LoadJsonTransform("Resources/Debug/json", "PlayerStartPoint.json");
 
-	goal_ = new Goal();
+	goal_ = make_unique<Goal>();
 	goal_->Initalize();
 
 	FadeManager::GetInstance()->FadeIn(1.0f);
@@ -152,7 +154,7 @@ void GameScene::Draw() {
 
 		SkinningObject3dBase::GetInstance()->ShaderDraw();
 
-		player_->Draw();
+		//player_->Draw();
 
 		SpriteBase::GetInstance()->ShaderDraw();
 
@@ -163,14 +165,6 @@ void GameScene::Draw() {
 }
 
 void GameScene::Finalize() {
-
-	delete camera;
-
-	delete player_;
-
-	delete land;
-
-	delete goal_;
 
 	CollisionManager::GetInstance()->DeleteCollision("land");
 

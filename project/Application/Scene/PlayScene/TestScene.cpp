@@ -9,21 +9,21 @@ void TestScene::Initialize() {
 
 	//ModelManager::GetInstance()->LoadModel("Resources/Model/gltf/human", "walkMultiMaterial.gltf", true, true);
 
-	camera = new Camera();
+	camera = std::make_unique<Camera>();
 	camera->SetRotate(Vector3(SwapRadian(10.0f), 0.0f, 0.0f));
 	camera->SetTranslate({ 0.0f, 2.8f, -8.0f });
 
 	TextureManager::GetInstance()->LoadTexture("Resources/rostock_laage_airport_4k.dds");
 
-	SkyBox::GetInstance()->SetCamera(camera);
+	SkyBox::GetInstance()->SetCamera(camera.get());
 	SkyBox::GetInstance()->SetTexture("Resources/rostock_laage_airport_4k.dds");
 
 	input = Input::GetInstance();
 	input->ShowMouseCursor(true);
 
-	Object3dBase::GetInstance()->SetDefaultCamera(camera);
+	Object3dBase::GetInstance()->SetDefaultCamera(camera.get());
 
-	ParticleManager::GetInstance()->SetCamera(camera);
+	ParticleManager::GetInstance()->SetCamera(camera.get());
 
 	grid = new Object3d();
 	grid->Initialize();
@@ -51,7 +51,7 @@ void TestScene::Initialize() {
 		{0.0f, 0.0f, 0.0f},
 		{0.0f, 1.0f, 0.0f},
 	};
-	player->Initialize(camera, input, t, true);
+	player->Initialize(camera.get(), input, t, true);
 
 	//LevelData jsonData = JsonLoader::GetInstance()->LoadJsonTransform("Resources/Stage/Json", "Debug.json");
 
@@ -154,8 +154,6 @@ void TestScene::Draw() {
 }
 
 void TestScene::Finalize() {
-
-	delete camera;
 
 	delete grid;
 

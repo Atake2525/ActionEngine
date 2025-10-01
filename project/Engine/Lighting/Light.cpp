@@ -61,7 +61,8 @@ void Light::Initialize() {
 }
 
 void Light::Update() {
-#ifdef _DEBUG
+#ifdef _LightDEBUG
+
 	ImGui::Begin("Light");
 	ImGui::SetWindowPos(ImVec2{ 0.0f, 18.0f * 2 });
 	ImGui::SetWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) - 18.0f * 2 });
@@ -95,7 +96,7 @@ void Light::Update() {
 	}
 	ImGui::End();
 
-#endif // _DEBUG
+#endif // _LightDEBUG
 
 
 	spotLightData->cosFalloffStart = max(spotLightData->cosFalloffStart, spotLightData->cosAngle);

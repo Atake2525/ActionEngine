@@ -48,7 +48,7 @@ public:
 
 private:
 	bool finished = false;
-	Camera* camera = nullptr;
+	std::unique_ptr<Camera> camera;
 	Input* input = nullptr;
 
 	bool cursorshow = true;

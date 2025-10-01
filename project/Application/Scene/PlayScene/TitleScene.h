@@ -16,6 +16,7 @@
 #include "SkyBox.h"
 #include <map>
 #include "UI.h"
+#include <memory>
 
 #pragma once
 
@@ -46,14 +47,14 @@ public:
 
 private:
 	bool finished = false;
-	Camera* camera = nullptr;
+	std::unique_ptr<Camera> camera;
 	Input* input = nullptr;
 
 	bool start = false;
 
-	Object3d* stageModel = nullptr;
+	std::unique_ptr<Object3d> stageModel = nullptr;
 
-	Object3d* playerModel = nullptr;
+	std::unique_ptr<Object3d> playerModel = nullptr;
 
 	enum class Select {
 		Play = 0,
@@ -66,23 +67,23 @@ private:
 	Select select = Select::Play;
 	Select selectPre = Select::Play;
 
-	UI* startUI = nullptr;
+	std::unique_ptr<UI> startUI = nullptr;
 
-	UI* playUI = nullptr;
+	std::unique_ptr<UI> playUI = nullptr;
 
-	UI* exitUI = nullptr;
+	std::unique_ptr<UI> exitUI = nullptr;
 
-	UI* settingUI = nullptr;
+	std::unique_ptr<UI> settingUI = nullptr;
 
-	UI* creditUI = nullptr;
+	std::unique_ptr<UI> creditUI = nullptr;
 
-	Sprite* uiFrame = nullptr;
+	std::unique_ptr<Sprite> uiFrame = nullptr;
 
-	Sprite* gamePad = nullptr;
+	std::unique_ptr<Sprite> gamePad = nullptr;
 
-	Sprite* gamePadOnFrame = nullptr;
+	std::unique_ptr<Sprite> gamePadOnFrame = nullptr;
 
-	Sprite* credit_sound = nullptr;
+	std::unique_ptr<Sprite> credit_sound = nullptr;
 
 	Vector3 uiFrameStartPoint = { 0.0f, 0.0f, 0.0f };
 

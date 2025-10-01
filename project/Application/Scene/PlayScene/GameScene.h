@@ -17,6 +17,7 @@
 #include "SkyBox.h"
 #include "CollisionManager.h"
 #include "Goal.h"
+#include <memory>
 
 #pragma once
 
@@ -50,9 +51,9 @@ private:
 
 	bool sneak = false;
 
-	Object3d* land = nullptr;
+	std::unique_ptr<Object3d> land = nullptr;
 
-	Camera* camera = nullptr;
+	std::unique_ptr<Camera> camera = nullptr;
 
 	bool finished = false;
 
@@ -70,10 +71,10 @@ private:
 	Vector2 leftTop;
 	Transform transformSprite;
 
-	Player* player_ = nullptr;
+	std::unique_ptr<Player> player_ = nullptr;
 
 	bool isGoal_ = false;
 
-	Goal* goal_ = nullptr;
+	std::unique_ptr<Goal> goal_ = nullptr;
 };
 
