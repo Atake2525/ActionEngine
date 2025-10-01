@@ -31,6 +31,8 @@ public:
 
     const AABB& GetAABB() const { return playerAABB_; }
 
+    const OBB& GetOBB() const { return playerOBB_; }
+
     const bool IsClear() const;
 
 private: // メンバ変数宣言
@@ -46,6 +48,8 @@ private: // メンバ変数宣言
     Object3d* playerCollisionModel_ = nullptr;
 
     AABB playerAABB_;
+
+    OBB playerOBB_;
 
 private: // ステータス(移動系)宣言
     Transform playerTransform_;
@@ -82,7 +86,7 @@ private: // ステータス(カメラ系)宣言
     Vector2 cameraSpeed = { 0.3f, 0.3f };
     Matrix4x4 cameraMatrix;
 
-    Vector3 cameraOffset_ = { 0.0f, -0.08f, 0.0f };
+    Vector3 cameraOffset_ = { 0.0f, 0.0f, 0.0f };
 
     float fovTime_ = 0.0f;
     float fovY_ = 0.45f; // 現在のFov数値
