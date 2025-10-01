@@ -67,6 +67,8 @@ private:
 	Select select = Select::Play;
 	Select selectPre = Select::Play;
 
+	std::unique_ptr<Object3d> title = nullptr;
+
 	std::unique_ptr<UI> startUI = nullptr;
 
 	std::unique_ptr<UI> playUI = nullptr;

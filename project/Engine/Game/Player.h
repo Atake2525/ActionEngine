@@ -62,7 +62,7 @@ private: // ステータス(移動系)宣言
     float speedLimit_ = 2.5f; // 移動速度限界
 
     float translateAcceleration_ = 0.04f; // 慣性(接地状態)
-    float flyAcceleration_ = 0.03f; // 慣性(ジャンプ中)
+    float flyAcceleration_ = 0.022f; // 慣性(ジャンプ中)
     float wallDashAcceleration_ = -0.04f; // 壁走り中の落下速度(固定)
 
     // 各アニメーションの速度倍率
@@ -80,7 +80,7 @@ private: // ステータス(移動系)宣言
     float jumpAcceleration_ = 0.24f; // ジャンプの移動量
     float fallLimit_ = -2.4f; // 落下速度上限
 
-    float fallAcceleration_ = 0.008f; // 落下の加速度
+    float fallAcceleration_ = 0.01f; // 落下の加速度
 
 private: // ステータス(カメラ系)宣言
     Transform cameraTransform;

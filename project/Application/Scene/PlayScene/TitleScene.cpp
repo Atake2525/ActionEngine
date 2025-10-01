@@ -26,6 +26,12 @@ void TitleScene::Initialize() {
 
 	ParticleManager::GetInstance()->SetCamera(camera.get());
 
+	title = make_unique<Object3d>();
+	title->Initialize();
+	title->SetModel("Resources/Model/gltf/title", "title.gltf", true);
+	title->SetTranslate({ 0.0f, 2.0f, 0.0f });
+	title->SetRotate(Vector3(SwapRadian(10.0f), 0.0f, 0.0f));
+
 	playerModel = make_unique<Object3d>();
 	playerModel->Initialize();
 	playerModel->SetModel("Resources/Model/gltf/char", "idle.gltf", true, true);
@@ -299,6 +305,8 @@ void TitleScene::Update() {
 
 	input->Update();
 
+	title->Update();
+
 	selectPre = select;
 
 	
@@ -315,10 +323,11 @@ void TitleScene::Draw() {
 		Object3dBase::GetInstance()->ShaderDraw();
 
 		stageModel->Draw();
+		title->Draw();
 
 		SkinningObject3dBase::GetInstance()->ShaderDraw();
 
-		//playerModel->Draw();
+		playerModel->Draw();
 
 		WireFrameObjectBase::GetInstance()->ShaderDraw();
 
@@ -352,11 +361,12 @@ void TitleScene::Draw() {
 
 		Object3dBase::GetInstance()->ShaderDraw();
 
-		stageModel->Draw();
+		//stageModel->Draw();
+		title->Draw();
 
 		SkinningObject3dBase::GetInstance()->ShaderDraw();
 
-		//playerModel->Draw();
+		playerModel->Draw();
 
 		WireFrameObjectBase::GetInstance()->ShaderDraw();
 
