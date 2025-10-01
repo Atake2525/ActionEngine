@@ -53,15 +53,15 @@ void TestScene::Initialize() {
 	};
 	player->Initialize(camera, input, t, true);
 
-	LevelData jsonData = JsonLoader::GetInstance()->LoadJsonTransform("Resources/Stage/Json", "Debug.json");
+	//LevelData jsonData = JsonLoader::GetInstance()->LoadJsonTransform("Resources/Stage/Json", "Debug.json");
 
-	for (const auto& data : jsonData.datas)
+	/*for (const auto& data : jsonData.datas)
 	{
 		if (data.second.file_name == "Trap")
 		{
 
 		}
-	}
+	}*/
 
 }
 
@@ -95,15 +95,12 @@ void TestScene::Update() {
 
 	bool flag = false;
 
-	for (const OBB obb : box1->GetMultiMeshOBB())
+	if (CheckOBBCollision(box1->GetOBB(), box2->GetOBB()))
 	{
-		if (CheckOBBCollision(obb, box2->GetOBB()))
-		{
-			flag = true;
-		}
+		flag = true;
 	}
 
-	if (CollisionAABB(box2->GetAABB(), player->GetAABB()))
+	if (CheckOBBCollision(box1->GetOBB(), player->GetOBB()))
 	{
 		flag = true;
 	}
@@ -143,8 +140,10 @@ void TestScene::Draw() {
 	box1->Draw();
 	box2->Draw();
 	plate->Draw();
+	player->Draw();
 
 	SkinningObject3dBase::GetInstance()->ShaderDraw();
+
 
 	WireFrameObjectBase::GetInstance()->ShaderDraw();
 
