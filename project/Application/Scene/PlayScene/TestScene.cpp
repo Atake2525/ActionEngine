@@ -2,7 +2,8 @@
 #include "externels/imgui/imgui.h"
 #include "externels/imgui/imgui_impl_dx12.h"
 #include "externels/imgui/imgui_impl_win32.h"
-
+#include "CollisionManager.h"
+#include "Collision.h"
 
 void TestScene::Initialize() {
 
@@ -37,10 +38,36 @@ void TestScene::Initialize() {
 	box2->Initialize();
 	box2->SetModel("Resources/Debug/gltf", "Box.gltf", true);
 	box2->SetTranslate({ 0.0f, 0.0f, 5.0f });
+
+	plate = std::make_unique<Object3d>();
+	plate->Initialize();
+	plate->SetModel("Resources/Debug/gltf", "Plante.gltf", true);
+
+	CollisionManager::GetInstance()->AddCollision(plate.get(), "plate");
+
+	player = std::make_unique<Player>();
+	Transform t = {
+		{1.0f, 1.0f, 1.0f},
+		{0.0f, 0.0f, 0.0f},
+		{0.0f, 1.0f, 0.0f},
+	};
+	player->Initialize(camera, input, t, true);
+
+	LevelData jsonData = JsonLoader::GetInstance()->LoadJsonTransform("Resources/Stage/Json", "Debug.json");
+
+	for (const auto& data : jsonData.datas)
+	{
+		if (data.second.file_name == "Trap")
+		{
+
+		}
+	}
+
 }
 
 void TestScene::Update() {
 
+	player->Update();
 	grid->Update();
 
 	camera->Update();
@@ -76,10 +103,10 @@ void TestScene::Update() {
 		}
 	}
 
-	//if (CheckOBBCollision(box1->GetOBB(), box2->GetOBB()))
-	//{
-	//	flag = true;
-	//}
+	if (CollisionAABB(box2->GetAABB(), player->GetAABB()))
+	{
+		flag = true;
+	}
 
 	if (flag)
 	{
@@ -89,6 +116,19 @@ void TestScene::Update() {
 	{
 		box1->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
 	}
+
+	if (input->TriggerKey(DIK_ESCAPE))
+	{
+		finished = true;
+	}
+
+	if (input->TriggerKey(DIK_F11))
+	{
+		cursorshow = !cursorshow;
+	}
+	input->ShowMouseCursor(cursorshow);
+
+	plate->Update();
 
 	input->Update();
 }
@@ -102,6 +142,7 @@ void TestScene::Draw() {
 
 	box1->Draw();
 	box2->Draw();
+	plate->Draw();
 
 	SkinningObject3dBase::GetInstance()->ShaderDraw();
 
@@ -118,4 +159,6 @@ void TestScene::Finalize() {
 	delete camera;
 
 	delete grid;
+
+	CollisionManager::GetInstance()->DeleteCollision("plate");
 }
