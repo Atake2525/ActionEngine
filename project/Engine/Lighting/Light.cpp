@@ -61,7 +61,7 @@ void Light::Initialize() {
 }
 
 void Light::Update() {
-#ifdef _LightDEBUG
+#ifdef _DEBUG
 
 	ImGui::Begin("Light");
 	ImGui::SetWindowPos(ImVec2{ 0.0f, 18.0f * 2 });
@@ -96,7 +96,7 @@ void Light::Update() {
 	}
 	ImGui::End();
 
-#endif // _LightDEBUG
+#endif // _DEBUG
 
 
 	spotLightData->cosFalloffStart = max(spotLightData->cosFalloffStart, spotLightData->cosAngle);

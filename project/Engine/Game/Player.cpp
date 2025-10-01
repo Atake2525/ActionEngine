@@ -111,7 +111,7 @@ void Player::Draw() {
 	{
 		playerModel_->Draw();
 	}*/
-	playerCollisionModel_->Draw();
+	playerModel_->Draw();
 }
 
 const bool Player::IsClear() const
@@ -360,10 +360,10 @@ void Player::Move()
 		speed_.y = 0.0f;
 		moveVelocity_.y = 0.0f;
 	}
-	if (dist >= -0.3f && dist < -0.1f && !jump_ && (moveVelocity_.x != 0.0f || moveVelocity_.z != 0.0f || moveVelocity_.y != 0.0f))
+	/*if (dist >= -0.3f && dist < -0.1f && !jump_ && (moveVelocity_.x != 0.0f || moveVelocity_.z != 0.0f || moveVelocity_.y != 0.0f))
 	{
 		playerTransform_.translate.y += -dist;
-	}
+	}*/
 	// プレイヤーの移動量を今のプレイヤーの位置に加算する
 	playerTransform_.translate += moveVelocity_;
 	playerAABB_ += moveVelocity_;
@@ -422,8 +422,6 @@ void Player::Move()
 		case PlayerMoveType::Walk:
 			playerModel_->SetChangeAnimationSpeed();
 			playerModel_->ChangePlayAnimation("walk");
-			//playerCollisionModel_->SetChangeAnimationSpeed();
-			//playerCollisionModel_->ChangePlayAnimation("walk");
 			break;
 		case PlayerMoveType::Backwalk:
 			playerModel_->SetChangeAnimationSpeed();
@@ -504,6 +502,7 @@ void Player::DebugUpdate()
 
 	if (input->TriggerKey(DIK_R))
 	{
+		moveVelocity_ = { 0.0f };
 		playerModel_->SetTranslate({ 0.0f, 1.0f, 0.0f });
 	}
 	if (cameraMove_)
