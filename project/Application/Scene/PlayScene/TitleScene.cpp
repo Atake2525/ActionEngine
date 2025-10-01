@@ -4,82 +4,83 @@
 #include "externels/imgui/imgui_impl_win32.h"
 #include "WinApp.h"
 
+using namespace std;
 
 void TitleScene::Initialize() {
 
 	//ModelManager::GetInstance()->LoadModel("Resources/Model/gltf/human", "walkMultiMaterial.gltf", true, true);
 
-	camera = new Camera();
+	camera = make_unique<Camera>();
 	camera->SetRotate(Vector3(SwapRadian(10.0f), 0.0f, 0.0f));
 	camera->SetTranslate({ 0.0f, 2.8f, -4.4f });
 
 	TextureManager::GetInstance()->LoadTexture("Resources/rostock_laage_airport_4k.dds");
 
-	SkyBox::GetInstance()->SetCamera(camera);
+	SkyBox::GetInstance()->SetCamera(camera.get());
 	SkyBox::GetInstance()->SetTexture("Resources/rostock_laage_airport_4k.dds");
 
 	input = Input::GetInstance();
 	input->ShowMouseCursor(true);
 
-	Object3dBase::GetInstance()->SetDefaultCamera(camera);
+	Object3dBase::GetInstance()->SetDefaultCamera(camera.get());
 
-	ParticleManager::GetInstance()->SetCamera(camera);
+	ParticleManager::GetInstance()->SetCamera(camera.get());
 
-	playerModel = new Object3d();
+	playerModel = make_unique<Object3d>();
 	playerModel->Initialize();
 	playerModel->SetModel("Resources/Model/gltf/char", "idle.gltf", true, true);
 	playerModel->ToggleStartAnimation();
 	playerModel->SetTranslate({ 0.0f, 0.1f, 0.0f });
 
-	stageModel = new Object3d();
+	stageModel = make_unique<Object3d>();
 	stageModel->Initialize();
 	stageModel->SetModel("Resources/Model/gltf/Stage/map01", "map01.gltf", true);
 
-	startUI = new UI();
+	startUI = make_unique<UI>();
 	startUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f), float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) - 64.0f * 3.0f }, Origin::Center, "Resources/Sprite/UI/start.png");
 	startUI->function = [this]() {
 		start = true;
 	};
 
-	playUI = new UI();
+	playUI = make_unique<UI>();
 	playUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f) + 128.0f, float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) }, Origin::Center, "Resources/Sprite/UI/play.png");
 	playUI->function = []() {
 		SceneManager::GetInstance()->SetNextScene("GAMESCENE");
 	};
 
-	settingUI = new UI();
+	settingUI = make_unique<UI>();
 	settingUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f) + 128.0f, float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) + 72.0f }, Origin::Center, "Resources/Sprite/UI/setting.png");
 	settingUI->function = [this]() {
 	};
 
-	exitUI = new UI();
+	exitUI = make_unique<UI>();
 	exitUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f) + 128.0f, float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) + 72.0f * 2.0f }, Origin::Center, "Resources/Sprite/UI/exit.png");
 	exitUI->function = [this]() {
 		finished = true;
 	};
 
-	creditUI = new UI();
+	creditUI = make_unique<UI>();
 	creditUI->CreateButton({ 64.0f + 16.0f, float(WinApp::GetInstance()->GetkClientHeight() - 24.0f - 16.0f) }, Origin::Center, "Resources/Sprite/UI/credit.png");
 	creditUI->function = [this]() {
 		showCredit = !showCredit;
 	};
 
-	uiFrame = new Sprite();
+	uiFrame = make_unique<Sprite>();
 	uiFrame->Initialize("Resources/Sprite/UI/uiFrame.png");
 	uiFrame->SetAnchorPoint({ 0.5f, 0.5f });
 	uiFrame->SetPosition({ startUI->GetTransform().translate.x, startUI->GetTransform().translate.y });
 
-	gamePad = new Sprite();
+	gamePad = make_unique<Sprite>();
 	gamePad->Initialize("Resources/Sprite/UI/gamepad.png");
 	//gamePad->SetAnchorPoint({ 0.5f, 0.5f });
 	gamePad->SetPosition({ float(WinApp::GetInstance()->GetkClientWidth() - gamePad->GetTextureSize().x - 10.0f), float(WinApp::GetInstance()->GetkClientHeight() - gamePad->GetTextureSize().y - 10.0f) });
 
-	gamePadOnFrame = new Sprite();
+	gamePadOnFrame = make_unique<Sprite>();
 	gamePadOnFrame->Initialize("Resources/Sprite/UI/gamepadONFrame.png");
 	//gamePadOnFrame->SetAnchorPoint({ 0.5f, 0.5f });
 	gamePadOnFrame->SetPosition({ float(WinApp::GetInstance()->GetkClientWidth() - gamePad->GetTextureSize().x - 10.0f), float(WinApp::GetInstance()->GetkClientHeight() - gamePad->GetTextureSize().y - 10.0f) });
 
-	credit_sound = new Sprite();
+	credit_sound = make_unique<Sprite>();
 	credit_sound->Initialize("Resources/Sprite/UI/credit_sound.png");
 	credit_sound->SetAnchorPoint({ 0.5f, 0.5f });
 	credit_sound->SetPosition({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f), float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) });
@@ -317,7 +318,7 @@ void TitleScene::Draw() {
 
 		SkinningObject3dBase::GetInstance()->ShaderDraw();
 
-		playerModel->Draw();
+		//playerModel->Draw();
 
 		WireFrameObjectBase::GetInstance()->ShaderDraw();
 
@@ -355,7 +356,7 @@ void TitleScene::Draw() {
 
 		SkinningObject3dBase::GetInstance()->ShaderDraw();
 
-		playerModel->Draw();
+		//playerModel->Draw();
 
 		WireFrameObjectBase::GetInstance()->ShaderDraw();
 
@@ -376,27 +377,4 @@ void TitleScene::Draw() {
 
 void TitleScene::Finalize() {
 
-	delete stageModel;
-
-	delete camera;
-
-	delete playerModel;
-
-	delete startUI;
-
-	delete playUI;
-
-	delete exitUI;
-
-	delete settingUI;
-
-	delete creditUI;
-
-	delete uiFrame;
-
-	delete gamePad;
-
-	delete gamePadOnFrame;
-
-	delete credit_sound;
 }

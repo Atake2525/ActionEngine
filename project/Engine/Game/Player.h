@@ -1,6 +1,7 @@
 #include "Camera.h"
 #include "Input.h"
 #include "Object3d.h"
+#include <memory>
 
 #pragma once
 
@@ -43,9 +44,9 @@ private: // メンバ変数宣言
     Camera* camera = nullptr;
     Input* input = nullptr;
 
-    Object3d* playerModel_ = nullptr;
+    std::unique_ptr<Object3d> playerModel_;
 
-    Object3d* playerCollisionModel_ = nullptr;
+    std::unique_ptr<Object3d> playerCollisionModel_;
 
     AABB playerAABB_;
 

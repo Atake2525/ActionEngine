@@ -77,6 +77,28 @@ void MyGame::Update() {
 	FadeManager::GetInstance()->Update();
 	//JsonLoader::GetInstance()->Update();
 
+#ifdef _DEBUG
+
+	ImGui::Begin("シーン");
+	ImGui::SetWindowPos(ImVec2{ float(WinApp::GetInstance()->GetkClientWidth()) - 300.0f, 128.0f * 1 });
+	ImGui::SetWindowSize(ImVec2{ 300.0f, 165.0f });
+	if (ImGui::Button("TITLE", {280, 40}))
+	{
+		SceneManager::GetInstance()->SetNextScene("TITLE");
+	}
+	if (ImGui::Button("GAMESCENE", { 280, 40 }))
+	{
+		SceneManager::GetInstance()->SetNextScene("GAMESCENE");
+	}
+	if (ImGui::Button("TEST", { 280, 40 }))
+	{
+		SceneManager::GetInstance()->SetNextScene("TEST");
+	}
+	ImGui::End();
+
+#endif // _SceneDEBUG
+
+
 	if (SceneManager::GetInstance()->EndRequest())
 	{
 		finished = true;

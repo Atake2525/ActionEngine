@@ -6,8 +6,6 @@
 
 Player::~Player()
 {
-	delete playerCollisionModel_;
-	delete playerModel_;
 	CollisionManager::GetInstance()->DeleteCollisionTarget("player");
 }
 
@@ -24,7 +22,7 @@ void Player::Initialize(Camera* camera, Input* input, const Transform startPoint
 
 	moveVelocity_ = { 0.0f, 0.0f, 0.0f };
 
-	playerModel_ = new Object3d();
+	playerModel_ = std::make_unique<Object3d>();
 	playerModel_->Initialize();
 	playerModel_->SetModel("Resources/Model/gltf/char", "onlyBodyIdle.gltf", true, true);
 	playerModel_->AddAnimation("Resources/Model/gltf/char", "walk.gltf", "walk");
@@ -37,7 +35,7 @@ void Player::Initialize(Camera* camera, Input* input, const Transform startPoint
 	playerModel_->SetTransform(playerTransform_);
 	playerModel_->ToggleStartAnimation();
 
-	playerCollisionModel_ = new Object3d();
+	playerCollisionModel_ = std::make_unique<Object3d>();
 	playerCollisionModel_->Initialize();
 	playerCollisionModel_->SetModel("Resources/Model/gltf/Player", "PlayerCollision.gltf", true);
 	/*playerCollisionModel_->SetModel("Resources/Model/gltf/char", "idle.gltf", true, true);
@@ -62,7 +60,9 @@ void Player::Update() {
 	if (parent_)
 	{
 		// プレイヤーの回転からcameraOffsetを計算してparent
-		Vector3 position = playerModel_->GetJointPosition("Head");
+		Vector3 position;
+		position = playerTransform_.translate;
+		position.y = playerModel_->GetJointPosition("Head").y;
 		playerAABB_.max.y = position.y;
 
 		Vector3	camOffset = cameraOffset_;
