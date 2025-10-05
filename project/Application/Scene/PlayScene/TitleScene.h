@@ -99,5 +99,9 @@ private:
 
 	bool showCredit = false;
 
+	bool titleUp = false;
+
+	float easeTime = 0.0f;
+
 };
 
