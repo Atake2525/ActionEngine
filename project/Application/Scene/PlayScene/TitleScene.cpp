@@ -3,6 +3,7 @@
 #include "externels/imgui/imgui_impl_dx12.h"
 #include "externels/imgui/imgui_impl_win32.h"
 #include "WinApp.h"
+#include "DirectXBase.h"
 
 using namespace std;
 
@@ -29,8 +30,8 @@ void TitleScene::Initialize() {
 	title = make_unique<Object3d>();
 	title->Initialize();
 	title->SetModel("Resources/Model/gltf/title", "title.gltf", true);
-	title->SetTranslate({ 0.0f, 2.0f, 0.0f });
-	title->SetRotate(Vector3(SwapRadian(10.0f), 0.0f, 0.0f));
+	title->SetTranslate({ -0.04f, 2.0f, 0.0f });
+	title->SetRotate(Vector3(SwapRadian(10.0f), 0.01f, 0.0f));
 
 	playerModel = make_unique<Object3d>();
 	playerModel->Initialize();
@@ -305,6 +306,34 @@ void TitleScene::Update() {
 
 	input->Update();
 
+	Transform titleTransform = title->GetTransform();
+
+	if (titleTransform.translate.y == 2.1f)
+	{
+		titleUp = false;
+	}
+
+	if (titleTransform.translate.y == 1.9f)
+	{
+		titleUp = true;
+	}
+
+	easeTime += DirectXBase::GetInstance()->GetDeltaTime() / 2.0f;
+
+	if (titleUp)
+	{
+		titleTransform.translate.y = easeInOut(easeTime, 1.9f, 2.1f);
+	}
+	else
+	{
+		titleTransform.translate.y = easeInOut(easeTime, 2.1f, 1.9f);
+	}
+
+	if (easeTime > 1.0f)
+	{
+		easeTime = 0.0f;
+	}
+	title->SetTransform(titleTransform);
 	title->Update();
 
 	selectPre = select;
@@ -361,7 +390,7 @@ void TitleScene::Draw() {
 
 		Object3dBase::GetInstance()->ShaderDraw();
 
-		//stageModel->Draw();
+		stageModel->Draw();
 		title->Draw();
 
 		SkinningObject3dBase::GetInstance()->ShaderDraw();

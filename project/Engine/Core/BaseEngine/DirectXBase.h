@@ -49,6 +49,8 @@ public:
 	void InitializePosteffect();
 
 	float GetDeltaTime();
+	// 毎フレームで呼び出す
+	float GetElapsedTime();
 
 	// 描画前処理
 	void PreDraw();
