@@ -6,8 +6,6 @@
 
 Player::~Player()
 {
-	delete playerCollisionModel_;
-	delete playerModel_;
 	CollisionManager::GetInstance()->DeleteCollisionTarget("player");
 }
 
@@ -24,7 +22,7 @@ void Player::Initialize(Camera* camera, Input* input, const Transform startPoint
 
 	moveVelocity_ = { 0.0f, 0.0f, 0.0f };
 
-	playerModel_ = new Object3d();
+	playerModel_ = std::make_unique<Object3d>();
 	playerModel_->Initialize();
 	playerModel_->SetModel("Resources/Model/gltf/char", "onlyBodyIdle.gltf", true, true);
 	playerModel_->AddAnimation("Resources/Model/gltf/char", "walk.gltf", "walk");
@@ -37,9 +35,10 @@ void Player::Initialize(Camera* camera, Input* input, const Transform startPoint
 	playerModel_->SetTransform(playerTransform_);
 	playerModel_->ToggleStartAnimation();
 
-	playerCollisionModel_ = new Object3d();
+	playerCollisionModel_ = std::make_unique<Object3d>();
 	playerCollisionModel_->Initialize();
-	playerCollisionModel_->SetModel("Resources/Model/gltf/char", "idle.gltf", true, true);
+	playerCollisionModel_->SetModel("Resources/Model/gltf/Player", "PlayerCollision.gltf", true);
+	/*playerCollisionModel_->SetModel("Resources/Model/gltf/char", "idle.gltf", true, true);
 	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "walk.gltf", "walk");
 	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "sneak.gltf", "sneak");
 	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "dash.gltf", "dash");
@@ -47,7 +46,7 @@ void Player::Initialize(Camera* camera, Input* input, const Transform startPoint
 	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "crouch.gltf", "crouch");
 	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "walk_back.gltf", "backwalk");
 	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "fall.gltf", "fall");
-	playerCollisionModel_->ToggleStartAnimation();
+	playerCollisionModel_->ToggleStartAnimation();*/
 
 	playerAABB_ = playerCollisionModel_->GetAABB();
 
@@ -57,11 +56,14 @@ void Player::Initialize(Camera* camera, Input* input, const Transform startPoint
 void Player::Update() {
 	cameraTransform = camera->GetTransform();
 	playerTransform_ = playerModel_->GetTransform();
-	playerAABB_ = playerModel_->GetAABB();
+	playerAABB_ = playerCollisionModel_->GetAABB();
 	if (parent_)
 	{
 		// プレイヤーの回転からcameraOffsetを計算してparent
-		Vector3 position = playerCollisionModel_->GetJointPosition("Head");
+		Vector3 position;
+		position = playerTransform_.translate;
+		position.y = playerModel_->GetJointPosition("Head").y;
+		playerAABB_.max.y = position.y;
 
 		Vector3	camOffset = cameraOffset_;
 
@@ -90,9 +92,10 @@ void Player::Update() {
 	Rotation();
 	Move();
 
+	playerOBB_ = CreateOBB(playerTransform_, playerAABB_);
 	playerModel_->SetAnimationSpeed(1.0f);
 	playerModel_->SetTransform(playerTransform_);
-	playerCollisionModel_->SetAnimationSpeed(1.0f);
+	//playerCollisionModel_->SetAnimationSpeed(1.0f);
 	playerCollisionModel_->SetTransform(playerTransform_);
 	playerCollisionModel_->Update();
 	playerModel_->Update();
@@ -108,6 +111,7 @@ void Player::Draw() {
 	{
 		playerModel_->Draw();
 	}*/
+	playerModel_->Draw();
 }
 
 const bool Player::IsClear() const
@@ -356,10 +360,10 @@ void Player::Move()
 		speed_.y = 0.0f;
 		moveVelocity_.y = 0.0f;
 	}
-	if (dist >= -0.3f && dist < -0.1f && !jump_ && (moveVelocity_.x != 0.0f || moveVelocity_.z != 0.0f || moveVelocity_.y != 0.0f))
+	/*if (dist >= -0.3f && dist < -0.1f && !jump_ && (moveVelocity_.x != 0.0f || moveVelocity_.z != 0.0f || moveVelocity_.y != 0.0f))
 	{
 		playerTransform_.translate.y += -dist;
-	}
+	}*/
 	// プレイヤーの移動量を今のプレイヤーの位置に加算する
 	playerTransform_.translate += moveVelocity_;
 	playerAABB_ += moveVelocity_;
@@ -407,39 +411,37 @@ void Player::Move()
 		{
 		case PlayerMoveType::Idle:
 			playerModel_->ChangePlayAnimation();
-			playerCollisionModel_->ChangePlayAnimation();
+			//playerCollisionModel_->ChangePlayAnimation();
 			break;
 		case PlayerMoveType::Crouch:
 			playerModel_->SetChangeAnimationSpeed(0.14f);
 			playerModel_->ChangePlayAnimation("crouch");
-			playerCollisionModel_->SetChangeAnimationSpeed(0.14f);
-			playerCollisionModel_->ChangePlayAnimation("crouch");
+			//playerCollisionModel_->SetChangeAnimationSpeed(0.14f);
+			//playerCollisionModel_->ChangePlayAnimation("crouch");
 			break;
 		case PlayerMoveType::Walk:
 			playerModel_->SetChangeAnimationSpeed();
 			playerModel_->ChangePlayAnimation("walk");
-			playerCollisionModel_->SetChangeAnimationSpeed();
-			playerCollisionModel_->ChangePlayAnimation("walk");
 			break;
 		case PlayerMoveType::Backwalk:
 			playerModel_->SetChangeAnimationSpeed();
 			playerModel_->SetAnimationSpeed(20.0f);
 			playerModel_->ChangePlayAnimation("backwalk");
-			playerCollisionModel_->SetChangeAnimationSpeed();
-			playerCollisionModel_->SetAnimationSpeed(20.0f);
-			playerCollisionModel_->ChangePlayAnimation("backwalk");
+			//playerCollisionModel_->SetChangeAnimationSpeed();
+			//playerCollisionModel_->SetAnimationSpeed(20.0f);
+			//playerCollisionModel_->ChangePlayAnimation("backwalk");
 			break;
 		case PlayerMoveType::Sneak:
 			playerModel_->SetChangeAnimationSpeed(0.18f);
 			playerModel_->ChangePlayAnimation("sneak");
-			playerCollisionModel_->SetChangeAnimationSpeed(0.18f);
-			playerCollisionModel_->ChangePlayAnimation("sneak");
+			//playerCollisionModel_->SetChangeAnimationSpeed(0.18f);
+			//playerCollisionModel_->ChangePlayAnimation("sneak");
 			break;
 		case PlayerMoveType::Dash:
 			playerModel_->SetChangeAnimationSpeed(0.2f);
 			playerModel_->ChangePlayAnimation("dash");
-			playerCollisionModel_->SetChangeAnimationSpeed(0.2f);
-			playerCollisionModel_->ChangePlayAnimation("dash");
+			//playerCollisionModel_->SetChangeAnimationSpeed(0.2f);
+			//playerCollisionModel_->ChangePlayAnimation("dash");
 			break;
 		case PlayerMoveType::Jump:
 			playerModel_->SetChangeAnimationSpeed(0.1f);
@@ -500,6 +502,7 @@ void Player::DebugUpdate()
 
 	if (input->TriggerKey(DIK_R))
 	{
+		moveVelocity_ = { 0.0f };
 		playerModel_->SetTranslate({ 0.0f, 1.0f, 0.0f });
 	}
 	if (cameraMove_)

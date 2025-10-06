@@ -205,6 +205,8 @@ void DirectXBase::Initialize() {
 	InitializeViewPortRect();
 	InitializeScissorRect();
 	CreateDXCCompiler();
+
+	
 }
 
 void DirectXBase::InitializePosteffect() {

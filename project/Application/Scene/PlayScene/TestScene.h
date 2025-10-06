@@ -16,6 +16,8 @@
 #include "SkyBox.h"
 #include <wrl.h>
 #include <memory>
+#include "Player.h"
+#include "JsonLoader.h"
 
 #pragma once
 
@@ -46,11 +48,16 @@ public:
 
 private:
 	bool finished = false;
-	Camera* camera = nullptr;
+	std::unique_ptr<Camera> camera;
 	Input* input = nullptr;
+
+	bool cursorshow = true;
 
 	std::unique_ptr<Object3d> box1;
 	std::unique_ptr<Object3d> box2;
+	std::unique_ptr<Object3d> plate;
+
+	std::unique_ptr<Player> player;
 
 	Object3d* grid = nullptr;
 

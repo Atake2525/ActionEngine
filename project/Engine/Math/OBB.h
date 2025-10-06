@@ -24,6 +24,20 @@ inline const OBB CreateOBB(const Matrix4x4 affine, const Vector3 halfSize) {
     return obb;
 }
 
+inline const OBB CreateOBB(const Transform transform, const AABB aabb) {
+    OBB obb;
+    Matrix4x4 matrix = MakeAffineMatrix(transform);
+
+    obb.axes[0] = Normalize({ matrix.m[0][0], matrix.m[0][1], matrix.m[0][2] });
+    obb.axes[1] = Normalize({ matrix.m[1][0], matrix.m[1][1], matrix.m[1][2] });
+    obb.axes[2] = Normalize({ matrix.m[2][0], matrix.m[2][1], matrix.m[2][2] });
+
+    obb.center = (aabb.min + aabb.max) * 0.5f;
+    obb.halfSize = (aabb.max - aabb.min) * 0.5f;
+
+    return obb;
+}
+
 inline const OBB CreateOBB(const Matrix4x4 affine, const Vector3 halfSize, const Vector3 center) {
 
     OBB obb;

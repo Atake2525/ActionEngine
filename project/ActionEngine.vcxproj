@@ -158,6 +158,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Scene\PlayScene\TestScene.cpp" />
     <ClCompile Include="Engine\Presentation\Cinematic\FadeManager.cpp" />
     <ClCompile Include="Engine\Game\Goal.cpp" />
+    <ClCompile Include="Engine\Game\Trap.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Scene\Manager\AbstractSceneFactory.h" />
@@ -223,6 +224,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Scene\PlayScene\TestScene.h" />
     <ClInclude Include="Engine\Presentation\Cinematic\FadeManager.h" />
     <ClInclude Include="Engine\Game\Goal.h" />
+    <ClInclude Include="Engine\Game\Trap.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externels\imgui\LICENSE.txt" />

@@ -1,6 +1,7 @@
 #include "Camera.h"
 #include "Input.h"
 #include "Object3d.h"
+#include <memory>
 
 #pragma once
 
@@ -29,6 +30,10 @@ public:
 
     void SetClearDistance(const float clearDistance) { clearDistance_ = clearDistance; }
 
+    const AABB& GetAABB() const { return playerAABB_; }
+
+    const OBB& GetOBB() const { return playerOBB_; }
+
     const bool IsClear() const;
 
 private: // メンバ変数宣言
@@ -39,11 +44,13 @@ private: // メンバ変数宣言
     Camera* camera = nullptr;
     Input* input = nullptr;
 
-    Object3d* playerModel_ = nullptr;
+    std::unique_ptr<Object3d> playerModel_;
 
-    Object3d* playerCollisionModel_ = nullptr;
+    std::unique_ptr<Object3d> playerCollisionModel_;
 
     AABB playerAABB_;
+
+    OBB playerOBB_;
 
 private: // ステータス(移動系)宣言
     Transform playerTransform_;
@@ -55,7 +62,7 @@ private: // ステータス(移動系)宣言
     float speedLimit_ = 2.5f; // 移動速度限界
 
     float translateAcceleration_ = 0.04f; // 慣性(接地状態)
-    float flyAcceleration_ = 0.03f; // 慣性(ジャンプ中)
+    float flyAcceleration_ = 0.022f; // 慣性(ジャンプ中)
     float wallDashAcceleration_ = -0.04f; // 壁走り中の落下速度(固定)
 
     // 各アニメーションの速度倍率
@@ -73,14 +80,14 @@ private: // ステータス(移動系)宣言
     float jumpAcceleration_ = 0.24f; // ジャンプの移動量
     float fallLimit_ = -2.4f; // 落下速度上限
 
-    float fallAcceleration_ = 0.008f; // 落下の加速度
+    float fallAcceleration_ = 0.01f; // 落下の加速度
 
 private: // ステータス(カメラ系)宣言
     Transform cameraTransform;
     Vector2 cameraSpeed = { 0.3f, 0.3f };
     Matrix4x4 cameraMatrix;
 
-    Vector3 cameraOffset_ = { 0.0f, -0.08f, 0.0f };
+    Vector3 cameraOffset_ = { 0.0f, 0.0f, 0.0f };
 
     float fovTime_ = 0.0f;
     float fovY_ = 0.45f; // 現在のFov数値
