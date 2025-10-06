@@ -1,6 +1,8 @@
 #include "FadeManager.h"
 #include "kMath.h"
 #include "TextureManager.h"
+#include "GameTime.h"
+#include "ImGuiManager.h"
 
 FadeManager* FadeManager::instance = nullptr;
 
@@ -25,11 +27,21 @@ void FadeManager::Initialize(const Vector3 color) {
 	sprite_->SetScale({ float(WinApp::GetInstance()->GetkClientWidth()), float(WinApp::GetInstance()->GetkClientHeight()) });
 }
 
+const bool& FadeManager::CompleteFade()
+{
+	bool complete = completeFade_;
+	completeFade_ = false;
+	return complete;
+	// TODO: return ステートメントをここに挿入します
+}
+
 void FadeManager::Update() {
+	float deltaTime = GameTime::GetInstance()->GetDeltaTime();
 	if (fade_)
 	{
 		fadeTimer_ += 1.0f / 60.0f / fadeTime_;
 		alpha_ = Lerp(alphaPre_, goalAlpha_, fadeTimer_);
+		alpha_ = std::clamp(alpha_, 0.0f, 1.0f);
 		if (fadeTimer_ >= 1.0f)
 		{
 			fade_ = false;
@@ -38,16 +50,15 @@ void FadeManager::Update() {
 		}
 		sprite_->SetColor({ color_.x, color_.y, color_.z, alpha_ });
 	}
-	else if (!fade_ && completeFade_)
-	{
-		fadeTimer_ += 1.0f;
-		if (fadeTimer_ > 2.0f)
-		{
-			fadeTimer_ = 0.0f;
-			completeFade_ = false;
-		}
-	}
 	sprite_->Update();
+
+	ImGui::Begin("FadeInOut");
+	ImGui::SliderFloat("fadeTimer", &fadeTimer_, 0.0f, 1.0f);
+	ImGui::DragFloat("alpha", &alpha_);
+	ImGui::DragFloat("DeltaTime", &deltaTime);
+	ImGui::End();
+
+
 }
 
 

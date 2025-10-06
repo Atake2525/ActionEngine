@@ -45,6 +45,8 @@ void MyGame::Initialize() {
 
 	Audio::GetInstance()->Initialize();
 
+	GameTime::GetInstance()->Initialize();
+
 	FadeManager::GetInstance()->Initialize({0.0f, 0.0f, 0.0f});
 
 	//// ↓---- シーンの初期化 ----↓ ////
@@ -60,6 +62,8 @@ void MyGame::Initialize() {
 
 void MyGame::Update() {
 	FrameWork::Update();
+
+	GameTime::GetInstance()->Update();
 
 	if (WinApp::GetInstance()->ProcessMessage()) {
 		finished = true;
@@ -165,6 +169,8 @@ void MyGame::Finalize() {
 	Input::GetInstance()->Finalize();
 
 	Audio::GetInstance()->Finalize();
+
+	GameTime::GetInstance()->Finalize();
 
 	FadeManager::GetInstance()->Finalize();
 
