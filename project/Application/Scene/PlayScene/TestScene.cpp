@@ -29,7 +29,7 @@ void TestScene::Initialize() {
 	grid->Initialize();
 	grid->SetModel("Resources/Debug", "Grid.obj");
 
-	box1 = std::make_unique<Object3d>();
+	/*box1 = std::make_unique<Object3d>();
 	box1->Initialize();
 	box1->SetModel("Resources/Debug/gltf", "hunmer.gltf", true);
 	box1->SetTranslate({ 5.0f, 0.0f, 5.0f });
@@ -37,7 +37,7 @@ void TestScene::Initialize() {
 	box2 = std::make_unique<Object3d>();
 	box2->Initialize();
 	box2->SetModel("Resources/Debug/gltf", "Box.gltf", true);
-	box2->SetTranslate({ 0.0f, 0.0f, 5.0f });
+	box2->SetTranslate({ 0.0f, 0.0f, 5.0f });*/
 
 	plate = std::make_unique<Object3d>();
 	plate->Initialize();
@@ -80,7 +80,7 @@ void TestScene::Update() {
 
 	SkyBox::GetInstance()->Update();
 
-	Transform t = box1->GetTransform();
+	/*Transform t = box1->GetTransform();
 	AABB aabb = box1->GetAABB();
 	ImGui::Begin("Box");
 	ImGui::DragFloat3("Translate", &t.translate.x, 0.1f);
@@ -92,9 +92,9 @@ void TestScene::Update() {
 
 	box1->SetTransform(t);
 	box1->Update();
-	box2->Update();
+	box2->Update();*/
 
-	bool flag = false;
+	/*bool flag = false;
 
 	if (CheckOBBCollision(box1->GetOBB(), box2->GetOBB()))
 	{
@@ -113,7 +113,7 @@ void TestScene::Update() {
 	else
 	{
 		box1->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
-	}
+	}*/
 
 	if (input->TriggerKey(DIK_ESCAPE))
 	{
@@ -138,8 +138,8 @@ void TestScene::Draw() {
 
 	Object3dBase::GetInstance()->ShaderDraw();
 
-	box1->Draw();
-	box2->Draw();
+	/*box1->Draw();
+	box2->Draw();*/
 	plate->Draw();
 	//player->Draw();
 

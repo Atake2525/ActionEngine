@@ -27,12 +27,12 @@ void FadeManager::Initialize(const Vector3 color) {
 	sprite_->SetScale({ float(WinApp::GetInstance()->GetkClientWidth()), float(WinApp::GetInstance()->GetkClientHeight()) });
 }
 
-const bool& FadeManager::CompleteFade()
+const bool FadeManager::CompleteFade()
 {
 	bool complete = completeFade_;
 	completeFade_ = false;
 	return complete;
-	// TODO: return ƒXƒe[ƒgƒƒ“ƒg‚ğ‚±‚±‚É‘}“ü‚µ‚Ü‚·
+	// TODO: return ã‚¹ãƒ†ãƒ¼ãƒˆãƒ¡ãƒ³ãƒˆã‚’ã“ã“ã«æŒ¿å…¥ã—ã¾ã™
 }
 
 void FadeManager::Update() {
