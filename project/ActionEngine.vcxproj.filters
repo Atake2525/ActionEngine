@@ -51,6 +51,7 @@
     <ClCompile Include="Engine\Presentation\Cinematic\FadeManager.cpp" />
     <ClCompile Include="Engine\Game\Goal.cpp" />
     <ClCompile Include="Engine\Game\Trap.cpp" />
+    <ClCompile Include="Engine\Core\Timer\GameTime.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Audio\Audio.h" />
@@ -115,6 +116,7 @@
     <ClInclude Include="Engine\Presentation\Cinematic\FadeManager.h" />
     <ClInclude Include="Engine\Game\Goal.h" />
     <ClInclude Include="Engine\Game\Trap.h" />
+    <ClInclude Include="Engine\Core\Timer\GameTime.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="externels\assimp\lib\Release\assimp-vc143-mtd.lib" />
