@@ -2,7 +2,7 @@
 #include "externels/imgui/imgui.h"
 #include "externels/imgui/imgui_impl_dx12.h"
 #include "externels/imgui/imgui_impl_win32.h"
-
+#include "GameTime.h"
 #include "JsonLoader.h"
 
 using namespace std;
