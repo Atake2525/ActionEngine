@@ -62,6 +62,7 @@ void Light::Initialize() {
 
 void Light::Update() {
 #ifdef _DEBUG
+
 	ImGui::Begin("Light");
 	ImGui::SetWindowPos(ImVec2{ 0.0f, 18.0f * 2 });
 	ImGui::SetWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) - 18.0f * 2 });

@@ -36,7 +36,7 @@ void Camera::Update() {
 
 	rotate = SwapRadian(rotate);
 	transform.rotate = rotate;
-#endif // _DEBUG
+#endif // _CAMERADEBUG
 
 
 	transform.rotate.x = std::fmod(transform.rotate.x, 2 * std::numbers::pi_v<float>);
