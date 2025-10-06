@@ -288,6 +288,11 @@ void TitleScene::Update() {
 		gamePad->SetColor({ 1.0f, 1.0f, 1.0f, 0.5f });
 	}
 
+	if (input->TriggerKey(DIK_F11))
+	{
+		WinApp::GetInstance()->ToggleWindowMode();
+	}
+
 	uiFrame->Update();
 
 	gamePad->Update();

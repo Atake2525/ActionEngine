@@ -38,6 +38,11 @@ public:
 	// 終了
 	void Finalize();
 
+	// WindowModeの変更
+	void SetWindowMode(const WindowMode windowMode);
+
+	void ToggleWindowMode();
+
 	// メッセージの処理
 	bool ProcessMessage();
 
@@ -50,14 +55,14 @@ public:
 	const int32_t& GetkClientWidth() const { return kClientWidth; }
 	const int32_t& GetkClientHeight() const { return kClientHeight; }
 
-	const WindowMode& GetWindowMode() const { return windowMode; }
+	const WindowMode& GetWindowMode() const { return windowMode_; }
 
 	// getter
 	HWND GetHwnd() const { return hwnd; }
 	HINSTANCE GetHInstance() const { return wc.hInstance; }
 
 private:
-	WindowMode windowMode = WindowMode::FullScreen;
+	WindowMode windowMode_ = WindowMode::FullScreen;
 	// ウィンドウハンドル
 	HWND hwnd = nullptr;
 

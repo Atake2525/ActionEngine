@@ -34,7 +34,7 @@ void WinApp::Initialize(const int32_t& width, const uint32_t& height, WindowMode
 
 	kClientWidth = width;
 	kClientHeight = height;
-	this->windowMode = windowMode;
+	windowMode_ = windowMode;
 
 
 	// システムタイマーの分解能を上げる
@@ -58,7 +58,7 @@ void WinApp::Initialize(const int32_t& width, const uint32_t& height, WindowMode
 	// ウィンドウサイズを表す構造体にクライアント領域を入れる
 	RECT wrc = {0, 0, kClientWidth, kClientHeight};
 
-	if (windowMode == WindowMode::FullScreen) {
+	if (windowMode_ == WindowMode::FullScreen) {
 		// クライアント領域をもとに実際のサイズにwrcを変更してもらう
 		AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
 
@@ -130,6 +130,103 @@ void WinApp::Finalize() {
 
 	delete instance;
 	instance = nullptr;
+}
+
+void WinApp::SetWindowMode(const WindowMode windowMode)
+{
+	if (windowMode != windowMode_)
+	{
+
+		RECT windowRect = {};
+		LONG windowStyle = 0;
+
+		// ウィンドウスタイルと位置を保存
+		windowStyle = GetWindowLong(hwnd, GWL_STYLE);
+		GetWindowRect(hwnd, &windowRect);
+
+		// ウィンドウスタイルの変更
+		SetWindowLong(hwnd, GWL_STYLE, WS_VISIBLE | WS_POPUP);
+
+		if (windowMode == WindowMode::FullScreen)
+		{
+			// モニター情報を取得
+			HMONITOR hMonitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY);
+			MONITORINFO monitorInfo = { sizeof(MONITORINFO) };
+			GetMonitorInfo(hMonitor, &monitorInfo);
+
+			// フルスクリーンサイズに変更
+			SetWindowPos(hwnd, HWND_TOPMOST, monitorInfo.rcMonitor.left, monitorInfo.rcMonitor.top, monitorInfo.rcMonitor.right - monitorInfo.rcMonitor.left, monitorInfo.rcMonitor.bottom - monitorInfo.rcMonitor.top, SWP_FRAMECHANGED | SWP_SHOWWINDOW);
+
+			windowMode_ = windowMode;
+		}
+		else
+		{
+
+			// 1. 元のウィンドウスタイルに戻す
+			SetWindowLong(hwnd, GWL_STYLE, windowStyle);
+
+			// 2. 元のサイズと位置に戻す（HWND_NOTOPMOSTで最前面から外す）
+			SetWindowPos(hwnd, HWND_NOTOPMOST,
+				windowRect.left,
+				windowRect.top,
+				windowRect.right - windowRect.left,
+				windowRect.bottom - windowRect.top,
+				SWP_FRAMECHANGED | SWP_SHOWWINDOW);
+
+			windowMode_ = windowMode;
+		}
+
+	}
+}
+
+void WinApp::ToggleWindowMode()
+{
+
+	if (windowMode_ == WindowMode::Window)
+	{
+		windowMode_ = WindowMode::FullScreen;
+	}
+	else
+	{
+		windowMode_ = WindowMode::Window;
+	}
+
+	RECT windowRect = {};
+	LONG windowStyle = 0;
+
+	// ウィンドウスタイルと位置を保存
+	windowStyle = GetWindowLong(hwnd, GWL_STYLE);
+	GetWindowRect(hwnd, &windowRect);
+
+	// ウィンドウスタイルの変更
+	SetWindowLong(hwnd, GWL_STYLE, WS_VISIBLE | WS_POPUP);
+
+	if (windowMode_ == WindowMode::Window)
+	{
+		// モニター情報を取得
+		HMONITOR hMonitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY);
+		MONITORINFO monitorInfo = { sizeof(MONITORINFO) };
+		GetMonitorInfo(hMonitor, &monitorInfo);
+
+		// フルスクリーンサイズに変更
+		SetWindowPos(hwnd, HWND_TOPMOST, monitorInfo.rcMonitor.left, monitorInfo.rcMonitor.top, monitorInfo.rcMonitor.right - monitorInfo.rcMonitor.left, monitorInfo.rcMonitor.bottom - monitorInfo.rcMonitor.top, SWP_FRAMECHANGED | SWP_SHOWWINDOW);
+
+	}
+	else
+	{
+		// 1. 元のウィンドウスタイルに戻す
+		SetWindowLong(hwnd, GWL_STYLE, windowStyle);
+
+		// 2. 元のサイズと位置に戻す（HWND_NOTOPMOSTで最前面から外す）
+		SetWindowPos(hwnd, HWND_NOTOPMOST,
+			windowRect.left,
+			windowRect.top,
+			windowRect.right - windowRect.left,
+			windowRect.bottom - windowRect.top,
+			SWP_FRAMECHANGED | SWP_SHOWWINDOW);
+	}
+
+	
 }
 
 // メッセージの処理
