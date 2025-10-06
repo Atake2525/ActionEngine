@@ -42,7 +42,7 @@ void TestScene::Initialize() {
 	plate = std::make_unique<Object3d>();
 	plate->Initialize();
 	//plate->SetModel("Resources/Debug/gltf", "Plante.gltf", true);
-	plate->SetModel("Resources/Model/gltf/Stage", "map_town.gltf", true);
+	plate->SetModel("Resources/Model/gltf/Stage", "dash.gltf", true);
 
 	CollisionManager::GetInstance()->AddCollision(plate.get(), "plate");
 
