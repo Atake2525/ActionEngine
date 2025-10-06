@@ -3,7 +3,7 @@
 #include "externels/imgui/imgui_impl_dx12.h"
 #include "externels/imgui/imgui_impl_win32.h"
 #include "WinApp.h"
-#include "DirectXBase.h"
+#include "GameTime.h"
 
 using namespace std;
 
@@ -204,7 +204,7 @@ void TitleScene::Update() {
 		}
 		if (isUIFrameMove)
 		{
-			uiFrameMoveTimer += 1.0f / 60.0f / uiFrameMoveLImitTime;
+			uiFrameMoveTimer += GameTime::GetInstance()->GetDeltaTime() / uiFrameMoveLImitTime;
 			position = easeOutQuint(uiFrameMoveTimer, uiFrameStartPoint, uiFrameEndPoint);
 			uiFrame->SetPosition({ position.x, position.y });
 		}
@@ -318,7 +318,7 @@ void TitleScene::Update() {
 		titleUp = true;
 	}
 
-	easeTime += DirectXBase::GetInstance()->GetDeltaTime() / 2.0f;
+	easeTime += GameTime::GetInstance()->GetDeltaTime() / 2.0f;
 
 	if (titleUp)
 	{
