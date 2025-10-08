@@ -32,7 +32,7 @@ const bool& FadeManager::CompleteFade()
 	bool complete = completeFade_;
 	completeFade_ = false;
 	return complete;
-	// TODO: return ƒXƒe[ƒgƒƒ“ƒg‚ð‚±‚±‚É‘}“ü‚µ‚Ü‚·
+	// TODO: return ã‚¹ãƒ†ãƒ¼ãƒˆãƒ¡ãƒ³ãƒˆã‚’ã“ã“ã«æŒ¿å…¥ã—ã¾ã™
 }
 
 void FadeManager::Update() {
@@ -55,9 +55,12 @@ void FadeManager::Update() {
 #ifndef NDEBUG
 	ImGui::Begin("FadeInOut");
 	ImGui::SliderFloat("fadeTimer", &fadeTimer_, 0.0f, 1.0f);
-	ImGui::DragFloat("alpha", &alpha_);
+	ImGui::DragFloat("alpha", &alpha_, 0.01f);
 	ImGui::DragFloat("DeltaTime", &deltaTime);
 	ImGui::End();
+
+	sprite_->SetColor({ color_.x, color_.y, color_.z, alpha_ });
+
 #endif // !NDEBUG
 
 

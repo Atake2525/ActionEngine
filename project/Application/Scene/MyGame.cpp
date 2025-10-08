@@ -100,8 +100,47 @@ void MyGame::Update() {
 	}
 	ImGui::End();
 
+    
+
+
+	
+
 #endif // _SceneDEBUG
 
+	ImGui::Begin("パフォーマンス");
+	ImGui::SetWindowPos(ImVec2{ float(WinApp::GetInstance()->GetkClientWidth()) - 300.0f, 128.0f + 165.0f });
+	ImGui::SetWindowSize(ImVec2{ 300.0f, 82.5f });
+	float fps = 1.0f / GameTime::GetInstance()->GetDeltaTime();
+	ImGui::Text("FPS:");
+	ImGui::SameLine();
+	if (fps > fps * 0.75f)
+	{
+		ImGui::TextColored({ 0.0f, 1.0f, 0.0f, 1.0f }, "%.1f", fps);
+	}
+	else if (fps > fps * 0.5f && fps < fps * 0.75f)
+	{
+		ImGui::TextColored({ 1.0f, 1.0f, 0.0f, 1.0f }, "%.1f", fps);
+	}
+	else
+	{
+		ImGui::TextColored({ 1.0f, 0.0f, 0.0f, 1.0f }, "%.1f", fps);
+	}
+	float cpuusage = GameTime::GetInstance()->GetCPUUsagePDH();
+	ImGui::Text("CPU使用率:");
+	ImGui::SameLine();
+	if (cpuusage < 40)
+	{
+		ImGui::TextColored({ 0.0f, 1.0f, 0.0f, 1.0f }, "%.1f %%", cpuusage);
+	}
+	else if (cpuusage > 40 && cpuusage < 79)
+	{
+		ImGui::TextColored({ 1.0f, 1.0f, 0.0f, 1.0f }, "%.1f %%", cpuusage);
+	}
+	else
+	{
+		ImGui::TextColored({ 1.0f, 0.0f, 0.0f, 1.0f }, "%.1f %%", cpuusage);
+	}
+	ImGui::End();
 
 	if (SceneManager::GetInstance()->EndRequest())
 	{
