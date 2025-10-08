@@ -50,7 +50,7 @@ void GameScene::Initialize() {
 	goal_ = make_unique<Goal>();
 	goal_->Initalize();
 
-	FadeManager::GetInstance()->FadeIn(1.0f);
+	FadeManager::GetInstance()->FadeIn(4.0f);
 }
 
 void GameScene::Update() {

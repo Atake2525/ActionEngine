@@ -36,7 +36,25 @@ public:
 
 	const float& GetDeltaTime() const { return deltaTime; }
 
+    const float& GetCPUUsagePDH() const { return cpuUsage; }
+
+    const float& GetGPUUsageNVML() const { return gpuUsage; }
+
 private:
 	float deltaTime = 0.0f;
-};
 
+    float cpuUsage = 0.0f;
+
+    float updateUPUUsageTimer = 0.0f;
+
+	bool initialized = false;
+
+    float gpuUsage = 0.0f;
+
+
+
+	void UpdateDeltaTime();
+    void UpdateCPUUsagePDH();
+    void UpdateGPUUsageNVML();
+
+};

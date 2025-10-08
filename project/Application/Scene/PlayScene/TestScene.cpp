@@ -34,6 +34,8 @@ void TestScene::Initialize() {
 	box1->SetModel("Resources/Debug/gltf", "hunmer.gltf", true);
 	box1->SetTranslate({ 5.0f, 0.0f, 5.0f });
 
+    CollisionManager::GetInstance()->AddCollision(box1.get(), "box1");
+
 	box2 = std::make_unique<Object3d>();
 	box2->Initialize();
 	box2->SetModel("Resources/Debug/gltf", "Box.gltf", true);

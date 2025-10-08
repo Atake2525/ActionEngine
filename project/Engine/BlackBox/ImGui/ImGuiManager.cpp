@@ -49,5 +49,7 @@ void ImGuiManager::Initialize()
 	// 日本語化
 	ImGuiIO& io = ImGui::GetIO();
 	ImFont* font = io.Fonts->AddFontFromFileTTF("Resources/Fonts/BIZ-UDGothicR.ttc", 14.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
+
+	//io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // ドッキングを有効化
 }
 
