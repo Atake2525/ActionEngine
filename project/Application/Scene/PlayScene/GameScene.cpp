@@ -57,7 +57,7 @@ void GameScene::Update() {
 
 	cameraTransform = camera->GetTransform();
 
-#ifdef _DEBUG
+#ifndef NDEBUG
 	ImGui::Begin("State");
 	ImGui::SetWindowPos(ImVec2{ 0.0f, 0.0f });
 	ImGui::SetWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) });

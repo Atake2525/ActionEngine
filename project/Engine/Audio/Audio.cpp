@@ -591,7 +591,7 @@ void Audio::Update() {
 	}
 	frameTime++;
 
-#ifdef _DEBUG
+#ifndef NDEBUG
 	ImGui::Begin("Audio");
 	ImGui::SetWindowPos(ImVec2{ 0.0f, 18.0f * 4 });
 	ImGui::SetWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) - 18.0f * 2 });

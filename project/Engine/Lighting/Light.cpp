@@ -61,7 +61,7 @@ void Light::Initialize() {
 }
 
 void Light::Update() {
-#ifdef _DEBUG
+#ifndef NDEBUG
 
 	ImGui::Begin("Light");
 	ImGui::SetWindowPos(ImVec2{ 0.0f, 18.0f * 2 });
