@@ -179,26 +179,37 @@ void Player::Move()
 	{
 		if (!jump_)
 		{
-			speed_.y = jumpAcceleration_;
 			if (wallDash_)
 			{
 				Vector3	cameraDirection = camera->GetDirection();
-				if (penetrationAmount.x > 0.0f)
+				if (penetrationAmount.x > 0.0f && std::fabs(cameraDirection.x) < 0.5f)
 				{
+					speed_.y = jumpAcceleration_;
 					speed_.x = -speedLimit_ * Sign(cameraDirection.z);
 				}
-				else if (penetrationAmount.x < 0.0f)
+				else if (penetrationAmount.x < 0.0f && std::fabs(cameraDirection.x) < 0.5f)
 				{
+					speed_.y = jumpAcceleration_;
 					speed_.x = speedLimit_ * Sign(cameraDirection.z);
 				}
-				else if (penetrationAmount.z > 0.0f)
+				else if (penetrationAmount.z > 0.0f && std::fabs(cameraDirection.z) < 0.5f)
 				{
+					speed_.y = jumpAcceleration_;
 					speed_.x = speedLimit_ * Sign(cameraDirection.x);
 				}
-				else if (penetrationAmount.z < 0.0f)
+				else if (penetrationAmount.z < 0.0f && std::fabs(cameraDirection.z) < 0.5f)
 				{
+					speed_.y = jumpAcceleration_;
 					speed_.x = -speedLimit_ * Sign(cameraDirection.x);
 				}
+				else if (CollisionManager::GetInstance()->GetGroundDistance("player") <= -1.5f)
+				{
+					speed_.y = jumpAcceleration_;
+				}
+			}
+			else
+			{
+				speed_.y = jumpAcceleration_;
 			}
 		}
 		jump_ = true;
@@ -493,6 +504,13 @@ void Player::DebugUpdate()
 	ImGui::DragFloat("落下量", &fallAcceleration_, 0.1f);
 	ImGui::DragFloat("視野角", &normalFovY_, 0.01f);
 	ImGui::DragFloat("視野角の上昇値", &fovYBoost_, 0.01f);
+
+	Vector3 directionCamera = camera->GetDirection();
+	if (std::fabs(directionCamera.x) > 0.5f)
+	{
+		ImGui::Text("右");
+	}
+
 	float dist = CollisionManager::GetInstance()->GetGroundDistance("player");
 	ImGui::TextColored({ 1.0f, 1.0f, 1.0f, 1.0f }, "GroundDistance: %.1f", dist);
 	Vector3 penetrationAmount = CollisionManager::GetInstance()->GetPenetration();
