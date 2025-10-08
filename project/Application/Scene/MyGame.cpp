@@ -81,7 +81,7 @@ void MyGame::Update() {
 	FadeManager::GetInstance()->Update();
 	//JsonLoader::GetInstance()->Update();
 
-#ifdef _DEBUG
+#ifndef NDEBUG
 
 	ImGui::Begin("シーン");
 	ImGui::SetWindowPos(ImVec2{ float(WinApp::GetInstance()->GetkClientWidth()) - 300.0f, 128.0f * 1 });

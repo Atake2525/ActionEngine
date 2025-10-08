@@ -52,11 +52,14 @@ void FadeManager::Update() {
 	}
 	sprite_->Update();
 
+#ifndef NDEBUG
 	ImGui::Begin("FadeInOut");
 	ImGui::SliderFloat("fadeTimer", &fadeTimer_, 0.0f, 1.0f);
 	ImGui::DragFloat("alpha", &alpha_);
 	ImGui::DragFloat("DeltaTime", &deltaTime);
 	ImGui::End();
+#endif // !NDEBUG
+
 
 
 }

@@ -18,7 +18,7 @@ Camera::Camera()
 
 void Camera::Update() {
 
-#ifdef _DEBUG
+#ifndef NDEBUG
 	Vector3 rotate = SwapDegree(transform.rotate);
 
 	Vector3 dirc = { -worldMatrix.m[0][2], -worldMatrix.m[1][2], worldMatrix.m[2][2] };
