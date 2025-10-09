@@ -54,7 +54,7 @@ void Player::Initialize(Camera* camera, Input* input, const Transform startPoint
 }
 
 void Player::Update() {
-	cameraTransform = camera->GetTransform();
+	cameraTransform.rotate = camera->GetAxisRotate();
 	playerTransform_ = playerModel_->GetTransform();
 	playerAABB_ = playerCollisionModel_->GetAABB();
 	if (parent_)
@@ -137,7 +137,7 @@ void Player::Rotation() {
 
 	cameraTransform.rotate.x = std::clamp(cameraTransform.rotate.x, SwapRadian(-90.0f), SwapRadian(90.0f));
 
-	camera->SetTransform(cameraTransform);
+	camera->SetAxisRotate(cameraTransform.rotate);
 
 }
 
@@ -148,10 +148,28 @@ void Player::Move()
 
 	Vector3 penetrationAmount = CollisionManager::GetInstance()->GetPenetration();
 
+	Vector3 cameraDirection = camera->GetDirection();
 	// 壁走りの処理
-	if (input->PressMouse(1) && (penetrationAmount.x != 0.0f || penetrationAmount.z != 0.0f) && moveVelocity_.y < 0.0f)
+	if (input->PressMouse(1) && (penetrationAmount.x != 0.0f || penetrationAmount.z != 0.0f) && moveVelocity_.y < 0.0f &&
+		(std::fabs(cameraDirection.x) < 0.5f || std::fabs(cameraDirection.x) < 0.5f || std::fabs(cameraDirection.z) < 0.5f || std::fabs(cameraDirection.z) < 0.5f))
 	{
 		wallDash_ = true;
+		if (penetrationAmount.x < 0.0f)
+		{
+			camera->SetRotate({ 0.0f ,0.0f, wallDashAngle_ * Sign(cameraDirection.z)});
+		}
+		else
+		{
+			camera->SetRotate({ 0.0f ,0.0f, wallDashAngle_ * Sign(cameraDirection.z) });
+		}
+		if (penetrationAmount.z < 0.0f)
+		{
+			camera->SetRotate({ 0.0f ,0.0f, -wallDashAngle_ * Sign(cameraDirection.x) });
+		}
+		else
+		{
+			camera->SetRotate({ 0.0f ,0.0f, -wallDashAngle_ * Sign(cameraDirection.x) });
+		}
 		jump_ = false;
 		moveVelocity_.y = wallDashAcceleration_;
 		speed_.y = wallDashAcceleration_;
@@ -160,7 +178,7 @@ void Player::Move()
 	{
 		moveType_ = PlayerMoveType::Dash;
 		wallDash_ = false;
-		camera->SetRotate({ cameraTransform.rotate.x, cameraTransform.rotate.y, 0.0f });
+		camera->SetRotate({ 0.0f, 0.0f, 0.0f });
 	}
 
 
@@ -181,7 +199,6 @@ void Player::Move()
 		{
 			if (wallDash_)
 			{
-				Vector3	cameraDirection = camera->GetDirection();
 				if (penetrationAmount.x > 0.0f && std::fabs(cameraDirection.x) < 0.5f)
 				{
 					speed_.y = jumpAcceleration_;
@@ -334,7 +351,7 @@ void Player::Move()
 	}
 
 	// カメラの方向を調べて移動方向を決める
-	cameraTransform = camera->GetTransform();
+	cameraTransform.rotate = camera->GetAxisRotate();
 
 	// カメラのY軸回転角度のみを使用（上下の視点は完全に無視）
 	float cameraYRotation = cameraTransform.rotate.y;
@@ -381,6 +398,12 @@ void Player::Move()
 	CollisionManager::GetInstance()->UpdateCollisionTarget(playerAABB_, "player");
 	CollisionManager::GetInstance()->Update("player");
 	penetrationAmount = CollisionManager::GetInstance()->GetPenetration();
+
+	if (penetrationAmount.y > 0.0f)
+	{
+		playerTransform_.scale.x = 1.0f;
+	}
+
 	// オブジェクトに衝突している時のために貫通量を引く
 	playerTransform_.translate -= penetrationAmount;
 	// プレイヤーの回転をカメラの正面を向くように変える（Y軸回転のみ）
