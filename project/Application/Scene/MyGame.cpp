@@ -6,8 +6,8 @@ void MyGame::Initialize() {
 
 #pragma region 基盤システムの初期化
 
-	WinApp::GetInstance()->Initialize(1920, 1080, WindowMode::FullScreen, L"Engine");
-	//WinApp::GetInstance()->Initialize();
+	//WinApp::GetInstance()->Initialize(1920, 1080, WindowMode::FullScreen, L"Engine");
+	WinApp::GetInstance()->Initialize();
 
 	DirectXBase::GetInstance()->Initialize();
 

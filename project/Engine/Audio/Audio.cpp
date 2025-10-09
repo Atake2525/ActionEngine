@@ -507,8 +507,8 @@ void Audio::SetVolume(const std::string soundName, const float volume) {
 
 void Audio::SetMasterVolume(const float volume){
 	// 0.0f ~ 1.0fにclampする
-	float vol = std::clamp(volume, 0.0f, 1.0f);
-	masterVoice->SetVolume(vol);
+	masterVolume = std::clamp(volume, 0.0f, 1.0f);
+	masterVoice->SetVolume(masterVolume);
 }
 
 // 全ての音声停止

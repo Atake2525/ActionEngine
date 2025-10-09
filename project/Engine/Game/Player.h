@@ -98,6 +98,8 @@ private: // ステータス(カメラ系)宣言
     float normalFovY_ = 1.0f; // ダッシュ中以外のFov数値
     float fovYBoost_ = 0.3f; // ダッシュ中のFovの上昇値(normalFovY_を参照)
 
+	float wallDashAngle_ = SwapRadian(25.0f); // 壁走り中のカメラの傾き
+
 private: // 中心からクリアまでの距離
 
     float clearDistance_ = 1000.0f;
