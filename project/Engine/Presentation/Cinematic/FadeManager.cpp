@@ -1,8 +1,11 @@
+#define NOMINMAX
+
 #include "FadeManager.h"
 #include "kMath.h"
 #include "TextureManager.h"
 #include "GameTime.h"
 #include "ImGuiManager.h"
+
 
 FadeManager* FadeManager::instance = nullptr;
 
@@ -27,7 +30,7 @@ void FadeManager::Initialize(const Vector3 color) {
 	sprite_->SetScale({ float(WinApp::GetInstance()->GetkClientWidth()), float(WinApp::GetInstance()->GetkClientHeight()) });
 }
 
-const bool& FadeManager::CompleteFade()
+const bool FadeManager::CompleteFade()
 {
 	bool complete = completeFade_;
 	completeFade_ = false;
@@ -37,9 +40,13 @@ const bool& FadeManager::CompleteFade()
 
 void FadeManager::Update() {
 	float deltaTime = GameTime::GetInstance()->GetDeltaTime();
+	if (completeFade_)
+	{
+		completeFade_ = false;
+	}
 	if (fade_)
 	{
-		fadeTimer_ += 1.0f / 60.0f / fadeTime_;
+		fadeTimer_ += deltaTime / fadeTime_;
 		alpha_ = Lerp(alphaPre_, goalAlpha_, fadeTimer_);
 		alpha_ = std::clamp(alpha_, 0.0f, 1.0f);
 		if (fadeTimer_ >= 1.0f)
@@ -52,18 +59,23 @@ void FadeManager::Update() {
 	}
 	sprite_->Update();
 
+
 #ifndef NDEBUG
+	maxDeltaTime_ = std::max(maxDeltaTime_, deltaTime);
 	ImGui::Begin("FadeInOut");
 	ImGui::SliderFloat("fadeTimer", &fadeTimer_, 0.0f, 1.0f);
 	ImGui::DragFloat("alpha", &alpha_, 0.01f);
 	ImGui::DragFloat("DeltaTime", &deltaTime);
+	ImGui::Text("MaxDeltaTime: %.6f", maxDeltaTime_);
+	if (ImGui::Button("ResetMaxDeltaTime"))
+	{
+		maxDeltaTime_ = 0.0f;
+	}
 	ImGui::End();
 
 	sprite_->SetColor({ color_.x, color_.y, color_.z, alpha_ });
 
 #endif // !NDEBUG
-
-
 
 }
 

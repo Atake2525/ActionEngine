@@ -117,6 +117,7 @@
     <ClInclude Include="Engine\Game\Goal.h" />
     <ClInclude Include="Engine\Game\Trap.h" />
     <ClInclude Include="Engine\Core\Timer\GameTime.h" />
+    <ClInclude Include="Engine\Math\EasingUtility.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="externels\assimp\lib\Release\assimp-vc143-mtd.lib" />

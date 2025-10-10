@@ -50,10 +50,17 @@ void GameScene::Initialize() {
 	goal_ = make_unique<Goal>();
 	goal_->Initalize();
 
-	FadeManager::GetInstance()->FadeIn(4.0f);
 }
 
 void GameScene::Update() {
+
+	if (!start)
+	{
+		GameTime::GetInstance()->SetDeltaPoint();
+		FadeManager::GetInstance()->FadeIn(1.0f);
+		start = true;
+		return;
+	}
 
 	cameraTransform = camera->GetTransform();
 
