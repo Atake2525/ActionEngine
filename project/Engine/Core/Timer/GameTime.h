@@ -26,7 +26,10 @@ public:
 	/// </summary>
 	void Finalize();
 
-	void SetDeltaPoint() { deltaTime = 0.0f; }
+	void SetDeltaPoint() { 
+		Update();
+		deltaTime = 0.0f;
+	}
 
 	void Update();
 	/// <summary>
