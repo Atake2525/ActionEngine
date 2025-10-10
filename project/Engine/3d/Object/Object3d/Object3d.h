@@ -262,6 +262,14 @@ public:
 
 	const bool CheckCollisionCapsule(Object3d* object) const;
 
+	const bool CheckCollisionOBB(Object3d* object) const;
+
+	const bool CheckCollisionOBBs(Object3d* object) const;
+
+	const bool CheckCollisionOBB(const OBB& obb) const;
+
+	const bool CheckCollisionOBBs(const OBB& obb) const;	
+
 	//const bool CheckCollisionCapsuleMultiAABB(Object3d* object) const;
 
 	//const bool& CheckCollisionSphere(const Sphere& sphere) const;

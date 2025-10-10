@@ -557,6 +557,40 @@ const bool Object3d::CheckCollisionCapsule(Object3d* object) const
 	return CollisionCapsuleAABB(capsule, object->GetAABB());
 }
 
+const bool Object3d::CheckCollisionOBB(Object3d* object) const
+{
+	return CheckOBBCollision(obb, object->GetOBB());
+}
+
+const bool Object3d::CheckCollisionOBBs(Object3d* object) const
+{
+	for (auto colOBB : multiMeshOBB)
+	{
+		if (CheckOBBCollision(colOBB, object->GetOBB()))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+const bool Object3d::CheckCollisionOBB(const OBB& obb) const
+{
+	return CheckOBBCollision(this->obb, obb);
+}
+
+const bool Object3d::CheckCollisionOBBs(const OBB& obb) const
+{
+	for (auto colOBB : multiMeshOBB)
+	{
+		if (CheckOBBCollision(colOBB, obb))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 const Skeleton Object3d::CreateSkelton(const Node& rootNode)
 {
 	Skeleton skeleton;
