@@ -211,6 +211,13 @@ void Player::Move()
 			moveVelocity_.y = wallDashAcceleration_;
 			speed_.y = wallDashAcceleration_;
 		}
+		else if (CollisionManager::GetInstance()->GetGroundDistance("player") >= -2.0f)
+		{
+			wallDash_ = true;
+			jump_ = false;
+			moveVelocity_.y = wallDashAcceleration_;
+			speed_.y = wallDashAcceleration_;
+		}
 		else
 		{
 			if (wallDashRotateEnd_ != 0.0f)
@@ -287,7 +294,7 @@ void Player::Move()
 					speed_.y = jumpAcceleration_;
 					speed_.x = -speedLimit_ * Sign(cameraDirection.x);
 				}
-				else if (CollisionManager::GetInstance()->GetGroundDistance("player") >= -1.5f)
+				else if (CollisionManager::GetInstance()->GetGroundDistance("player") >= -2.0f)
 				{
 					speed_.y = jumpAcceleration_;
 				}

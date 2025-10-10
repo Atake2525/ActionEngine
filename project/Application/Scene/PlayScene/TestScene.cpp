@@ -31,10 +31,10 @@ void TestScene::Initialize() {
 
 	box1 = std::make_unique<Object3d>();
 	box1->Initialize();
-	box1->SetModel("Resources/Debug/gltf", "hunmer.gltf", true);
-	box1->SetTranslate({ 5.0f, 0.0f, 5.0f });
+	box1->SetModel("Resources/Debug/gltf", "trap.gltf", true);
+	box1->SetTranslate({ 14.5f, 15.0f, 26.2f });
 
-    CollisionManager::GetInstance()->AddCollision(box1.get(), "box1");
+    //CollisionManager::GetInstance()->AddCollision(box1.get(), "box1");
 
 	box2 = std::make_unique<Object3d>();
 	box2->Initialize();
@@ -44,7 +44,7 @@ void TestScene::Initialize() {
 	plate = std::make_unique<Object3d>();
 	plate->Initialize();
 	//plate->SetModel("Resources/Debug/gltf", "Plante.gltf", true);
-	plate->SetModel("Resources/Model/gltf/Stage", "dash.gltf", true);
+	plate->SetModel("Resources/Model/gltf/Stage/map01", "map01.gltf", true);
 
 	CollisionManager::GetInstance()->AddCollision(plate.get(), "plate");
 
@@ -92,21 +92,32 @@ void TestScene::Update() {
 	ImGui::DragFloat3("MAX", &aabb.max.x, 0.0f);
 	ImGui::End();
 
+	t.rotate.z += SwapRadian(4.0f);
+
 	box1->SetTransform(t);
 	box1->Update();
 	box2->Update();
 
 	bool flag = false;
 
-	if (CheckOBBCollision(box1->GetOBB(), box2->GetOBB()))
+	/*if (CheckOBBCollision(box1->GetOBB(), box2->GetOBB()))
+	{
+		flag = true;
+	}*/
+	if (box1->CheckCollisionOBBs(box2->GetOBB()))
 	{
 		flag = true;
 	}
 
-	if (CheckOBBCollision(box1->GetOBB(), player->GetOBB()))
+	if (box1->CheckCollisionOBBs(player->GetOBB()))
 	{
 		flag = true;
 	}
+
+	/*if (CheckOBBCollision(box1->GetOBB(), player->GetOBB()))
+	{
+		flag = true;
+	}*/
 
 	if (flag)
 	{
