@@ -75,6 +75,8 @@ private:
 
 	bool isGoal_ = false;
 
+	bool start = false;
+
 	std::unique_ptr<Goal> goal_ = nullptr;
 };
 

@@ -178,6 +178,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Math\Animator.h" />
     <ClInclude Include="Engine\Math\Capsule.h" />
     <ClInclude Include="Engine\Math\Collision.h" />
+    <ClInclude Include="Engine\Math\EasingUtility.h" />
     <ClInclude Include="Engine\Math\Segment.h" />
     <ClInclude Include="Engine\UI\UI.h" />
     <ClInclude Include="Engine\Audio\Audio.h" />

@@ -3,6 +3,8 @@
 #include "ImGuiManager.h"
 #include "CollisionManager.h"
 #include "WinApp.h"
+#include "EasingUtility.h"
+#include "GameTime.h"
 
 Player::~Player()
 {
@@ -54,7 +56,7 @@ void Player::Initialize(Camera* camera, Input* input, const Transform startPoint
 }
 
 void Player::Update() {
-	cameraTransform = camera->GetTransform();
+	cameraTransform.rotate = camera->GetAxisRotate();
 	playerTransform_ = playerModel_->GetTransform();
 	playerAABB_ = playerCollisionModel_->GetAABB();
 	if (parent_)
@@ -137,7 +139,7 @@ void Player::Rotation() {
 
 	cameraTransform.rotate.x = std::clamp(cameraTransform.rotate.x, SwapRadian(-90.0f), SwapRadian(90.0f));
 
-	camera->SetTransform(cameraTransform);
+	camera->SetAxisRotate(cameraTransform.rotate);
 
 }
 
@@ -148,19 +150,110 @@ void Player::Move()
 
 	Vector3 penetrationAmount = CollisionManager::GetInstance()->GetPenetration();
 
+	Vector3 cameraDirection = camera->GetDirection();
+
 	// 壁走りの処理
 	if (input->PressMouse(1) && (penetrationAmount.x != 0.0f || penetrationAmount.z != 0.0f) && moveVelocity_.y < 0.0f)
 	{
-		wallDash_ = true;
-		jump_ = false;
-		moveVelocity_.y = wallDashAcceleration_;
-		speed_.y = wallDashAcceleration_;
+		if ((cameraDirection.x < -0.5f || cameraDirection.x > 0.5f) && penetrationAmount.z != 0.0f)
+		{
+ 			wallDash_ = true;
+			if (penetrationAmount.z < 0.0f)
+			{
+				if (wallDashRotateEnd_ != wallDashAngle_ * Sign(cameraDirection.x))
+				{
+					wallDashRotateTimer_ = 0.0f;
+					wallDashRotateStart_ = camera->GetRotate().z;
+					wallDashRotateEnd_ = wallDashAngle_ * Sign(cameraDirection.x);
+				}
+				wallDashRotateTimer_ += GameTime::GetInstance()->GetDeltaTime() / wallDashRotateTime_;
+				wallDashRotateTimer_ = std::clamp(wallDashRotateTimer_, 0.0f, 1.0f);
+			}
+			else if (penetrationAmount.z > 0.0f)
+			{
+				if (wallDashRotateEnd_ != -wallDashAngle_ * Sign(cameraDirection.x))
+				{
+					wallDashRotateTimer_ = 0.0f;
+					wallDashRotateStart_ = camera->GetRotate().z;
+					wallDashRotateEnd_ = -wallDashAngle_ * Sign(cameraDirection.x);
+				}
+				wallDashRotateTimer_ += GameTime::GetInstance()->GetDeltaTime() / wallDashRotateTime_;
+				wallDashRotateTimer_ = std::clamp(wallDashRotateTimer_, 0.0f, 1.0f);
+			}
+			jump_ = false;
+			moveVelocity_.y = wallDashAcceleration_;
+			speed_.y = wallDashAcceleration_;
+		}
+		else if ((cameraDirection.z < -0.5f || cameraDirection.z > 0.5f) && penetrationAmount.x != 0.0f)
+		{
+			wallDash_ = true;
+			if (penetrationAmount.x < 0.0f)
+			{
+				if (wallDashRotateEnd_ != -wallDashAngle_ * Sign(cameraDirection.z))
+				{
+					wallDashRotateTimer_ = 0.0f;
+					wallDashRotateStart_ = camera->GetRotate().z;
+					wallDashRotateEnd_ = -wallDashAngle_ * Sign(cameraDirection.z);
+				}
+				wallDashRotateTimer_ += GameTime::GetInstance()->GetDeltaTime() / wallDashRotateTime_;
+				wallDashRotateTimer_ = std::clamp(wallDashRotateTimer_, 0.0f, 1.0f);
+			}
+			else if (penetrationAmount.x > 0.0f)
+			{
+				if (wallDashRotateEnd_ != wallDashAngle_ * Sign(cameraDirection.z))
+				{
+					wallDashRotateTimer_ = 0.0f;
+					wallDashRotateStart_ = camera->GetRotate().z;
+					wallDashRotateEnd_ = wallDashAngle_ * Sign(cameraDirection.z);
+				}
+			}
+			jump_ = false;
+			moveVelocity_.y = wallDashAcceleration_;
+			speed_.y = wallDashAcceleration_;
+		}
+		else if (CollisionManager::GetInstance()->GetGroundDistance("player") >= -2.0f)
+		{
+			wallDash_ = true;
+			jump_ = false;
+			moveVelocity_.y = wallDashAcceleration_;
+			speed_.y = wallDashAcceleration_;
+		}
+		else
+		{
+			if (wallDashRotateEnd_ != 0.0f)
+			{
+				wallDashRotateTimer_ = 0.0f;
+				wallDashRotateStart_ = camera->GetRotate().z;
+				wallDashRotateEnd_ = 0.0f;
+			}
+			wallDash_ = false;
+		}
 	}
 	else if (wallDash_)
 	{
+		if (wallDashRotateEnd_ != 0.0f)
+		{
+			wallDashRotateTimer_ = 0.0f;
+			wallDashRotateStart_ = camera->GetRotate().z;
+			wallDashRotateEnd_ = 0.0f;
+		}
 		moveType_ = PlayerMoveType::Dash;
 		wallDash_ = false;
-		camera->SetRotate({ cameraTransform.rotate.x, cameraTransform.rotate.y, 0.0f });
+	}
+
+	if (wallDashRotateEnd_ != camera->GetRotate().z )
+	{
+		isWallDashRotating_ = true;
+	}
+	else
+	{
+		isWallDashRotating_ = false;
+	}
+	if (isWallDashRotating_)
+	{
+		wallDashRotateTimer_ += GameTime::GetInstance()->GetDeltaTime() / wallDashRotateTime_;
+		wallDashRotateTimer_ = std::clamp(wallDashRotateTimer_, 0.0f, 1.0f);
+		camera->SetRotate({ 0.0f ,0.0f, EaseOutExpo(wallDashRotateTimer_, wallDashRotateStart_, wallDashRotateEnd_) });
 	}
 
 
@@ -181,28 +274,27 @@ void Player::Move()
 		{
 			if (wallDash_)
 			{
-				Vector3	cameraDirection = camera->GetDirection();
-				if (penetrationAmount.x > 0.0f && std::fabs(cameraDirection.x) < 0.5f)
+				if (penetrationAmount.x > 0.0f)
 				{
 					speed_.y = jumpAcceleration_;
 					speed_.x = -speedLimit_ * Sign(cameraDirection.z);
 				}
-				else if (penetrationAmount.x < 0.0f && std::fabs(cameraDirection.x) < 0.5f)
+				else if (penetrationAmount.x < 0.0f)
 				{
 					speed_.y = jumpAcceleration_;
 					speed_.x = speedLimit_ * Sign(cameraDirection.z);
 				}
-				else if (penetrationAmount.z > 0.0f && std::fabs(cameraDirection.z) < 0.5f)
+				else if (penetrationAmount.z > 0.0f)
 				{
 					speed_.y = jumpAcceleration_;
 					speed_.x = speedLimit_ * Sign(cameraDirection.x);
 				}
-				else if (penetrationAmount.z < 0.0f && std::fabs(cameraDirection.z) < 0.5f)
+				else if (penetrationAmount.z < 0.0f)
 				{
 					speed_.y = jumpAcceleration_;
 					speed_.x = -speedLimit_ * Sign(cameraDirection.x);
 				}
-				else if (CollisionManager::GetInstance()->GetGroundDistance("player") <= -1.5f)
+				else if (CollisionManager::GetInstance()->GetGroundDistance("player") >= -2.0f)
 				{
 					speed_.y = jumpAcceleration_;
 				}
@@ -334,7 +426,7 @@ void Player::Move()
 	}
 
 	// カメラの方向を調べて移動方向を決める
-	cameraTransform = camera->GetTransform();
+	cameraTransform.rotate = camera->GetAxisRotate();
 
 	// カメラのY軸回転角度のみを使用（上下の視点は完全に無視）
 	float cameraYRotation = cameraTransform.rotate.y;
@@ -381,6 +473,12 @@ void Player::Move()
 	CollisionManager::GetInstance()->UpdateCollisionTarget(playerAABB_, "player");
 	CollisionManager::GetInstance()->Update("player");
 	penetrationAmount = CollisionManager::GetInstance()->GetPenetration();
+
+	if (penetrationAmount.y > 0.0f)
+	{
+		playerTransform_.scale.x = 1.0f;
+	}
+
 	// オブジェクトに衝突している時のために貫通量を引く
 	playerTransform_.translate -= penetrationAmount;
 	// プレイヤーの回転をカメラの正面を向くように変える（Y軸回転のみ）
@@ -475,7 +573,7 @@ void Player::DebugUpdate()
 	ImGui::Begin("Animation");
 	ImGui::SetWindowPos(ImVec2{ 0.0f, 18.0f * 3.0f });
 	ImGui::SetWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) - 18.0f * 3.0f });
-	if (ImGui::Button("Idle"))
+	/*if (ImGui::Button("Idle"))
 	{
 		moveType_ = PlayerMoveType::Idle;
 	}
@@ -490,7 +588,7 @@ void Player::DebugUpdate()
 	if (ImGui::Button("Dash"))
 	{
 		moveType_ = PlayerMoveType::Dash;
-	}
+	}*/
 	ImGui::Checkbox("カメラ移動", &cameraMove_);
 	ImGui::Checkbox("カメラ追従", &parent_);
 	ImGui::DragFloat3("カメラオフセット", &cameraOffset_.x, 0.1f);
@@ -502,13 +600,41 @@ void Player::DebugUpdate()
 	ImGui::DragFloat("最大落下速度", &fallLimit_, 0.1f);
 	ImGui::DragFloat("ジャンプ量", &jumpAcceleration_, 0.1f);
 	ImGui::DragFloat("落下量", &fallAcceleration_, 0.1f);
-	ImGui::DragFloat("視野角", &normalFovY_, 0.01f);
-	ImGui::DragFloat("視野角の上昇値", &fovYBoost_, 0.01f);
+	if (ImGui::TreeNode("カメラ関係")) {
+		ImGui::DragFloat("視野角", &normalFovY_, 0.01f);
+		ImGui::DragFloat("視野角の上昇値", &fovYBoost_, 0.01f);
+		ImGui::TreePop();
+	}
+	if (ImGui::TreeNode("壁走り")) {
+		ImGui::DragFloat("壁走りカメラ回転タイマー", &wallDashRotateTimer_, 0.01f);
+		ImGui::DragFloat("壁走りカメラ回転時間", &wallDashRotateTime_, 0.01f);
+		ImGui::TreePop();
+	}
+	Vector3 cameraDirection = camera->GetDirection();
+	float angleX = wallDashAngle_ * Sign(cameraDirection.x);
+	ImGui::DragFloat("回転X", &angleX, 0.01f);
+	float angleZ = wallDashAngle_ * Sign(cameraDirection.z);
+	ImGui::DragFloat("回転Z", &angleZ, 0.01f);
 
 	Vector3 directionCamera = camera->GetDirection();
-	if (std::fabs(directionCamera.x) > 0.5f)
+	if (directionCamera.x > 0.0f)
 	{
 		ImGui::Text("右");
+		ImGui::SameLine();
+	} 
+	else if (directionCamera.x < 0.0f)
+	{
+
+		ImGui::Text("左");
+		ImGui::SameLine();
+	}
+	if (directionCamera.z > 0.0f)
+	{
+		ImGui::Text("前");
+	}
+	else if (directionCamera.z < 0.0f)
+	{
+		ImGui::Text("後");
 	}
 
 	float dist = CollisionManager::GetInstance()->GetGroundDistance("player");

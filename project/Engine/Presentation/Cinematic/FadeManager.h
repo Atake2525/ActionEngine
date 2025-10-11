@@ -30,7 +30,7 @@ public:
 	/// </summary>
 	void Initialize(const Vector3 color = {1.0f, 1.0f, 1.0f});
 
-	const bool& CompleteFade();
+	const bool CompleteFade();
 	const bool& IsFade() const { return fade_; }
 
 	void Update();
@@ -47,6 +47,8 @@ private:
 
 	float fadeTimer_ = 0.0f;
 	float fadeTime_ = 0.0f;
+
+	float maxDeltaTime_ = 0.0f;
 
 	float goalAlpha_ = 0.0f;
 
