@@ -33,7 +33,7 @@ void GameScene::Initialize() {
 		{0.0f, 0.1f, 0.0f}
 	};
 	player_ = make_unique<Player>();
-	player_->Initialize(camera.get(), input, pl, true);
+	player_->Initialize(camera.get(), input, pl, false);
 	player_->SetClearDistance(50.0f);
 
 	land = make_unique<Object3d>();
@@ -50,14 +50,21 @@ void GameScene::Initialize() {
 	goal_ = make_unique<Goal>();
 	goal_->Initalize();
 
-	FadeManager::GetInstance()->FadeIn(1.0f);
 }
 
 void GameScene::Update() {
 
+	if (!start)
+	{
+		GameTime::GetInstance()->SetDeltaPoint();
+		FadeManager::GetInstance()->FadeIn(1.0f);
+		start = true;
+		return;
+	}
+
 	cameraTransform = camera->GetTransform();
 
-#ifdef _DEBUG
+#ifndef NDEBUG
 	ImGui::Begin("State");
 	ImGui::SetWindowPos(ImVec2{ 0.0f, 0.0f });
 	ImGui::SetWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) });

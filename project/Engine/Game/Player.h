@@ -78,6 +78,7 @@ private: // ステータス(移動系)宣言
     bool wallDash_ = false;
 
     float jumpAcceleration_ = 0.24f; // ジャンプの移動量
+	float jumpAccelerationForWallDash_ = 0.12f; // 壁走り中のジャンプの移動量
     float fallLimit_ = -2.4f; // 落下速度上限
 
     float fallAcceleration_ = 0.01f; // 落下の加速度
@@ -97,6 +98,14 @@ private: // ステータス(カメラ系)宣言
 
     float normalFovY_ = 1.0f; // ダッシュ中以外のFov数値
     float fovYBoost_ = 0.3f; // ダッシュ中のFovの上昇値(normalFovY_を参照)
+
+	float wallDashAngle_ = SwapRadian(25.0f); // 壁走り中のカメラの傾き
+
+    float wallDashRotateTime_ = 0.35f; // 壁走り中のカメラの傾きのイージング用時間
+    float wallDashRotateTimer_ = 0.0f; // 壁走り中のカメラの傾きのイージング用タイマー
+	float wallDashRotateStart_ = 0.0f; // 壁走り中のカメラの傾きのイージング用前の傾き
+    float wallDashRotateEnd_ = 0.0f; // 壁走り中のカメラの傾きのイージング用前の傾き
+	bool isWallDashRotating_ = false;
 
 private: // 中心からクリアまでの距離
 

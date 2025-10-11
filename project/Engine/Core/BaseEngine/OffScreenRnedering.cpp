@@ -61,7 +61,7 @@ void OffScreenRnedering::Initialize() {
 }
 
 void OffScreenRnedering::Update() {
-#ifdef _DEBUG
+#ifndef NDEBUG
 	ImGui::Begin("PostEffect");
 	/*if (ImGui::IsPopupOpen("PostEffect"))
 	{

@@ -1,5 +1,8 @@
 #include "GameTime.h"
 #include <chrono>
+#include <windows.h>
+#include <pdh.h>
+#pragma comment(lib, "pdh.lib")
 
 GameTime* GameTime::instance = nullptr;
 
@@ -19,11 +22,41 @@ void GameTime::Initialize() {
 	deltaTime = 0.0f;
 }
 
-void GameTime::Update()
-{
+void GameTime::UpdateDeltaTime() {
 	static auto lastTime = std::chrono::high_resolution_clock::now();
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<float> delta = currentTime - lastTime;
 	lastTime = currentTime;
 	deltaTime = delta.count();
+}
+
+void GameTime::UpdateCPUUsagePDH()
+{
+    static PDH_HQUERY query;
+    static PDH_HCOUNTER counter;
+
+    if (!initialized) {
+        PdhOpenQuery(NULL, NULL, &query);
+        PdhAddCounter(query, TEXT("\\Processor(_Total)\\% Processor Time"), NULL, &counter);
+        PdhCollectQueryData(query);
+        initialized = true;
+        cpuUsage = 0.0f;
+    }
+
+    PdhCollectQueryData(query);
+    PDH_FMT_COUNTERVALUE value;
+    PdhGetFormattedCounterValue(counter, PDH_FMT_DOUBLE, NULL, &value);
+    cpuUsage = static_cast<float>(value.doubleValue);
+
+}
+
+void GameTime::Update()
+{
+	UpdateDeltaTime();
+   
+    updateUPUUsageTimer += deltaTime;
+    if (updateUPUUsageTimer >= 1.0f) {
+        UpdateCPUUsagePDH();
+        updateUPUUsageTimer = 0.0f;
+    }
 }

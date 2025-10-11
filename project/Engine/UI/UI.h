@@ -54,7 +54,11 @@ public:
 	/// <summary>
 	/// ボタンがONになっているかどうかを返す
 	/// </summary>
-	const bool& GetButtonOn() const { return onButton_; }
+	const bool GetButtonOn() { 
+		bool result = onButton_;
+		onButton_ = false;
+		return result; 
+	}
 
 	/// <summary>
 	/// ボタンにカーソルが合わせられているかどうか

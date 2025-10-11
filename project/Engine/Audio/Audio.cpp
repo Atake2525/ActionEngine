@@ -507,8 +507,8 @@ void Audio::SetVolume(const std::string soundName, const float volume) {
 
 void Audio::SetMasterVolume(const float volume){
 	// 0.0f ~ 1.0fにclampする
-	float vol = std::clamp(volume, 0.0f, 1.0f);
-	masterVoice->SetVolume(vol);
+	masterVolume = std::clamp(volume, 0.0f, 1.0f);
+	masterVoice->SetVolume(masterVolume);
 }
 
 // 全ての音声停止
@@ -591,7 +591,7 @@ void Audio::Update() {
 	}
 	frameTime++;
 
-#ifdef _DEBUG
+#ifndef NDEBUG
 	ImGui::Begin("Audio");
 	ImGui::SetWindowPos(ImVec2{ 0.0f, 18.0f * 4 });
 	ImGui::SetWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) - 18.0f * 2 });

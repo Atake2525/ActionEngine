@@ -4,6 +4,7 @@
 #include "externels/imgui/imgui_impl_win32.h"
 #include "WinApp.h"
 #include "GameTime.h"
+#include "EasingUtility.h"
 
 using namespace std;
 
@@ -98,7 +99,7 @@ void TitleScene::Initialize() {
 
 	Audio::GetInstance()->Play("bgm", true);
 
-	Audio::GetInstance()->SetMasterVolume(0.2f);
+	Audio::GetInstance()->SetMasterVolume(0.0f);
 }
 
 void TitleScene::Update() {
@@ -205,7 +206,7 @@ void TitleScene::Update() {
 		if (isUIFrameMove)
 		{
 			uiFrameMoveTimer += GameTime::GetInstance()->GetDeltaTime() / uiFrameMoveLImitTime;
-			position = easeOutQuint(uiFrameMoveTimer, uiFrameStartPoint, uiFrameEndPoint);
+			position = EaseOutQuint(uiFrameMoveTimer, uiFrameStartPoint, uiFrameEndPoint);
 			uiFrame->SetPosition({ position.x, position.y });
 		}
 		
@@ -322,11 +323,11 @@ void TitleScene::Update() {
 
 	if (titleUp)
 	{
-		titleTransform.translate.y = easeInOut(easeTime, 1.9f, 2.1f);
+		titleTransform.translate.y = EaseInOut(easeTime, 1.9f, 2.1f);
 	}
 	else
 	{
-		titleTransform.translate.y = easeInOut(easeTime, 2.1f, 1.9f);
+		titleTransform.translate.y = EaseInOut(easeTime, 2.1f, 1.9f);
 	}
 
 	if (easeTime > 1.0f)
