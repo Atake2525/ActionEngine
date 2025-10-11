@@ -316,6 +316,7 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 
 			// メタリックの数値
 			float metallic = 0.0f;
+			float roughness = 1.0f;
 			MaterialTemplate matTempData;
 
 			if (material->Get(AI_MATKEY_METALLIC_FACTOR, metallic) == AI_SUCCESS) {
@@ -324,6 +325,13 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 			else
 			{
 				matTempData.metallic = 0.0f;
+			}
+			if (material->Get(AI_MATKEY_ROUGHNESS_FACTOR, roughness) == AI_SUCCESS) {
+				matTempData.roughness = roughness;
+			}
+			else
+			{
+				matTempData.roughness = 1.0f;
 			}
 
 			modelData.materialTemplate.push_back(matTempData);
@@ -555,6 +563,7 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 
 			// メタリックの数値
 			float metallic = 0.0f;
+			float roughness = 1.0f;
 			MaterialTemplate matTempData;
 
 			if (material->Get(AI_MATKEY_METALLIC_FACTOR, metallic) == AI_SUCCESS) {
@@ -563,6 +572,13 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 			else
 			{
 				matTempData.metallic = 0.0f;
+			}
+			if (material->Get(AI_MATKEY_ROUGHNESS_FACTOR, roughness) == AI_SUCCESS) {
+				matTempData.roughness = roughness;
+			}
+			else
+			{
+				matTempData.roughness = 1.0f;
 			}
 
 			modelData.materialTemplate.push_back(matTempData);

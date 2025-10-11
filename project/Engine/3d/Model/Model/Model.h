@@ -54,7 +54,8 @@ struct Material {
 struct MaterialTemplate
 {
 	float metallic;
-	float padding[3];
+	float roughness;
+	float padding[2];
 };
 
 struct MaterialData {

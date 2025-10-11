@@ -45,6 +45,7 @@ void TestScene::Initialize() {
 	plate->Initialize();
 	//plate->SetModel("Resources/Debug/gltf", "Plante.gltf", true);
 	plate->SetModel("Resources/Model/gltf/Stage/map01", "map01.gltf", true);
+	plate->SetEnableMetallic(true);
 
 	CollisionManager::GetInstance()->AddCollision(plate.get(), "plate");
 
