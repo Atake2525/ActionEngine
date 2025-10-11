@@ -32,8 +32,8 @@ void TextureManager::Initialize() {
 
 	LoadTexture("Resources/Debug/black1x1.png");
 
-	LoadTexture("Resources/Debug/Rock_NormalGL.png");
-	LoadTexture("Resources/Debug/Rock_Roughness.png");
+	LoadTexture("Resources/Model/gltf/Stage/map01/Concrete_Normal.jpg");
+	LoadTexture("Resources/Model/gltf/Stage/map01/Concrete_Roughness.jpg");
 
 }
 
