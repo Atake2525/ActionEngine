@@ -117,9 +117,9 @@ void Model::Draw() {
 		else
 		{
 			SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(2, modelData.material[matData.second.materialIndex].textureIndex);
-			SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(10, TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/Debug/Rock_NormalGL.png")); // ノーマルマップ
-			SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(11, TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/Debug/RockColor.png")); // メタリックマップ
-			SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(12, TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/Debug/Rock_Roughness.png")); // ラフネスマップ
+			SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(10, TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/Model/gltf/Stage/map01/Concrete_Normal.jpg")); // ノーマルマップ
+			SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(11, TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/Debug/black1x1.png")); // メタリックマップ
+			SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(12, TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/Model/gltf/Stage/map01/Concrete_Roughness.jpg")); // ラフネスマップ
 		}
 		SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(7, SkyBox::GetInstance()->GetSrvIndex());
 
