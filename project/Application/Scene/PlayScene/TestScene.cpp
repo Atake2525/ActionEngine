@@ -159,6 +159,7 @@ void TestScene::Draw() {
 
 	SkinningObject3dBase::GetInstance()->ShaderDraw();
 
+	//player->Draw();
 
 	WireFrameObjectBase::GetInstance()->ShaderDraw();
 

@@ -19,7 +19,8 @@
 				8,
 				9,
 				10,
-				11
+				11,
+				12
 			]
 		}
 	],
@@ -71,6 +72,10 @@
 		{
 			"mesh":11,
 			"name":"\u7acb\u65b9\u4f53.011"
+		},
+		{
+			"mesh":12,
+			"name":"\u7acb\u65b9\u4f53.012"
 		}
 	],
 	"materials":[
@@ -111,6 +116,17 @@
 					"index":3
 				},
 				"metallicFactor":0.5,
+				"roughnessFactor":0.5
+			}
+		},
+		{
+			"doubleSided":true,
+			"name":"\u30de\u30c6\u30ea\u30a2\u30eb.004",
+			"pbrMetallicRoughness":{
+				"baseColorTexture":{
+					"index":4
+				},
+				"metallicFactor":0,
 				"roughnessFactor":0.5
 			}
 		}
@@ -283,6 +299,20 @@
 					"material":0
 				}
 			]
+		},
+		{
+			"name":"\u7acb\u65b9\u4f53.007",
+			"primitives":[
+				{
+					"attributes":{
+						"POSITION":43,
+						"NORMAL":44,
+						"TEXCOORD_0":45
+					},
+					"indices":32,
+					"material":4
+				}
+			]
 		}
 	],
 	"textures":[
@@ -301,6 +331,10 @@
 		{
 			"sampler":0,
 			"source":0
+		},
+		{
+			"sampler":0,
+			"source":1
 		}
 	],
 	"images":[
@@ -308,6 +342,11 @@
 			"mimeType":"image/png",
 			"name":"concrete",
 			"uri":"concrete.png"
+		},
+		{
+			"mimeType":"image/png",
+			"name":"RockColor",
+			"uri":"RockColor.png"
 		}
 	],
 	"accessors":[
@@ -688,6 +727,34 @@
 			"componentType":5126,
 			"count":24,
 			"type":"VEC2"
+		},
+		{
+			"bufferView":43,
+			"componentType":5126,
+			"count":24,
+			"max":[
+				1,
+				2.200000047683716,
+				15.267497062683105
+			],
+			"min":[
+				-1,
+				0.20000004768371582,
+				13.267497062683105
+			],
+			"type":"VEC3"
+		},
+		{
+			"bufferView":44,
+			"componentType":5126,
+			"count":24,
+			"type":"VEC3"
+		},
+		{
+			"bufferView":45,
+			"componentType":5126,
+			"count":24,
+			"type":"VEC2"
 		}
 	],
 	"bufferViews":[
@@ -948,6 +1015,24 @@
 			"byteLength":192,
 			"byteOffset":9528,
 			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":288,
+			"byteOffset":9720,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":288,
+			"byteOffset":10008,
+			"target":34962
+		},
+		{
+			"buffer":0,
+			"byteLength":192,
+			"byteOffset":10296,
+			"target":34962
 		}
 	],
 	"samplers":[
@@ -958,7 +1043,7 @@
 	],
 	"buffers":[
 		{
-			"byteLength":9720,
+			"byteLength":10488,
 			"uri":"map01.bin"
 		}
 	]

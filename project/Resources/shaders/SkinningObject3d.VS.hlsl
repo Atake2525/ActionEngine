@@ -28,6 +28,8 @@ struct VertexShaderInput
     float3 normal : NORMAL0;
     float4 weight : WEIGHT0;
     int4 index : INDEX0;
+    float3 tangent : TANGENT0;
+    float3 bitangent : BITANGENT0;
 };
 
 struct Skinned
@@ -69,5 +71,9 @@ VertexShaderOutput main(VertexShaderInput input) // “ü—Í’¸“_‚Í“–‘RskeletonSpace
     output.texcoord = input.texcoord;
     output.normal = normalize(mul(skinned.normal, (float3x3)gTransformationMatrix.WorldInverseTranspose));
 
+    output.tangent = normalize(mul(input.tangent, (float3x3) gTransformationMatrix.World));
+    
+    output.bitangent = normalize(mul(input.bitangent, (float3x3) gTransformationMatrix.World));
+    
     return output;
 }

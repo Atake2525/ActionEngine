@@ -5,6 +5,7 @@
 #include "WinApp.h"
 #include "EasingUtility.h"
 #include "GameTime.h"
+#include "Light.h"
 
 Player::~Player()
 {
@@ -86,6 +87,7 @@ void Player::Update() {
 		world.m[3][1] = position.y;
 		world.m[3][2] = position.z;
 		camera->SetTranslateParent(world);
+
 	}
 	else
 	{
@@ -101,6 +103,10 @@ void Player::Update() {
 	playerCollisionModel_->SetTransform(playerTransform_);
 	playerCollisionModel_->Update();
 	playerModel_->Update();
+
+	Light::GetInstance()->SetPositionSpotLight({ playerTransform_.translate.x, playerModel_->GetJointPosition("Head").y, playerTransform_.translate.z });
+	Vector3 direction = camera->GetDirection();
+	Light::GetInstance()->SetDirectionSpotLight({direction.x, direction.y, direction.z});
 
 	if (debugMode_)
 	{
