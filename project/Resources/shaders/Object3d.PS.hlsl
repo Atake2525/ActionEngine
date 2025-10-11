@@ -1,6 +1,9 @@
 #include "object3d.hlsli"
 
-Texture2D<float4> gTexture : register(t0);
+Texture2D<float4> albedoTexture : register(t0);
+Texture2D<float4> normalTexture : register(t2);
+Texture2D<float4> metallicTexture : register(t3);
+Texture2D<float4> roughnessTexture : register(t4);
 TextureCube<float4> gEnvironmentTexture : register(t1);
 SamplerState gSampler : register(s0);
 
@@ -77,6 +80,15 @@ struct MaterialTemplate
 };
 ConstantBuffer<MaterialTemplate> gMaterialTemplate : register(b5);
 
+struct padd
+{
+    float pad0;
+    float pad1;
+    float pad2;
+    float pad3;
+};
+ConstantBuffer<padd> gPad : register(b6);
+
 static PixelShaderOutput RoadMaterialTemplate(PixelShaderOutput output, VertexShaderOutput input)
 {
     // 環境マップ
@@ -117,7 +129,7 @@ static float3 TorranceSparrow(float3 lightDir, float3 viewDir, float3 normal, fl
     float VdotH = saturate(dot(viewDir, halfVector));
     float3 F = F0 + (1.0f - F0) * pow(1.0f - VdotH, 5.0f); // Schlickの近似
     
-    return (D * G * F) / (4.0f * NdotL * NdotV + 0.001f);
+    return (D * G * F) / (4.0f * (NdotL * NdotV) + 0.001f);
 }
 
 static float3 Flusnel(float3 viewDir, float3 halfVector, float3 F0)
@@ -132,7 +144,18 @@ PixelShaderOutput main(VertexShaderOutput input)
     PixelShaderOutput output;
     output.color = gMaterial.color;
     float4 transformedUV = mul(float4(input.texcoord, 0.0f, 1.0f), gMaterial.uvTransform);
-    float4 textureColor = gTexture.Sample(gSampler, transformedUV.xy);
+    float4 textureColor = albedoTexture.Sample(gSampler, transformedUV.xy);
+    float3 normal = normalTexture.Sample(gSampler, transformedUV.xy).rgb;
+    float metallic = metallicTexture.Sample(gSampler, transformedUV.xy).r;
+    float roughness = roughnessTexture.Sample(gSampler, transformedUV.xy).r;
+    
+    float3 tangent = normalize(input.tangent);
+    float3 bitangent = normalize(input.bitangent);
+    normal = normalize(normal * 2.0f - 1.0f);
+    
+    float3x3 TBN = float3x3(tangent, bitangent, normalize(input.normal));
+    
+    normal = normalize(mul(normal, TBN));
     
     if (gMaterial.enableLighting != 0)
     { // Lightingする場合
@@ -198,7 +221,7 @@ PixelShaderOutput main(VertexShaderOutput input)
         
         // 鏡面反射                                                                                      ↓ 物体の鏡面反射の色。ここでは白にしている materialで設定できたりすると良い
         //float3 specularDirectionalLight = gDirectionalLight.color.rgb * gDirectionalLight.intensity * specularPow * gDirectionalLight.specularColor;
-        float3 specularDirectionalLight = TorranceSparrow(-gDirectionalLight.direction, toEye, normalize(input.normal), gMaterialTemplate.roughness, gMaterial.specularColor) * gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity;
+        float3 specularDirectionalLight = TorranceSparrow(-gDirectionalLight.direction, toEye, normal, roughness, gMaterial.specularColor) * gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity;
         
         //float3 directionalLight = environmentColorDirectionalLight + (diffuseDirectionalLight * (1.0f - Flusnel(toEye, normalize(-gDirectionalLight.direction + toEye), gMaterial.specularColor))) + specularDirectionalLight;
         float3 directionalLight = environmentColorDirectionalLight + diffuseDirectionalLight + specularDirectionalLight;
@@ -213,11 +236,15 @@ PixelShaderOutput main(VertexShaderOutput input)
         // SpotLight
          // 拡散反射
         //float32_t3 diffuseSpotLight = gMaterial.color.rgb * textureColor.rgb * gSpotLight.color.rgb * cosSpotLight * gSpotLight.intensity * falloffFactor * attenuationFactor;
-        float3 diffuseSpotLight = gMaterial.color.rgb * textureColor.rgb * gSpotLight.color.rgb * cosSpotLight * gSpotLight.intensity * falloffFactor * attenuationFactor * (environmentColor.rgb * gMaterialTemplate.metallic);
+        float3 diffuseSpotLight = gMaterial.color.rgb * textureColor.rgb * gSpotLight.color.rgb * cosSpotLight * gSpotLight.intensity * falloffFactor * attenuationFactor;
         
         // 鏡面反射                                                                                      ↓ 物体の鏡面反射の色。ここでは白にしている materialで設定できたりすると良い
         //float3 specularSpotLight = gSpotLight.color.rgb * gSpotLight.intensity * attenuationFactor * gMaterial.specularColor * gSpotLight.specularColor * specularPowSpotLight;
-        float3 specularSpotLight = TorranceSparrow(-gSpotLight.direction, toEye, normalize(input.normal), gMaterialTemplate.roughness, gMaterial.specularColor) * gMaterial.color.rgb * textureColor.rgb * gSpotLight.color.rgb * cosSpotLight * gSpotLight.intensity * falloffFactor * attenuationFactor;
+        float3 specularSpotLight = TorranceSparrow(-gSpotLight.direction, toEye, normal, roughness, gMaterial.specularColor) * gMaterial.color.rgb * textureColor.rgb * gSpotLight.color.rgb * cosSpotLight * gSpotLight.intensity * falloffFactor * attenuationFactor;
+        
+        float3 environmentColorSpotLight = (environmentColor.rgb * gMaterialTemplate.metallic) * diffuseSpotLight;
+        
+        float3 spotLight = environmentColorSpotLight + diffuseSpotLight + specularSpotLight;
         
         float3 ambient = float3(0.05f, 0.05f, 0.06f);
         
@@ -225,7 +252,7 @@ PixelShaderOutput main(VertexShaderOutput input)
         
         
         // 拡散反射 + 鏡面反射
-        output.color.rgb = ambient + directionalLight + diffusePointLight + specularPointLight + diffuseSpotLight + specularSpotLight;
+        output.color.rgb = ambient + directionalLight + diffusePointLight + specularPointLight + spotLight;
         // アルファは今まで通り
         output.color.a = gMaterial.color.a * textureColor.a;
     }

@@ -117,6 +117,9 @@ void Model::Draw() {
 		else
 		{
 			SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(2, modelData.material[matData.second.materialIndex].textureIndex);
+			SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(10, TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/Debug/Rock_NormalGL.png")); // ノーマルマップ
+			SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(11, TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/Debug/RockColor.png")); // メタリックマップ
+			SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(12, TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/Debug/Rock_Roughness.png")); // ラフネスマップ
 		}
 		SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(7, SkyBox::GetInstance()->GetSrvIndex());
 
@@ -179,7 +182,7 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 	ModelData modelData;            // 構築するModelData
 	Assimp::Importer importer;
 	std::string filePath = directoryPath + "/" + filename;
-	const aiScene* scene = importer.ReadFile(filePath.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs | aiProcess_Triangulate | aiProcess_JoinIdenticalVertices);
+	const aiScene* scene = importer.ReadFile(filePath.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs | aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_CalcTangentSpace);
 	//assert(scene->HasMeshes()); // メッシュが無いのは対応しない
 	if (!scene->HasMeshes())
 	{
@@ -220,13 +223,20 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 			aiVector3D& position = mesh->mVertices[vertexIndex];
 			aiVector3D& normal = mesh->mNormals[vertexIndex];
 			aiVector3D& texcoord = mesh->mTextureCoords[0][vertexIndex];
+			aiVector3D& tangent = mesh->mTangents[vertexIndex];
+			aiVector3D& bitangent = mesh->mBitangents[vertexIndex];
 			// 右手系->左手系への返還を忘れずに
 			modelData.vertices[vertexIndex].position = { -position.x, position.y, position.z, 1.0f };
 			modelData.vertices[vertexIndex].normal = { -normal.x, normal.y, normal.z };
 			modelData.vertices[vertexIndex].texcoord = { texcoord.x, texcoord.y };
+			modelData.vertices[vertexIndex].tangent = { tangent.x, tangent.y, tangent.z };
+			modelData.vertices[vertexIndex].binormal = { bitangent.x, bitangent.y, bitangent.z };
+
 			modelData.matVertexData[meshName].vertices[vertexIndex].position = { -position.x, position.y, position.z, 1.0f };
 			modelData.matVertexData[meshName].vertices[vertexIndex].normal = { -normal.x, normal.y, normal.z };
 			modelData.matVertexData[meshName].vertices[vertexIndex].texcoord = { texcoord.x, texcoord.y };
+			modelData.matVertexData[meshName].vertices[vertexIndex].tangent = { tangent.x, tangent.y, tangent.z };
+			modelData.matVertexData[meshName].vertices[vertexIndex].binormal = { bitangent.x, bitangent.y, bitangent.z };
 		}
 		// Indexの解析
 		for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; ++faceIndex)
@@ -446,7 +456,7 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 	ModelData modelData;            // 構築するModelData
 	Assimp::Importer importer;
 	std::string filePath = directoryPath + "/" + filename;
-	const aiScene* scene = importer.ReadFile(filePath.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs | aiProcess_Triangulate);
+	const aiScene* scene = importer.ReadFile(filePath.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs | aiProcess_Triangulate | aiProcess_CalcTangentSpace);
 	//assert(scene->HasMeshes()); 
 	// メッシュが無いのは対応しない
 	if (!scene->HasMeshes())
@@ -493,13 +503,20 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 			aiVector3D& position = mesh->mVertices[vertexIndex];
 			aiVector3D& normal = mesh->mNormals[vertexIndex];
 			aiVector3D& texcoord = mesh->mTextureCoords[0][vertexIndex];
+			aiVector3D& tangent = mesh->mTangents[vertexIndex];
+			aiVector3D& bitangent = mesh->mBitangents[vertexIndex];
 			// 右手系->左手系への返還を忘れずに
 			modelData.vertices[vertexIndex].position = { -position.x, position.y, position.z, 1.0f };
 			modelData.vertices[vertexIndex].normal = { -normal.x, normal.y, normal.z };
 			modelData.vertices[vertexIndex].texcoord = { texcoord.x, texcoord.y };
+			modelData.vertices[vertexIndex].tangent = { tangent.x, tangent.y, tangent.z };
+			modelData.vertices[vertexIndex].binormal = { bitangent.x, bitangent.y, bitangent.z };
+
 			modelData.matVertexData[meshName].vertices[vertexIndex].position = { -position.x, position.y, position.z, 1.0f };
 			modelData.matVertexData[meshName].vertices[vertexIndex].normal = { -normal.x, normal.y, normal.z };
 			modelData.matVertexData[meshName].vertices[vertexIndex].texcoord = { texcoord.x, texcoord.y };
+			modelData.matVertexData[meshName].vertices[vertexIndex].tangent = { tangent.x, tangent.y, tangent.z };
+			modelData.matVertexData[meshName].vertices[vertexIndex].binormal = { bitangent.x, bitangent.y, bitangent.z };
 		}
 		// Indexの解析
 		for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; faceIndex++)

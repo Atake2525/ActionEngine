@@ -10,7 +10,7 @@
 
 #pragma once
 
-// ease In-Out x1 : 開始点  x2 : 目標点
+// ease In-Out x1 : 髢句ｧ狗せ  x2 : 逶ｮ讓咏せ
 inline float EaseInOut(float time, float x1, float x2) {
 	float T = time;
 	T = std::clamp(T, 0.0f, 1.0f);
@@ -22,7 +22,7 @@ inline float EaseInOut(float time, float x1, float x2) {
 	return x;
 };
 
-// ease In-Out x1 : 開始点  x2 : 目標点
+// ease In-Out x1 : 髢句ｧ狗せ  x2 : 逶ｮ讓咏せ
 inline int EaseInOut(float t, int x1, int x2) {
 	float T = t;
 	T = std::clamp(T, 0.0f, 1.0f);
@@ -52,7 +52,7 @@ inline float EaseInBack(float t, float x1, float x2) {
 	T = std::clamp(T, 0.0f, 1.0f);
 	float x;
 	const float c1 = 1.70158f;
-	const float c3 = c1 + 1;
+	const float c3 = c1 + 1.0f;
 	// easeOut
 	float easedT = c3 * T * T * T - c1 * T * T;
 
@@ -60,7 +60,7 @@ inline float EaseInBack(float t, float x1, float x2) {
 	return x;
 };
 
-// ease In-Out x1 : 開始点  x2 : 目標点
+// ease In-Out x1 : 髢句ｧ狗せ  x2 : 逶ｮ讓咏せ
 inline Vector3 EaseInOut(float time, Vector3 x1, Vector3 x2) {
 
 	Vector3 result;
@@ -102,7 +102,7 @@ inline float EaseOutExpo(float time, float start, float end) {
 		result = end;
 	}
 	else {
-		float easedT = 1 - pow(2, -10 * timer);
+		float easedT = 1.0f - pow(2.0f, -10.0f * timer);
 		result = (1.0f - easedT) * start + easedT * end;
 	}
 	return result;

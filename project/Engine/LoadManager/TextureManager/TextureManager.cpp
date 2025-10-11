@@ -29,6 +29,12 @@ void TextureManager::Finalize() {
 void TextureManager::Initialize() {
 	// SRVの数と同数
 	textureDatas.reserve(SrvManager::GetInstance()->kMaxSRVCount);
+
+	LoadTexture("Resources/Debug/black1x1.png");
+
+	LoadTexture("Resources/Debug/Rock_NormalGL.png");
+	LoadTexture("Resources/Debug/Rock_Roughness.png");
+
 }
 
 void TextureManager::LoadTexture(const std::string& filePath) {
