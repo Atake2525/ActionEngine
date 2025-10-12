@@ -79,7 +79,7 @@ void Model::Initialize(std::string directoryPath, std::string filename, bool ena
 	materialData->shininess = 70.0f;
 	materialData->specularColor = { 1.0f, 1.0f, 1.0f };
 	materialData->environmentCoefficient = 0.0f;
-	materialData->enableMetallic = true;
+	materialData->enableMetallic = false;
 
 
 	useWireFrameTexture = false;
@@ -117,9 +117,9 @@ void Model::Draw() {
 		else
 		{
 			SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(2, modelData.material[matData.second.materialIndex].textureIndex);
-			SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(10, TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/Model/gltf/Stage/map01/Concrete_Normal.jpg")); // ノーマルマップ
-			SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(11, TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/Debug/black1x1.png")); // メタリックマップ
-			SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(12, TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/Model/gltf/Stage/map01/Concrete_Roughness.jpg")); // ラフネスマップ
+			SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(10, TextureManager::GetInstance()->GetnormalMapSrvIndex(modelData.material[matData.second.materialIndex].textureFilePath)); // ノーマルマップ
+			SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(11, TextureManager::GetInstance()->GetmetallicMapSrvIndex(modelData.material[matData.second.materialIndex].textureFilePath)); // メタリックマップ
+			SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(12, TextureManager::GetInstance()->GetroughnessMapSrvIndex(modelData.material[matData.second.materialIndex].textureFilePath)); // ラフネスマップ
 		}
 		SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(7, SkyBox::GetInstance()->GetSrvIndex());
 
