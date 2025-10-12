@@ -141,7 +141,7 @@ PixelShaderOutput main(VertexShaderOutput input)
     float4 transformedUV = mul(float4(input.texcoord, 0.0f, 1.0f), gMaterial.uvTransform);
     float4 textureColor = albedoTexture.Sample(gSampler, transformedUV.xy);
     float3 normal = normalTexture.Sample(gSampler, transformedUV.xy).rgb;
-    float metallic = metallicTexture.Sample(gSampler, transformedUV.xy).r;
+    float metallic = metallicTexture.Sample(gSampler, transformedUV.xy).b;
    
     float roughness = roughnessTexture.Sample(gSampler, transformedUV.xy).r;
     

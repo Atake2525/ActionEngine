@@ -83,6 +83,9 @@
 		{
 			"doubleSided":true,
 			"name":"\u30de\u30c6\u30ea\u30a2\u30eb.005",
+			"normalTexture":{
+				"index":0
+			},
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
 					"extensions":{
@@ -97,10 +100,12 @@
 							]
 						}
 					},
-					"index":0
+					"index":1
 				},
 				"metallicFactor":0,
-				"roughnessFactor":0.5
+				"metallicRoughnessTexture":{
+					"index":2
+				}
 			}
 		},
 		{
@@ -108,7 +113,7 @@
 			"name":"\u30de\u30c6\u30ea\u30a2\u30eb.001",
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
-					"index":1
+					"index":3
 				},
 				"metallicFactor":0
 			}
@@ -118,7 +123,7 @@
 			"name":"\u30de\u30c6\u30ea\u30a2\u30eb.002",
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
-					"index":2
+					"index":4
 				}
 			}
 		},
@@ -127,7 +132,7 @@
 			"name":"\u30de\u30c6\u30ea\u30a2\u30eb.003",
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
-					"index":3
+					"index":5
 				},
 				"metallicFactor":0.5,
 				"roughnessFactor":0.5
@@ -136,6 +141,9 @@
 		{
 			"doubleSided":true,
 			"name":"\u30de\u30c6\u30ea\u30a2\u30eb",
+			"normalTexture":{
+				"index":6
+			},
 			"pbrMetallicRoughness":{
 				"baseColorTexture":{
 					"extensions":{
@@ -150,10 +158,12 @@
 							]
 						}
 					},
-					"index":4
+					"index":7
 				},
 				"metallicFactor":0,
-				"roughnessFactor":0.5
+				"metallicRoughnessTexture":{
+					"index":8
+				}
 			}
 		}
 	],
@@ -338,22 +348,48 @@
 		},
 		{
 			"sampler":0,
-			"source":1
-		},
-		{
-			"sampler":0,
-			"source":1
-		},
-		{
-			"sampler":0,
 			"source":2
+		},
+		{
+			"sampler":0,
+			"source":3
+		},
+		{
+			"sampler":0,
+			"source":3
+		},
+		{
+			"sampler":0,
+			"source":3
+		},
+		{
+			"sampler":0,
+			"source":4
+		},
+		{
+			"sampler":0,
+			"source":5
+		},
+		{
+			"sampler":0,
+			"source":6
 		}
 	],
 	"images":[
 		{
 			"mimeType":"image/jpeg",
-			"name":"Concrete031_4K-JPG_Color",
-			"uri":"Concrete031_4K-JPG_Color.jpg"
+			"name":"Concrete_Normal.jpg",
+			"uri":"Concrete_Normal.jpg"
+		},
+		{
+			"mimeType":"image/jpeg",
+			"name":"Concrete_Color.jpg",
+			"uri":"Concrete_Color.jpg"
+		},
+		{
+			"mimeType":"image/jpeg",
+			"name":"Concrete_Roughness.jpg",
+			"uri":"Concrete_Roughness.jpg"
 		},
 		{
 			"mimeType":"image/png",
@@ -362,8 +398,18 @@
 		},
 		{
 			"mimeType":"image/png",
-			"name":"RockColor",
-			"uri":"RockColor.png"
+			"name":"Rock_NormalGL.png",
+			"uri":"Rock_NormalGL.png"
+		},
+		{
+			"mimeType":"image/png",
+			"name":"Rock_Color.png",
+			"uri":"Rock_Color.png"
+		},
+		{
+			"mimeType":"image/png",
+			"name":"Rock_Roughness.png",
+			"uri":"Rock_Roughness.png"
 		}
 	],
 	"accessors":[

@@ -32,9 +32,6 @@ void TextureManager::Initialize() {
 
 	LoadTexture("Resources/Debug/black1x1.png");
 
-	//LoadTexture("Resources/Model/gltf/Stage/map01/Concrete_Normal.jpg");
-	//LoadTexture("Resources/Model/gltf/Stage/map01/Concrete_Roughness.jpg");
-
 }
 
 void TextureManager::LoadTexture(const std::string& filePath) {

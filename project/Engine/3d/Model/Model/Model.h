@@ -63,6 +63,15 @@ struct MaterialTemplate
 struct MaterialData {
 	std::string textureFilePath;
 	uint32_t textureIndex = 0;
+
+	std::string normalMapFilePath;
+	uint32_t normalMapIndex = 0;
+
+	std::string metallicMapFilePath;
+	uint32_t metallicMapIndex = 0;
+
+	std::string roughnessMapFilePath;
+	uint32_t roughnessMapIndex = 0;
 };
 
 
