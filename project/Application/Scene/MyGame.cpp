@@ -6,6 +6,8 @@ void MyGame::Initialize() {
 
 #pragma region 基盤システムの初期化
 
+	GameTime::GetInstance()->Initialize();
+
 	//WinApp::GetInstance()->Initialize(1920, 1080, WindowMode::FullScreen, L"Engine");
 	WinApp::GetInstance()->Initialize();
 
@@ -44,8 +46,6 @@ void MyGame::Initialize() {
 	Input::GetInstance()->Initialize();
 
 	Audio::GetInstance()->Initialize();
-
-	GameTime::GetInstance()->Initialize();
 
 	FadeManager::GetInstance()->Initialize({0.0f, 0.0f, 0.0f});
 

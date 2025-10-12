@@ -45,7 +45,13 @@ void TestScene::Initialize() {
 	plate->Initialize();
 	//plate->SetModel("Resources/Debug/gltf", "Plante.gltf", true);
 	plate->SetModel("Resources/Model/gltf/Stage/map01", "map01.gltf", true);
-	plate->SetEnableMetallic(true);
+	//plate->SetEnableMetallic(true);
+
+	TextureManager::GetInstance()->SetNormalMapTexture("Resources/Model/gltf/Stage/map01/RockColor.png", "Resources/Model/gltf/Stage/map01/Rock_NormalGL.png");
+	TextureManager::GetInstance()->SetRoughnessMapTexture("Resources/Model/gltf/Stage/map01/RockColor.png", "Resources/Model/gltf/Stage/map01/Rock_Roughness.png");
+
+	TextureManager::GetInstance()->SetNormalMapTexture("Resources/Model/gltf/Stage/map01/Concrete031_4K-JPG_Color.jpg", "Resources/Model/gltf/Stage/map01/Concrete_Normal.jpg");
+	TextureManager::GetInstance()->SetRoughnessMapTexture("Resources/Model/gltf/Stage/map01/Concrete031_4K-JPG_Color.jpg", "Resources/Model/gltf/Stage/map01/Concrete_Roughness.jpg");
 
 	CollisionManager::GetInstance()->AddCollision(plate.get(), "plate");
 
