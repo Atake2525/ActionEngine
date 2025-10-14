@@ -79,7 +79,7 @@ void Model::Initialize(std::string directoryPath, std::string filename, bool ena
 	materialData->shininess = 70.0f;
 	materialData->specularColor = { 1.0f, 1.0f, 1.0f };
 	materialData->environmentCoefficient = 0.0f;
-	materialData->enableMetallic = true;
+	materialData->enableMetallic = false;
 
 
 	useWireFrameTexture = false;
@@ -117,6 +117,9 @@ void Model::Draw() {
 		else
 		{
 			SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(2, modelData.material[matData.second.materialIndex].textureIndex);
+			SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(10, modelData.material[matData.second.materialIndex].normalMapIndex); // ノーマルマップ
+			SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(11, modelData.material[matData.second.materialIndex].metallicMapIndex); // メタリックマップ
+			SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(12, modelData.material[matData.second.materialIndex].roughnessMapIndex); // ラフネスマップ
 		}
 		SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(7, SkyBox::GetInstance()->GetSrvIndex());
 
@@ -179,7 +182,7 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 	ModelData modelData;            // 構築するModelData
 	Assimp::Importer importer;
 	std::string filePath = directoryPath + "/" + filename;
-	const aiScene* scene = importer.ReadFile(filePath.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs | aiProcess_Triangulate | aiProcess_JoinIdenticalVertices);
+	const aiScene* scene = importer.ReadFile(filePath.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs | aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_CalcTangentSpace);
 	//assert(scene->HasMeshes()); // メッシュが無いのは対応しない
 	if (!scene->HasMeshes())
 	{
@@ -220,13 +223,20 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 			aiVector3D& position = mesh->mVertices[vertexIndex];
 			aiVector3D& normal = mesh->mNormals[vertexIndex];
 			aiVector3D& texcoord = mesh->mTextureCoords[0][vertexIndex];
+			aiVector3D& tangent = mesh->mTangents[vertexIndex];
+			aiVector3D& bitangent = mesh->mBitangents[vertexIndex];
 			// 右手系->左手系への返還を忘れずに
 			modelData.vertices[vertexIndex].position = { -position.x, position.y, position.z, 1.0f };
 			modelData.vertices[vertexIndex].normal = { -normal.x, normal.y, normal.z };
 			modelData.vertices[vertexIndex].texcoord = { texcoord.x, texcoord.y };
+			modelData.vertices[vertexIndex].tangent = { tangent.x, tangent.y, tangent.z };
+			modelData.vertices[vertexIndex].binormal = { bitangent.x, bitangent.y, bitangent.z };
+
 			modelData.matVertexData[meshName].vertices[vertexIndex].position = { -position.x, position.y, position.z, 1.0f };
 			modelData.matVertexData[meshName].vertices[vertexIndex].normal = { -normal.x, normal.y, normal.z };
 			modelData.matVertexData[meshName].vertices[vertexIndex].texcoord = { texcoord.x, texcoord.y };
+			modelData.matVertexData[meshName].vertices[vertexIndex].tangent = { tangent.x, tangent.y, tangent.z };
+			modelData.matVertexData[meshName].vertices[vertexIndex].binormal = { bitangent.x, bitangent.y, bitangent.z };
 		}
 		// Indexの解析
 		for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; ++faceIndex)
@@ -273,11 +283,19 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 			modelData.matVertexData[meshName].skinClusterData[JointName] = jointWeightData;
 		}
 	}
+	uint32_t texIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/Debug/black1x1.png");
 	// テクスチャが無い場合white1x1を張るようにする
 	if (scene->mNumMaterials == 0)
 	{
 		MaterialData matData;
 		matData.textureFilePath = "Resources/Debug/white1x1.png";
+
+		matData.normalMapFilePath = "Resources/Debug/black1x1.png";
+		matData.normalMapIndex = texIndex;
+		matData.metallicMapFilePath = "Resources/Debug/black1x1.png";
+		matData.metallicMapIndex = texIndex;
+		matData.roughnessMapFilePath = "Resources/Debug/black1x1.png";
+		matData.roughnessMapIndex = texIndex;
 
 		// テクスチャ読み込み
 		TextureManager::GetInstance()->LoadTexture(matData.textureFilePath);
@@ -314,8 +332,43 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 			// 読み込んだテクスチャの番号尾を取得
 			matData.textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(matData.textureFilePath);
 
+
+			// ノーマルマップ、メタリックマップ、ラフネスマップの読み込み
+			if (material->GetTexture(aiTextureType_NORMALS, 0, &textureFilePath) == AI_SUCCESS) {
+				TextureManager::GetInstance()->LoadTexture(directoryPath + "/" + textureFilePath.C_Str());
+				matData.normalMapFilePath = directoryPath + "/" + textureFilePath.C_Str();
+				matData.normalMapIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(matData.normalMapFilePath);
+			}
+			else
+			{
+				matData.normalMapFilePath = "Resources/Debug/black1x1.png";
+				matData.normalMapIndex = texIndex;
+			}
+			if (material->GetTexture(aiTextureType_METALNESS, 0, &textureFilePath) == AI_SUCCESS) {
+				TextureManager::GetInstance()->LoadTexture(directoryPath + "/" + textureFilePath.C_Str());
+				matData.metallicMapFilePath = directoryPath + "/" + textureFilePath.C_Str();
+				matData.metallicMapIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(matData.metallicMapFilePath);
+			}
+			else
+			{
+				matData.metallicMapFilePath = "Resources/Debug/black1x1.png";
+				matData.metallicMapIndex = texIndex;
+			}
+			if (material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &textureFilePath) == AI_SUCCESS) {
+				TextureManager::GetInstance()->LoadTexture(directoryPath + "/" + textureFilePath.C_Str());
+				matData.roughnessMapFilePath = directoryPath + "/" + textureFilePath.C_Str();
+				matData.roughnessMapIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(matData.roughnessMapFilePath);
+			}
+			else
+			{
+				matData.roughnessMapFilePath = "Resources/Debug/black1x1.png";
+				matData.roughnessMapIndex = texIndex;
+			}
+
+
 			// メタリックの数値
 			float metallic = 0.0f;
+			float roughness = 1.0f;
 			MaterialTemplate matTempData;
 
 			if (material->Get(AI_MATKEY_METALLIC_FACTOR, metallic) == AI_SUCCESS) {
@@ -324,6 +377,13 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 			else
 			{
 				matTempData.metallic = 0.0f;
+			}
+			if (material->Get(AI_MATKEY_ROUGHNESS_FACTOR, roughness) == AI_SUCCESS) {
+				matTempData.roughness = roughness;
+			}
+			else
+			{
+				matTempData.roughness = 1.0f;
 			}
 
 			modelData.materialTemplate.push_back(matTempData);
@@ -335,6 +395,13 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 		{
 			MaterialData matData;
 			matData.textureFilePath = "Resources/Debug/white1x1.png";
+
+			matData.normalMapFilePath = "Resources/Debug/black1x1.png";
+			matData.normalMapIndex = texIndex;
+			matData.metallicMapFilePath = "Resources/Debug/black1x1.png";
+			matData.metallicMapIndex = texIndex;
+			matData.roughnessMapFilePath = "Resources/Debug/black1x1.png";
+			matData.roughnessMapIndex = texIndex;
 
 			// テクスチャ読み込み
 			TextureManager::GetInstance()->LoadTexture(matData.textureFilePath);
@@ -438,7 +505,7 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 	ModelData modelData;            // 構築するModelData
 	Assimp::Importer importer;
 	std::string filePath = directoryPath + "/" + filename;
-	const aiScene* scene = importer.ReadFile(filePath.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs | aiProcess_Triangulate);
+	const aiScene* scene = importer.ReadFile(filePath.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs | aiProcess_Triangulate | aiProcess_CalcTangentSpace);
 	//assert(scene->HasMeshes()); 
 	// メッシュが無いのは対応しない
 	if (!scene->HasMeshes())
@@ -485,13 +552,20 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 			aiVector3D& position = mesh->mVertices[vertexIndex];
 			aiVector3D& normal = mesh->mNormals[vertexIndex];
 			aiVector3D& texcoord = mesh->mTextureCoords[0][vertexIndex];
+			aiVector3D& tangent = mesh->mTangents[vertexIndex];
+			aiVector3D& bitangent = mesh->mBitangents[vertexIndex];
 			// 右手系->左手系への返還を忘れずに
 			modelData.vertices[vertexIndex].position = { -position.x, position.y, position.z, 1.0f };
 			modelData.vertices[vertexIndex].normal = { -normal.x, normal.y, normal.z };
 			modelData.vertices[vertexIndex].texcoord = { texcoord.x, texcoord.y };
+			modelData.vertices[vertexIndex].tangent = { tangent.x, tangent.y, tangent.z };
+			modelData.vertices[vertexIndex].binormal = { bitangent.x, bitangent.y, bitangent.z };
+
 			modelData.matVertexData[meshName].vertices[vertexIndex].position = { -position.x, position.y, position.z, 1.0f };
 			modelData.matVertexData[meshName].vertices[vertexIndex].normal = { -normal.x, normal.y, normal.z };
 			modelData.matVertexData[meshName].vertices[vertexIndex].texcoord = { texcoord.x, texcoord.y };
+			modelData.matVertexData[meshName].vertices[vertexIndex].tangent = { tangent.x, tangent.y, tangent.z };
+			modelData.matVertexData[meshName].vertices[vertexIndex].binormal = { bitangent.x, bitangent.y, bitangent.z };
 		}
 		// Indexの解析
 		for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; faceIndex++)
@@ -514,11 +588,19 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 		}
 
 	}
+	uint32_t texIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/Debug/black1x1.png");
 	// マテリアルが作成されていない場合はwhite1x1を使用
 	if (scene->mNumMaterials == 1 || scene->mNumMaterials == 0)
 	{
 		MaterialData matData;
 		matData.textureFilePath = "Resources/Debug/white1x1.png";
+
+		matData.normalMapFilePath = "Resources/Debug/black1x1.png";
+		matData.normalMapIndex = texIndex;
+		matData.metallicMapFilePath = "Resources/Debug/black1x1.png";
+		matData.metallicMapIndex = texIndex;
+		matData.roughnessMapFilePath = "Resources/Debug/black1x1.png";
+		matData.roughnessMapIndex = texIndex;
 
 		// テクスチャ読み込み
 		TextureManager::GetInstance()->LoadTexture(matData.textureFilePath);
@@ -553,8 +635,41 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 			// 読み込んだテクスチャの番号尾を取得
 			matData.textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(matData.textureFilePath);
 
+			// ノーマルマップ、メタリックマップ、ラフネスマップの読み込み
+			if (material->GetTexture(aiTextureType_NORMALS, 0, &textureFilePath) == AI_SUCCESS) {
+				TextureManager::GetInstance()->LoadTexture(directoryPath + "/" + textureFilePath.C_Str());
+				matData.normalMapFilePath = directoryPath + "/" + textureFilePath.C_Str();
+				matData.normalMapIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(matData.normalMapFilePath);
+			}
+			else
+			{
+				matData.normalMapFilePath = "Resources/Debug/black1x1.png";
+				matData.normalMapIndex = texIndex;
+			}
+			if (material->GetTexture(aiTextureType_METALNESS, 0, &textureFilePath) == AI_SUCCESS) {
+				TextureManager::GetInstance()->LoadTexture(directoryPath + "/" + textureFilePath.C_Str());
+				matData.metallicMapFilePath = directoryPath + "/" + textureFilePath.C_Str();
+				matData.metallicMapIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(matData.metallicMapFilePath);
+			}
+			else
+			{
+				matData.metallicMapFilePath = "Resources/Debug/black1x1.png";
+				matData.metallicMapIndex = texIndex;
+			}
+			if (material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &textureFilePath) == AI_SUCCESS) {
+				TextureManager::GetInstance()->LoadTexture(directoryPath + "/" + textureFilePath.C_Str());
+				matData.roughnessMapFilePath = directoryPath + "/" + textureFilePath.C_Str();
+				matData.roughnessMapIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(matData.roughnessMapFilePath);
+			}
+			else
+			{
+				matData.roughnessMapFilePath = "Resources/Debug/black1x1.png";
+				matData.roughnessMapIndex = texIndex;
+			}
+
 			// メタリックの数値
 			float metallic = 0.0f;
+			float roughness = 1.0f;
 			MaterialTemplate matTempData;
 
 			if (material->Get(AI_MATKEY_METALLIC_FACTOR, metallic) == AI_SUCCESS) {
@@ -564,6 +679,13 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 			{
 				matTempData.metallic = 0.0f;
 			}
+			if (material->Get(AI_MATKEY_ROUGHNESS_FACTOR, roughness) == AI_SUCCESS) {
+				matTempData.roughness = roughness;
+			}
+			else
+			{
+				matTempData.roughness = 1.0f;
+			}
 
 			modelData.materialTemplate.push_back(matTempData);
 			modelData.material.push_back(matData);
@@ -572,6 +694,13 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 		{
 			MaterialData matData;
 			matData.textureFilePath = "Resources/Debug/white1x1.png";
+
+			matData.normalMapFilePath = "Resources/Debug/black1x1.png";
+			matData.normalMapIndex = texIndex;
+			matData.metallicMapFilePath = "Resources/Debug/black1x1.png";
+			matData.metallicMapIndex = texIndex;
+			matData.roughnessMapFilePath = "Resources/Debug/black1x1.png";
+			matData.roughnessMapIndex = texIndex;
 
 			// テクスチャ読み込み
 			TextureManager::GetInstance()->LoadTexture(matData.textureFilePath);
