@@ -23,6 +23,8 @@ struct VertexData {
 	Vector4 position;
 	Vector2 texcoord;
 	Vector3 normal;
+	Vector3 tangent;
+	Vector3 binormal;
 };
 
 struct MaterialVertexData {
@@ -54,12 +56,22 @@ struct Material {
 struct MaterialTemplate
 {
 	float metallic;
-	float padding[3];
+	float roughness;
+	float padding[2];
 };
 
 struct MaterialData {
 	std::string textureFilePath;
 	uint32_t textureIndex = 0;
+
+	std::string normalMapFilePath;
+	uint32_t normalMapIndex = 0;
+
+	std::string metallicMapFilePath;
+	uint32_t metallicMapIndex = 0;
+
+	std::string roughnessMapFilePath;
+	uint32_t roughnessMapIndex = 0;
 };
 
 

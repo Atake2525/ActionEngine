@@ -37,6 +37,16 @@ public:
 	/// <param name="filePath">テクスチャファイルのパス</param>
 	void LoadTexture(const std::string& filePath);
 
+	void SetNormalMapTexture(const std::string& targetTextureFilePath, const std::string& filePath);
+
+	void SetMetallicMapTexture(const std::string& targetTextureFilePath, const std::string& filePath);
+
+	void SetRoughnessMapTexture(const std::string& targetTextureFilePath, const std::string& filePath);
+
+	uint32_t GetnormalMapSrvIndex(const std::string& filePath);
+	uint32_t GetmetallicMapSrvIndex(const std::string& filePath);
+	uint32_t GetroughnessMapSrvIndex(const std::string& filePath);
+
 	// SRVインデックスの開始番号
 	uint32_t GetTextureIndexByFilePath(const std::string& filePath);
 
@@ -67,6 +77,10 @@ private:
 		D3D12_CPU_DESCRIPTOR_HANDLE srvHandleCPU; // SRV作成時に必要なCPUハンドル
 		D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU; // 描画コマンドに必要なGPUハンドル
 		Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource;
+
+		uint32_t normalMapSrvIndex; // 法線マップ用SRVインデックス
+		uint32_t metallicMapSrvIndex; // メタリックマップ用SRVインデックス
+		uint32_t roughnessMapSrvIndex; // ラフネスマップ用SRVインデックス
 	};
 	// テクスチャデータ
 	std::unordered_map<std::string, TextureData> textureDatas;
