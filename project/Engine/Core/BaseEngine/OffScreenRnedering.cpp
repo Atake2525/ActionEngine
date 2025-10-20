@@ -63,7 +63,7 @@ void OffScreenRnedering::Initialize() {
     dissolveResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(Dissolve));
     dissolveResource->Map(0, nullptr, reinterpret_cast<void**>(&dissolve));
     dissolve->edgeColor = { 1.0f, 0.0f, 0.0f };
-    dissolve->threshold = 0.5f;
+    dissolve->threshold = 0.0f;
 }
 
 void OffScreenRnedering::Update() {
