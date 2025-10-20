@@ -9,7 +9,7 @@
 
 struct Grayscale
 {
-	bool enableGrayscale;
+	float grayscaleIntensity;
 	Vector3 toneColor;
 	float alpah;
 };
@@ -31,6 +31,13 @@ struct GaussianFilter
 {
 	bool enableGaussianFilter;
 	float sigma;
+};
+
+struct Dissolve
+{
+	Vector3 edgeColor;
+	float threshold;
+	//float edgerange;
 };
 
 class OffScreenRnedering
@@ -69,12 +76,12 @@ public:
 private:
 	/// Rootsignature
 	// DescriptorRange
-	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
+	D3D12_DESCRIPTOR_RANGE descriptorRange[2] = {};
 	// Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
 	// Resource作る度に配列を増やしす
 	// RootParameter作成、PixelShaderのMatrixShaderのTransform
-	D3D12_ROOT_PARAMETER rootParameters[6] = {};
+	D3D12_ROOT_PARAMETER rootParameters[7] = {};
 	// シリアライズしてバイナリにする
 	Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob = nullptr;
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
@@ -109,18 +116,17 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> renderTextureResource;
 
 	Grayscale* grayscale = nullptr;
-
 	Microsoft::WRL::ComPtr<ID3D12Resource> grayscaleResouce;
 
 	Vignette* vignette = nullptr;
-
 	Microsoft::WRL::ComPtr<ID3D12Resource> vignetteResource;
 
 	BoxFilter* boxFilter = nullptr;
-
 	Microsoft::WRL::ComPtr<ID3D12Resource> boxFilterResource;
 
-	GaussianFilter* gaussianFilter = nullptr;
+	/*GaussianFilter* gaussianFilter = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12Resource> gaussianFilterResource;*/
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> gaussianFilterResource;
+    Dissolve* dissolve = nullptr;
+    Microsoft::WRL::ComPtr<ID3D12Resource> dissolveResource;
 };

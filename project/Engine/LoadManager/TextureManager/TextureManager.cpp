@@ -31,6 +31,7 @@ void TextureManager::Initialize() {
 	textureDatas.reserve(SrvManager::GetInstance()->kMaxSRVCount);
 
 	LoadTexture("Resources/Debug/black1x1.png");
+    LoadTexture("Resources/Sprite/noise0.png");
 
 }
 

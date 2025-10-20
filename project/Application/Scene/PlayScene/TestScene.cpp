@@ -29,10 +29,10 @@ void TestScene::Initialize() {
 	grid->Initialize();
 	grid->SetModel("Resources/Debug", "Grid.obj");
 
-	box1 = std::make_unique<Object3d>();
+	/*box1 = std::make_unique<Object3d>();
 	box1->Initialize();
 	box1->SetModel("Resources/Debug/gltf", "trap.gltf", true);
-	box1->SetTranslate({ 14.5f, 15.0f, 26.2f });
+	box1->SetTranslate({ 14.5f, 15.0f, 26.2f });*/
 
     //CollisionManager::GetInstance()->AddCollision(box1.get(), "box1");
 
@@ -89,7 +89,7 @@ void TestScene::Update() {
 
 	SkyBox::GetInstance()->Update();
 
-	Transform t = box1->GetTransform();
+	/*Transform t = box1->GetTransform();
 	AABB aabb = box1->GetAABB();
 	ImGui::Begin("Box");
 	ImGui::DragFloat3("Translate", &t.translate.x, 0.1f);
@@ -102,7 +102,7 @@ void TestScene::Update() {
 	t.rotate.z += SwapRadian(4.0f);
 
 	box1->SetTransform(t);
-	box1->Update();
+	box1->Update();*/
 	box2->Update();
 
 	bool flag = false;
@@ -111,7 +111,7 @@ void TestScene::Update() {
 	{
 		flag = true;
 	}*/
-	if (box1->CheckCollisionOBBs(box2->GetOBB()))
+	/*if (box1->CheckCollisionOBBs(box2->GetOBB()))
 	{
 		flag = true;
 	}
@@ -119,21 +119,21 @@ void TestScene::Update() {
 	if (box1->CheckCollisionOBBs(player->GetOBB()))
 	{
 		flag = true;
-	}
+	}*/
 
 	/*if (CheckOBBCollision(box1->GetOBB(), player->GetOBB()))
 	{
 		flag = true;
 	}*/
 
-	if (flag)
+	/*if (flag)
 	{
 		box1->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
 	}
 	else
 	{
 		box1->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
-	}
+	}*/
 
 	if (input->TriggerKey(DIK_ESCAPE))
 	{
@@ -158,7 +158,7 @@ void TestScene::Draw() {
 
 	Object3dBase::GetInstance()->ShaderDraw();
 
-	box1->Draw();
+	//box1->Draw();
 	box2->Draw();
 	plate->Draw();
 	//player->Draw();
