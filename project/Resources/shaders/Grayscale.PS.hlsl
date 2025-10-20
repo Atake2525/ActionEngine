@@ -10,7 +10,7 @@ struct PixelShaderOutput
 
 struct Grayscale
 {
-    int enableGrayscale;
+    float grayscaleIntensity;
     float3 toneColor;
     float alpha;
 };
@@ -21,13 +21,12 @@ PixelShaderOutput ShadingGrayscale(VertexShaderOutput input)
     PixelShaderOutput output;
     output.color = gTexture.Sample(gSampler, input.texcoord);
     
-    if (gGrayscale.enableGrayscale)
-    {
-        float value = dot(output.color.rbg, float3(0.2125f, 0.7154f, 0.0721f));
+    float value = dot(output.color.rbg, float3(0.2125f, 0.7154f, 0.0721f));
     
-        output.color.rgb = value * float3(gGrayscale.toneColor.x, gGrayscale.toneColor.y, gGrayscale.toneColor.z);
-        output.color.a = gGrayscale.alpha;
-    }
+    float3 gray = value * float3(gGrayscale.toneColor.x, gGrayscale.toneColor.y, gGrayscale.toneColor.z);
+    
+    output.color.rgb = lerp(output.color.rgb, gray, gGrayscale.grayscaleIntensity);
+    output.color.a = gGrayscale.alpha;
    
 
     return output;
