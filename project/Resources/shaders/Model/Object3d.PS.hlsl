@@ -1,4 +1,5 @@
 #include "object3d.hlsli"
+#include "DistanceCulling.PS.hlsl"
 
 Texture2D<float4> albedoTexture : register(t0);
 Texture2D<float4> normalTexture : register(t2);
@@ -36,6 +37,9 @@ struct PixelShaderOutput
 struct Camera
 {
     float3 worldPosition;
+    float nearClipDistance;
+    float farClipDistance;
+    float drawHeight;
 };
 ConstantBuffer<Camera> gCamera : register(b1);
 
@@ -274,6 +278,8 @@ PixelShaderOutput main(VertexShaderOutput input)
     }
     output.color.rgb = RoadMaterialTemplate(output, input).color.rgb;
 
+    output.color.a = HeightCulling(input.worldPosition, gCamera.drawHeight);
+    output.color.a *= DistanceCulling(input.worldPosition, gCamera.worldPosition, gCamera.nearClipDistance, gCamera.farClipDistance);
     
     if (output.color.a < 0.2f)
     {

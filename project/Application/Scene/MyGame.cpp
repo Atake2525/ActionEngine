@@ -53,7 +53,7 @@ void MyGame::Initialize() {
 
 	SceneManager::GetInstance();
 	
-	SceneManager::GetInstance()->SetNextScene("TITLE");
+	SceneManager::GetInstance()->SetNextScene("TEST");
 
 	//gameScene->Initialize();
 

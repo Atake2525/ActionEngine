@@ -122,6 +122,9 @@ private:
 
 	struct CameraForGPU {
 		Vector3 worldPosition;
+        float nearClipDistance;
+        float farClipDistance;
+		float drawHeihgt;
 	};
 
 	// 座標変換リソースのバッファリソース
