@@ -16,6 +16,7 @@ Camera::Camera()
 	, axisAngle({ 0.0f, 1.0f, 0.0f })
 	, rotateQuaternionMatrix(MakeRotateAxisAngle(axisAngle, 0.0f))
 	, rotateAngle(0.0f)
+    , drawHeihgt(1.0f)
 {
 }
 
@@ -38,6 +39,7 @@ void Camera::Update() {
 	ImGui::DragFloat3("Direction2", &dirc.x);
 	ImGui::DragFloat("Fov", &fovY, 0.01f);
 	ImGui::DragFloat("farClipDist", &farClipDistance, 1.0f);
+    ImGui::DragFloat("drawHeihgt", &drawHeihgt, 0.1f);
 	/*ImGui::DragFloat3("AxisAngle", &axisAngle.x);
 	axisAngle = Normalize(axisAngle);*/
 	ImGui::End();

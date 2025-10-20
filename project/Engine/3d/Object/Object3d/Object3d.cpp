@@ -60,6 +60,9 @@ void Object3d::Initialize() {
 	SetQuaternionAngle(0.0f);
 
 	cameraData->worldPosition = { 1.0f, 1.0f, 1.0f };
+	cameraData->nearClipDistance = 800.0f;
+    cameraData->farClipDistance = 1000.0f;
+	cameraData->drawHeihgt = 1.0f;
 
 	camera = Object3dBase::GetInstance()->GetDefaultCamera();
 
@@ -126,6 +129,9 @@ void Object3d::Update() {
 	Matrix4x4 worldViewProjectionMatrix;
 	if (camera) {
 		cameraData->worldPosition = camera->GetWorldPosition();
+        cameraData->nearClipDistance = camera->GetFarClipDistance() - camera->GetFarClipDistance() * 0.2f;
+        cameraData->farClipDistance = camera->GetFarClipDistance();
+        cameraData->drawHeihgt = camera->GetDrawHeihgt();
 		const Matrix4x4& viewProjectionMatrix = camera->GetViewProjectionMatrix();
 		worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
 	}

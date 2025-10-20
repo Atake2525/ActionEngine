@@ -29,7 +29,7 @@ PixelShaderOutput main(VertexShaderOutput input)
     }
 
     // シーン色を取得（ポスト処理前の生の色を参照すること）
-    output.color = gTexture.Sample(gSampler, input.texcoord);
+    //output.color += gTexture.Sample(gSampler, input.texcoord);
 
     //// 溶解色とシーン色を線形補間して出力
     //float3 outRgb = (t * output.color.rgb) * ((1.0f - t) * gDissolve.edgeColor);
