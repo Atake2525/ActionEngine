@@ -338,29 +338,29 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Resources\shaders\BoxFilter.PS.hlsl" />
-    <FxCompile Include="Resources\shaders\Fullscreen.PS.hlsl" />
-    <FxCompile Include="Resources\shaders\Fullscreen.VS.hlsl" />
-    <FxCompile Include="Resources\shaders\Grayscale.PS.hlsl" />
-    <FxCompile Include="Resources\shaders\Object3d.PS.hlsl" />
-    <FxCompile Include="Resources\shaders\Object3d.VS.hlsl" />
-    <FxCompile Include="Resources\shaders\Particle.PS.hlsl" />
-    <FxCompile Include="Resources\shaders\Particle.VS.hlsl" />
-    <FxCompile Include="Resources\shaders\Vignetting.PS.hlsl" />
-    <FxCompile Include="Resources\shaders\GaussianFilter.PS.hlsl" />
-    <FxCompile Include="Resources\shaders\SkinningObject3d.VS.hlsl" />
-    <FxCompile Include="Resources\shaders\Skybox.PS.hlsl" />
-    <FxCompile Include="Resources\shaders\Skybox.VS.hlsl" />
-    <FxCompile Include="Resources\shaders\Sprite.PS.hlsl" />
-    <FxCompile Include="Resources\shaders\Sprite.VS.hlsl" />
-    <FxCompile Include="Resources\shaders\Dissolve.PS.hlsl" />
+    <FxCompile Include="Resources\shaders\PostEffect\BoxFilter.PS.hlsl" />
+    <FxCompile Include="Resources\shaders\PostEffect\Fullscreen.PS.hlsl" />
+    <FxCompile Include="Resources\shaders\PostEffect\Fullscreen.VS.hlsl" />
+    <FxCompile Include="Resources\shaders\PostEffect\Grayscale.PS.hlsl" />
+    <FxCompile Include="Resources\shaders\Model\Object3d.PS.hlsl" />
+    <FxCompile Include="Resources\shaders\Model\Object3d.VS.hlsl" />
+    <FxCompile Include="Resources\shaders\Particle\Particle.PS.hlsl" />
+    <FxCompile Include="Resources\shaders\Particle\Particle.VS.hlsl" />
+    <FxCompile Include="Resources\shaders\PostEffect\Vignetting.PS.hlsl" />
+    <FxCompile Include="Resources\shaders\PostEffect\GaussianFilter.PS.hlsl" />
+    <FxCompile Include="Resources\shaders\Model\SkinningObject3d.VS.hlsl" />
+    <FxCompile Include="Resources\shaders\SkyBox\Skybox.PS.hlsl" />
+    <FxCompile Include="Resources\shaders\SkyBox\Skybox.VS.hlsl" />
+    <FxCompile Include="Resources\shaders\Sprite\Sprite.PS.hlsl" />
+    <FxCompile Include="Resources\shaders\Sprite\Sprite.VS.hlsl" />
+    <FxCompile Include="Resources\shaders\PostEffect\Dissolve.PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\shaders\Fullscreen.hlsli" />
-    <None Include="Resources\shaders\Object3d.hlsli" />
-    <None Include="Resources\shaders\Particle.hlsli" />
-    <None Include="Resources\shaders\Skybox.hlsli" />
-    <None Include="Resources\shaders\Sprite.hlsli" />
+    <None Include="Resources\shaders\PostEffect\Fullscreen.hlsli" />
+    <None Include="Resources\shaders\Model\Object3d.hlsli" />
+    <None Include="Resources\shaders\Particle\Particle.hlsli" />
+    <None Include="Resources\shaders\SkyBox\Skybox.hlsli" />
+    <None Include="Resources\shaders\Sprite\Sprite.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Math">
