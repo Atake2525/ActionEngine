@@ -53,7 +53,7 @@ private:
 
 	bool cursorshow = true;
 
-	std::unique_ptr<Object3d> box1;
+	//std::unique_ptr<Object3d> box1;
 	std::unique_ptr<Object3d> box2;
 	std::unique_ptr<Object3d> plate;
 
