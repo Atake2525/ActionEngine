@@ -354,6 +354,7 @@
     <FxCompile Include="Resources\shaders\Sprite\Sprite.PS.hlsl" />
     <FxCompile Include="Resources\shaders\Sprite\Sprite.VS.hlsl" />
     <FxCompile Include="Resources\shaders\PostEffect\Dissolve.PS.hlsl" />
+    <FxCompile Include="Resources\shaders\Model\DistanceCulling.PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\shaders\PostEffect\Fullscreen.hlsli" />
