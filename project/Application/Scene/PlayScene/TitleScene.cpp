@@ -5,104 +5,305 @@
 #include "WinApp.h"
 #include "GameTime.h"
 #include "EasingUtility.h"
+#include "Logger.h"
 
+using namespace Logger;
 using namespace std;
 
+bool TitleScene::InitializeStep() {
+	// ステップごとに重い処理を分割して1フレームごとに呼ぶ
+	// initStep の値に応じて処理を行い、最後に true を返す
+	switch (initStep)
+	{
+	case 0:
+		// 軽量な初期化 (必須 UI とカメラ)
+		camera = make_unique<Camera>();
+		camera->SetRotate(Vector3(SwapRadian(10.0f), 0.0f, 0.0f));
+		camera->SetTranslate({ 0.0f, 2.8f, -4.4f });
+
+		SkyBox::GetInstance()->SetCamera(camera.get());
+
+		input = Input::GetInstance();
+		input->ShowMouseCursor(true);
+
+		Object3dBase::GetInstance()->SetDefaultCamera(camera.get());
+
+		ParticleManager::GetInstance()->SetCamera(camera.get());
+
+		Log("カメラ初期化完了\n");
+		// 次ステップへ
+		initStep++;
+		return false;
+
+	case 1:
+
+		// プレースホルダとなるオブジェクトは最低限生成する
+		title = make_unique<Object3d>();
+		title->Initialize();
+		// モデルの本読み込みは後のステップで行う
+		title->SetTranslate({ -0.04f, 2.0f, 0.0f });
+		title->SetRotate(Vector3(SwapRadian(10.0f), 0.01f, 0.0f));
+
+		playerModel = make_unique<Object3d>();
+		playerModel->Initialize();
+		playerModel->SetTranslate({ 0.0f, 0.1f, 0.0f });
+
+		stageModel = make_unique<Object3d>();
+		stageModel->Initialize();
+
+		// UIの初期化は軽めなのでここで実行
+		startUI = make_unique<UI>();
+		startUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f), float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) - 64.0f * 3.0f }, Origin::Center, "Resources/Sprite/UI/start.png");
+		startUI->function = [this]() {
+			start = true;
+		};
+
+		playUI = make_unique<UI>();
+		playUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f) + 128.0f, float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) }, Origin::Center, "Resources/Sprite/UI/play.png");
+		playUI->function = []() {
+			SceneManager::GetInstance()->SetNextScene("GAMESCENE");
+		};
+
+		settingUI = make_unique<UI>();
+		settingUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f) + 128.0f, float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) + 72.0f }, Origin::Center, "Resources/Sprite/UI/setting.png");
+		settingUI->function = [this]() {
+		};
+
+		exitUI = make_unique<UI>();
+		exitUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f) + 128.0f, float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) + 72.0f * 2.0f }, Origin::Center, "Resources/Sprite/UI/exit.png");
+		exitUI->function = [this]() {
+			finished = true;
+		};
+
+		creditUI = make_unique<UI>();
+		creditUI->CreateButton({ 64.0f + 16.0f, float(WinApp::GetInstance()->GetkClientHeight() - 24.0f - 16.0f) }, Origin::Center, "Resources/Sprite/UI/credit.png");
+		creditUI->function = [this]() {
+			showCredit = !showCredit;
+		};
+
+		uiFrame = make_unique<Sprite>();
+		uiFrame->Initialize("Resources/Sprite/UI/uiFrame.png");
+		uiFrame->SetAnchorPoint({ 0.5f, 0.5f });
+		uiFrame->SetPosition({ startUI->GetTransform().translate.x, startUI->GetTransform().translate.y });
+
+		gamePad = make_unique<Sprite>();
+		gamePad->Initialize("Resources/Sprite/UI/gamepad.png");
+		gamePad->SetPosition({ float(WinApp::GetInstance()->GetkClientWidth() - gamePad->GetTextureSize().x - 10.0f), float(WinApp::GetInstance()->GetkClientHeight() - gamePad->GetTextureSize().y - 10.0f) });
+
+		gamePadOnFrame = make_unique<Sprite>();
+		gamePadOnFrame->Initialize("Resources/Sprite/UI/gamepadONFrame.png");
+		gamePadOnFrame->SetPosition({ float(WinApp::GetInstance()->GetkClientWidth() - gamePad->GetTextureSize().x - 10.0f), float(WinApp::GetInstance()->GetkClientHeight() - gamePad->GetTextureSize().y - 10.0f) });
+
+		credit_sound = make_unique<Sprite>();
+		credit_sound->Initialize("Resources/Sprite/UI/credit_sound.png");
+		credit_sound->SetAnchorPoint({ 0.5f, 0.5f });
+		credit_sound->SetPosition({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f), float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) });
+
+		// オーディオ読み込みは次のステップで行う（重いため）
+
+		// 次ステップへ
+		/*initStep++;
+		return false;*/
+
+	//case 2:
+		// テクスチャ等のディスクI/Oを行うステップ
+		// ここをワーカースレッドにすることもできるが、まずはフレーム分割で非ブロッキングにする
+		TextureManager::GetInstance()->LoadTexture("Resources/rostock_laage_airport_4k.dds");
+		SkyBox::GetInstance()->SetTexture("Resources/rostock_laage_airport_4k.dds");
+
+		Log("UI|skyBox初期化完了\n");
+		// 次ステップへ
+		initStep++;
+		return false;
+
+	case 2:
+		// モデル本体の読み込み (比較的重い)
+		// ModelManager は内部で同期読み込みだが、分割して呼ぶことでフレームブロックを分散
+		ModelManager::GetInstance()->LoadModel("Resources/Model/gltf/title", "title.gltf", true);
+		title->SetModel("Resources/Model/gltf/title", "title.gltf", true);
+
+		ModelManager::GetInstance()->LoadModel("Resources/Model/gltf/char", "idle.gltf", true, true);
+		playerModel->SetModel("Resources/Model/gltf/char", "idle.gltf", true, true);
+		playerModel->ToggleStartAnimation();
+
+		ModelManager::GetInstance()->LoadModel("Resources/Model/gltf/Stage/map01", "map01.gltf", true);
+		stageModel->SetModel("Resources/Model/gltf/Stage/map01", "map01.gltf", true);
+
+		Log("モデル初期化完了\n");
+		// 次ステップへ
+		initStep++;
+		return false;
+
+	case 3:
+		// オーディオなど残りの読み込み
+		Audio::GetInstance()->LoadMP3("Resources/sound/select.mp3", "select", 1.0f);
+		Audio::GetInstance()->LoadMP3("Resources/sound/enter.mp3", "enter", 1.0f);
+		Audio::GetInstance()->LoadMP3("Resources/sound/Experimenta_Model_short.mp3", "bgm", 0.2f);
+
+		Audio::GetInstance()->Play("bgm", true);
+		Audio::GetInstance()->SetMasterVolume(0.0f);
+
+		Log("オーディオ初期化完了\n");
+		// 全ての初期化完了
+		Log("タイトルシーン初期化処理完了\n");
+		assetsLoaded = true;
+		initStep++;
+		return true;
+
+	default:
+		return assetsLoaded;
+	}
+
+	
+}
+
 void TitleScene::Initialize() {
+	// 非ブロッキング初期化を開始する
+	initStep = 0;
+	assetsLoaded = false;
+	// ここでは即座に1フレーム分の軽量初期化だけ行い、残りは Update 内で進める
+	// InitializeStep() を一度呼んで UI 等の初期化を実施しておく
+    stepInitializer = make_unique<StepInitializer>();
+    stepInitializer->Initialize();
 
-	//ModelManager::GetInstance()->LoadModel("Resources/Model/gltf/human", "walkMultiMaterial.gltf", true, true);
+	std::function<void()> stepFunc = [this]() {
+		// 軽量な初期化 (必須 UI とカメラ)
+		camera = make_unique<Camera>();
+		camera->SetRotate(Vector3(SwapRadian(10.0f), 0.0f, 0.0f));
+		camera->SetTranslate({ 0.0f, 2.8f, -4.4f });
 
-	camera = make_unique<Camera>();
-	camera->SetRotate(Vector3(SwapRadian(10.0f), 0.0f, 0.0f));
-	camera->SetTranslate({ 0.0f, 2.8f, -4.4f });
+		SkyBox::GetInstance()->SetCamera(camera.get());
 
-	TextureManager::GetInstance()->LoadTexture("Resources/rostock_laage_airport_4k.dds");
+		input = Input::GetInstance();
+		input->ShowMouseCursor(true);
 
-	SkyBox::GetInstance()->SetCamera(camera.get());
-	SkyBox::GetInstance()->SetTexture("Resources/rostock_laage_airport_4k.dds");
+		Object3dBase::GetInstance()->SetDefaultCamera(camera.get());
 
-	input = Input::GetInstance();
-	input->ShowMouseCursor(true);
+		ParticleManager::GetInstance()->SetCamera(camera.get());
+		};
+    stepInitializer->AddStep(stepFunc);
 
-	Object3dBase::GetInstance()->SetDefaultCamera(camera.get());
+	stepFunc = [this]() {
+		// プレースホルダとなるオブジェクトは最低限生成する
+		title = make_unique<Object3d>();
+		title->Initialize();
+		// モデルの本読み込みは後のステップで行う
+		title->SetTranslate({ -0.04f, 2.0f, 0.0f });
+		title->SetRotate(Vector3(SwapRadian(10.0f), 0.01f, 0.0f));
 
-	ParticleManager::GetInstance()->SetCamera(camera.get());
+		playerModel = make_unique<Object3d>();
+		playerModel->Initialize();
+		playerModel->SetTranslate({ 0.0f, 0.1f, 0.0f });
 
-	title = make_unique<Object3d>();
-	title->Initialize();
-	title->SetModel("Resources/Model/gltf/title", "title.gltf", true);
-	title->SetTranslate({ -0.04f, 2.0f, 0.0f });
-	title->SetRotate(Vector3(SwapRadian(10.0f), 0.01f, 0.0f));
+		stageModel = make_unique<Object3d>();
+		stageModel->Initialize();
 
-	playerModel = make_unique<Object3d>();
-	playerModel->Initialize();
-	playerModel->SetModel("Resources/Model/gltf/char", "idle.gltf", true, true);
-	playerModel->ToggleStartAnimation();
-	playerModel->SetTranslate({ 0.0f, 0.1f, 0.0f });
+		// UIの初期化は軽めなのでここで実行
+		startUI = make_unique<UI>();
+		startUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f), float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) - 64.0f * 3.0f }, Origin::Center, "Resources/Sprite/UI/start.png");
+		startUI->function = [this]() {
+			start = true;
+			};
 
-	stageModel = make_unique<Object3d>();
-	stageModel->Initialize();
-	stageModel->SetModel("Resources/Model/gltf/Stage/map01", "map01.gltf", true);
+		playUI = make_unique<UI>();
+		playUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f) + 128.0f, float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) }, Origin::Center, "Resources/Sprite/UI/play.png");
+		playUI->function = []() {
+			SceneManager::GetInstance()->SetNextScene("GAMESCENE");
+			};
 
-	startUI = make_unique<UI>();
-	startUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f), float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) - 64.0f * 3.0f }, Origin::Center, "Resources/Sprite/UI/start.png");
-	startUI->function = [this]() {
-		start = true;
-	};
+		settingUI = make_unique<UI>();
+		settingUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f) + 128.0f, float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) + 72.0f }, Origin::Center, "Resources/Sprite/UI/setting.png");
+		settingUI->function = [this]() {
+			};
 
-	playUI = make_unique<UI>();
-	playUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f) + 128.0f, float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) }, Origin::Center, "Resources/Sprite/UI/play.png");
-	playUI->function = []() {
-		SceneManager::GetInstance()->SetNextScene("GAMESCENE");
-	};
+		exitUI = make_unique<UI>();
+		exitUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f) + 128.0f, float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) + 72.0f * 2.0f }, Origin::Center, "Resources/Sprite/UI/exit.png");
+		exitUI->function = [this]() {
+			finished = true;
+			};
 
-	settingUI = make_unique<UI>();
-	settingUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f) + 128.0f, float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) + 72.0f }, Origin::Center, "Resources/Sprite/UI/setting.png");
-	settingUI->function = [this]() {
-	};
+		creditUI = make_unique<UI>();
+		creditUI->CreateButton({ 64.0f + 16.0f, float(WinApp::GetInstance()->GetkClientHeight() - 24.0f - 16.0f) }, Origin::Center, "Resources/Sprite/UI/credit.png");
+		creditUI->function = [this]() {
+			showCredit = !showCredit;
+			};
 
-	exitUI = make_unique<UI>();
-	exitUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f) + 128.0f, float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) + 72.0f * 2.0f }, Origin::Center, "Resources/Sprite/UI/exit.png");
-	exitUI->function = [this]() {
-		finished = true;
-	};
+		uiFrame = make_unique<Sprite>();
+		uiFrame->Initialize("Resources/Sprite/UI/uiFrame.png");
+		uiFrame->SetAnchorPoint({ 0.5f, 0.5f });
+		uiFrame->SetPosition({ startUI->GetTransform().translate.x, startUI->GetTransform().translate.y });
 
-	creditUI = make_unique<UI>();
-	creditUI->CreateButton({ 64.0f + 16.0f, float(WinApp::GetInstance()->GetkClientHeight() - 24.0f - 16.0f) }, Origin::Center, "Resources/Sprite/UI/credit.png");
-	creditUI->function = [this]() {
-		showCredit = !showCredit;
-	};
+		gamePad = make_unique<Sprite>();
+		gamePad->Initialize("Resources/Sprite/UI/gamepad.png");
+		gamePad->SetPosition({ float(WinApp::GetInstance()->GetkClientWidth() - gamePad->GetTextureSize().x - 10.0f), float(WinApp::GetInstance()->GetkClientHeight() - gamePad->GetTextureSize().y - 10.0f) });
 
-	uiFrame = make_unique<Sprite>();
-	uiFrame->Initialize("Resources/Sprite/UI/uiFrame.png");
-	uiFrame->SetAnchorPoint({ 0.5f, 0.5f });
-	uiFrame->SetPosition({ startUI->GetTransform().translate.x, startUI->GetTransform().translate.y });
+		gamePadOnFrame = make_unique<Sprite>();
+		gamePadOnFrame->Initialize("Resources/Sprite/UI/gamepadONFrame.png");
+		gamePadOnFrame->SetPosition({ float(WinApp::GetInstance()->GetkClientWidth() - gamePad->GetTextureSize().x - 10.0f), float(WinApp::GetInstance()->GetkClientHeight() - gamePad->GetTextureSize().y - 10.0f) });
 
-	gamePad = make_unique<Sprite>();
-	gamePad->Initialize("Resources/Sprite/UI/gamepad.png");
-	//gamePad->SetAnchorPoint({ 0.5f, 0.5f });
-	gamePad->SetPosition({ float(WinApp::GetInstance()->GetkClientWidth() - gamePad->GetTextureSize().x - 10.0f), float(WinApp::GetInstance()->GetkClientHeight() - gamePad->GetTextureSize().y - 10.0f) });
+		credit_sound = make_unique<Sprite>();
+		credit_sound->Initialize("Resources/Sprite/UI/credit_sound.png");
+		credit_sound->SetAnchorPoint({ 0.5f, 0.5f });
+		credit_sound->SetPosition({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f), float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) });
 
-	gamePadOnFrame = make_unique<Sprite>();
-	gamePadOnFrame->Initialize("Resources/Sprite/UI/gamepadONFrame.png");
-	//gamePadOnFrame->SetAnchorPoint({ 0.5f, 0.5f });
-	gamePadOnFrame->SetPosition({ float(WinApp::GetInstance()->GetkClientWidth() - gamePad->GetTextureSize().x - 10.0f), float(WinApp::GetInstance()->GetkClientHeight() - gamePad->GetTextureSize().y - 10.0f) });
+		TextureManager::GetInstance()->LoadTexture("Resources/rostock_laage_airport_4k.dds");
+		SkyBox::GetInstance()->SetTexture("Resources/rostock_laage_airport_4k.dds");
 
-	credit_sound = make_unique<Sprite>();
-	credit_sound->Initialize("Resources/Sprite/UI/credit_sound.png");
-	credit_sound->SetAnchorPoint({ 0.5f, 0.5f });
-	credit_sound->SetPosition({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f), float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) });
+		};
+    stepInitializer->AddStep(stepFunc);
 
-	Audio::GetInstance()->LoadMP3("Resources/sound/select.mp3", "select", 1.0f);
-	Audio::GetInstance()->LoadMP3("Resources/sound/enter.mp3", "enter", 1.0f);
-	Audio::GetInstance()->LoadMP3("Resources/sound/Experimenta_Model_short.mp3", "bgm", 0.2f);
+	stepFunc = [this]() {
+		// モデル本体の読み込み (比較的重い)
+		// ModelManager は内部で同期読み込みだが、分割して呼ぶことでフレームブロックを分散
+		ModelManager::GetInstance()->LoadModel("Resources/Model/gltf/title", "title.gltf", true);
+		title->SetModel("Resources/Model/gltf/title", "title.gltf", true);
 
-	Audio::GetInstance()->Play("bgm", true);
+		ModelManager::GetInstance()->LoadModel("Resources/Model/gltf/char", "idle.gltf", true, true);
+		playerModel->SetModel("Resources/Model/gltf/char", "idle.gltf", true, true);
+		playerModel->ToggleStartAnimation();
 
-	Audio::GetInstance()->SetMasterVolume(0.0f);
+		ModelManager::GetInstance()->LoadModel("Resources/Model/gltf/Stage/map01", "map01.gltf", true);
+		stageModel->SetModel("Resources/Model/gltf/Stage/map01", "map01.gltf", true);
+		};
+    stepInitializer->AddStep(stepFunc);
+
+	stepFunc = [this]() {
+		// オーディオなど残りの読み込み
+		Audio::GetInstance()->LoadMP3("Resources/sound/select.mp3", "select", 1.0f);
+		Audio::GetInstance()->LoadMP3("Resources/sound/enter.mp3", "enter", 1.0f);
+		Audio::GetInstance()->LoadMP3("Resources/sound/Experimenta_Model_short.mp3", "bgm", 0.2f);
+
+		Audio::GetInstance()->Play("bgm", true);
+		Audio::GetInstance()->SetMasterVolume(0.0f);
+		};
+    stepInitializer->AddStep(stepFunc);
+
+	//InitializeStep();
 }
 
 void TitleScene::Update() {
+
+	// 初期化が完了していなければ一フレームごとに初期化ステップを進行
+	if (!assetsLoaded) {
+		stepInitializer->Update();
+
+		if (stepInitializer->IsFinished())
+		{
+			assetsLoaded = true;
+		}
+		// 描画側では読み込み中UIを表示するため、Updateの残りは最小限にする
+		// それでも一部必要なUpdateは行う
+		input = Input::GetInstance();
+		input->ShowMouseCursor(true);
+
+		uiFrame->Update();
+		gamePad->Update();
+		gamePadOnFrame->Update();
+		credit_sound->Update();
+		camera->Update();
+		SkyBox::GetInstance()->Update();
+		return;
+	}
 
 	if (start && !FadeManager::GetInstance()->IsFade())
 	{
@@ -344,11 +545,42 @@ void TitleScene::Update() {
 
 void TitleScene::Draw() {
 
+	// 読み込み中ならローディング画面を優先して描画
+	if (!assetsLoaded)
+	{
+		// 最低限の背景(ステージとタイトルプレースホルダ)を描画し、UIで読み込み中を示す
+		SpriteBase::GetInstance()->ShaderDraw();
+
+		Object3dBase::GetInstance()->ShaderDraw();
+
+		stageModel->Draw();
+		title->Draw();
+
+		SkinningObject3dBase::GetInstance()->ShaderDraw();
+
+		playerModel->Draw();
+
+		WireFrameObjectBase::GetInstance()->ShaderDraw();
+
+		ParticleManager::GetInstance()->Draw();
+
+		SpriteBase::GetInstance()->ShaderDraw();
+
+		// 読み込み中メッセージ
+		startUI->Draw();
+		
+		// loading フレーム (uiFrame を仮利用)
+		uiFrame->Draw();
+		
+		gamePad->Draw();
+		// 進捗表示を追加したければここに描画処理を入れる
+		return;
+	}
+
+	// assetsLoaded == true の通常描画
 	if (start)
 	{
 		SpriteBase::GetInstance()->ShaderDraw();
-
-
 
 		Object3dBase::GetInstance()->ShaderDraw();
 

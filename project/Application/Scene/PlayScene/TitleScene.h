@@ -17,6 +17,7 @@
 #include <map>
 #include "UI.h"
 #include <memory>
+#include "StepInitializer.h"
 
 #pragma once
 
@@ -44,6 +45,10 @@ public:
 	void Draw() override;
 
 	const bool& EndRequest() override { return finished; }
+
+	// 非ブロッキング（ステップ実行）初期化を1フレームごとに呼べるようにする
+	// 返り値: true == 全初期化完了
+	bool InitializeStep();
 
 private:
 	bool finished = false;
@@ -103,5 +108,10 @@ private:
 
 	float easeTime = 0.0f;
 
+	std::unique_ptr<StepInitializer> stepInitializer;
+
+	// ステップ初期化用
+	int initStep = 0; // 現在のステップ
+	bool assetsLoaded = false; // 全アセット読み込み完了フラグ
 };
 
