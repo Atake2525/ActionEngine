@@ -21,7 +21,6 @@ void GameScene::Initialize() {
 	input = Input::GetInstance();
 
 #ifndef _DEBUG
-	input->ShowMouseCursor(false);
 #endif // !
 
 
@@ -41,6 +40,7 @@ void GameScene::Initialize() {
 	player_ = make_unique<Player>();
 	player_->Initialize(camera.get(), input, pl, false);
 	player_->SetClearDistance(50.0f);
+	player_->Freeze(true);
 
 	land = make_unique<Object3d>();
 	land->Initialize();
@@ -109,6 +109,7 @@ void GameScene::Update() {
 
 	input->Update();
 
+	player_->Update();
 
 	if (input->TriggerKey(DIK_ESCAPE))
 	{
@@ -169,6 +170,7 @@ void GameScene::Update() {
 			{
 				startMovie_ = false;
 				movieTimer_ = 0.0f;
+				player_->Freeze(false);
 			}
 			else
 			{
@@ -190,9 +192,9 @@ void GameScene::Update() {
 	}
 	else
 	{
-		player_->Update();
 		if (player_->IsClear())
 		{
+			player_->Freeze(true);
 			isGoal_ = true;
 			Audio::GetInstance()->Stop("bgm");
 		}

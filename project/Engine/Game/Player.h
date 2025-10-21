@@ -28,6 +28,8 @@ public:
 
     void Draw();
 
+    void Freeze(bool flag) { freeze_ = flag; }
+
     void SetClearDistance(const float clearDistance) { clearDistance_ = clearDistance; }
 
     const AABB& GetAABB() const { return playerAABB_; }
@@ -112,6 +114,8 @@ private: // 中心からクリアまでの距離
     float clearDistance_ = 1000.0f;
 
 private: // ステータス関係の関数宣言
+
+    bool freeze_ = false;
 
     void Rotation();
 

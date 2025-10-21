@@ -20,7 +20,10 @@ void Player::Initialize(Camera* camera, Input* input, const Transform startPoint
 	//this->camera->SetTranslate({ 0.0f, 1.7f, 0.15f });
 	this->input = input;
 	parent_ = !DebugMode;
-
+	if (!DebugMode)
+	{
+		this->input->ShowMouseCursor(false);
+	}
 	playerTransform_ = startPoint;
 
 	moveVelocity_ = { 0.0f, 0.0f, 0.0f };
@@ -93,8 +96,11 @@ void Player::Update() {
 	{
 		camera->DeleteTranslateParent();
 	}
-	Rotation();
-	Move();
+	if (!freeze_)
+	{
+		Rotation();
+		Move();
+	}
 
 	playerOBB_ = CreateOBB(playerTransform_, playerAABB_);
 	playerModel_->SetAnimationSpeed(1.0f);

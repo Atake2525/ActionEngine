@@ -67,7 +67,7 @@ private:
 
 	bool enableLighting = true;
 
-	bool cursorshow = true;
+	bool cursorshow = false;
 
 	Vector2 leftTop;
 	Transform transformSprite;
