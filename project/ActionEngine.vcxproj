@@ -327,9 +327,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Model\obj\Stage\map01\map01.mtl" />
-    <None Include="Resources\Model\obj\Stage\map01\map01_floor.mtl" />
-    <None Include="Resources\Model\obj\Stage\map01\map01_stage.mtl" />
     <None Include="Resources\shaders\PostEffect\Fullscreen.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -350,22 +347,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="Resources\Model\obj\Stage\map01\concrete.png" />
-    <Image Include="Resources\Model\obj\Stage\map01\Concrete_Color.jpg" />
-    <Image Include="Resources\Model\obj\Stage\map01\Concrete_Displacement.jpg" />
-    <Image Include="Resources\Model\obj\Stage\map01\Concrete_Normal.jpg" />
-    <Image Include="Resources\Model\obj\Stage\map01\Concrete_Roughness.jpg" />
-    <Image Include="Resources\Model\obj\Stage\map01\Rock_Color.png" />
-    <Image Include="Resources\Model\obj\Stage\map01\Rock_Displacement.png" />
-    <Image Include="Resources\Model\obj\Stage\map01\Rock_NormalGL.png" />
-    <Image Include="Resources\Model\obj\Stage\map01\Rock_Roughness.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Object Include="Resources\Model\obj\Stage\map01\map01.obj" />
-    <Object Include="Resources\Model\obj\Stage\map01\map01_floor.obj" />
-    <Object Include="Resources\Model\obj\Stage\map01\map01_stage.obj" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
