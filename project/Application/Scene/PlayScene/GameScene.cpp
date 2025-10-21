@@ -39,7 +39,7 @@ void GameScene::Initialize() {
 		{0.0f, 0.1f, 0.0f}
 	};
 	player_ = make_unique<Player>();
-	player_->Initialize(camera.get(), input, pl, true);
+	player_->Initialize(camera.get(), input, pl, false);
 	player_->SetClearDistance(50.0f);
 
 	land = make_unique<Object3d>();
@@ -198,6 +198,15 @@ void GameScene::Update() {
 		}
 	}
 
+	if (input->TriggerKey(DIK_RETURN))
+	{
+		FadeManager::GetInstance()->FadeOut(1.0f);
+		back = true;
+	}
+	if (back && FadeManager::GetInstance()->CompleteFade())
+	{
+		SceneManager::GetInstance()->SetNextScene("GAMESCENE");
+	}
 }
 
 void GameScene::Draw() {
