@@ -83,6 +83,8 @@ private:
 	float movieTime_ = 2.0f;
 	int phase_ = 0;
 
+	bool back = false;
+
 	std::unique_ptr<Goal> goal_ = nullptr;
 };
 
