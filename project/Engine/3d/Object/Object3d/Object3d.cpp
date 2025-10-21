@@ -66,6 +66,11 @@ void Object3d::Initialize() {
 
 	camera = Object3dBase::GetInstance()->GetDefaultCamera();
 
+	cullingTemplateResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(CullingTemplate));
+	cullingTemplateResource->Map(0, nullptr, reinterpret_cast<void**>(&cullingTemplateData));
+
+	cullingTemplateData->drawHeight = -1.0f;
+	privateCullingData.drawHeight = 100.0f;
 
 }
 
@@ -170,6 +175,10 @@ void Object3d::Update() {
 		multiMeshOBB.push_back(CreateOBB(worldMatrix, multiHalfSize, CenterAABB(multiMeshAABB[index])));
 	}
 
+	// Culling用データの更新
+	CullingTemplate data = Object3dBase::GetInstance()->GetCullingTemplate() + privateCullingData;
+	cullingTemplateData->drawHeight = data.drawHeight;
+
 
 }
 
@@ -192,6 +201,8 @@ void Object3d::Draw() {
 	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
 
 	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(3, cameraResource->GetGPUVirtualAddress());
+
+	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(13, cullingTemplateResource->GetGPUVirtualAddress());
 
 	// 3Dモデルが割り当てられていれば描画する
 	if (model_) {

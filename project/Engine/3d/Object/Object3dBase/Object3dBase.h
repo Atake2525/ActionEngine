@@ -1,9 +1,11 @@
 #include <d3d12.h>
 #include <dxcapi.h>
 #include <wrl.h>
+#include "Culling.h"
 #pragma once
 
 class Camera;
+
 
 class Object3dBase {
 private:
@@ -41,6 +43,11 @@ public:
 	// Setter(Camera)
 	void SetDefaultCamera(Camera* camera) { defaultCamera = camera; }
 
+	// Getter(CullingTemplate)
+	CullingTemplate GetCullingTemplate() { return cullingTemplateData; }
+
+	void SetCullingTemplateData(CullingTemplate data) { cullingTemplateData = data; }
+
 private:
 
 	Camera* defaultCamera = nullptr;
@@ -62,7 +69,7 @@ private:
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
 	// Resource作る度に配列を増やしす
 	// RootParameter作成、PixelShaderのMatrixShaderのTransform
-	D3D12_ROOT_PARAMETER rootParameters[13] = {};
+	D3D12_ROOT_PARAMETER rootParameters[14] = {};
 	// シリアライズしてバイナリにする
 	Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob = nullptr;
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
@@ -88,4 +95,6 @@ private:
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
 
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPilelineState = nullptr;
+
+	CullingTemplate cullingTemplateData;
 };

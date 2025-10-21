@@ -5,6 +5,7 @@
 #include "TextureManager.h"
 #include "GameTime.h"
 #include "ImGuiManager.h"
+#include "EasingUtility.h"
 
 
 FadeManager* FadeManager::instance = nullptr;
@@ -28,6 +29,9 @@ void FadeManager::Initialize(const Vector3 color) {
 	sprite_->Initialize("Resources/Sprite/white1x1.png");
 	sprite_->SetColor({ color_.x, color_.y, color_.z, alpha_ });
 	sprite_->SetScale({ float(WinApp::GetInstance()->GetkClientWidth()), float(WinApp::GetInstance()->GetkClientHeight()) });
+	function = [this]() {
+		alpha_ = Lerp(alphaPre_, goalAlpha_, fadeTimer_);
+		};
 }
 
 const bool FadeManager::CompleteFade()
@@ -47,7 +51,10 @@ void FadeManager::Update() {
 	if (fade_)
 	{
 		fadeTimer_ += deltaTime / fadeTime_;
-		alpha_ = Lerp(alphaPre_, goalAlpha_, fadeTimer_);
+		if (function)
+		{
+			function();
+		}
 		alpha_ = std::clamp(alpha_, 0.0f, 1.0f);
 		if (fadeTimer_ >= 1.0f)
 		{
@@ -89,6 +96,9 @@ void FadeManager::FadeOut(const float time) {
 		goalAlpha_ = 1.0f;
 		fadeTime_ = time;
 		fadeTimer_ = 0.0f;
+		function = [this]() {
+			alpha_ = Lerp(alphaPre_, goalAlpha_, fadeTimer_);
+			};
 	}
 }
 
@@ -101,6 +111,10 @@ void FadeManager::FadeIn(const float time) {
 		goalAlpha_ = 0.0f;
 		fadeTime_ = time;
 		fadeTimer_ = 0.0f;
+
+		function = [this]() {
+			alpha_ = EaseInBack(fadeTimer_, alphaPre_, goalAlpha_);
+			};
 	}
 }
 

@@ -39,7 +39,6 @@ struct Camera
     float3 worldPosition;
     float nearClipDistance;
     float farClipDistance;
-    float drawHeight;
 };
 ConstantBuffer<Camera> gCamera : register(b1);
 
@@ -92,6 +91,12 @@ struct padd
     float pad3;
 };
 ConstantBuffer<padd> gPad : register(b6);
+
+struct CullingTemplate
+{
+    float drawHeight;
+};
+ConstantBuffer<CullingTemplate> gCullingTemplate : register(b7);
 
 static PixelShaderOutput RoadMaterialTemplate(PixelShaderOutput output, VertexShaderOutput input)
 {
@@ -278,7 +283,7 @@ PixelShaderOutput main(VertexShaderOutput input)
     }
     output.color.rgb = RoadMaterialTemplate(output, input).color.rgb;
 
-    output.color.a = HeightCulling(input.worldPosition, gCamera.drawHeight);
+    output.color.a = HeightCulling(input.worldPosition, gCullingTemplate.drawHeight);
     output.color.a *= DistanceCulling(input.worldPosition, gCamera.worldPosition, gCamera.nearClipDistance, gCamera.farClipDistance);
     
     if (output.color.a < 0.2f)
