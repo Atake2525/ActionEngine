@@ -363,6 +363,9 @@
     <None Include="Resources\shaders\Particle\Particle.hlsli" />
     <None Include="Resources\shaders\SkyBox\Skybox.hlsli" />
     <None Include="Resources\shaders\Sprite\Sprite.hlsli" />
+    <None Include="Resources\Model\obj\Stage\map01\map01.mtl" />
+    <None Include="Resources\Model\obj\Stage\map01\map01_floor.mtl" />
+    <None Include="Resources\Model\obj\Stage\map01\map01_stage.mtl" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Math">
@@ -393,5 +396,21 @@
     <Text Include="externels\imgui\LICENSE.txt">
       <Filter>External</Filter>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Resources\Model\obj\Stage\map01\concrete.png" />
+    <Image Include="Resources\Model\obj\Stage\map01\Rock_Roughness.png" />
+    <Image Include="Resources\Model\obj\Stage\map01\Concrete_Color.jpg" />
+    <Image Include="Resources\Model\obj\Stage\map01\Concrete_Displacement.jpg" />
+    <Image Include="Resources\Model\obj\Stage\map01\Concrete_Normal.jpg" />
+    <Image Include="Resources\Model\obj\Stage\map01\Concrete_Roughness.jpg" />
+    <Image Include="Resources\Model\obj\Stage\map01\Rock_Color.png" />
+    <Image Include="Resources\Model\obj\Stage\map01\Rock_Displacement.png" />
+    <Image Include="Resources\Model\obj\Stage\map01\Rock_NormalGL.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Object Include="Resources\Model\obj\Stage\map01\map01.obj" />
+    <Object Include="Resources\Model\obj\Stage\map01\map01_floor.obj" />
+    <Object Include="Resources\Model\obj\Stage\map01\map01_stage.obj" />
   </ItemGroup>
 </Project>
