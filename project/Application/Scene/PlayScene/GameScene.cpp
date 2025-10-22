@@ -20,16 +20,8 @@ void GameScene::Initialize() {
 
 	input = Input::GetInstance();
 
-#ifndef _DEBUG
-#endif // !
 
-
-	ParticleManager::GetInstance()->SetCamera(camera.get());
-
-	ParticleManager::GetInstance()->CreateParticleGroupFromOBJ("Resources/Debug/obj", "plane.obj", "plane");
-
-	ParticleManager::GetInstance()->CreateParticleGroup(ParticleType::plane, "Resources/Particle/circle2.png", "circle");
-
+	
 	Object3dBase::GetInstance()->SetDefaultCamera(camera.get());
 
 	Transform pl = {
@@ -53,8 +45,6 @@ void GameScene::Initialize() {
 
 	CollisionManager::GetInstance()->AddCollision(land.get(), "land");
 	CollisionManager::GetInstance()->AddCollision(floor.get(), "floor");
-
-	Audio::GetInstance()->LoadMP3("Resources/sekiranun.mp3", "bgm", 0.1f);
 
 	LevelData levelData = JsonLoader::GetInstance()->LoadJsonTransform("Resources/Debug/json", "PlayerStartPoint.json");
 
