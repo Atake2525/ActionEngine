@@ -42,7 +42,7 @@ void TitleScene::Initialize() {
 
 	stageModel = make_unique<Object3d>();
 	stageModel->Initialize();
-	stageModel->SetModel("Resources/Model/gltf/Stage/map01", "map01.gltf", true);
+	stageModel->SetModel("Resources/Model/obj/Stage/map01", "map01.obj", true);
 
 	startUI = make_unique<UI>();
 	startUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f), float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) - 64.0f * 3.0f }, Origin::Center, "Resources/Sprite/UI/start.png");
