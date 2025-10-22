@@ -52,6 +52,7 @@ private:
 	bool sneak = false;
 
 	std::unique_ptr<Object3d> land = nullptr;
+	std::unique_ptr<Object3d> floor = nullptr;
 
 	std::unique_ptr<Camera> camera = nullptr;
 
@@ -66,7 +67,7 @@ private:
 
 	bool enableLighting = true;
 
-	bool cursorshow = true;
+	bool cursorshow = false;
 
 	Vector2 leftTop;
 	Transform transformSprite;
@@ -75,7 +76,14 @@ private:
 
 	bool isGoal_ = false;
 
-	bool start = false;
+	bool start_ = false;
+
+	bool startMovie_ = false;
+	float movieTimer_ = 0.0f;
+	float movieTime_ = 2.0f;
+	int phase_ = 0;
+
+	bool back = false;
 
 	std::unique_ptr<Goal> goal_ = nullptr;
 };

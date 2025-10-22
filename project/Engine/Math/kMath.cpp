@@ -741,8 +741,9 @@ Vector3 Lerp(const Vector3& befor, const Vector3& after, float t) {
 }
 
 float Lerp(const float& befor, const float& after, float t) {
+	float time = std::clamp(t, 0.0f, 1.0f);
 	float ans = 0.0f;
-	ans = t * after + (1.0f - t) * befor;
+	ans = time * after + (1.0f - time) * befor;
 	return ans;
 }
 

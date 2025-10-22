@@ -114,6 +114,9 @@ void WireFrameObjectBase::CreateRootSignature() {
 	rootParameters[12].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;           // PixelShaderで使う
 	rootParameters[12].DescriptorTable.pDescriptorRanges = &descriptorRange[4];        // Tableの中身の配列を指定
 	rootParameters[12].DescriptorTable.NumDescriptorRanges = 1;
+	rootParameters[13].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;    // ConstantBufferView
+	rootParameters[13].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShader
+	rootParameters[13].Descriptor.ShaderRegister = 7;                    // b7
 	descriptionRootSignature.pParameters = rootParameters;              // ルートパラメータ配列へのポインタ
 	descriptionRootSignature.NumParameters = _countof(rootParameters);  // 配列の長さ
 

@@ -2,6 +2,7 @@
 
 #include "Sprite.h"
 #include "SpriteBase.h"
+#include <functional>
 
 class FadeManager
 {
@@ -56,6 +57,8 @@ private:
 	float alphaPre_ = 0.0f;
 
 	Vector3 color_ = { 1.0f, 1.0f, 1.0f };
+
+	std::function<void()> function;
 
 	Sprite* sprite_ = nullptr;
 };

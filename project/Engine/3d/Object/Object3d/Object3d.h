@@ -14,6 +14,7 @@
 #include "Animator.h"
 #include "Model.h"
 #include "Capsule.h"
+#include "Culling.h"
 //#include "DebugAnimation.h"
 
 #pragma once
@@ -207,6 +208,8 @@ public:
 	// アニメーションの再生速度を取得
 	const float& GetAnimationSpeed() const { return animationSpeed; }
 
+	const CullingTemplate GetCullingTemplateData() const { return privateCullingData; }
+
 	const OBB& GetOBB() const { return obb; }
 	const std::vector<OBB>& GetMultiMeshOBB() const { return multiMeshOBB; }
 
@@ -241,10 +244,11 @@ public:
 
 	const Vector3 GetJointNormal(const std::string jointName);
 
-
 	void SetEnvironmentCoefficient(const float amount);
 
 	void SetEnableMetallic(const bool flag) { model_->SetEnableMetallic(flag); }
+
+	void SetDrawHeiht(const float height) { privateCullingData.drawHeight = height; }
 
 	const bool GetEnableMetallic() { return model_->GetEnableMetallic(); }
 
@@ -298,5 +302,10 @@ private:
 
 	// SkinClusterの作成
 	std::vector<SkinCluster> CreateSkinCluster(const Skeleton& skeleton, const ModelData& modelData);
+
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> cullingTemplateResource = nullptr;
+	CullingTemplate* cullingTemplateData = nullptr;
+	CullingTemplate privateCullingData;
 
 };
