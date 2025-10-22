@@ -12,12 +12,17 @@ void GameScene::Initialize() {
 	TextureManager::GetInstance()->LoadTexture("Resources/rostock_laage_airport_4k.dds");
 
 	camera = make_unique<Camera>();
+	camera->SetFarClipDistance(1.0f);
+	camera->SetTranslate({ 0.0f, 1.8f, 0.0f });
 
 	SkyBox::GetInstance()->SetCamera(camera.get());
 	SkyBox::GetInstance()->SetTexture("Resources/rostock_laage_airport_4k.dds");
 
 	input = Input::GetInstance();
-	input->ShowMouseCursor(false);
+
+#ifndef _DEBUG
+#endif // !
+
 
 	ParticleManager::GetInstance()->SetCamera(camera.get());
 
@@ -35,13 +40,19 @@ void GameScene::Initialize() {
 	player_ = make_unique<Player>();
 	player_->Initialize(camera.get(), input, pl, false);
 	player_->SetClearDistance(50.0f);
+	player_->Freeze(true);
 
 	land = make_unique<Object3d>();
 	land->Initialize();
-	//land->SetModel("Resources/Debug/gltf", "LandPlate.gltf", true);
-	land->SetModel("Resources/Model/gltf/Stage/map01", "map01.gltf", true);
+	land->SetModel("Resources/Model/obj/Stage/map01", "map01_stage.obj", true);
+	land->SetDrawHeiht(-1.0f);
+
+	floor = make_unique<Object3d>();
+	floor->Initialize();
+	floor->SetModel("Resources/Model/obj/Stage/map01", "map01_floor.obj", true);
 
 	CollisionManager::GetInstance()->AddCollision(land.get(), "land");
+	CollisionManager::GetInstance()->AddCollision(floor.get(), "floor");
 
 	Audio::GetInstance()->LoadMP3("Resources/sekiranun.mp3", "bgm", 0.1f);
 
@@ -50,30 +61,17 @@ void GameScene::Initialize() {
 	goal_ = make_unique<Goal>();
 	goal_->Initalize();
 
+
+	GameTime::GetInstance()->SetDeltaPoint();
+	FadeManager::GetInstance()->FadeIn(1.0f);
 }
 
 void GameScene::Update() {
-
-	if (!start)
-	{
-		GameTime::GetInstance()->SetDeltaPoint();
-		FadeManager::GetInstance()->FadeIn(1.0f);
-		start = true;
-		return;
-	}
-
-	cameraTransform = camera->GetTransform();
 
 #ifndef NDEBUG
 	ImGui::Begin("State");
 	ImGui::SetWindowPos(ImVec2{ 0.0f, 0.0f });
 	ImGui::SetWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) });
-	if (ImGui::TreeNode("Camera")) {
-		ImGui::DragFloat3("Tranlate", &cameraTransform.translate.x, 0.1f);
-		ImGui::DragFloat3("Rotate", &cameraTransform.rotate.x, 0.1f);
-		ImGui::DragFloat3("Scale", &cameraTransform.scale.x, 0.1f);
-		ImGui::TreePop();
-	}
 	float landEnvironment = land->GetEnvironmentCoefficient();
 	bool landMetalFlag = land->GetEnableMetallic();
 	if (ImGui::TreeNode("環境マップ")) {
@@ -88,19 +86,13 @@ void GameScene::Update() {
 		input->UpdateDevice();
 	}
 	ImGui::DragFloat("カメラ速度", &speed, 0.01f);
-	ImGuiIO& io = ImGui::GetIO();
-	if (io.Framerate > 45)
-	{
-		ImGui::TextColored({ 0.0f, 1.0f, 0.0f, 1.0f }, "FPS: %.1f", io.Framerate);
-	}
-	else if (io.Framerate > 30 && io.Framerate < 45)
-	{
-		ImGui::TextColored({ 1.0f, 1.0f, 0.0f, 1.0f }, "FPS: %.1f", io.Framerate);
-	}
-	else
-	{
-		ImGui::TextColored({ 1.0f, 0.0f, 0.0f, 1.0f }, "FPS: %.1f", io.Framerate);
-	}
+	
+	float drawHeight = land->GetCullingTemplateData().drawHeight;
+
+	ImGui::DragFloat("カリング高さ", &drawHeight, 0.1f);
+
+	land->SetDrawHeiht(drawHeight);
+	
 	ImGui::Checkbox("マウスカーソル表示", &cursorshow);
 	if (ImGui::Button("タイトルへ"))
 	{
@@ -109,6 +101,15 @@ void GameScene::Update() {
 	ImGui::End();
 
 #endif // _DEBUG
+
+	camera->Update();
+
+	land->Update();
+	floor->Update();
+
+	input->Update();
+
+	player_->Update();
 
 	if (input->TriggerKey(DIK_ESCAPE))
 	{
@@ -129,25 +130,85 @@ void GameScene::Update() {
 
 	SkyBox::GetInstance()->Update();
 
+	if (!start_)
+	{
+		if (FadeManager::GetInstance()->CompleteFade())
+		{
+			start_ = true;
+			startMovie_ = true;
+			phase_ = 0;
+		}
+		else
+		{
+			return;
+		}
+	}
+
+	if (startMovie_)
+	{
+		movieTimer_ += GameTime::GetInstance()->GetDeltaTime();
+
+		float farClip = camera->GetFarClipDistance();
+		float height;
+		switch (phase_)
+		{
+		case 0:
+
+			farClip = Lerp(1.0f, 48.0f, movieTimer_ / movieTime_);
+
+			camera->SetFarClipDistance(farClip);
+			break;
+		case 1:
+			height = Lerp(-1.0f, 35.0f, movieTimer_ / movieTime_);
+			land->SetDrawHeiht(height);
+			break;
+		}
+
+		if (movieTimer_ >= movieTime_)
+		{
+			if (phase_ == 1)
+			{
+				startMovie_ = false;
+				movieTimer_ = 0.0f;
+				player_->Freeze(false);
+			}
+			else
+			{
+				camera->SetFarClipDistance(100.0f);
+				movieTimer_ = 0.0f;
+				phase_++;
+				return;
+			}
+		}
+		else
+		{
+			return;
+		}
+	}
+
 	if (isGoal_)
 	{
 		goal_->Update();
 	}
 	else
 	{
-		player_->Update();
 		if (player_->IsClear())
 		{
+			player_->Freeze(true);
 			isGoal_ = true;
 			Audio::GetInstance()->Stop("bgm");
 		}
-		camera->Update();
 	}
 
-	land->Update();
-
-	input->Update();
-
+	if (input->TriggerKey(DIK_RETURN))
+	{
+		FadeManager::GetInstance()->FadeOut(1.0f);
+		back = true;
+	}
+	if (back && FadeManager::GetInstance()->CompleteFade())
+	{
+		SceneManager::GetInstance()->SetNextScene("GAMESCENE");
+	}
 }
 
 void GameScene::Draw() {
@@ -158,6 +219,7 @@ void GameScene::Draw() {
 		Object3dBase::GetInstance()->ShaderDraw();
 
 		land->Draw();
+		floor->Draw();
 
 		SkinningObject3dBase::GetInstance()->ShaderDraw();
 
@@ -174,5 +236,6 @@ void GameScene::Draw() {
 void GameScene::Finalize() {
 
 	CollisionManager::GetInstance()->DeleteCollision("land");
+	CollisionManager::GetInstance()->DeleteCollision("floor");
 
 }
