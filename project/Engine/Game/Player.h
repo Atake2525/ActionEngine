@@ -30,6 +30,8 @@ public:
 
     void Freeze(bool flag) { freeze_ = flag; }
 
+    const bool IsGameOver() const;
+
     void SetClearDistance(const float clearDistance) { clearDistance_ = clearDistance; }
 
     const AABB& GetAABB() const { return playerAABB_; }
