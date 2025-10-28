@@ -4,6 +4,7 @@
 #include "externels/imgui/imgui_impl_win32.h"
 #include "GameTime.h"
 #include "JsonLoader.h"
+#include "GameOver.h"
 
 using namespace std;
 
@@ -20,6 +21,8 @@ void GameScene::Initialize() {
 
 	input = Input::GetInstance();
 
+	gameOver_ = make_unique<GameOver>();
+	gameOver_->Initialize();
 
 	
 	Object3dBase::GetInstance()->SetDefaultCamera(camera.get());
@@ -192,12 +195,11 @@ void GameScene::Update() {
 
 	if (input->TriggerKey(DIK_RETURN))
 	{
-		FadeManager::GetInstance()->FadeOut(1.0f);
 		back = true;
 	}
-	if (back && FadeManager::GetInstance()->CompleteFade())
+	if (back)
 	{
-		SceneManager::GetInstance()->SetNextScene("GAMESCENE");
+		gameOver_->Update();
 	}
 }
 
@@ -221,6 +223,7 @@ void GameScene::Draw() {
 		{
 			goal_->Draw();
 		}
+		gameOver_->Draw();
 }
 
 void GameScene::Finalize() {
