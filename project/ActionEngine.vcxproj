@@ -160,6 +160,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Game\Goal.cpp" />
     <ClCompile Include="Engine\Game\Trap.cpp" />
     <ClCompile Include="Engine\Core\Timer\GameTime.cpp" />
+    <ClCompile Include="Application\GameOver.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Scene\Manager\AbstractSceneFactory.h" />
@@ -229,6 +230,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Game\Goal.h" />
     <ClInclude Include="Engine\Game\Trap.h" />
     <ClInclude Include="Engine\Core\Timer\GameTime.h" />
+    <ClInclude Include="Application\GameOver.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externels\imgui\LICENSE.txt" />
