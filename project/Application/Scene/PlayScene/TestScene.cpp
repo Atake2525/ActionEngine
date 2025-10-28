@@ -57,6 +57,9 @@ void TestScene::Initialize() {
 	};
 	player->Initialize(camera.get(), input, t, true);
 
+	gameOverSprite = std::make_unique<GameOver>();
+	gameOverSprite->Initialize();
+
 	//LevelData jsonData = JsonLoader::GetInstance()->LoadJsonTransform("Resources/Stage/Json", "Debug.json");
 
 	/*for (const auto& data : jsonData.datas)
@@ -70,6 +73,12 @@ void TestScene::Initialize() {
 }
 
 void TestScene::Update() {
+
+	if (player->IsGameOver())
+	{
+		player->Freeze(true);
+		gameOverSprite->Update();
+	}
 
 	player->Update();
 	grid->Update();
@@ -164,6 +173,10 @@ void TestScene::Draw() {
 	WireFrameObjectBase::GetInstance()->ShaderDraw();
 
 	grid->Draw();
+
+	SpriteBase::GetInstance()->ShaderDraw();
+
+	gameOverSprite->Draw();
 
 	ParticleManager::GetInstance()->Draw();
 

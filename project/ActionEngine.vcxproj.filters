@@ -150,6 +150,7 @@
     <ClCompile Include="Engine\3d\Object\Skinning\SkinningObject3dBase.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
+    <ClCompile Include="Application\GameOver.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externels\imgui\imstb_rectpack.h" />
@@ -337,6 +338,7 @@
       <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Math\Culling.h" />
+    <ClInclude Include="Application\GameOver.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\PostEffect\BoxFilter.PS.hlsl" />
