@@ -142,7 +142,7 @@ inline float EaseOutElastic(float time, float start, float end) {
 	float t = std::clamp(time, 0.0f, 1.0f);
 	float result;
 
-	float c4 = (2 * float(M_PI)) / 3;
+	float c4 = (2.0f * float(M_PI)) / 3.0f;
 
 	if (t == 1.0f)
 	{
@@ -150,7 +150,7 @@ inline float EaseOutElastic(float time, float start, float end) {
 	}
 	else
 	{
-		result = std::pow(2, -10 * t) * sin((t * 10 - 0.75) * c4) + 1;
+		result = std::pow(2.0f, -10.0f * t) * sin((t * 10.0f - 0.75f) * c4) + 1.0f;
 	}
 
 	return result;

@@ -18,6 +18,7 @@
 #include "CollisionManager.h"
 #include "Goal.h"
 #include <memory>
+#include "GameOver.h"
 
 #pragma once
 
@@ -86,5 +87,7 @@ private:
 	bool back = false;
 
 	std::unique_ptr<Goal> goal_ = nullptr;
+
+	std::unique_ptr<GameOver> gameOver_ = nullptr;
 };
 
