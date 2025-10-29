@@ -24,9 +24,15 @@ void JsonLoader::Initialize() {
 
 }
 
-const LevelData JsonLoader::LoadJsonTransform(const std::string& directoryPath, const std::string& fileName)
+void JsonLoader::LoadJsonTransform(const std::string& path, const std::string& jsonName, const bool overwrite)
 {
     LevelData lvData;
+
+    if (levelDatas.contains(jsonName) && !overwrite)
+    {
+        Log("指定したjsonNameは既に使用されています\n");
+        return;
+    }
 
     Transform tl = { {0.0f, 0.0f, 0.0f},{0.0f, 0.0f, 0.0f},{0.0f, 0.0f,0.0f} };
     JsonData data;
@@ -38,7 +44,7 @@ const LevelData JsonLoader::LoadJsonTransform(const std::string& directoryPath, 
     lvData.name = "null";
 
     // 連結してファイルパスを得る
-    const std::string fullpath = directoryPath + "/" + fileName;
+    const std::string fullpath = path;
 
     // ファイルストリーム
     std::ifstream file;
@@ -49,7 +55,7 @@ const LevelData JsonLoader::LoadJsonTransform(const std::string& directoryPath, 
     if (file.fail())
     {
         Log("ファイルの展開に失敗しました\nファイルパスが正しい確認してください\n");
-        return lvData;
+        return;
     }
 
     // JSON文字列から解凍したデータ
@@ -62,17 +68,17 @@ const LevelData JsonLoader::LoadJsonTransform(const std::string& directoryPath, 
     if (!deserialized.is_object())
     {
         Log("正しいレベルデータファイルではありません\nBlockPoint is_object\n");
-        return lvData;
+        return;
     }
     if (!deserialized.contains("name"))
     {
         Log("正しいレベルデータファイルではありません\nBlockPoint contains\n");
-        return lvData;
+        return;
     }
     if (!deserialized["name"].is_string())
     {
         Log("正しいレベルデータファイルではありません\nBlockPoint is_string\n");
-        return lvData;
+        return;
     }
 
     // "name"を文字列として取得
@@ -81,7 +87,7 @@ const LevelData JsonLoader::LoadJsonTransform(const std::string& directoryPath, 
     if (name.compare("scene") != 0)
     {
         Log("正しいレベルデータファイルではありません\nBlockPoint compare\n");
-        return lvData;
+        return;
     }
 
     // レベルデータ格納用インスタンスを生成
@@ -92,7 +98,7 @@ const LevelData JsonLoader::LoadJsonTransform(const std::string& directoryPath, 
     if (levelData.name != "scene")
     {
         Log("シーンではない");
-        return lvData;
+        return;
     }
 
     // "object"の全オブジェクトを走査
@@ -101,7 +107,7 @@ const LevelData JsonLoader::LoadJsonTransform(const std::string& directoryPath, 
         if (!object.contains("type"))
         {
             Log("objectにtypeが存在しません\n");
-            return lvData;
+            return;
         }
 
         // 種別をMESHかCAMERAのみ通るようにする
@@ -193,5 +199,29 @@ const LevelData JsonLoader::LoadJsonTransform(const std::string& directoryPath, 
         }
 
     }
-    return levelData;
+    levelDatas[jsonName] = levelData;
+}
+
+void JsonLoader::SerchTransformFunctional(const std::string& jsonName, const std::string file_name, std::function<void(Transform transform)> function)
+{
+    for (auto data : levelDatas[jsonName].datas)
+    {
+        if (data.second.file_name == file_name)
+        {
+            function(data.second.transform);
+        }
+    }
+}
+
+const JsonData& JsonLoader::GetJsonData(const std::string& jsonName, const std::string file_name) {
+    JsonData result;
+    for (auto data : levelDatas[jsonName].datas)
+    {
+        if (data.second.file_name == file_name)
+        {
+            result = data.second;
+            return result;
+        }
+    }
+    return result;
 }

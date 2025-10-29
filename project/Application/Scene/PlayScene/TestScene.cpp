@@ -4,6 +4,11 @@
 #include "externels/imgui/imgui_impl_win32.h"
 #include "CollisionManager.h"
 #include "Collision.h"
+#include "JsonLoader.h"
+#include <functional>
+#include "Logger.h"
+
+using namespace Logger;
 
 void TestScene::Initialize() {
 
@@ -61,15 +66,15 @@ void TestScene::Initialize() {
 	gameOverSprite = std::make_unique<GameOver>();
 	gameOverSprite->Initialize();
 
-	//LevelData jsonData = JsonLoader::GetInstance()->LoadJsonTransform("Resources/Stage/Json", "Debug.json");
+	JsonLoader::GetInstance()->LoadJsonTransform("Resources/Debug/json/PlayerStartPoint.json", "startPoint", false);
+	std::function<void(Transform transform)> func;
+	func = [this](Transform tansform) {
+		std::string s = std::to_string(tansform.translate.x);
+		Log("出力結果 x : " + s + "\n");
+		};
+	JsonLoader::GetInstance()->SerchTransformFunctional("startPoint", "Player", func);
 
-	/*for (const auto& data : jsonData.datas)
-	{
-		if (data.second.file_name == "Trap")
-		{
 
-		}
-	}*/
 
 	Audio::GetInstance()->LoadMP3("Resources/sekiranun.mp3", "bgm", 1.0f);
 

@@ -178,6 +178,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Collision\CollisionManager.h" />
     <ClInclude Include="Engine\Core\BaseEngine\OffScreenRnedering.h" />
     <ClInclude Include="Engine\BlackBox\Animation\DebugAnimation.h" />
+    <ClInclude Include="Engine\JsonLoader\json.hpp" />
+    <ClInclude Include="Engine\JsonLoader\JsonLoader.h" />
     <ClInclude Include="Engine\LoadManager\ParticleManager\ParticleManager.h" />
     <ClInclude Include="Engine\Math\AABB.h" />
     <ClInclude Include="Engine\Math\Animator.h" />

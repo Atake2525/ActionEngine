@@ -186,6 +186,7 @@ public:
 	// Getter(Transform)
 	const Transform& GetTransform() const { return transform; }
 	// Getter(Translate)
+
 	const Vector3& GetTranslate() const { return transform.translate; }
 	// Getter(Scale)
 	const Vector3& GetScale() const { return transform.scale; }
