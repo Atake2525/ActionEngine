@@ -48,6 +48,7 @@ void TestScene::Initialize() {
 	//plate->SetEnableMetallic(true);
 
 	CollisionManager::GetInstance()->AddCollision(plate.get(), "plate");
+	CollisionManager::GetInstance()->AddCollision(box2.get(), "box");
 
 	player = std::make_unique<Player>();
 	Transform t = {
@@ -69,6 +70,8 @@ void TestScene::Initialize() {
 
 		}
 	}*/
+
+	Audio::GetInstance()->LoadMP3("Resources/sekiranun.mp3", "bgm", 1.0f);
 
 }
 
@@ -92,8 +95,8 @@ void TestScene::Update() {
 
 	SkyBox::GetInstance()->Update();
 
-	/*Transform t = box1->GetTransform();
-	AABB aabb = box1->GetAABB();
+	Transform t = box2->GetTransform();
+	AABB aabb = box2->GetAABB();
 	ImGui::Begin("Box");
 	ImGui::DragFloat3("Translate", &t.translate.x, 0.1f);
 	ImGui::DragFloat3("Scale", &t.scale.x, 0.1f);
@@ -102,41 +105,19 @@ void TestScene::Update() {
 	ImGui::DragFloat3("MAX", &aabb.max.x, 0.0f);
 	ImGui::End();
 
-	t.rotate.z += SwapRadian(4.0f);
+	/*t.rotate.z += SwapRadian(4.0f);
 
 	box1->SetTransform(t);
 	box1->Update();*/
+	box2->SetTransform(t);
 	box2->Update();
 
 	bool flag = false;
 
-	/*if (CheckOBBCollision(box1->GetOBB(), box2->GetOBB()))
+	if (input->TriggerKey(DIK_1))
 	{
-		flag = true;
-	}*/
-	/*if (box1->CheckCollisionOBBs(box2->GetOBB()))
-	{
-		flag = true;
+		Audio::GetInstance()->Play3D("bgm", { 0.0f, 0.0f, 0.0f }, false);
 	}
-
-	if (box1->CheckCollisionOBBs(player->GetOBB()))
-	{
-		flag = true;
-	}*/
-
-	/*if (CheckOBBCollision(box1->GetOBB(), player->GetOBB()))
-	{
-		flag = true;
-	}*/
-
-	/*if (flag)
-	{
-		box1->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
-	}
-	else
-	{
-		box1->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
-	}*/
 
 	if (input->TriggerKey(DIK_ESCAPE))
 	{
@@ -187,4 +168,5 @@ void TestScene::Finalize() {
 	delete grid;
 
 	CollisionManager::GetInstance()->DeleteCollision("plate");
+	CollisionManager::GetInstance()->DeleteCollision("box");
 }
