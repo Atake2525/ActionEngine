@@ -1,4 +1,5 @@
 #include "SceneManager.h"
+#include "GameTime.h"
 
 SceneManager* SceneManager::instance = nullptr;
 

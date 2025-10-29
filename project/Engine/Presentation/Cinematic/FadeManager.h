@@ -2,6 +2,7 @@
 
 #include "Sprite.h"
 #include "SpriteBase.h"
+#include <functional>
 
 class FadeManager
 {
@@ -30,7 +31,7 @@ public:
 	/// </summary>
 	void Initialize(const Vector3 color = {1.0f, 1.0f, 1.0f});
 
-	const bool& CompleteFade() const { return completeFade_; }
+	const bool CompleteFade();
 	const bool& IsFade() const { return fade_; }
 
 	void Update();
@@ -48,12 +49,16 @@ private:
 	float fadeTimer_ = 0.0f;
 	float fadeTime_ = 0.0f;
 
+	float maxDeltaTime_ = 0.0f;
+
 	float goalAlpha_ = 0.0f;
 
 	float alpha_ = 0.0f;
 	float alphaPre_ = 0.0f;
 
 	Vector3 color_ = { 1.0f, 1.0f, 1.0f };
+
+	std::function<void()> function;
 
 	Sprite* sprite_ = nullptr;
 };

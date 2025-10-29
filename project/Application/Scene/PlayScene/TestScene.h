@@ -18,6 +18,7 @@
 #include <memory>
 #include "Player.h"
 #include "JsonLoader.h"
+#include "GameOver.h"
 
 #pragma once
 
@@ -53,9 +54,11 @@ private:
 
 	bool cursorshow = true;
 
-	std::unique_ptr<Object3d> box1;
+	//std::unique_ptr<Object3d> box1;
 	std::unique_ptr<Object3d> box2;
 	std::unique_ptr<Object3d> plate;
+
+	std::unique_ptr<GameOver> gameOverSprite;
 
 	std::unique_ptr<Player> player;
 

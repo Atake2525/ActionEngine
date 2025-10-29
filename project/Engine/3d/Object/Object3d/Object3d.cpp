@@ -60,9 +60,17 @@ void Object3d::Initialize() {
 	SetQuaternionAngle(0.0f);
 
 	cameraData->worldPosition = { 1.0f, 1.0f, 1.0f };
+	cameraData->nearClipDistance = 800.0f;
+    cameraData->farClipDistance = 1000.0f;
+	cameraData->drawHeihgt = 1.0f;
 
 	camera = Object3dBase::GetInstance()->GetDefaultCamera();
 
+	cullingTemplateResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(CullingTemplate));
+	cullingTemplateResource->Map(0, nullptr, reinterpret_cast<void**>(&cullingTemplateData));
+
+	cullingTemplateData->drawHeight = -1.0f;
+	privateCullingData.drawHeight = 100.0f;
 
 }
 
@@ -126,6 +134,9 @@ void Object3d::Update() {
 	Matrix4x4 worldViewProjectionMatrix;
 	if (camera) {
 		cameraData->worldPosition = camera->GetWorldPosition();
+        cameraData->nearClipDistance = camera->GetFarClipDistance() - camera->GetFarClipDistance() * 0.2f;
+        cameraData->farClipDistance = camera->GetFarClipDistance();
+        cameraData->drawHeihgt = camera->GetDrawHeihgt();
 		const Matrix4x4& viewProjectionMatrix = camera->GetViewProjectionMatrix();
 		worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
 	}
@@ -146,8 +157,8 @@ void Object3d::Update() {
 
 	Vector3 worldPos = { worldMatrix.m[3][0], worldMatrix.m[3][1], worldMatrix.m[3][2] };
 
-	aabb.min = (first.min + worldPos) * transform.scale;
-	aabb.max = (first.max + worldPos) * transform.scale;
+	aabb.min = (first.min * transform.scale) + worldPos;
+	aabb.max = (first.max * transform.scale) + worldPos;
 
 	Vector3 halfSize = { (aabb.max.x - aabb.min.x) / 2.0f, (aabb.max.y - aabb.min.y) / 2.0f, (aabb.max.z - aabb.min.z) / 2.0f };
 
@@ -156,13 +167,17 @@ void Object3d::Update() {
 	multiMeshOBB.clear();
 	for (size_t index = 0; index < multiMeshAABB.size(); index++)
 	{
-		multiMeshAABB[index].min = (firstMultiMeshAABB[index].min + worldPos) * transform.scale;
-		multiMeshAABB[index].max = (firstMultiMeshAABB[index].max + worldPos) * transform.scale;
+		multiMeshAABB[index].min = (firstMultiMeshAABB[index].min * transform.scale) + worldPos;
+		multiMeshAABB[index].max = (firstMultiMeshAABB[index].max * transform.scale) + worldPos;
 
 		Vector3 multiHalfSize = { (multiMeshAABB[index].max.x - multiMeshAABB[index].min.x) / 2.0f, (multiMeshAABB[index].max.y - multiMeshAABB[index].min.y) / 2.0f, (multiMeshAABB[index].max.z - multiMeshAABB[index].min.z) / 2.0f };
 
 		multiMeshOBB.push_back(CreateOBB(worldMatrix, multiHalfSize, CenterAABB(multiMeshAABB[index])));
 	}
+
+	// Culling用データの更新
+	CullingTemplate data = Object3dBase::GetInstance()->GetCullingTemplate() + privateCullingData;
+	cullingTemplateData->drawHeight = data.drawHeight;
 
 
 }
@@ -186,6 +201,8 @@ void Object3d::Draw() {
 	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
 
 	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(3, cameraResource->GetGPUVirtualAddress());
+
+	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(13, cullingTemplateResource->GetGPUVirtualAddress());
 
 	// 3Dモデルが割り当てられていれば描画する
 	if (model_) {
@@ -555,6 +572,40 @@ const bool Object3d::CheckCollisionAABBs(Object3d* object) const
 const bool Object3d::CheckCollisionCapsule(Object3d* object) const
 {
 	return CollisionCapsuleAABB(capsule, object->GetAABB());
+}
+
+const bool Object3d::CheckCollisionOBB(Object3d* object) const
+{
+	return CheckOBBCollision(obb, object->GetOBB());
+}
+
+const bool Object3d::CheckCollisionOBBs(Object3d* object) const
+{
+	for (auto colOBB : multiMeshOBB)
+	{
+		if (CheckOBBCollision(colOBB, object->GetOBB()))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+const bool Object3d::CheckCollisionOBB(const OBB& obb) const
+{
+	return CheckOBBCollision(this->obb, obb);
+}
+
+const bool Object3d::CheckCollisionOBBs(const OBB& obb) const
+{
+	for (auto colOBB : multiMeshOBB)
+	{
+		if (CheckOBBCollision(colOBB, obb))
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 const Skeleton Object3d::CreateSkelton(const Node& rootNode)

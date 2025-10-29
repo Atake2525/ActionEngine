@@ -1,9 +1,11 @@
 #include <d3d12.h>
 #include <dxcapi.h>
 #include <wrl.h>
+#include "Culling.h"
 #pragma once
 
 class Camera;
+
 
 class Object3dBase {
 private:
@@ -41,6 +43,11 @@ public:
 	// Setter(Camera)
 	void SetDefaultCamera(Camera* camera) { defaultCamera = camera; }
 
+	// Getter(CullingTemplate)
+	CullingTemplate GetCullingTemplate() { return cullingTemplateData; }
+
+	void SetCullingTemplateData(CullingTemplate data) { cullingTemplateData = data; }
+
 private:
 
 	Camera* defaultCamera = nullptr;
@@ -57,19 +64,19 @@ public:
 private:
 	/// Rootsignature
 	// DescriptorRange
-	D3D12_DESCRIPTOR_RANGE descriptorRange[2] = {};
+	D3D12_DESCRIPTOR_RANGE descriptorRange[5] = {};
 	// Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
 	// Resource作る度に配列を増やしす
 	// RootParameter作成、PixelShaderのMatrixShaderのTransform
-	D3D12_ROOT_PARAMETER rootParameters[9] = {};
+	D3D12_ROOT_PARAMETER rootParameters[14] = {};
 	// シリアライズしてバイナリにする
 	Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob = nullptr;
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
 	// バイナリをもとに作成
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature = nullptr;
 	// InputLayout
-	D3D12_INPUT_ELEMENT_DESC inputElementDescs[3] = {};
+	D3D12_INPUT_ELEMENT_DESC inputElementDescs[5] = {};
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
 	// BlendStateの設定
 	D3D12_BLEND_DESC blendDesc{};
@@ -88,4 +95,6 @@ private:
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
 
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPilelineState = nullptr;
+
+	CullingTemplate cullingTemplateData;
 };

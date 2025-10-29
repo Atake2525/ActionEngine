@@ -34,12 +34,20 @@ public:
 	const Vector3& GetTranslate() const { return transform.translate; }
 	// Getter(Direction)
 	const Vector3& GetDirection() const { return direction; }
+    // Getter(nearClipDistance)
+    const float& GetNearClipDistance() const { return nearClipDistance; }
 	// Getter(farClipDistance)
 	const float& GetFarClipDistance() const { return farClipDistance; }
+    // Getter(drawHeihgt)
+    const float& GetDrawHeihgt() const { return drawHeihgt; }
 	// Getter(fovY)
 	const float& GetfovY() const { return fovY; }
 	// Getter(Transform)
 	const Transform& GetTransform() const { return transform; }
+	// 任意軸回転の回転量を設定
+	void SetAxisRotate(const Vector3& angle) { rotateAngle = angle; }
+
+	const Vector3& GetAxisRotate() const { return rotateAngle; }
 
 	// Setter(Rotate)
 	void SetRotate(const Vector3& rotate) { transform.rotate = rotate; }
@@ -106,6 +114,11 @@ private:
 	float nearClipDistance;
 	float farClipDistance;
 
+    float drawHeihgt;
+
+	Vector3 axisAngle;
+	Matrix4x4 rotateQuaternionMatrix;
+	Vector3 rotateAngle;
 
 	Matrix4x4 viewProjectionMatrix;
 };

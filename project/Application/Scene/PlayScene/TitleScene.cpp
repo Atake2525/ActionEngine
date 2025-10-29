@@ -3,7 +3,8 @@
 #include "externels/imgui/imgui_impl_dx12.h"
 #include "externels/imgui/imgui_impl_win32.h"
 #include "WinApp.h"
-#include "DirectXBase.h"
+#include "GameTime.h"
+#include "EasingUtility.h"
 
 using namespace std;
 
@@ -41,7 +42,7 @@ void TitleScene::Initialize() {
 
 	stageModel = make_unique<Object3d>();
 	stageModel->Initialize();
-	stageModel->SetModel("Resources/Model/gltf/Stage/map01", "map01.gltf", true);
+	stageModel->SetModel("Resources/Model/obj/Stage/map01", "map01.obj", true);
 
 	startUI = make_unique<UI>();
 	startUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f), float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) - 64.0f * 3.0f }, Origin::Center, "Resources/Sprite/UI/start.png");
@@ -98,7 +99,7 @@ void TitleScene::Initialize() {
 
 	Audio::GetInstance()->Play("bgm", true);
 
-	Audio::GetInstance()->SetMasterVolume(0.2f);
+	Audio::GetInstance()->SetMasterVolume(0.0f);
 }
 
 void TitleScene::Update() {
@@ -204,8 +205,8 @@ void TitleScene::Update() {
 		}
 		if (isUIFrameMove)
 		{
-			uiFrameMoveTimer += 1.0f / 60.0f / uiFrameMoveLImitTime;
-			position = easeOutQuint(uiFrameMoveTimer, uiFrameStartPoint, uiFrameEndPoint);
+			uiFrameMoveTimer += GameTime::GetInstance()->GetDeltaTime() / uiFrameMoveLImitTime;
+			position = EaseOutQuint(uiFrameMoveTimer, uiFrameStartPoint, uiFrameEndPoint);
 			uiFrame->SetPosition({ position.x, position.y });
 		}
 		
@@ -318,15 +319,15 @@ void TitleScene::Update() {
 		titleUp = true;
 	}
 
-	easeTime += DirectXBase::GetInstance()->GetDeltaTime() / 2.0f;
+	easeTime += GameTime::GetInstance()->GetDeltaTime() / 2.0f;
 
 	if (titleUp)
 	{
-		titleTransform.translate.y = easeInOut(easeTime, 1.9f, 2.1f);
+		titleTransform.translate.y = EaseInOut(easeTime, 1.9f, 2.1f);
 	}
 	else
 	{
-		titleTransform.translate.y = easeInOut(easeTime, 2.1f, 1.9f);
+		titleTransform.translate.y = EaseInOut(easeTime, 2.1f, 1.9f);
 	}
 
 	if (easeTime > 1.0f)
