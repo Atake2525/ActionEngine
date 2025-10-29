@@ -44,16 +44,7 @@ void Player::Initialize(Camera* camera, Input* input, const Transform startPoint
 	playerCollisionModel_ = std::make_unique<Object3d>();
 	playerCollisionModel_->Initialize();
 	playerCollisionModel_->SetModel("Resources/Model/gltf/Player", "PlayerCollision.gltf", true);
-	/*playerCollisionModel_->SetModel("Resources/Model/gltf/char", "idle.gltf", true, true);
-	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "walk.gltf", "walk");
-	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "sneak.gltf", "sneak");
-	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "dash.gltf", "dash");
-	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "jump.gltf", "jump");
-	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "crouch.gltf", "crouch");
-	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "walk_back.gltf", "backwalk");
-	playerCollisionModel_->AddAnimation("Resources/Model/gltf/char", "fall.gltf", "fall");
-	playerCollisionModel_->ToggleStartAnimation();*/
-
+	
 	playerAABB_ = playerCollisionModel_->GetAABB();
 
 	CollisionManager::GetInstance()->AddCollisionTarget(playerAABB_, "player");
@@ -126,6 +117,15 @@ void Player::Draw() {
 		playerModel_->Draw();
 	}*/
 	playerModel_->Draw();
+}
+
+const bool Player::IsGameOver() const
+{
+	if (playerTransform_.translate.y < -10.0f)
+	{
+		return true;
+	}
+	return false;
 }
 
 const bool Player::IsClear() const

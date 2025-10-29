@@ -52,7 +52,7 @@ void OffScreenRnedering::Initialize() {
 
 	boxFilterResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(BoxFilter));
 	boxFilterResource->Map(0, nullptr, reinterpret_cast<void**>(&boxFilter));
-	boxFilter->enableBoxFilter = false;
+	boxFilter->boxFilterIntensity = 0.0f;
 	boxFilter->size = 5;
 
 	/*gaussianFilterResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(GaussianFilter));
@@ -62,7 +62,7 @@ void OffScreenRnedering::Initialize() {
 
     dissolveResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(Dissolve));
     dissolveResource->Map(0, nullptr, reinterpret_cast<void**>(&dissolve));
-    dissolve->edgeColor = { 1.0f, 0.0f, 0.0f };
+    dissolve->edgeColor = { 1.0f, 1.0f, 1.0f };
     dissolve->threshold = 0.0f;
 }
 
@@ -88,8 +88,8 @@ void OffScreenRnedering::Update() {
 		ImGui::TreePop();
 	}
 	if (ImGui::TreeNode("BoxFilter / ボックスフィルター")) {
-		ImGui::Checkbox("有効化", &boxFilter->enableBoxFilter);
-		ImGui::SliderInt("size", &boxFilter->size, 1, 25);
+		ImGui::SliderFloat("有効化", &boxFilter->boxFilterIntensity, 0.0f, 1.0f);
+		ImGui::SliderInt("size", &boxFilter->size, 1, 50);
 		ImGui::TreePop();
 	}
 	/*if (ImGui::TreeNode("GaussianFilter / ガウシアンフィルター")) {
