@@ -7,7 +7,7 @@
 class Trap
 {
 public:
-    void Initialize();
+    void Initialize(std::string jsonName);
     void Update();
     void Draw();
 
