@@ -624,91 +624,6 @@ Vector3 TransformNormal(const Vector3& v, const Matrix4x4& m) {
 	return result;
 }
 
-// ease In-Out x1 : 開始点  x2 : 目標点
-float easeInOut(float time, float x1, float x2) {
-	float T = time;
-	T = std::clamp(T, 0.0f, 1.0f);
-	float x;
-	// easeOut
-	float easedT = -(cos(float(M_PI * T)) - 1.0f) / 2.0f;
-
-	x = (1.0f - easedT) * x1 + easedT * x2;
-	return x;
-};
-
-// ease In-Out x1 : 開始点  x2 : 目標点
-int easeInOut(float t, unsigned int x1, unsigned int x2) {
-	float T = t;
-	T = std::clamp(T, 0.0f, 1.0f);
-	int x;
-	// easeOut
-	int easedT = -int((cos(float(M_PI * int(T))) - 1.0f) / 2.0f);
-
-	x = (1 - easedT) * x1 + easedT * x2;
-	return x;
-};
-
-// easeOutQuint
-float easeOutQuint(float t, float x1, float x2) {
-	float T = t;
-	T = std::clamp(T, 0.0f, 1.0f);
-	float x;
-	// easeOut
-	float easedT = 1.0f - pow(1.0f - T, 5.0f);
-
-	x = (1.0f - easedT) * x1 + easedT * x2;
-	return x;
-};
-
-// easeInBack
-float easeInBack(float t, float x1, float x2) {
-	float T = t;
-	T = std::clamp(T, 0.0f, 1.0f);
-	float x;
-	const float c1 = 1.70158f;
-	const float c3 = c1 + 1;
-	// easeOut
-	float easedT = c3 * T * T * T - c1 * T * T;
-
-	x = (1.0f - easedT) * x1 + easedT * x2;
-	return x;
-};
-
-// ease In-Out x1 : 開始点  x2 : 目標点
-Vector3 easeInOut(float time, Vector3 x1, Vector3 x2) {
-
-	Vector3 result;
-
-	result.x = easeInOut(time, x1.x, x2.x);
-	result.y = easeInOut(time, x1.y, x2.y);
-	result.z = easeInOut(time, x1.z, x2.z);
-
-	return result;;
-};
-
-// easeOutQuint
-Vector3 easeOutQuint(float t, Vector3 x1, Vector3 x2) {
-
-	Vector3 result;
-
-	result.x = easeOutQuint(t, x1.x, x2.x);
-	result.y = easeOutQuint(t, x1.y, x2.y);
-	result.z = easeOutQuint(t, x1.z, x2.z);
-
-	return result;;
-};
-
-// easeInBack
-Vector3 easeInBack(float t, Vector3 x1, Vector3 x2) {
-	Vector3 result;
-
-	result.x = easeInBack(t, x1.x, x2.x);
-	result.y = easeInBack(t, x1.y, x2.y);
-	result.z = easeInBack(t, x1.z, x2.z);
-
-	return result;;
-};
-
 Quaternion Slerp(const Quaternion& befor, const Quaternion& after, float t) {
 	//float dot = Dot(q0, q1);
 	//
@@ -826,8 +741,9 @@ Vector3 Lerp(const Vector3& befor, const Vector3& after, float t) {
 }
 
 float Lerp(const float& befor, const float& after, float t) {
+	float time = std::clamp(t, 0.0f, 1.0f);
 	float ans = 0.0f;
-	ans = t * after + (1.0f - t) * befor;
+	ans = time * after + (1.0f - time) * befor;
 	return ans;
 }
 

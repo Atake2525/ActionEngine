@@ -60,6 +60,7 @@ public:
 	//const bool& CheckCollision(const AABB& a, const AABB& b);
 	//const bool& CheckCollision(const AABB& a, const Sphere& b);
 
+	const Vector3 CheckPenetrationAmount(const AABB& aabb);
 
 	//const bool& CheckCollision(const AABB& a, const OBB& b);
 

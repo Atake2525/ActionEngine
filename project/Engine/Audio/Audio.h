@@ -34,6 +34,12 @@ struct SoundData {
 	float playTime;
 	// 音量
 	float volume;
+	// 音の位置
+	Vector3 audioPos;
+	// 音の方向
+	float matrix[16] = { 0.0f };
+	// sourceVoiceDetails
+	XAUDIO2_VOICE_DETAILS sourceVoiceDetails;
 };
 
 struct AudioList
@@ -134,5 +140,8 @@ private:
 
 	// Media Foundation SourceReader
 	Microsoft::WRL::ComPtr<IMFSourceReader> pMFSourceReader{ nullptr };
+
+	// masterVoiceDetails
+	XAUDIO2_VOICE_DETAILS masterVoiceDetails;
 
 };

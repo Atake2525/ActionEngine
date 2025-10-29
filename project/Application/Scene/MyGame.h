@@ -20,6 +20,7 @@
 #include "JsonLoader.h"
 #include "CollisionManager.h"
 #include "FadeManager.h"
+#include "GameTime.h"
 
 #include "algorithm"
 #include "externels/imgui/imgui.h"

@@ -63,6 +63,8 @@ void Audio::Initialize() {
 	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 
 	MFStartup(MF_VERSION, MFSTARTUP_NOSOCKET);
+	
+	masterVoice->GetVoiceDetails(&masterVoiceDetails);
 }
 
 bool Audio::LoadWave(const std::string filePath, const std::string soundName, const float volume) {
@@ -243,27 +245,36 @@ void Audio::Play2D(const std::string soundName, const Vector2 position, const bo
 		buf.LoopCount = XAUDIO2_LOOP_INFINITE;
 	}
 
-	Vector2 pos = position;
+	//Vector2 pos = position;
 
-	// 出力チャンネル数(ステレオなら2)
-	const UINT32 outputChannels = 2;
+	//// 出力チャンネル数(ステレオなら2)
+	//const UINT32 outputChannels = 2;
 
 	// 入力チャンネル数(モノラルなら1)
-	const UINT32 inputChannels = 1;
-	XAUDIO2_VOICE_DETAILS sourceVoiceDetails;
-	pSourceVoice->GetVoiceDetails(&sourceVoiceDetails);
-	XAUDIO2_VOICE_DETAILS masterVoiceDetails;
-	masterVoice->GetVoiceDetails(&masterVoiceDetails);
+	//const UINT32 inputChannels = 1;
+	//XAUDIO2_VOICE_DETAILS sourceVoiceDetails;
+	//pSourceVoice->GetVoiceDetails(&sourceVoiceDetails);
+	//XAUDIO2_VOICE_DETAILS masterVoiceDetails;
+	//masterVoice->GetVoiceDetails(&masterVoiceDetails);
 
-	// 出力マトリクス(左右)
-	float matrix[2] = { 1.0f, 0.0f };
+	//// 出力マトリクス(左右)
+	//float matrix[2] = { 1.0f, 0.0f };
 
-	pSourceVoice->SetOutputMatrix(nullptr, sourceVoiceDetails.InputChannels, masterVoiceDetails.InputChannels, matrix);
+	//pSourceVoice->SetOutputMatrix(nullptr, sourceVoiceDetails.InputChannels, masterVoiceDetails.InputChannels, matrix);
+	
+	pSourceVoice->GetVoiceDetails(&soundMap[soundName].sourceVoiceDetails);
+
+	Vector2 pos = position;
+
+	pSourceVoice->SetOutputMatrix(nullptr, soundMap[soundName].sourceVoiceDetails.InputChannels, masterVoiceDetails.InputChannels, soundMap[soundName].matrix);
+
+	
 	// 波形データの再生
 	result = pSourceVoice->SubmitSourceBuffer(&buf);
 	result = pSourceVoice->SetVolume(soundMap[soundName].volume);
 	result = pSourceVoice->Start();
 	AudioList list = { pSourceVoice, soundMap[soundName], buf, frameTime };
+	list.soundData.audioPos = { pos.x, pos.y, 0.0f };
 	audioList.push_back(list);
 	Log("sound playing\n");
 	// 指定したsourceVoiceよりも多くpush_backしたらassert
@@ -295,23 +306,30 @@ void Audio::Play3D(const std::string soundName, const Vector3 position, const bo
 		buf.LoopCount = XAUDIO2_LOOP_INFINITE;
 	}
 
+	//Vector3 pos = position;
+
+	//// 出力チャンネル数(ステレオなら2)
+	//const UINT32 outputChannels = 2;
+
+	//// 入力チャンネル数(モノラルなら1)
+	//const UINT32 inputChannels = 1;
+
+	//// 出力マトリクス(左右)
+	//float matrix[2] = { 1.0f, 0.0f };
+
+	//pSourceVoice->GetOutputMatrix(nullptr, inputChannels, outputChannels, matrix);
+
+	pSourceVoice->GetVoiceDetails(&soundMap[soundName].sourceVoiceDetails);
+
 	Vector3 pos = position;
+	pSourceVoice->SetOutputMatrix(nullptr, soundMap[soundName].sourceVoiceDetails.InputChannels, masterVoiceDetails.InputChannels, soundMap[soundName].matrix);
 
-	// 出力チャンネル数(ステレオなら2)
-	const UINT32 outputChannels = 2;
-
-	// 入力チャンネル数(モノラルなら1)
-	const UINT32 inputChannels = 1;
-
-	// 出力マトリクス(左右)
-	float matrix[2] = { 1.0f, 0.0f };
-
-	pSourceVoice->GetOutputMatrix(nullptr, inputChannels, outputChannels, matrix);
 	// 波形データの再生
 	result = pSourceVoice->SubmitSourceBuffer(&buf);
 	result = pSourceVoice->SetVolume(soundMap[soundName].volume);
 	result = pSourceVoice->Start();
 	AudioList list = { pSourceVoice, soundMap[soundName], buf, frameTime };
+	list.soundData.audioPos = pos;
 	audioList.push_back(list);
 	// 指定したsourceVoiceよりも多くpush_backしたらassert
 	assert(audioList.size() < maxSourceVoiceCount);
@@ -464,7 +482,7 @@ bool Audio::LoadMP3(const std::string filePath, const std::string soundName, con
 	}
 
 	// 再生時間を計算する
-	int time = static_cast<int>(mp3AudioData.size() / pWaveFormat->nAvgBytesPerSec);
+	int time = static_cast<int>(mp3AudioData[soundName].size() / pWaveFormat->nAvgBytesPerSec);
 	if (time <= 0)
 	{
 		time = 1;
@@ -507,8 +525,8 @@ void Audio::SetVolume(const std::string soundName, const float volume) {
 
 void Audio::SetMasterVolume(const float volume){
 	// 0.0f ~ 1.0fにclampする
-	float vol = std::clamp(volume, 0.0f, 1.0f);
-	masterVoice->SetVolume(vol);
+	masterVolume = std::clamp(volume, 0.0f, 1.0f);
+	masterVoice->SetVolume(masterVolume);
 }
 
 // 全ての音声停止
@@ -569,6 +587,38 @@ void Audio::Resume(const std::string soundName) {
 
 
 void Audio::Update() {
+
+#ifndef NDEBUG
+	ImGui::Begin("Audio");
+	ImGui::SetWindowPos(ImVec2{ 0.0f, 18.0f * 4 });
+	ImGui::SetWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) - 18.0f * 2 });
+	ImGui::SliderFloat("MasterVolume", &masterVolume, 0.0f, 1.0f);
+	for (AudioList list : audioList)
+	{
+		float matrix[16];
+		float volume = list.soundData.volume;
+		list.sourceVoice->GetOutputMatrix(nullptr, list.soundData.sourceVoiceDetails.InputChannels, masterVoiceDetails.InputChannels, matrix);
+		ImGui::Separator();
+		ImGui::Text("AudioList");
+		ImGui::SliderFloat("Front Left", &matrix[0], 0.0f, 1.0f);
+		ImGui::SliderFloat("Front Right", &matrix[2], 0.0f, 1.0f);
+		ImGui::SliderFloat("Center", &matrix[4], 0.0f, 1.0f);
+		ImGui::SliderFloat("LFE", &matrix[6], 0.0f, 1.0f);
+		ImGui::SliderFloat("Back Left", &matrix[8], 0.0f, 1.0f);
+		ImGui::SliderFloat("Back Right", &matrix[10], 0.0f, 1.0f);
+		ImGui::SliderFloat("Side Left", &matrix[12], 0.0f, 1.0f);
+		ImGui::SliderFloat("Side Right", &matrix[14], 0.0f, 1.0f);
+		ImGui::SliderFloat("Volume", &volume, 0.0f, 1.0f);
+		list.sourceVoice->SetVolume(volume);
+		list.soundData.volume = volume;
+		list.sourceVoice->SetOutputMatrix(nullptr, list.soundData.sourceVoiceDetails.InputChannels, masterVoiceDetails.InputChannels, matrix);
+	};
+	ImGui::End();
+
+	masterVoice->SetVolume(masterVolume);
+
+#endif // _DEBUG
+
 	// audioListのサイズが0なら早期return
 	if (audioList.size() == 0) { 
 		frameTime = 0;
@@ -590,17 +640,6 @@ void Audio::Update() {
 		index++;
 	}
 	frameTime++;
-
-#ifdef _DEBUG
-	ImGui::Begin("Audio");
-	ImGui::SetWindowPos(ImVec2{ 0.0f, 18.0f * 4 });
-	ImGui::SetWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) - 18.0f * 2 });
-	ImGui::SliderFloat("MasterVolume", &masterVolume, 0.0f, 1.0f);
-	ImGui::End();
-
-	masterVoice->SetVolume(masterVolume);
-
-#endif // _DEBUG
 }
 
 // 音声データ解放

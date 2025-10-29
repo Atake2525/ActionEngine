@@ -6,8 +6,10 @@ void MyGame::Initialize() {
 
 #pragma region 基盤システムの初期化
 
-	WinApp::GetInstance()->Initialize(1920, 1080, WindowMode::FullScreen, L"Engine");
-	//WinApp::GetInstance()->Initialize();
+	GameTime::GetInstance()->Initialize();
+
+	//WinApp::GetInstance()->Initialize(1920, 1080, WindowMode::FullScreen, L"Engine");
+	WinApp::GetInstance()->Initialize();
 
 	DirectXBase::GetInstance()->Initialize();
 
@@ -51,7 +53,7 @@ void MyGame::Initialize() {
 
 	SceneManager::GetInstance();
 	
-	SceneManager::GetInstance()->SetNextScene("TITLE");
+	SceneManager::GetInstance()->SetNextScene("TEST");
 
 	//gameScene->Initialize();
 
@@ -60,6 +62,8 @@ void MyGame::Initialize() {
 
 void MyGame::Update() {
 	FrameWork::Update();
+
+	GameTime::GetInstance()->Update();
 
 	if (WinApp::GetInstance()->ProcessMessage()) {
 		finished = true;
@@ -77,7 +81,7 @@ void MyGame::Update() {
 	FadeManager::GetInstance()->Update();
 	//JsonLoader::GetInstance()->Update();
 
-#ifdef _DEBUG
+#ifndef NDEBUG
 
 	ImGui::Begin("シーン");
 	ImGui::SetWindowPos(ImVec2{ float(WinApp::GetInstance()->GetkClientWidth()) - 300.0f, 128.0f * 1 });
@@ -96,8 +100,47 @@ void MyGame::Update() {
 	}
 	ImGui::End();
 
+    
+
+
+	
+
 #endif // _SceneDEBUG
 
+	ImGui::Begin("パフォーマンス");
+	ImGui::SetWindowPos(ImVec2{ float(WinApp::GetInstance()->GetkClientWidth()) - 300.0f, 128.0f + 165.0f });
+	ImGui::SetWindowSize(ImVec2{ 300.0f, 82.5f });
+	float fps = 1.0f / GameTime::GetInstance()->GetDeltaTime();
+	ImGui::Text("FPS:");
+	ImGui::SameLine();
+	if (fps > fps * 0.75f)
+	{
+		ImGui::TextColored({ 0.0f, 1.0f, 0.0f, 1.0f }, "%.1f", fps);
+	}
+	else if (fps > fps * 0.5f && fps < fps * 0.75f)
+	{
+		ImGui::TextColored({ 1.0f, 1.0f, 0.0f, 1.0f }, "%.1f", fps);
+	}
+	else
+	{
+		ImGui::TextColored({ 1.0f, 0.0f, 0.0f, 1.0f }, "%.1f", fps);
+	}
+	float cpuusage = GameTime::GetInstance()->GetCPUUsagePDH();
+	ImGui::Text("CPU使用率:");
+	ImGui::SameLine();
+	if (cpuusage < 40)
+	{
+		ImGui::TextColored({ 0.0f, 1.0f, 0.0f, 1.0f }, "%.1f %%", cpuusage);
+	}
+	else if (cpuusage > 40 && cpuusage < 79)
+	{
+		ImGui::TextColored({ 1.0f, 1.0f, 0.0f, 1.0f }, "%.1f %%", cpuusage);
+	}
+	else
+	{
+		ImGui::TextColored({ 1.0f, 0.0f, 0.0f, 1.0f }, "%.1f %%", cpuusage);
+	}
+	ImGui::End();
 
 	if (SceneManager::GetInstance()->EndRequest())
 	{
@@ -165,6 +208,8 @@ void MyGame::Finalize() {
 	Input::GetInstance()->Finalize();
 
 	Audio::GetInstance()->Finalize();
+
+	GameTime::GetInstance()->Finalize();
 
 	FadeManager::GetInstance()->Finalize();
 

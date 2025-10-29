@@ -14,6 +14,7 @@
 #include "BaseScene.h"
 #include "SceneManager.h"
 #include "SkyBox.h"
+#include <memory>
 
 #pragma once
 
@@ -44,9 +45,8 @@ public:
 
 private:
 	bool finished = false;
-	Camera* camera = nullptr;
+	std::unique_ptr<Camera> camera;
 	Input* input = nullptr;
 
-	Object3d* grid = nullptr;
 };
 

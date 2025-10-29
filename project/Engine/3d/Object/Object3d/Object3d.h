@@ -14,6 +14,7 @@
 #include "Animator.h"
 #include "Model.h"
 #include "Capsule.h"
+#include "Culling.h"
 //#include "DebugAnimation.h"
 
 #pragma once
@@ -122,6 +123,9 @@ private:
 
 	struct CameraForGPU {
 		Vector3 worldPosition;
+        float nearClipDistance;
+        float farClipDistance;
+		float drawHeihgt;
 	};
 
 	// 座標変換リソースのバッファリソース
@@ -204,6 +208,8 @@ public:
 	// アニメーションの再生速度を取得
 	const float& GetAnimationSpeed() const { return animationSpeed; }
 
+	const CullingTemplate GetCullingTemplateData() const { return privateCullingData; }
+
 	const OBB& GetOBB() const { return obb; }
 	const std::vector<OBB>& GetMultiMeshOBB() const { return multiMeshOBB; }
 
@@ -238,10 +244,11 @@ public:
 
 	const Vector3 GetJointNormal(const std::string jointName);
 
-
 	void SetEnvironmentCoefficient(const float amount);
 
 	void SetEnableMetallic(const bool flag) { model_->SetEnableMetallic(flag); }
+
+	void SetDrawHeiht(const float height) { privateCullingData.drawHeight = height; }
 
 	const bool GetEnableMetallic() { return model_->GetEnableMetallic(); }
 
@@ -261,6 +268,14 @@ public:
 	const bool CheckCollisionAABBs(Object3d* object) const;
 
 	const bool CheckCollisionCapsule(Object3d* object) const;
+
+	const bool CheckCollisionOBB(Object3d* object) const;
+
+	const bool CheckCollisionOBBs(Object3d* object) const;
+
+	const bool CheckCollisionOBB(const OBB& obb) const;
+
+	const bool CheckCollisionOBBs(const OBB& obb) const;	
 
 	//const bool CheckCollisionCapsuleMultiAABB(Object3d* object) const;
 
@@ -287,5 +302,10 @@ private:
 
 	// SkinClusterの作成
 	std::vector<SkinCluster> CreateSkinCluster(const Skeleton& skeleton, const ModelData& modelData);
+
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> cullingTemplateResource = nullptr;
+	CullingTemplate* cullingTemplateData = nullptr;
+	CullingTemplate privateCullingData;
 
 };

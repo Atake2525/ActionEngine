@@ -10,8 +10,8 @@ void TestScene::Initialize() {
 	//ModelManager::GetInstance()->LoadModel("Resources/Model/gltf/human", "walkMultiMaterial.gltf", true, true);
 
 	camera = std::make_unique<Camera>();
-	camera->SetRotate(Vector3(SwapRadian(10.0f), 0.0f, 0.0f));
-	camera->SetTranslate({ 0.0f, 2.8f, -8.0f });
+	camera->SetRotate(Vector3(SwapRadian(0.0f), 0.0f, 0.0f));
+	camera->SetTranslate({ 0.0f, 0.0f, 0.0f });
 
 	TextureManager::GetInstance()->LoadTexture("Resources/rostock_laage_airport_4k.dds");
 
@@ -29,10 +29,12 @@ void TestScene::Initialize() {
 	grid->Initialize();
 	grid->SetModel("Resources/Debug", "Grid.obj");
 
-	box1 = std::make_unique<Object3d>();
+	/*box1 = std::make_unique<Object3d>();
 	box1->Initialize();
-	box1->SetModel("Resources/Debug/gltf", "hunmer.gltf", true);
-	box1->SetTranslate({ 5.0f, 0.0f, 5.0f });
+	box1->SetModel("Resources/Debug/gltf", "trap.gltf", true);
+	box1->SetTranslate({ 14.5f, 15.0f, 26.2f });*/
+
+    //CollisionManager::GetInstance()->AddCollision(box1.get(), "box1");
 
 	box2 = std::make_unique<Object3d>();
 	box2->Initialize();
@@ -42,9 +44,11 @@ void TestScene::Initialize() {
 	plate = std::make_unique<Object3d>();
 	plate->Initialize();
 	//plate->SetModel("Resources/Debug/gltf", "Plante.gltf", true);
-	plate->SetModel("Resources/Model/gltf/Stage", "map_town.gltf", true);
+	plate->SetModel("Resources/Model/obj/Stage/map01", "map01.obj", true);
+	//plate->SetEnableMetallic(true);
 
 	CollisionManager::GetInstance()->AddCollision(plate.get(), "plate");
+	CollisionManager::GetInstance()->AddCollision(box2.get(), "box");
 
 	player = std::make_unique<Player>();
 	Transform t = {
@@ -53,6 +57,9 @@ void TestScene::Initialize() {
 		{0.0f, 1.0f, 0.0f},
 	};
 	player->Initialize(camera.get(), input, t, true);
+
+	gameOverSprite = std::make_unique<GameOver>();
+	gameOverSprite->Initialize();
 
 	//LevelData jsonData = JsonLoader::GetInstance()->LoadJsonTransform("Resources/Stage/Json", "Debug.json");
 
@@ -64,9 +71,17 @@ void TestScene::Initialize() {
 		}
 	}*/
 
+	Audio::GetInstance()->LoadMP3("Resources/sekiranun.mp3", "bgm", 1.0f);
+
 }
 
 void TestScene::Update() {
+
+	if (player->IsGameOver())
+	{
+		player->Freeze(true);
+		gameOverSprite->Update();
+	}
 
 	player->Update();
 	grid->Update();
@@ -80,8 +95,8 @@ void TestScene::Update() {
 
 	SkyBox::GetInstance()->Update();
 
-	Transform t = box1->GetTransform();
-	AABB aabb = box1->GetAABB();
+	Transform t = box2->GetTransform();
+	AABB aabb = box2->GetAABB();
 	ImGui::Begin("Box");
 	ImGui::DragFloat3("Translate", &t.translate.x, 0.1f);
 	ImGui::DragFloat3("Scale", &t.scale.x, 0.1f);
@@ -90,29 +105,18 @@ void TestScene::Update() {
 	ImGui::DragFloat3("MAX", &aabb.max.x, 0.0f);
 	ImGui::End();
 
+	/*t.rotate.z += SwapRadian(4.0f);
+
 	box1->SetTransform(t);
-	box1->Update();
+	box1->Update();*/
+	box2->SetTransform(t);
 	box2->Update();
 
 	bool flag = false;
 
-	if (CheckOBBCollision(box1->GetOBB(), box2->GetOBB()))
+	if (input->TriggerKey(DIK_1))
 	{
-		flag = true;
-	}
-
-	if (CheckOBBCollision(box1->GetOBB(), player->GetOBB()))
-	{
-		flag = true;
-	}
-
-	if (flag)
-	{
-		box1->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
-	}
-	else
-	{
-		box1->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+		Audio::GetInstance()->Play3D("bgm", { 0.0f, 0.0f, 0.0f }, false);
 	}
 
 	if (input->TriggerKey(DIK_ESCAPE))
@@ -138,17 +142,22 @@ void TestScene::Draw() {
 
 	Object3dBase::GetInstance()->ShaderDraw();
 
-	box1->Draw();
+	//box1->Draw();
 	box2->Draw();
 	plate->Draw();
 	//player->Draw();
 
 	SkinningObject3dBase::GetInstance()->ShaderDraw();
 
+	//player->Draw();
 
 	WireFrameObjectBase::GetInstance()->ShaderDraw();
 
 	grid->Draw();
+
+	SpriteBase::GetInstance()->ShaderDraw();
+
+	gameOverSprite->Draw();
 
 	ParticleManager::GetInstance()->Draw();
 
@@ -159,4 +168,5 @@ void TestScene::Finalize() {
 	delete grid;
 
 	CollisionManager::GetInstance()->DeleteCollision("plate");
+	CollisionManager::GetInstance()->DeleteCollision("box");
 }

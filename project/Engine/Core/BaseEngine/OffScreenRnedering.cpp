@@ -4,6 +4,7 @@
 #include <cassert>
 #include "DirectXBase.h"
 #include "SrvManager.h"
+#include "TextureManager.h"
 
 #include "externels/imgui/imgui_impl_dx12.h"
 #include "externels/imgui/imgui_impl_win32.h"
@@ -39,7 +40,7 @@ void OffScreenRnedering::Initialize() {
 
 	grayscaleResouce = DirectXBase::GetInstance()->CreateBufferResource(sizeof(Grayscale));
 	grayscaleResouce->Map(0, nullptr, reinterpret_cast<void**>(&grayscale));
-	grayscale->enableGrayscale = false;
+	grayscale->grayscaleIntensity = 0.0f;
 	grayscale->toneColor = { 1.0f, 73.0f / 107.0f, 43.0f / 107.0f };
 	grayscale->alpah = 1.0f;
 
@@ -51,17 +52,22 @@ void OffScreenRnedering::Initialize() {
 
 	boxFilterResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(BoxFilter));
 	boxFilterResource->Map(0, nullptr, reinterpret_cast<void**>(&boxFilter));
-	boxFilter->enableBoxFilter = false;
+	boxFilter->boxFilterIntensity = 0.0f;
 	boxFilter->size = 5;
 
-	gaussianFilterResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(GaussianFilter));
+	/*gaussianFilterResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(GaussianFilter));
 	gaussianFilterResource->Map(0, nullptr, reinterpret_cast<void**>(&gaussianFilter));
 	gaussianFilter->enableGaussianFilter = false;
-	gaussianFilter->sigma = 2.0f;
+	gaussianFilter->sigma = 2.0f;*/
+
+    dissolveResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(Dissolve));
+    dissolveResource->Map(0, nullptr, reinterpret_cast<void**>(&dissolve));
+    dissolve->edgeColor = { 1.0f, 1.0f, 1.0f };
+    dissolve->threshold = 0.0f;
 }
 
 void OffScreenRnedering::Update() {
-#ifdef _DEBUG
+#ifndef NDEBUG
 	ImGui::Begin("PostEffect");
 	/*if (ImGui::IsPopupOpen("PostEffect"))
 	{
@@ -70,7 +76,7 @@ void OffScreenRnedering::Update() {
 	ImGui::SetWindowPos(ImVec2{ 0.0f, 18.0f });
 	ImGui::SetWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) - 18.0f });
 	if (ImGui::TreeNode("Grayscale / グレイスケール")) {
-		ImGui::Checkbox("有効化", &grayscale->enableGrayscale);
+		ImGui::SliderFloat("グレースケール強度", &grayscale->grayscaleIntensity, 0.0f, 1.0f);
 		ImGui::ColorEdit3("ColTone", &grayscale->toneColor.x);
 		ImGui::DragFloat("Alpha", &grayscale->alpah);
 		ImGui::TreePop();
@@ -82,13 +88,18 @@ void OffScreenRnedering::Update() {
 		ImGui::TreePop();
 	}
 	if (ImGui::TreeNode("BoxFilter / ボックスフィルター")) {
-		ImGui::Checkbox("有効化", &boxFilter->enableBoxFilter);
-		ImGui::SliderInt("size", &boxFilter->size, 1, 25);
+		ImGui::SliderFloat("有効化", &boxFilter->boxFilterIntensity, 0.0f, 1.0f);
+		ImGui::SliderInt("size", &boxFilter->size, 1, 50);
 		ImGui::TreePop();
 	}
-	if (ImGui::TreeNode("GaussianFilter / ガウシアンフィルター")) {
+	/*if (ImGui::TreeNode("GaussianFilter / ガウシアンフィルター")) {
 		ImGui::Checkbox("有効化", &gaussianFilter->enableGaussianFilter);
 		ImGui::SliderFloat("size", &gaussianFilter->sigma, 1.0f, 10.0f);
+		ImGui::TreePop();
+	}*/
+	if (ImGui::TreeNode("Dissolve / ディゾルブ")) {
+        ImGui::ColorEdit3("EdgeColor", &dissolve->edgeColor.x);
+        ImGui::SliderFloat("Threshold", &dissolve->threshold, 0.0f, 1.0f);
 		ImGui::TreePop();
 	}
 	ImGui::End();
@@ -105,6 +116,11 @@ void OffScreenRnedering::CreateRootSignature() {
 	descriptorRange[0].NumDescriptors = 1;                                                       // 数は1つ
 	descriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;                              // SRVを使う
 	descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; // Offsetを自動計算
+
+	descriptorRange[1].BaseShaderRegister = 1;                                                   // 0から始まる
+	descriptorRange[1].NumDescriptors = 1;                                                       // 数は1つ
+	descriptorRange[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;                              // SRVを使う
+	descriptorRange[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; // Offsetを自動計算
 
 	// Samplerの設定
 	staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;   // バイナリフィルタ
@@ -128,20 +144,24 @@ void OffScreenRnedering::CreateRootSignature() {
 	rootParameters[0].Descriptor.ShaderRegister = 0;                              // レジスタ番号0を使う
 	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う
 	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;           // PixelShaderで使う
-	rootParameters[1].DescriptorTable.pDescriptorRanges = descriptorRange;        // Tableの中身の配列を指定
-	rootParameters[1].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange);
+	rootParameters[1].DescriptorTable.pDescriptorRanges = &descriptorRange[0];        // Tableの中身の配列を指定
+	rootParameters[1].DescriptorTable.NumDescriptorRanges = 1;
 	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;              // CBVを使う
 	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;           // PixelShaderで使う
 	rootParameters[2].Descriptor.ShaderRegister = 0;                              // レジスタ番号0とバインド
 	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;    // CBVを使う
 	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderを使う
-	rootParameters[3].Descriptor.ShaderRegister = 1;                    // レジスタ番号0を使う
+	rootParameters[3].Descriptor.ShaderRegister = 1;                    // レジスタ番号1を使う
 	rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;    // CBVを使う
 	rootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderを使う
-	rootParameters[4].Descriptor.ShaderRegister = 2;                    // レジスタ番号0を使う
+	rootParameters[4].Descriptor.ShaderRegister = 2;                    // レジスタ番号2を使う
 	rootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;    // CBVを使う
 	rootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderを使う
-	rootParameters[5].Descriptor.ShaderRegister = 3;                    // レジスタ番号0を使う
+	rootParameters[5].Descriptor.ShaderRegister = 3;                    // レジスタ番号3を使う
+	rootParameters[6].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う
+	rootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;           // PixelShaderで使う
+	rootParameters[6].DescriptorTable.pDescriptorRanges = &descriptorRange[1];        // Tableの中身の配列を指定
+	rootParameters[6].DescriptorTable.NumDescriptorRanges = 1;
 	descriptionRootSignature.pParameters = rootParameters;              // ルートパラメータ配列へのポインタ
 	descriptionRootSignature.NumParameters = _countof(rootParameters);  // 配列の長さ
 
@@ -183,9 +203,9 @@ void OffScreenRnedering::CreateRootSignature() {
 	// 三角形の中を塗りつぶす
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 	// Shaderをコンパイルする
-	vertexShaderBlob = DirectXBase::GetInstance()->CompileShader(L"Resources/shaders/Fullscreen.VS.hlsl", L"vs_6_0");
+	vertexShaderBlob = DirectXBase::GetInstance()->CompileShader(L"Resources/shaders/PostEffect/Fullscreen.VS.hlsl", L"vs_6_0");
 	assert(vertexShaderBlob != nullptr);
-	pixelShaderBlob = DirectXBase::GetInstance()->CompileShader(L"Resources/shaders/GaussianFilter.PS.hlsl", L"ps_6_0");
+	pixelShaderBlob = DirectXBase::GetInstance()->CompileShader(L"Resources/shaders//PostEffect/Dissolve.PS.hlsl", L"ps_6_0");
 	assert(pixelShaderBlob != nullptr);
 
 	// DepthStencilStateの設定
@@ -235,9 +255,12 @@ void OffScreenRnedering::Draw() {
 	// boxFilter
 	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(4, boxFilterResource->GetGPUVirtualAddress());
 	// gaussianFilter
-	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(5, gaussianFilterResource->GetGPUVirtualAddress());
+	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(5, dissolveResource->GetGPUVirtualAddress());
+
+	SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(6, TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/Sprite/noise0.png"));
 	// srvGPUHandleの設定
 	SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(1, srvIndex);
+
 	//directxBase_->GetCommandList()->SetGraphicsRootDescriptorTable(1, srvGPUHandle);
 	// Draw call
 	DirectXBase::GetInstance()->GetCommandList()->DrawInstanced(3, 1, 0, 0);
