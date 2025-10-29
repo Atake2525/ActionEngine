@@ -73,6 +73,17 @@ inline Vector3 EaseInOut(float time, Vector3 x1, Vector3 x2) {
 };
 
 // easeOutQuint
+inline Vector2 EaseOutQuint(float t, Vector2 x1, Vector2 x2) {
+
+	Vector2 result;
+
+	result.x = EaseOutQuint(t, x1.x, x2.x);
+	result.y = EaseOutQuint(t, x1.y, x2.y);
+
+	return result;;
+};
+
+// easeOutQuint
 inline Vector3 EaseOutQuint(float t, Vector3 x1, Vector3 x2) {
 
 	Vector3 result;
@@ -123,6 +134,43 @@ inline Vector3 EaseOutExpo(float time, Vector3 start, Vector3 end) {
 	result.x = EaseOutExpo(time, start.x, end.x);
 	result.y = EaseOutExpo(time, start.y, end.y);
 	result.z = EaseOutExpo(time, start.z, end.z);
+
+	return result;
+}
+
+inline float EaseOutElastic(float time, float start, float end) {
+	float t = std::clamp(time, 0.0f, 1.0f);
+	float result;
+
+	float c4 = (2.0f * float(M_PI)) / 3.0f;
+
+	if (t == 1.0f)
+	{
+		result = end;
+	}
+	else
+	{
+		result = std::pow(2.0f, -10.0f * t) * sin((t * 10.0f - 0.75f) * c4) + 1.0f;
+	}
+
+	return result;
+}
+
+inline Vector2 EaseOutElastic(float time, Vector2 start, Vector2 end) {
+	Vector2 result;
+
+	result.x = EaseOutElastic(time, start.x, end.x);
+	result.y = EaseOutElastic(time, start.y, end.y);
+
+	return result;
+}
+
+inline Vector3 EaseOutElastic(float time, Vector3 start, Vector3 end) {
+	Vector3 result;
+
+	result.x = EaseOutElastic(time, start.x, end.x);
+	result.y = EaseOutElastic(time, start.y, end.y);
+	result.z = EaseOutElastic(time, start.z, end.z);
 
 	return result;
 }

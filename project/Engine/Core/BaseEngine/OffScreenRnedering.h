@@ -23,7 +23,7 @@ struct Vignette
 
 struct BoxFilter
 {
-	bool enableBoxFilter;
+	float boxFilterIntensity;
 	int size;
 };
 
