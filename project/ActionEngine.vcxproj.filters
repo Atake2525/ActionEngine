@@ -151,6 +151,7 @@
       <Filter>Engine</Filter>
     </ClCompile>
     <ClCompile Include="Application\GameOver.cpp" />
+    <ClCompile Include="Engine\UI\Text.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externels\imgui\imstb_rectpack.h" />
@@ -339,6 +340,7 @@
     </ClInclude>
     <ClInclude Include="Engine\Math\Culling.h" />
     <ClInclude Include="Application\GameOver.h" />
+    <ClInclude Include="Engine\UI\Text.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\PostEffect\BoxFilter.PS.hlsl" />
