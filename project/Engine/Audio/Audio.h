@@ -30,6 +30,8 @@ struct SoundData {
 	unsigned int bufferSize;
 	// ファイル
 	std::string filePath;
+	// 名前
+	std::string audioName;
 	// ファイルの再生時間
 	float playTime;
 	// 音量
@@ -50,6 +52,7 @@ struct AudioList
 	int startFrameTime;
 };
 
+class Camera;
 
 class Audio {
 private:
@@ -67,6 +70,9 @@ public:
 
 	// 初期化
 	void Initialize();
+
+	// カメラの設定
+	void SetCamera(Camera* camera) { camera_ = camera; }
 
 	// 更新
 	void Update();
@@ -125,6 +131,8 @@ private:
 	// audio test
 	Microsoft::WRL::ComPtr<IXAudio2> xAudio2;
 	IXAudio2MasteringVoice* masterVoice = nullptr;
+	// masterVoiceDetails
+	XAUDIO2_VOICE_DETAILS masterVoiceDetails;
 	float masterVolume = 1.0f;
 
 	std::vector<AudioList> audioList;
@@ -141,7 +149,6 @@ private:
 	// Media Foundation SourceReader
 	Microsoft::WRL::ComPtr<IMFSourceReader> pMFSourceReader{ nullptr };
 
-	// masterVoiceDetails
-	XAUDIO2_VOICE_DETAILS masterVoiceDetails;
+	Camera* camera_ = nullptr;
 
 };

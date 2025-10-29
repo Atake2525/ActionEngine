@@ -118,6 +118,10 @@ void TestScene::Update() {
 	{
 		Audio::GetInstance()->Play3D("bgm", { 0.0f, 0.0f, 0.0f }, false);
 	}
+	if (input->TriggerKey(DIK_2))
+	{
+		Audio::GetInstance()->Play("bgm", false);
+	}
 
 	if (input->TriggerKey(DIK_ESCAPE))
 	{

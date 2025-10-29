@@ -3,6 +3,8 @@
 #include <algorithm>
 #include "Logger.h"
 #include "WinApp.h"
+#include "GameTime.h"
+#include <cmath>
 
 #include "externels/imgui/imgui.h"
 #include "externels/imgui/imgui_impl_dx12.h"
@@ -214,6 +216,8 @@ void Audio::Play(const std::string soundName, const bool loop) {
 	result = pSourceVoice->SetVolume(soundMap[soundName].volume);
 	result = pSourceVoice->Start();
 	AudioList list = { pSourceVoice, soundMap[soundName], buf, frameTime };
+	list.startFrameTime = frameTime;
+	list.soundData.audioName = soundName;
 	audioList.push_back(list);
 	Log("sound playing\n");
 	// 指定したsourceVoiceよりも多くpush_backしたらassert
@@ -275,6 +279,8 @@ void Audio::Play2D(const std::string soundName, const Vector2 position, const bo
 	result = pSourceVoice->Start();
 	AudioList list = { pSourceVoice, soundMap[soundName], buf, frameTime };
 	list.soundData.audioPos = { pos.x, pos.y, 0.0f };
+	list.startFrameTime = frameTime;
+	list.soundData.audioName = soundName;
 	audioList.push_back(list);
 	Log("sound playing\n");
 	// 指定したsourceVoiceよりも多くpush_backしたらassert
@@ -330,6 +336,8 @@ void Audio::Play3D(const std::string soundName, const Vector3 position, const bo
 	result = pSourceVoice->Start();
 	AudioList list = { pSourceVoice, soundMap[soundName], buf, frameTime };
 	list.soundData.audioPos = pos;
+	list.soundData.audioName = soundName;
+	list.startFrameTime = frameTime;
 	audioList.push_back(list);
 	// 指定したsourceVoiceよりも多くpush_backしたらassert
 	assert(audioList.size() < maxSourceVoiceCount);
@@ -593,25 +601,29 @@ void Audio::Update() {
 	ImGui::SetWindowPos(ImVec2{ 0.0f, 18.0f * 4 });
 	ImGui::SetWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) - 18.0f * 2 });
 	ImGui::SliderFloat("MasterVolume", &masterVolume, 0.0f, 1.0f);
+	if (ImGui::Button("StopAll"))
+	{
+		StopAll();
+	}
 	for (AudioList list : audioList)
 	{
-		float matrix[16];
 		float volume = list.soundData.volume;
-		list.sourceVoice->GetOutputMatrix(nullptr, list.soundData.sourceVoiceDetails.InputChannels, masterVoiceDetails.InputChannels, matrix);
+		list.sourceVoice->GetOutputMatrix(nullptr, list.soundData.sourceVoiceDetails.InputChannels, masterVoiceDetails.InputChannels, list.soundData.matrix);
 		ImGui::Separator();
 		ImGui::Text("AudioList");
-		ImGui::SliderFloat("Front Left", &matrix[0], 0.0f, 1.0f);
-		ImGui::SliderFloat("Front Right", &matrix[2], 0.0f, 1.0f);
-		ImGui::SliderFloat("Center", &matrix[4], 0.0f, 1.0f);
-		ImGui::SliderFloat("LFE", &matrix[6], 0.0f, 1.0f);
-		ImGui::SliderFloat("Back Left", &matrix[8], 0.0f, 1.0f);
-		ImGui::SliderFloat("Back Right", &matrix[10], 0.0f, 1.0f);
-		ImGui::SliderFloat("Side Left", &matrix[12], 0.0f, 1.0f);
-		ImGui::SliderFloat("Side Right", &matrix[14], 0.0f, 1.0f);
+		ImGui::Text(list.soundData.audioName.c_str());
+		ImGui::SliderFloat("Front Left", &list.soundData.matrix[0], 0.0f, 1.0f);
+		ImGui::SliderFloat("Front Right", &list.soundData.matrix[2], 0.0f, 1.0f);
+		ImGui::SliderFloat("Center", &list.soundData.matrix[4], 0.0f, 1.0f);
+		ImGui::SliderFloat("LFE", &list.soundData.matrix[6], 0.0f, 1.0f);
+		ImGui::SliderFloat("Back Left", &list.soundData.matrix[8], 0.0f, 1.0f);
+		ImGui::SliderFloat("Back Right", &list.soundData.matrix[10], 0.0f, 1.0f);
+		ImGui::SliderFloat("Side Left", &list.soundData.matrix[12], 0.0f, 1.0f);
+		ImGui::SliderFloat("Side Right", &list.soundData.matrix[14], 0.0f, 1.0f);
 		ImGui::SliderFloat("Volume", &volume, 0.0f, 1.0f);
 		list.sourceVoice->SetVolume(volume);
 		list.soundData.volume = volume;
-		list.sourceVoice->SetOutputMatrix(nullptr, list.soundData.sourceVoiceDetails.InputChannels, masterVoiceDetails.InputChannels, matrix);
+		list.sourceVoice->SetOutputMatrix(nullptr, list.soundData.sourceVoiceDetails.InputChannels, masterVoiceDetails.InputChannels, list.soundData.matrix);
 	};
 	ImGui::End();
 
@@ -627,6 +639,12 @@ void Audio::Update() {
 	uint32_t index = 0;
 	for (AudioList list : audioList)
 	{
+		// 3DAudioの更新
+		if (std::isnan(list.soundData.audioPos.x) || std::isinf(list.soundData.audioPos.x))
+		{
+			float t = 0.0f;
+			t++;
+		}
 		if (frameTime >= list.soundData.playTime * 60 + list.startFrameTime && list.buf.LoopCount != XAUDIO2_LOOP_INFINITE)
 		{ 
 			// 再生時間ごとに削除 
@@ -639,7 +657,7 @@ void Audio::Update() {
 		}
 		index++;
 	}
-	frameTime++;
+	frameTime += GameTime::GetInstance()->GetDeltaTime();
 }
 
 // 音声データ解放
