@@ -19,12 +19,21 @@ struct Children
 	std::string	file_name;
 };
 
+struct Trap
+{
+	bool move;
+
+	Transform velocity;
+	float loopTime;
+};
+
 struct JsonData
 {
 	std::string type;
 	std::string name;
 
 	Transform transform;
+	Trap trap;
 
 	std::string	file_name;
 
@@ -88,7 +97,7 @@ public:
 
 	void SerchTransformFunctional(const std::string& jsonName, const std::string file_name, std::function<void(Transform transform)> function);
 
-	const JsonData& GetJsonData(const std::string& jsonName, const std::string file_name);
+	const std::vector<JsonData> GetJsonData(const std::string& jsonName, const std::string file_name);
 
 private:
 

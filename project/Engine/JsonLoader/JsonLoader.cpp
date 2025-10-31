@@ -156,7 +156,37 @@ void JsonLoader::LoadJsonTransform(const std::string& path, const std::string& j
             jsonData.transform.scale.x = (float)transform["scaling"][0];
             jsonData.transform.scale.y = (float)transform["scaling"][1];
             jsonData.transform.scale.z = (float)transform["scaling"][2];
+            
+            for (nlohmann::json& trap : object["trap"])
+            {
+                nlohmann::json& translate = trap["velocity_translation"];
+                nlohmann::json& rotate = trap["velocity_rotation"];
+                nlohmann::json& scale = trap["velocity_scale"];
+                nlohmann::json& loop = trap["loop"];
+                if (trap["move"].get<std::string>() == "true")
+                {
+                    jsonData.trap.move = true;
 
+                    jsonData.trap.velocity.translate.x = (float)translate[0];
+                    jsonData.trap.velocity.translate.y = (float)translate[1];
+                    jsonData.trap.velocity.translate.z = (float)translate[2];
+
+                    jsonData.trap.velocity.rotate.x = (float)rotate[0];
+                    jsonData.trap.velocity.rotate.y = (float)rotate[1];
+                    jsonData.trap.velocity.rotate.z = (float)rotate[2];
+
+                    jsonData.trap.velocity.scale.x = (float)scale[0];
+                    jsonData.trap.velocity.scale.y = (float)scale[1];
+                    jsonData.trap.velocity.scale.z = (float)scale[2];
+
+                    jsonData.trap.loopTime = (float)loop[0];
+
+                }
+                else
+                {
+                    jsonData.trap.move = false;
+                }
+            }
             // "file_name"
             if (object.contains("file_name"))
             {
@@ -197,7 +227,11 @@ void JsonLoader::LoadJsonTransform(const std::string& path, const std::string& j
                 }
             }
         }
-
+    }
+    if (overwrite)
+    {
+        levelDatas[jsonName].datas.clear();
+        levelDatas[jsonName].name = "NULL";
     }
     levelDatas[jsonName] = levelData;
 }
@@ -213,14 +247,13 @@ void JsonLoader::SerchTransformFunctional(const std::string& jsonName, const std
     }
 }
 
-const JsonData& JsonLoader::GetJsonData(const std::string& jsonName, const std::string file_name) {
-    JsonData result;
+const std::vector<JsonData> JsonLoader::GetJsonData(const std::string& jsonName, const std::string file_name) {
+    std::vector<JsonData> result;
     for (auto data : levelDatas[jsonName].datas)
     {
-        if (data.second.file_name == file_name)
+        if (data.second.file_name.find(file_name) == !std::string::npos)
         {
-            result = data.second;
-            return result;
+            result.push_back(data.second);
         }
     }
     return result;
