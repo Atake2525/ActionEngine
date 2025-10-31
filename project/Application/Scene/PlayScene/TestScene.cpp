@@ -66,15 +66,8 @@ void TestScene::Initialize() {
 	gameOverSprite = std::make_unique<GameOver>();
 	gameOverSprite->Initialize();
 
-	JsonLoader::GetInstance()->LoadJsonTransform("Resources/Debug/json/PlayerStartPoint.json", "startPoint", false);
-	std::function<void(Transform transform)> func;
-	func = [this](Transform tansform) {
-		std::string s = std::to_string(tansform.translate.x);
-		Log("出力結果 x : " + s + "\n");
-		};
-	JsonLoader::GetInstance()->SerchTransformFunctional("startPoint", "Player", func);
-
-
+	trap = std::make_unique<Trap>();
+	trap->Initialize("Resources/Debug/json/trap.json");
 
 	Audio::GetInstance()->LoadMP3("Resources/sekiranun.mp3", "bgm", 1.0f);
 
@@ -117,6 +110,8 @@ void TestScene::Update() {
 	box2->SetTransform(t);
 	box2->Update();
 
+	trap->Update();
+
 	bool flag = false;
 
 	if (input->TriggerKey(DIK_1))
@@ -150,6 +145,7 @@ void TestScene::Draw() {
 	//box1->Draw();
 	box2->Draw();
 	plate->Draw();
+	trap->Draw();
 	//player->Draw();
 
 	SkinningObject3dBase::GetInstance()->ShaderDraw();

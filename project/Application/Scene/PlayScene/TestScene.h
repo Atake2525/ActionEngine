@@ -19,6 +19,7 @@
 #include "Player.h"
 #include "JsonLoader.h"
 #include "GameOver.h"
+#include "Trap.h"
 
 #pragma once
 
@@ -64,5 +65,6 @@ private:
 
 	Object3d* grid = nullptr;
 
+	std::unique_ptr<Trap> trap;
 };
 

@@ -4,16 +4,29 @@
 #include <memory>
 #pragma once
 
+enum class TrapType : uint8_t {
+    Spike = 0,
+
+};
+
+struct Traps
+{
+    std::unique_ptr<Object3d> object;
+    TrapType type;
+};
+
 class Trap
 {
 public:
-    void Initialize(std::string jsonName);
+    void Initialize(std::string path);
     void Update();
     void Draw();
 
 private:
 
-    std::map<std::wstring, std::unique_ptr<Object3d>> traps;
+    std::vector<Traps> traps;
+
+    void UpdateSpikeTrap();
 
 };
 
