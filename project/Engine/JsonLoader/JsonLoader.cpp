@@ -157,35 +157,43 @@ void JsonLoader::LoadJsonTransform(const std::string& path, const std::string& j
             jsonData.transform.scale.y = (float)transform["scaling"][1];
             jsonData.transform.scale.z = (float)transform["scaling"][2];
             
-            for (nlohmann::json& trap : object["trap"])
+            nlohmann::json trap = object["trap"];
+
+            nlohmann::json& translate = trap["velocity_translation"];
+            nlohmann::json& rotate = trap["velocity_rotation"];
+            nlohmann::json& scale = trap["velocity_scale"];
+            nlohmann::json& runtime = trap["runtime"];
+            if (trap["move"].get<std::string>() == "true")
             {
-                nlohmann::json& translate = trap["velocity_translation"];
-                nlohmann::json& rotate = trap["velocity_rotation"];
-                nlohmann::json& scale = trap["velocity_scale"];
-                nlohmann::json& loop = trap["loop"];
-                if (trap["move"].get<std::string>() == "true")
+                jsonData.trap.move = true;
+
+                jsonData.trap.velocity.translate.x = (float)translate[0];
+                jsonData.trap.velocity.translate.y = (float)translate[1];
+                jsonData.trap.velocity.translate.z = (float)translate[2];
+
+                jsonData.trap.velocity.rotate.x = SwapRadian((float)rotate[0]);
+                jsonData.trap.velocity.rotate.y = SwapRadian((float)rotate[1]);
+                jsonData.trap.velocity.rotate.z = SwapRadian((float)rotate[2]);
+
+                jsonData.trap.velocity.scale.x = (float)scale[0];
+                jsonData.trap.velocity.scale.y = (float)scale[1];
+                jsonData.trap.velocity.scale.z = (float)scale[2];
+
+                jsonData.trap.runTime = (float)runtime;
+
+                if (trap["loop"].get<std::string>() == "true")
                 {
-                    jsonData.trap.move = true;
-
-                    jsonData.trap.velocity.translate.x = (float)translate[0];
-                    jsonData.trap.velocity.translate.y = (float)translate[1];
-                    jsonData.trap.velocity.translate.z = (float)translate[2];
-
-                    jsonData.trap.velocity.rotate.x = (float)rotate[0];
-                    jsonData.trap.velocity.rotate.y = (float)rotate[1];
-                    jsonData.trap.velocity.rotate.z = (float)rotate[2];
-
-                    jsonData.trap.velocity.scale.x = (float)scale[0];
-                    jsonData.trap.velocity.scale.y = (float)scale[1];
-                    jsonData.trap.velocity.scale.z = (float)scale[2];
-
-                    jsonData.trap.loopTime = (float)loop[0];
-
+                    jsonData.trap.loop = true;
+                } 
+                else 
+                { 
+                    jsonData.trap.loop = false; 
                 }
-                else
-                {
-                    jsonData.trap.move = false;
-                }
+
+            }
+            else
+            {
+                jsonData.trap.move = false;
             }
             // "file_name"
             if (object.contains("file_name"))

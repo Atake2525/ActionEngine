@@ -2,6 +2,8 @@
 #include <string>
 #include <map>
 #include <memory>
+#include "Transform.h"
+#include "JsonLoader.h"
 #pragma once
 
 enum class TrapType : uint8_t {
@@ -13,6 +15,9 @@ struct Traps
 {
     std::unique_ptr<Object3d> object;
     TrapType type;
+    Transform start;
+    TrapData trapData;
+    float startFrame;
 };
 
 class Trap
@@ -23,10 +28,11 @@ public:
     void Draw();
 
 private:
+    std::string jsonPath;
 
     std::vector<Traps> traps;
 
-    void UpdateSpikeTrap();
+    float gameTimer_ = 0.0f;
 
 };
 
