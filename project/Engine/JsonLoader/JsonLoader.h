@@ -19,12 +19,13 @@ struct Children
 	std::string	file_name;
 };
 
-struct Trap
+struct TrapData
 {
 	bool move;
 
 	Transform velocity;
-	float loopTime;
+	bool loop;
+	float runTime;
 };
 
 struct JsonData
@@ -33,7 +34,7 @@ struct JsonData
 	std::string name;
 
 	Transform transform;
-	Trap trap;
+	TrapData trap;
 
 	std::string	file_name;
 
