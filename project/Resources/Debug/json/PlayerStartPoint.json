@@ -8,7 +8,7 @@
                 "translation": [
                     0.0,
                     0.0,
-                    0.0
+                    1.0
                 ],
                 "rotation": [
                     0.0,
@@ -21,19 +21,113 @@
                     1.0
                 ]
             },
-            "file_name": "",
-            "collider": {
-                "type": "BOX",
-                "center": [
-                    0.03999999910593033,
+            "file_name": "trap0",
+            "trap": {
+                "move": "true",
+                "velocity_translation": [
+                    0.0,
+                    0.0,
+                    0.10000000149011612
+                ],
+                "velocity_rotation": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "velocity_scale": [
+                    0.0,
                     0.0,
                     0.0
                 ],
-                "size": [
-                    2.0,
-                    2.0,
-                    2.0
+                "loop": "true",
+                "reverse": "false",
+                "runtime": 3.0
+            }
+        },
+        {
+            "type": "MESH",
+            "name": "立方体.001",
+            "transform": {
+                "translation": [
+                    4.0,
+                    0.0,
+                    1.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
                 ]
+            },
+            "file_name": "trap01",
+            "trap": {
+                "move": "true",
+                "velocity_translation": [
+                    0.0,
+                    0.0,
+                    0.10000000149011612
+                ],
+                "velocity_rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "velocity_scale": [
+                    0.009999999776482582,
+                    0.009999999776482582,
+                    0.009999999776482582
+                ],
+                "loop": "true",
+                "reverse": "true",
+                "runtime": 3.0
+            }
+        },
+        {
+            "type": "MESH",
+            "name": "立方体.002",
+            "transform": {
+                "translation": [
+                    -4.0,
+                    0.0,
+                    1.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "trap02",
+            "trap": {
+                "move": "true",
+                "velocity_translation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "velocity_rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "velocity_scale": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "loop": "false",
+                "reverse": "false",
+                "runtime": 0.0
             }
         }
     ]

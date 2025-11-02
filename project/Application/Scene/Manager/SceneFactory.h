@@ -21,6 +21,8 @@ public:
     // インスタンスの取得
     static SceneFactory* GetInstance();
 
+    void CallStart();
+
     // 終了処理
     void Finalize();
 
