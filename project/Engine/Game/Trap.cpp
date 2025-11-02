@@ -20,17 +20,37 @@ void Trap::Initialize(std::string path) {
 		trap.object = make_unique<Object3d>();
 		trap.object->Initialize();
 		trap.object->SetTransform(data.transform);
-		trap.object->SetModel("Resources/Debug/obj", "box.obj");
+		trap.object->SetModel("Resources/Debug/obj", "box.obj", true);
 		trap.start = data.transform;
 		trap.trapData = data.trap;
 		trap.startFrame = gameTimer_;
+		if (!data.trap.loop && !data.trap.reverse)
+		{
+			trap.reverse = true;
+		}
+		else
+		{
+			trap.reverse = false;
+		}
 		traps.push_back(std::move(trap));
 	}
 }
 
 void Trap::Update() {
 	gameTimer_ += GameTime::GetInstance()->GetDeltaTime();
-
+	if (!start)
+	{
+		Log("更新開始 : " + std::to_string(gameTimer_) + "\n");
+		for (int i = 0; i < traps.size(); i++)
+		{
+			traps[i].object->SetTransform(traps[i].start);
+			traps[i].startFrame = gameTimer_;
+		}
+		gameTimer_ = 0.0f;
+		GameTime::GetInstance()->SetDeltaPoint();
+		Log("更新初期処理終了 : " + std::to_string(gameTimer_) + "\n");
+		start = true;
+	}
 #ifndef _NDEBUG
 	ImGui::Begin("Trap");
 	ImGui::TextColored({ 1.0f, 1.0f, 1.0f, 1.0f }, "経過時間 %.1f", gameTimer_);
@@ -44,13 +64,22 @@ void Trap::Update() {
 	{
 		if (gameTimer_ > traps[i].startFrame + traps[i].trapData.runTime && traps[i].trapData.runTime > 0.0f)
 		{
-			if (!traps[i].trapData.loop)
+			if (!traps[i].trapData.loop && traps[i].reverse)
 			{
 				traps.erase(traps.cbegin() + i);
 				continue;
 			}
+			if (!traps[i].trapData.reverse)
+			{
+				traps[i].object->SetTransform(traps[i].start);
+				traps[i].reverse = true;
+			}
+			else
+			{
+				traps[i].trapData.velocity *= -1.0f;
+				traps[i].reverse = !traps[i].reverse;
+			}
 			traps[i].startFrame = gameTimer_;
-			traps[i].object->SetTransform(traps[i].start);
 
 
 		}

@@ -28,9 +28,12 @@ public:
 
     void Draw();
 
+    void CallStart();
+
     const bool& EndRequest() { return roopOut_; }
 
 private:
+    bool drawStart = false;
     // 実行中のシーン
     BaseScene* scene_ = nullptr;
     // 次のシーン

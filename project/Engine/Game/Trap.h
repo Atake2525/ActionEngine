@@ -17,6 +17,7 @@ struct Traps
     TrapType type;
     Transform start;
     TrapData trapData;
+    bool reverse;
     float startFrame;
 };
 
@@ -33,6 +34,8 @@ private:
     std::vector<Traps> traps;
 
     float gameTimer_ = 0.0f;
+
+    bool start = false;
 
 };
 

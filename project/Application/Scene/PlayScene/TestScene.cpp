@@ -7,6 +7,7 @@
 #include "JsonLoader.h"
 #include <functional>
 #include "Logger.h"
+#include "GameTime.h"
 
 using namespace Logger;
 
@@ -81,7 +82,7 @@ void TestScene::Update() {
 		gameOverSprite->Update();
 	}
 
-	player->Update();
+	//player->Update();
 	grid->Update();
 
 	camera->Update();
@@ -143,8 +144,8 @@ void TestScene::Draw() {
 	Object3dBase::GetInstance()->ShaderDraw();
 
 	//box1->Draw();
-	box2->Draw();
-	plate->Draw();
+	//box2->Draw();
+	//plate->Draw();
 	trap->Draw();
 	//player->Draw();
 

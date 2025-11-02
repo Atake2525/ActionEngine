@@ -22,3 +22,17 @@ struct TransformationMatrix {
 	Matrix4x4 World;
 	Matrix4x4 WorldInverseTranspose;
 };
+
+inline Transform operator*=(Transform& t, const float& n) {
+	t.scale *= n;
+	t.rotate *= n;
+	t.translate *= n;
+	return t;
+}
+
+inline Transform operator*=(Transform& t1, const Transform& t2) {
+	t1.scale *= t2.scale;
+	t1.rotate *= t2.rotate;
+	t1.translate *= t2.translate;
+	return t1;
+}

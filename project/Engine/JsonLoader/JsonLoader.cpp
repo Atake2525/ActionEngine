@@ -126,6 +126,11 @@ void JsonLoader::LoadJsonTransform(const std::string& path, const std::string& j
             //        }
             //    }
             //}
+            if (!object.contains("file_name"))
+            {
+                Log("objectにfile_nameが存在しません\n");
+                return;
+            }
             // 1個分の要素の準備
             JsonData& jsonData = levelData.datas[object["file_name"].get<std::string>()];
 
@@ -188,6 +193,14 @@ void JsonLoader::LoadJsonTransform(const std::string& path, const std::string& j
                 else 
                 { 
                     jsonData.trap.loop = false; 
+                }
+                if (trap["reverse"].get<std::string>() == "true")
+                {
+                    jsonData.trap.reverse = true;
+                }
+                else
+                {
+                    jsonData.trap.reverse = false;
                 }
 
             }

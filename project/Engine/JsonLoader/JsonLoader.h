@@ -24,7 +24,10 @@ struct TrapData
 	bool move;
 
 	Transform velocity;
+
 	bool loop;
+	bool reverse;
+
 	float runTime;
 };
 
