@@ -4,6 +4,12 @@
 #include "externels/imgui/imgui_impl_win32.h"
 #include "CollisionManager.h"
 #include "Collision.h"
+#include "JsonLoader.h"
+#include <functional>
+#include "Logger.h"
+#include "GameTime.h"
+
+using namespace Logger;
 
 void TestScene::Initialize() {
 
@@ -61,15 +67,8 @@ void TestScene::Initialize() {
 	gameOverSprite = std::make_unique<GameOver>();
 	gameOverSprite->Initialize();
 
-	//LevelData jsonData = JsonLoader::GetInstance()->LoadJsonTransform("Resources/Stage/Json", "Debug.json");
-
-	/*for (const auto& data : jsonData.datas)
-	{
-		if (data.second.file_name == "Trap")
-		{
-
-		}
-	}*/
+	trap = std::make_unique<Trap>();
+	trap->Initialize("Resources/Debug/json/trap.json");
 
 	Audio::GetInstance()->LoadMP3("Resources/sekiranun.mp3", "bgm", 1.0f);
 
@@ -83,7 +82,7 @@ void TestScene::Update() {
 		gameOverSprite->Update();
 	}
 
-	player->Update();
+	//player->Update();
 	grid->Update();
 
 	camera->Update();
@@ -111,6 +110,8 @@ void TestScene::Update() {
 	box1->Update();*/
 	box2->SetTransform(t);
 	box2->Update();
+
+	trap->Update();
 
 	bool flag = false;
 
@@ -143,8 +144,9 @@ void TestScene::Draw() {
 	Object3dBase::GetInstance()->ShaderDraw();
 
 	//box1->Draw();
-	box2->Draw();
-	plate->Draw();
+	//box2->Draw();
+	//plate->Draw();
+	trap->Draw();
 	//player->Draw();
 
 	SkinningObject3dBase::GetInstance()->ShaderDraw();

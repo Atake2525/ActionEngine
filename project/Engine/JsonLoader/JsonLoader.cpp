@@ -24,9 +24,15 @@ void JsonLoader::Initialize() {
 
 }
 
-const LevelData JsonLoader::LoadJsonTransform(const std::string& directoryPath, const std::string& fileName)
+void JsonLoader::LoadJsonTransform(const std::string& path, const std::string& jsonName, const bool overwrite)
 {
     LevelData lvData;
+
+    if (levelDatas.contains(jsonName) && !overwrite)
+    {
+        Log("指定したjsonNameは既に使用されています\n");
+        return;
+    }
 
     Transform tl = { {0.0f, 0.0f, 0.0f},{0.0f, 0.0f, 0.0f},{0.0f, 0.0f,0.0f} };
     JsonData data;
@@ -38,7 +44,7 @@ const LevelData JsonLoader::LoadJsonTransform(const std::string& directoryPath, 
     lvData.name = "null";
 
     // 連結してファイルパスを得る
-    const std::string fullpath = directoryPath + "/" + fileName;
+    const std::string fullpath = path;
 
     // ファイルストリーム
     std::ifstream file;
@@ -49,7 +55,7 @@ const LevelData JsonLoader::LoadJsonTransform(const std::string& directoryPath, 
     if (file.fail())
     {
         Log("ファイルの展開に失敗しました\nファイルパスが正しい確認してください\n");
-        return lvData;
+        return;
     }
 
     // JSON文字列から解凍したデータ
@@ -62,17 +68,17 @@ const LevelData JsonLoader::LoadJsonTransform(const std::string& directoryPath, 
     if (!deserialized.is_object())
     {
         Log("正しいレベルデータファイルではありません\nBlockPoint is_object\n");
-        return lvData;
+        return;
     }
     if (!deserialized.contains("name"))
     {
         Log("正しいレベルデータファイルではありません\nBlockPoint contains\n");
-        return lvData;
+        return;
     }
     if (!deserialized["name"].is_string())
     {
         Log("正しいレベルデータファイルではありません\nBlockPoint is_string\n");
-        return lvData;
+        return;
     }
 
     // "name"を文字列として取得
@@ -81,7 +87,7 @@ const LevelData JsonLoader::LoadJsonTransform(const std::string& directoryPath, 
     if (name.compare("scene") != 0)
     {
         Log("正しいレベルデータファイルではありません\nBlockPoint compare\n");
-        return lvData;
+        return;
     }
 
     // レベルデータ格納用インスタンスを生成
@@ -92,7 +98,7 @@ const LevelData JsonLoader::LoadJsonTransform(const std::string& directoryPath, 
     if (levelData.name != "scene")
     {
         Log("シーンではない");
-        return lvData;
+        return;
     }
 
     // "object"の全オブジェクトを走査
@@ -101,7 +107,7 @@ const LevelData JsonLoader::LoadJsonTransform(const std::string& directoryPath, 
         if (!object.contains("type"))
         {
             Log("objectにtypeが存在しません\n");
-            return lvData;
+            return;
         }
 
         // 種別をMESHかCAMERAのみ通るようにする
@@ -120,6 +126,11 @@ const LevelData JsonLoader::LoadJsonTransform(const std::string& directoryPath, 
             //        }
             //    }
             //}
+            if (!object.contains("file_name"))
+            {
+                Log("objectにfile_nameが存在しません\n");
+                return;
+            }
             // 1個分の要素の準備
             JsonData& jsonData = levelData.datas[object["file_name"].get<std::string>()];
 
@@ -150,7 +161,53 @@ const LevelData JsonLoader::LoadJsonTransform(const std::string& directoryPath, 
             jsonData.transform.scale.x = (float)transform["scaling"][0];
             jsonData.transform.scale.y = (float)transform["scaling"][1];
             jsonData.transform.scale.z = (float)transform["scaling"][2];
+            
+            nlohmann::json trap = object["trap"];
 
+            nlohmann::json& translate = trap["velocity_translation"];
+            nlohmann::json& rotate = trap["velocity_rotation"];
+            nlohmann::json& scale = trap["velocity_scale"];
+            nlohmann::json& runtime = trap["runtime"];
+            if (trap["move"].get<std::string>() == "true")
+            {
+                jsonData.trap.move = true;
+
+                jsonData.trap.velocity.translate.x = (float)translate[0];
+                jsonData.trap.velocity.translate.y = (float)translate[1];
+                jsonData.trap.velocity.translate.z = (float)translate[2];
+
+                jsonData.trap.velocity.rotate.x = SwapRadian((float)rotate[0]);
+                jsonData.trap.velocity.rotate.y = SwapRadian((float)rotate[1]);
+                jsonData.trap.velocity.rotate.z = SwapRadian((float)rotate[2]);
+
+                jsonData.trap.velocity.scale.x = (float)scale[0];
+                jsonData.trap.velocity.scale.y = (float)scale[1];
+                jsonData.trap.velocity.scale.z = (float)scale[2];
+
+                jsonData.trap.runTime = (float)runtime;
+
+                if (trap["loop"].get<std::string>() == "true")
+                {
+                    jsonData.trap.loop = true;
+                } 
+                else 
+                { 
+                    jsonData.trap.loop = false; 
+                }
+                if (trap["reverse"].get<std::string>() == "true")
+                {
+                    jsonData.trap.reverse = true;
+                }
+                else
+                {
+                    jsonData.trap.reverse = false;
+                }
+
+            }
+            else
+            {
+                jsonData.trap.move = false;
+            }
             // "file_name"
             if (object.contains("file_name"))
             {
@@ -191,7 +248,34 @@ const LevelData JsonLoader::LoadJsonTransform(const std::string& directoryPath, 
                 }
             }
         }
-
     }
-    return levelData;
+    if (overwrite)
+    {
+        levelDatas[jsonName].datas.clear();
+        levelDatas[jsonName].name = "NULL";
+    }
+    levelDatas[jsonName] = levelData;
+}
+
+void JsonLoader::SerchTransformFunctional(const std::string& jsonName, const std::string file_name, std::function<void(Transform transform)> function)
+{
+    for (auto data : levelDatas[jsonName].datas)
+    {
+        if (data.second.file_name == file_name)
+        {
+            function(data.second.transform);
+        }
+    }
+}
+
+const std::vector<JsonData> JsonLoader::GetJsonData(const std::string& jsonName, const std::string file_name) {
+    std::vector<JsonData> result;
+    for (auto data : levelDatas[jsonName].datas)
+    {
+        if (data.second.file_name.find(file_name) == !std::string::npos)
+        {
+            result.push_back(data.second);
+        }
+    }
+    return result;
 }

@@ -47,6 +47,7 @@ public:
 
 private:
 	bool finished = false;
+
 	std::unique_ptr<Camera> camera;
 	Input* input = nullptr;
 

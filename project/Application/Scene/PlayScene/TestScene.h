@@ -19,6 +19,7 @@
 #include "Player.h"
 #include "JsonLoader.h"
 #include "GameOver.h"
+#include "Trap.h"
 
 #pragma once
 
@@ -48,7 +49,9 @@ public:
 	const bool& EndRequest() override { return finished; }
 
 private:
+
 	bool finished = false;
+
 	std::unique_ptr<Camera> camera;
 	Input* input = nullptr;
 
@@ -64,5 +67,6 @@ private:
 
 	Object3d* grid = nullptr;
 
+	std::unique_ptr<Trap> trap;
 };
 

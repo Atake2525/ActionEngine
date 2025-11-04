@@ -49,7 +49,7 @@ void GameScene::Initialize() {
 	CollisionManager::GetInstance()->AddCollision(land.get(), "land");
 	CollisionManager::GetInstance()->AddCollision(floor.get(), "floor");
 
-	LevelData levelData = JsonLoader::GetInstance()->LoadJsonTransform("Resources/Debug/json", "PlayerStartPoint.json");
+	//LevelData levelData = JsonLoader::GetInstance()->LoadJsonTransform("Resources/Debug/json", "PlayerStartPoint.json");
 
 	goal_ = make_unique<Goal>();
 	goal_->Initalize();
