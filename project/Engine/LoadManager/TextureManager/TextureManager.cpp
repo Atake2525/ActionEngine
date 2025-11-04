@@ -72,7 +72,7 @@ void TextureManager::LoadTexture(const std::string& filePath) {
 	std::wstring filePathW = ConvertString(filePath);
 	HRESULT hr;
 	// .ddsかそうでないかを判定する
-	if (filePathW.ends_with(L".dds")) // .ddsで終わって居tらddsとみなす。より安全な方法はいくらでもあるので余裕があれば対応させる
+	if (filePathW.ends_with(L".dds")) // .ddsで終わって居たらddsとみなす。より安全な方法はいくらでもあるので余裕があれば対応させる
 	{
 		hr = DirectX::LoadFromDDSFile(filePathW.c_str(), DirectX::DDS_FLAGS_NONE, nullptr, image);
 	}
@@ -450,3 +450,4 @@ const DirectX::TexMetadata& TextureManager::GetMetaData(const std::string& fileP
 	TextureData& textureData = textureDatas[path];
 	return textureData.metadata;
 }
+

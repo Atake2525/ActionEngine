@@ -169,6 +169,8 @@ void MyGame::Draw() {
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), DirectXBase::GetInstance()->GetCommandList().Get());
 
 	DirectXBase::GetInstance()->PostDraw();
+
+	SceneManager::GetInstance()->CallStart();
 }
 
 void MyGame::Finalize() {

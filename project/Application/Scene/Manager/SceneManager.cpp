@@ -24,6 +24,7 @@ SceneManager* SceneManager::GetInstance() {
 
 void SceneManager::SetNextScene(const std::string& sceneName)
 {
+    drawStart = false;
     nextScene_ = SceneFactory::GetInstance()->ChangeScene(sceneName);
 }
 
@@ -58,5 +59,14 @@ void SceneManager::Draw() {
     if (scene_)
     {
         scene_->Draw();
+    }
+}
+
+void SceneManager::CallStart()
+{
+    if (scene_ && !drawStart)
+    {
+        drawStart = true;
+        GameTime::GetInstance()->SetDeltaPoint();
     }
 }

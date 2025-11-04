@@ -24,6 +24,8 @@ public:
 private:
     bool endRequest = false;
 
+    bool drawStart = false;
+
     // シーンマネージャ
     SceneManager* sceneManager_ = nullptr;
 };

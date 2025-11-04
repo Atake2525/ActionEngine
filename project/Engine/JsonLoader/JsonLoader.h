@@ -6,6 +6,7 @@
 #include <fstream>
 #include <Windows.h>
 #include <map>
+#include <memory>
 
 struct Children
 {
@@ -18,12 +19,25 @@ struct Children
 	std::string	file_name;
 };
 
+struct TrapData
+{
+	bool move;
+
+	Transform velocity;
+
+	bool loop;
+	bool reverse;
+
+	float runTime;
+};
+
 struct JsonData
 {
 	std::string type;
 	std::string name;
 
 	Transform transform;
+	TrapData trap;
 
 	std::string	file_name;
 
@@ -77,7 +91,21 @@ public:
 	/// </summary>
 	void Initialize();
 
-	const LevelData LoadJsonTransform(const std::string& directoryPath, const std::string& fileName);
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="path">Jsonのパス</param>
+	/// <param name="jsonName">保存するJson名</param>
+	/// <param name="Overwrite">上書きするか</param>
+	void LoadJsonTransform(const std::string& path, const std::string& jsonName, const bool Overwrite = false);
+
+	void SerchTransformFunctional(const std::string& jsonName, const std::string file_name, std::function<void(Transform transform)> function);
+
+	const std::vector<JsonData> GetJsonData(const std::string& jsonName, const std::string file_name);
+
+private:
+
+	std::map<std::string, LevelData> levelDatas;
 
 };
 
