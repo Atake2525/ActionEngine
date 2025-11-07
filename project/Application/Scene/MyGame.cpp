@@ -51,6 +51,8 @@ void MyGame::Initialize() {
 
 	//// ↓---- シーンの初期化 ----↓ ////
 
+	StageCount::GetInstance()->Initialize();
+
 	SceneManager::GetInstance();
 	
 	SceneManager::GetInstance()->SetNextScene("TEST");
