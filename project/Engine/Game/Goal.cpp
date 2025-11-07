@@ -2,39 +2,47 @@
 #include "ImGuiManager.h"
 #include "SceneManager.h"
 #include "FadeManager.h"
+#include "Logger.h"
+#include "StageCount.h"
+
+using namespace Logger;
+using namespace std;
 
 
-Goal::~Goal()
-{
-	delete clearBackScreenSprite_;
-	delete clearTextSprite_;
+Goal::~Goal() {
+
 }
 
 void Goal::Initalize() {
-	clearBackScreenSprite_ = new Sprite();
-	clearBackScreenSprite_->Initialize("Resources/Sprite/UI/stageClearBackScreen.png");
-
-	clearTextSprite_ = new Sprite();
-	clearTextSprite_->Initialize("Resources/Sprite/UI/stageClearText.png");
-
 	input = Input::GetInstance();
+	int stageCount = StageCount::GetInstance()->GetStageCount();
+	string str = "Resources/Json/Stage/map" + to_string(stageCount) + ".json";
+
+	
+	JsonLoader::GetInstance()->LoadJson(str, "map" + to_string(stageCount), false);
+	jsonDatas = JsonLoader::GetInstance()->GetJsonData("map" + to_string(stageCount), "goal");
+
+	for (int i = 0; i < jsonDatas.size(); i++)
+	{
+		unique_ptr<Object3d> goal;
+		goal = make_unique<Object3d>();
+		goal->Initialize();
+		goal->SetModel("Resources/Debug/obj", "box.obj");
+		goal->SetTransform(jsonDatas[i].transform);
+		goalObjects.push_back(goal);
+	}
 }
 
 void Goal::Update() {
-	clearBackScreenSprite_->Update();
-	clearTextSprite_->Update();
-
-	if (input->TriggerKey(DIK_SPACE) || input->TriggerKey(DIK_RETURN) || input->TriggerMouse(0))
+	for (int i = 0; i < jsonDatas.size(); i++)
 	{
-		SceneManager::GetInstance()->SetNextScene("TITLE");
-		//FadeManager::GetInstance()->FadeOut(1.0f);
+		goalObjects[i]->Update();
 	}
-
 }
 
 void Goal::Draw() {
-
-	clearBackScreenSprite_->Draw();
-	clearTextSprite_->Draw();
-
+	for (int i = 0; i < jsonDatas.size(); i++)
+	{
+		goalObjects[i]->Draw();
+	}
 }

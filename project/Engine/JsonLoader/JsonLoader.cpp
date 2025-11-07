@@ -24,7 +24,7 @@ void JsonLoader::Initialize() {
 
 }
 
-void JsonLoader::LoadJsonTransform(const std::string& path, const std::string& jsonName, const bool overwrite)
+void JsonLoader::LoadJson(const std::string& path, const std::string& jsonName, const bool overwrite)
 {
     LevelData lvData;
 
@@ -238,7 +238,7 @@ void JsonLoader::LoadJsonTransform(const std::string& path, const std::string& j
                     data.transform = transformchild;
                     if (children["file_name"] == NULL)
                     {
-                        Log("file_nameがNULLです\nfile_nameに記入されていない可能性があります");
+                        Log("file_nameがNULLです\nfile_nameが記入されているか確認してください");
                         continue;
                     }
                     data.file_name = children["file_name"].get<std::string>();
