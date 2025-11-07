@@ -21,6 +21,7 @@
 #include "CollisionManager.h"
 #include "FadeManager.h"
 #include "GameTime.h"
+#include "StageCount.h"
 
 #include "algorithm"
 #include "externels/imgui/imgui.h"
