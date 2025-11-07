@@ -10,6 +10,7 @@
 #include "GameTime.h"
 
 using namespace Logger;
+using namespace std;
 
 void TestScene::Initialize() {
 
@@ -69,6 +70,9 @@ void TestScene::Initialize() {
 
 	trap = std::make_unique<Trap>();
 	trap->Initialize("Resources/Debug/json/trap.json");
+
+	goal = make_unique<Goal>();
+	goal->Initalize();
 
 	Audio::GetInstance()->LoadMP3("Resources/sekiranun.mp3", "bgm", 1.0f);
 

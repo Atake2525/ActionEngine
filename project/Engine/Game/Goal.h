@@ -3,6 +3,9 @@
 #include "Sprite.h"
 #include "UI.h"
 #include "Input.h"
+#include "JsonLoader.h"
+#include "Object3d.h"
+#include <memory>
 
 class Goal
 {
@@ -17,13 +20,12 @@ public:
 	void Draw();
 
 private:
-	Sprite* clearBackScreenSprite_ = nullptr;
-
-	Sprite* clearTextSprite_ = nullptr;
-
-	UI* titleUI_ = nullptr;
 
 	Input* input = nullptr;
+
+	std::vector<JsonData> jsonDatas;
+
+	std::vector<std::unique_ptr<Object3d>> goalObjects;
 
 };
 

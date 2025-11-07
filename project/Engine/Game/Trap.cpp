@@ -8,7 +8,7 @@ using namespace std;
 
 void Trap::Initialize(std::string path) {
 
-	JsonLoader::GetInstance()->LoadJsonTransform(path, "Trap", true);
+	JsonLoader::GetInstance()->LoadJson(path, "Trap", true);
 	jsonPath = path;
 	gameTimer_ = 0.0f;
 	traps.clear();
