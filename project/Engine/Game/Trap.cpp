@@ -2,17 +2,18 @@
 #include "Logger.h"
 #include "GameTime.h"
 #include "ImGuiManager.h"
+#include "StageCount.h"
 
 using namespace Logger;
 using namespace std;
 
-void Trap::Initialize(std::string path) {
+void Trap::Initialize() {
 
-	JsonLoader::GetInstance()->LoadJson(path, "Trap", true);
-	jsonPath = path;
 	gameTimer_ = 0.0f;
 	traps.clear();
-	vector<JsonData> json = JsonLoader::GetInstance()->GetJsonData("Trap", "trap");
+
+	string str = "map" + to_string(StageCount::GetInstance()->GetStageCount());
+	vector<JsonData> json = JsonLoader::GetInstance()->GetJsonData(str, "trap");
 	Log("指定したデータが" + std::to_string(json.size()) + "個見つかりました\n");
 	for (auto data : json) {
 		Traps trap;
@@ -46,8 +47,6 @@ void Trap::Update() {
 			traps[i].object->SetTransform(traps[i].start);
 			traps[i].startFrame = gameTimer_;
 		}
-		gameTimer_ = 0.0f;
-		GameTime::GetInstance()->SetDeltaPoint();
 		Log("更新初期処理終了 : " + std::to_string(gameTimer_) + "\n");
 		start = true;
 	}
@@ -56,7 +55,7 @@ void Trap::Update() {
 	ImGui::TextColored({ 1.0f, 1.0f, 1.0f, 1.0f }, "経過時間 %.1f", gameTimer_);
 	if (ImGui::Button("Json再読み込み"))
 	{
-		Initialize(jsonPath);
+		Initialize();
 	}
 	ImGui::End();
 #endif

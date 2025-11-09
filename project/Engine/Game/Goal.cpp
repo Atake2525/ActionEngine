@@ -16,10 +16,6 @@ Goal::~Goal() {
 void Goal::Initalize() {
 	input = Input::GetInstance();
 	int stageCount = StageCount::GetInstance()->GetStageCount();
-	string str = "Resources/Json/Stage/map" + to_string(stageCount) + ".json";
-
-	
-	JsonLoader::GetInstance()->LoadJson(str, "map" + to_string(stageCount), false);
 	jsonDatas = JsonLoader::GetInstance()->GetJsonData("map" + to_string(stageCount), "goal");
 
 	for (int i = 0; i < jsonDatas.size(); i++)
@@ -29,7 +25,7 @@ void Goal::Initalize() {
 		goal->Initialize();
 		goal->SetModel("Resources/Debug/obj", "box.obj");
 		goal->SetTransform(jsonDatas[i].transform);
-		goalObjects.push_back(goal);
+		goalObjects.push_back(move(goal));
 	}
 }
 

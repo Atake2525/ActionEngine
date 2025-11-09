@@ -24,12 +24,11 @@ struct Traps
 class Trap
 {
 public:
-    void Initialize(std::string path);
+    void Initialize();
     void Update();
     void Draw();
 
 private:
-    std::string jsonPath;
 
     std::vector<Traps> traps;
 

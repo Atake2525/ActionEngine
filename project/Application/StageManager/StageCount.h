@@ -16,11 +16,11 @@ private:
 public:
 	static StageCount* GetInstance();
 
-	// I—¹ˆ—
+	// çµ‚äº†å‡¦ç†
 	void Finalize();
 
 	/// <summary>
-	/// ‰Šú‰»
+	/// åˆæœŸåŒ–
 	/// </summary>
 	void Initialize();
 
