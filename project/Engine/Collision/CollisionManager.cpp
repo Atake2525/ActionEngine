@@ -117,26 +117,26 @@ const float CollisionManager::GetGroundDistance(const std::string& targetName) c
 		float serchDistance = Distance(object.second->GetAABB().max, target->second.min);
 		//if (serchDistance <= distance)
 		//{
-			const std::vector<AABB> terrains = object.second->GetAABBMultiMeshed();
-			for (AABB terrainAABB : terrains) 
+		const std::vector<AABB> terrains = object.second->GetAABBMultiMeshed();
+		for (AABB terrainAABB : terrains)
+		{
+			terrainAABB = AddSize(terrainAABB, 0.1f);
+			AABB target = collisionTarget.at(targetName);
+			Vector3 centerTarget = CenterAABB(target);
+			target.min = { centerTarget.x - 0.5f, target.min.y, centerTarget.z - 0.5f };
+			target.max = { centerTarget.x + 0.5f, target.max.y, centerTarget.z + 0.5f };
+
+			// ターゲットとオブジェクトが貫通していたら実行
+			if (CollisionAABBXZ(target, terrainAABB))
 			{
-				terrainAABB = AddSize(terrainAABB, 0.1f);
-				AABB target = collisionTarget.at(targetName);
-				Vector3 centerTarget = CenterAABB(target);
-				target.min = { centerTarget.x - 0.5f, target.min.y, centerTarget.z - 0.5f };
-				target.max = { centerTarget.x + 0.5f, target.max.y, centerTarget.z + 0.5f };
-
-				// ターゲットとオブジェクトが貫通していたら実行
-				if (CollisionAABBXZ(target, terrainAABB))
+				float dist = target.min.y - terrainAABB.max.y;
+				distance = std::min(distance, dist);
+				/*if (distance >= 0.0f)
 				{
-					float dist = target.min.y - terrainAABB.max.y;
-					distance = std::min(distance, dist);
-					/*if (distance >= 0.0f)
-					{
 
-					}*/
-				}
+				}*/
 			}
+		}
 		//}
 	}
 	return distance;
@@ -158,31 +158,31 @@ const float CollisionManager::GetGroundMAXDistance(const std::string& targetName
 	for (const auto& object : collisionObject) {
 		// オブジェクトのメッシュごとのAABBを取得する
 		float serchDistance = Distance(object.second->GetAABB().max, target->second.min);
-		if (serchDistance <= distance)
+		//if (serchDistance <= distance)
+		//{
+		const std::vector<AABB> terrains = object.second->GetAABBMultiMeshed();
+		for (AABB terrainAABB : terrains)
 		{
-			const std::vector<AABB> terrains = object.second->GetAABBMultiMeshed();
-			for (AABB terrainAABB : terrains)
-			{
-				terrainAABB = AddSize(terrainAABB, 0.1f);
-				AABB target = collisionTarget.at(targetName);
-				Vector3 centerTarget = CenterAABB(target);
-				target.min = { centerTarget.x - 0.5f, target.min.y, centerTarget.z - 0.5f };
-				target.max = { centerTarget.x + 0.5f, target.max.y, centerTarget.z + 0.5f };
+			terrainAABB = AddSize(terrainAABB, 0.1f);
+			AABB target = collisionTarget.at(targetName);
+			Vector3 centerTarget = CenterAABB(target);
+			target.min = { centerTarget.x - 0.5f, target.min.y, centerTarget.z - 0.5f };
+			target.max = { centerTarget.x + 0.5f, target.max.y, centerTarget.z + 0.5f };
 
-				// ターゲットとオブジェクトが貫通していたら実行
-				if (CollisionAABBXZ(target, terrainAABB))
+			// ターゲットとオブジェクトが貫通していたら実行
+			if (CollisionAABBXZ(target, terrainAABB))
+			{
+				float dist = target.min.y - terrainAABB.max.y;
+				distance = std::min(distance, dist);
+				maxDistance = max(distance, maxDistance);
+				if (distance == 0.0f)
 				{
-					float dist = target.min.y - terrainAABB.max.y;
-					distance = std::min(distance, dist);
-					maxDistance = max(distance, maxDistance);
-					if (distance == 0.0f)
-					{
-						maxDistance = 0.0f;
-						break;
-					}
+					maxDistance = 0.0f;
+					break;
 				}
 			}
 		}
+		//}
 	}
 	return maxDistance;
 }
