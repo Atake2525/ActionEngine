@@ -76,6 +76,7 @@ void Trap::Update() {
 			else
 			{
 				traps[i].trapData.velocity *= -1.0f;
+				traps[i].start = traps[i].object->GetTransform();
 				traps[i].reverse = !traps[i].reverse;
 			}
 			traps[i].startFrame = gameTimer_;
@@ -83,9 +84,16 @@ void Trap::Update() {
 
 		}
 		Transform newTransform = traps[i].object->GetTransform();
-		newTransform.scale += traps[i].trapData.velocity.scale;
+
+		float time = (gameTimer_ - traps[i].startFrame) / traps[i].trapData.runTime;
+		time = std::clamp(time, 0.0f, 1.0f);
+		newTransform.scale = Lerp(traps[i].start.scale, traps[i].start.scale + traps[i].trapData.velocity.scale, time);
+		newTransform.rotate = Lerp(traps[i].start.rotate, traps[i].start.rotate + traps[i].trapData.velocity.rotate, time);
+		newTransform.translate = Lerp(traps[i].start.translate, traps[i].start.translate + traps[i].trapData.velocity.translate, time);
+
+		/*newTransform.scale += traps[i].trapData.velocity.scale;
 		newTransform.rotate += traps[i].trapData.velocity.rotate;
-		newTransform.translate += traps[i].trapData.velocity.translate;
+		newTransform.translate += traps[i].trapData.velocity.translate;*/
 		traps[i].object->SetTransform(newTransform);
 		traps[i].object->Update();
 	}

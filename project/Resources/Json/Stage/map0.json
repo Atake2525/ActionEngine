@@ -6,57 +6,14 @@
             "name": "立方体.012",
             "transform": {
                 "translation": [
-                    10.0,
-                    20.0,
+                    -10.0,
+                    -3.0,
                     1.0
                 ],
                 "rotation": [
                     0.0,
                     -0.0,
-                    0.0
-                ],
-                "scaling": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "file_name": "trap01",
-            "trap": {
-                "move": "true",
-                "velocity_translation": [
-                    -0.10000000149011612,
-                    0.0,
-                    0.0
-                ],
-                "velocity_rotation": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "velocity_scale": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "loop": "true",
-                "reverse": "true",
-                "runtime": 5.0
-            }
-        },
-        {
-            "type": "MESH",
-            "name": "立方体.014",
-            "transform": {
-                "translation": [
-                    20.0,
-                    12.0,
-                    11.0
-                ],
-                "rotation": [
-                    0.0,
-                    -0.0,
-                    0.0
+                    -179.99998474121094
                 ],
                 "scaling": [
                     1.0,
@@ -67,19 +24,49 @@
             "file_name": "goal",
             "trap": {
                 "move": "false"
+            }
+        },
+        {
+            "type": "MESH",
+            "name": "立方体.013",
+            "transform": {
+                "translation": [
+                    12.5,
+                    16.0,
+                    1.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    -179.99998474121094
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
             },
-            "collider": {
-                "type": "BOX",
-                "center": [
+            "file_name": "trap",
+            "trap": {
+                "move": "true",
+                "velocity_translation": [
+                    -24.0,
+                    0.0,
+                    0.0
+                ],
+                "velocity_rotation": [
+                    90.0,
+                    0.0,
+                    0.0
+                ],
+                "velocity_scale": [
                     0.0,
                     0.0,
                     0.0
                 ],
-                "size": [
-                    2.0,
-                    2.0,
-                    2.0
-                ]
+                "loop": "true",
+                "reverse": "true",
+                "runtime": 6.0
             }
         }
     ]
