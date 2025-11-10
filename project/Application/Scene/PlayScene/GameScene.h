@@ -18,6 +18,7 @@
 #include "CollisionManager.h"
 #include "Goal.h"
 #include <memory>
+#include "Trap.h"
 #include "GameOver.h"
 
 #pragma once
@@ -75,8 +76,6 @@ private:
 
 	std::unique_ptr<Player> player_ = nullptr;
 
-	bool isGoal_ = false;
-
 	bool start_ = false;
 
 	bool startMovie_ = false;
@@ -86,7 +85,8 @@ private:
 
 	bool back = false;
 
-	std::unique_ptr<Goal> goal_ = nullptr;
+	std::unique_ptr<Trap> trap_;
+	std::unique_ptr<Goal> goal_;
 
 	std::unique_ptr<GameOver> gameOver_ = nullptr;
 };

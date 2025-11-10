@@ -6,6 +6,7 @@
 #include "JsonLoader.h"
 #include "Object3d.h"
 #include <memory>
+#include "AABB.h"
 
 class Goal
 {
@@ -15,9 +16,11 @@ public:
 
 	void Initalize();
 
-	void Update();
+	void Update(AABB aabb);
 
 	void Draw();
+
+	const bool& IsGoal() const { return isGoal_; }
 
 private:
 
@@ -26,6 +29,8 @@ private:
 	std::vector<JsonData> jsonDatas;
 
 	std::vector<std::unique_ptr<Object3d>> goalObjects;
+
+	bool isGoal_ = false;
 
 };
 

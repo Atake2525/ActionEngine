@@ -128,17 +128,6 @@ const bool Player::IsGameOver() const
 	return false;
 }
 
-const bool Player::IsClear() const
-{
-	float playerDist = Distance(playerTransform_.translate, { 0.0f, playerTransform_.translate.y, 0.0f });
-
-	if (playerDist > clearDistance_)
-	{
-		return true;
-	}
-	return false;
-}
-
 void Player::Rotation() {
 	Vector3 mouseVelocity = input->GetMouseVel3();
 

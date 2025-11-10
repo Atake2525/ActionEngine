@@ -32,13 +32,9 @@ public:
 
     const bool IsGameOver() const;
 
-    void SetClearDistance(const float clearDistance) { clearDistance_ = clearDistance; }
-
     const AABB& GetAABB() const { return playerAABB_; }
 
     const OBB& GetOBB() const { return playerOBB_; }
-
-    const bool IsClear() const;
 
 private: // メンバ変数宣言
 
@@ -110,10 +106,6 @@ private: // ステータス(カメラ系)宣言
 	float wallDashRotateStart_ = 0.0f; // 壁走り中のカメラの傾きのイージング用前の傾き
     float wallDashRotateEnd_ = 0.0f; // 壁走り中のカメラの傾きのイージング用前の傾き
 	bool isWallDashRotating_ = false;
-
-private: // 中心からクリアまでの距離
-
-    float clearDistance_ = 1000.0f;
 
 private: // ステータス関係の関数宣言
 

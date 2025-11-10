@@ -4,6 +4,7 @@
 #include "FadeManager.h"
 #include "Logger.h"
 #include "StageCount.h"
+#include "Collision.h"
 
 using namespace Logger;
 using namespace std;
@@ -14,6 +15,8 @@ Goal::~Goal() {
 }
 
 void Goal::Initalize() {
+
+	isGoal_ = false;
 	input = Input::GetInstance();
 	int stageCount = StageCount::GetInstance()->GetStageCount();
 	jsonDatas = JsonLoader::GetInstance()->GetJsonData("map" + to_string(stageCount), "goal");
@@ -29,10 +32,14 @@ void Goal::Initalize() {
 	}
 }
 
-void Goal::Update() {
+void Goal::Update(AABB aabb) {
 	for (int i = 0; i < jsonDatas.size(); i++)
 	{
 		goalObjects[i]->Update();
+		if (CollisionAABB(goalObjects[i]->GetAABB(), aabb))
+		{
+			isGoal_ = true;
+		}
 	}
 }
 

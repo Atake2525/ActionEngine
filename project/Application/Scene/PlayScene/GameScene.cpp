@@ -34,7 +34,6 @@ void GameScene::Initialize() {
 	};
 	player_ = make_unique<Player>();
 	player_->Initialize(camera.get(), input, pl, false);
-	player_->SetClearDistance(50.0f);
 	player_->Freeze(true);
 
 	land = make_unique<Object3d>();
@@ -54,6 +53,8 @@ void GameScene::Initialize() {
 	goal_ = make_unique<Goal>();
 	goal_->Initalize();
 
+	trap_ = make_unique<Trap>();
+	trap_->Initialize();
 
 	GameTime::GetInstance()->SetDeltaPoint();
 	FadeManager::GetInstance()->FadeIn(1.0f);
@@ -179,19 +180,7 @@ void GameScene::Update() {
 		}
 	}
 
-	if (isGoal_)
-	{
-		goal_->Update();
-	}
-	else
-	{
-		if (player_->IsClear())
-		{
-			player_->Freeze(true);
-			isGoal_ = true;
-			Audio::GetInstance()->Stop("bgm");
-		}
-	}
+	goal_->Update(player_->GetAABB());
 
 	if (input->TriggerKey(DIK_RETURN))
 	{
@@ -212,6 +201,7 @@ void GameScene::Draw() {
 
 		land->Draw();
 		floor->Draw();
+		goal_->Draw();
 
 		SkinningObject3dBase::GetInstance()->ShaderDraw();
 
@@ -219,10 +209,6 @@ void GameScene::Draw() {
 
 		SpriteBase::GetInstance()->ShaderDraw();
 
-		if (isGoal_)
-		{
-			goal_->Draw();
-		}
 		gameOver_->Draw();
 }
 
