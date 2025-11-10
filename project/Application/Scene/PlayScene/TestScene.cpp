@@ -121,7 +121,7 @@ void TestScene::Update() {
 	box2->Update();
 
 	trap->Update();
-	goal->Update();
+	goal->Update(player->GetAABB());
 
 	bool flag = false;
 
