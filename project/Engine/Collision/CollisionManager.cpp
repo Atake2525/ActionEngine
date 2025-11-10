@@ -118,7 +118,7 @@ const float CollisionManager::GetGroundDistance(const std::string& targetName) c
 		//if (serchDistance <= distance)
 		//{
 			const std::vector<AABB> terrains = object.second->GetAABBMultiMeshed();
-			for (AABB terrainAABB : terrains)
+			for (AABB terrainAABB : terrains) 
 			{
 				terrainAABB = AddSize(terrainAABB, 0.1f);
 				AABB target = collisionTarget.at(targetName);
