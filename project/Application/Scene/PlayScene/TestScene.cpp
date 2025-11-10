@@ -62,13 +62,13 @@ void TestScene::Initialize() {
 	CollisionManager::GetInstance()->AddCollision(plate.get(), "plate");
 	//CollisionManager::GetInstance()->AddCollision(box2.get(), "box");
 
+
+	Transform startTransform;
+	auto data = JsonLoader::GetInstance()->GetJsonData("map" + to_string(stageCount), "stagestartpos");
+	startTransform = data[0].transform;
+	startTransform.scale = { 1.0f, 1.0f, 1.0f };
 	player = std::make_unique<Player>();
-	Transform t = {
-		{1.0f, 1.0f, 1.0f},
-		{0.0f, 0.0f, 0.0f},
-		{0.0f, 1.0f, 0.0f},
-	};
-	player->Initialize(camera.get(), input, t, true);
+	player->Initialize(camera.get(), input, startTransform, true);
 
 	gameOverSprite = std::make_unique<GameOver>();
 	gameOverSprite->Initialize();

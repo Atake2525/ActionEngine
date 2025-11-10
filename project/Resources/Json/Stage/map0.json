@@ -55,7 +55,7 @@
                     0.0
                 ],
                 "velocity_rotation": [
-                    90.0,
+                    0.0,
                     0.0,
                     0.0
                 ],
@@ -67,6 +67,31 @@
                 "loop": "true",
                 "reverse": "true",
                 "runtime": 6.0
+            }
+        },
+        {
+            "type": "MESH",
+            "name": "立方体",
+            "transform": {
+                "translation": [
+                    0.0,
+                    0.0,
+                    1.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "stagestartpos",
+            "trap": {
+                "move": "false"
             }
         }
     ]

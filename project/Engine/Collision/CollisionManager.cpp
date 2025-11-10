@@ -115,8 +115,8 @@ const float CollisionManager::GetGroundDistance(const std::string& targetName) c
 	for (const auto& object : collisionObject) {
 		// オブジェクトのメッシュごとのAABBを取得する
 		float serchDistance = Distance(object.second->GetAABB().max, target->second.min);
-		if (serchDistance <= distance)
-		{
+		//if (serchDistance <= distance)
+		//{
 			const std::vector<AABB> terrains = object.second->GetAABBMultiMeshed();
 			for (AABB terrainAABB : terrains)
 			{
@@ -137,7 +137,7 @@ const float CollisionManager::GetGroundDistance(const std::string& targetName) c
 					}*/
 				}
 			}
-		}
+		//}
 	}
 	return distance;
 }

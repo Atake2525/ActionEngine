@@ -5,10 +5,15 @@
 #include "GameTime.h"
 #include "JsonLoader.h"
 #include "GameOver.h"
+#include "StageCount.h"
 
 using namespace std;
 
 void GameScene::Initialize() {
+	
+	int stageCount = StageCount::GetInstance()->GetStageCount();
+	string str = "Resources/Json/Stage/map" + to_string(stageCount) + ".json";
+	JsonLoader::GetInstance()->LoadJson(str, "map" + to_string(stageCount), false);
 
 	TextureManager::GetInstance()->LoadTexture("Resources/rostock_laage_airport_4k.dds");
 
@@ -27,13 +32,12 @@ void GameScene::Initialize() {
 	
 	Object3dBase::GetInstance()->SetDefaultCamera(camera.get());
 
-	Transform pl = {
-		{1.0f, 1.0f, 1.0f},
-		{0.0f, 0.0f, 0.0f},
-		{0.0f, 0.1f, 0.0f}
-	};
+	Transform startTransform;
+	auto data = JsonLoader::GetInstance()->GetJsonData("map" + to_string(stageCount), "stagestartpos");
+	startTransform = data[0].transform;
+	startTransform.scale = { 1.0f, 1.0f, 1.0f };
 	player_ = make_unique<Player>();
-	player_->Initialize(camera.get(), input, pl, false);
+	player_->Initialize(camera.get(), input, startTransform, true);
 	player_->Freeze(true);
 
 	land = make_unique<Object3d>();
