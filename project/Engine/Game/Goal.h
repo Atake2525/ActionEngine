@@ -3,6 +3,10 @@
 #include "Sprite.h"
 #include "UI.h"
 #include "Input.h"
+#include "JsonLoader.h"
+#include "Object3d.h"
+#include <memory>
+#include "AABB.h"
 
 class Goal
 {
@@ -12,18 +16,21 @@ public:
 
 	void Initalize();
 
-	void Update();
+	void Update(AABB aabb);
 
 	void Draw();
 
+	const bool& IsGoal() const { return isGoal_; }
+
 private:
-	Sprite* clearBackScreenSprite_ = nullptr;
-
-	Sprite* clearTextSprite_ = nullptr;
-
-	UI* titleUI_ = nullptr;
 
 	Input* input = nullptr;
+
+	std::vector<JsonData> jsonDatas;
+
+	std::vector<std::unique_ptr<Object3d>> goalObjects;
+
+	bool isGoal_ = false;
 
 };
 

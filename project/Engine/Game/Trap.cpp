@@ -2,25 +2,39 @@
 #include "Logger.h"
 #include "GameTime.h"
 #include "ImGuiManager.h"
+#include "StageCount.h"
+#include "CollisionManager.h"
 
 using namespace Logger;
 using namespace std;
 
-void Trap::Initialize(std::string path) {
+Trap::Trap() {
 
-	JsonLoader::GetInstance()->LoadJsonTransform(path, "Trap", true);
-	jsonPath = path;
+}
+
+Trap::~Trap() {
+	for (int i = 0; i < traps.size(); i++)
+	{
+		CollisionManager::GetInstance()->DeleteCollision("trap" + to_string(i));
+	}
+}
+
+void Trap::Initialize() {
+
 	gameTimer_ = 0.0f;
 	traps.clear();
-	vector<JsonData> json = JsonLoader::GetInstance()->GetJsonData("Trap", "trap");
+
+	string str = "map" + to_string(StageCount::GetInstance()->GetStageCount());
+	vector<JsonData> json = JsonLoader::GetInstance()->GetJsonData(str, "trap");
 	Log("指定したデータが" + std::to_string(json.size()) + "個見つかりました\n");
+	int num = 0;
 	for (auto data : json) {
 		Traps trap;
 		trap.type = TrapType::Spike;
 		trap.object = make_unique<Object3d>();
 		trap.object->Initialize();
 		trap.object->SetTransform(data.transform);
-		trap.object->SetModel("Resources/Debug/obj", "box.obj", true);
+		trap.object->SetModel("Resources/Model/obj", "trap.obj", true);
 		trap.start = data.transform;
 		trap.trapData = data.trap;
 		trap.startFrame = gameTimer_;
@@ -32,7 +46,10 @@ void Trap::Initialize(std::string path) {
 		{
 			trap.reverse = false;
 		}
+		trap.object->Update();
 		traps.push_back(std::move(trap));
+		CollisionManager::GetInstance()->AddCollision(traps[num].object.get(), "trap" + to_string(num));
+		num++;
 	}
 }
 
@@ -46,8 +63,6 @@ void Trap::Update() {
 			traps[i].object->SetTransform(traps[i].start);
 			traps[i].startFrame = gameTimer_;
 		}
-		gameTimer_ = 0.0f;
-		GameTime::GetInstance()->SetDeltaPoint();
 		Log("更新初期処理終了 : " + std::to_string(gameTimer_) + "\n");
 		start = true;
 	}
@@ -56,7 +71,7 @@ void Trap::Update() {
 	ImGui::TextColored({ 1.0f, 1.0f, 1.0f, 1.0f }, "経過時間 %.1f", gameTimer_);
 	if (ImGui::Button("Json再読み込み"))
 	{
-		Initialize(jsonPath);
+		Initialize();
 	}
 	ImGui::End();
 #endif
@@ -77,6 +92,7 @@ void Trap::Update() {
 			else
 			{
 				traps[i].trapData.velocity *= -1.0f;
+				traps[i].start = traps[i].object->GetTransform();
 				traps[i].reverse = !traps[i].reverse;
 			}
 			traps[i].startFrame = gameTimer_;
@@ -84,9 +100,16 @@ void Trap::Update() {
 
 		}
 		Transform newTransform = traps[i].object->GetTransform();
-		newTransform.scale += traps[i].trapData.velocity.scale;
+
+		float time = (gameTimer_ - traps[i].startFrame) / traps[i].trapData.runTime;
+		time = std::clamp(time, 0.0f, 1.0f);
+		newTransform.scale = Lerp(traps[i].start.scale, traps[i].start.scale + traps[i].trapData.velocity.scale, time);
+		newTransform.rotate = Lerp(traps[i].start.rotate, traps[i].start.rotate + traps[i].trapData.velocity.rotate, time);
+		newTransform.translate = Lerp(traps[i].start.translate, traps[i].start.translate + traps[i].trapData.velocity.translate, time);
+
+		/*newTransform.scale += traps[i].trapData.velocity.scale;
 		newTransform.rotate += traps[i].trapData.velocity.rotate;
-		newTransform.translate += traps[i].trapData.velocity.translate;
+		newTransform.translate += traps[i].trapData.velocity.translate;*/
 		traps[i].object->SetTransform(newTransform);
 		traps[i].object->Update();
 	}
@@ -97,5 +120,13 @@ void Trap::Draw() {
 	for (int i = 0; i < traps.size(); i++)
 	{
 		traps[i].object->Draw();
+	}
+}
+
+void Trap::SetDrawHeight(const float height)
+{
+	for (int i = 0; i < traps.size(); i++)
+	{
+		traps[i].object->SetDrawHeiht(height);
 	}
 }

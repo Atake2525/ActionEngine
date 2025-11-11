@@ -166,6 +166,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Core\Timer\GameTime.cpp" />
     <ClCompile Include="Application\Scene\PlayScene\GameOver.cpp" />
     <ClCompile Include="Application\StageManager\StageCount.cpp" />
+    <ClCompile Include="Application\Scene\PlayScene\GameClearScene.cpp" />
     <ClCompile Include="Stage.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -244,6 +245,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Core\Timer\GameTime.h" />
     <ClInclude Include="Application\Scene\PlayScene\GameOver.h" />
     <ClInclude Include="Application\StageManager\StageCount.h" />
+    <ClInclude Include="Application\Scene\PlayScene\GameClearScene.h" />
     <ClInclude Include="Stage.h" />
   </ItemGroup>
   <ItemGroup>

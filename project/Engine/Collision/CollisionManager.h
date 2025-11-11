@@ -93,4 +93,5 @@ private:
 
 	// 貫通量を示す変数
 	Vector3 penetration_;
+	Vector3 penetrationPre_;
 };
