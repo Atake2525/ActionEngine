@@ -63,12 +63,8 @@ void TestScene::Initialize() {
 	//CollisionManager::GetInstance()->AddCollision(box2.get(), "box");
 
 
-	Transform startTransform;
-	auto data = JsonLoader::GetInstance()->GetJsonData("map" + to_string(stageCount), "stagestartpos");
-	startTransform = data[0].transform;
-	startTransform.scale = { 1.0f, 1.0f, 1.0f };
 	player = std::make_unique<Player>();
-	player->Initialize(camera.get(), input, startTransform, true);
+	player->Initialize(camera.get(), input, true);
 
 	gameOverSprite = std::make_unique<GameOver>();
 	gameOverSprite->Initialize();

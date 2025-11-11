@@ -6,13 +6,17 @@
 #include "EasingUtility.h"
 #include "GameTime.h"
 #include "Light.h"
+#include "JsonLoader.h"
+#include "StageCount.h"
+
+using namespace std;
 
 Player::~Player()
 {
 	CollisionManager::GetInstance()->DeleteCollisionTarget("player");
 }
 
-void Player::Initialize(Camera* camera, Input* input, const Transform startPoint, const bool DebugMode)
+void Player::Initialize(Camera* camera, Input* input, const bool DebugMode)
 {
 	debugMode_ = DebugMode;
 	this->camera = camera;
@@ -23,6 +27,17 @@ void Player::Initialize(Camera* camera, Input* input, const Transform startPoint
 	if (!DebugMode)
 	{
 		this->input->ShowMouseCursor(false);
+	}
+
+	vector<JsonData> data = JsonLoader::GetInstance()->GetJsonData("map" + to_string(StageCount::GetInstance()->GetStageCount()), "startpoint");
+	Transform startPoint = {
+		{1.0f, 1.0f, 1.0f},
+		{0.0f, 0.0f, 0.0f},
+		{0.0f, 0.1f, 0.0f}
+	};
+	if (data.size() != 0)
+	{
+		startPoint = data[0].transform;
 	}
 	playerTransform_ = startPoint;
 

@@ -31,6 +31,8 @@ public:
     void Update();
     void Draw();
 
+    void SetDrawHeight(const float height);
+
 private:
 
     std::vector<Traps> traps;
