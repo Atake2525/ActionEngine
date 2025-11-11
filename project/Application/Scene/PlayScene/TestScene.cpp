@@ -91,7 +91,6 @@ void TestScene::Update() {
 		gameOverSprite->Update();
 	}
 
-	player->Update();
 	grid->Update();
 
 	camera->Update();
@@ -121,7 +120,10 @@ void TestScene::Update() {
 	box2->Update();
 
 	trap->Update();
+	player->Update();
+
 	goal->Update(player->GetAABB());
+
 
 	bool flag = false;
 

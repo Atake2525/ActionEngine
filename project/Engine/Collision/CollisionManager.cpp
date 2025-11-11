@@ -25,6 +25,7 @@ void CollisionManager::Initialize() {
 
 void CollisionManager::Update(const std::string& targetName) {
 
+	penetrationPre_ = penetration_;
 	penetration_ = { 0.0f, 0.0f, 0.0f };
 	for (const auto& object : collisionObject) {
 		// ターゲット(プレイヤーなど)とオブジェクトの距離を全体のAABBから求めて離れていればcontinue
@@ -81,6 +82,14 @@ void CollisionManager::Update(const std::string& targetName) {
 					{
 						penetration.y *= -1.0f;
 					}
+
+					// 既に累積された押し出し量と逆向きの成分は無視する（隣接オブジェクト同士で打ち消し合うのを防ぐ）
+					if (penetration_.x <= -penetrationPre_.x && penetration_.x != 0.0f) {
+						penetration.x = 0.0f; }
+					if (penetration_.y <= -penetrationPre_.y && penetration_.y != 0.0f) { 
+						penetration.y = 0.0f; }
+					if (penetration_.z <= -penetrationPre_.z && penetration_.z != 0.0f) {
+						penetration.z = 0.0f; }
 
 					// 押し出しの量を格納する
 					penetration_ += penetration;
@@ -246,6 +255,11 @@ const Vector3 CollisionManager::CheckPenetrationAmount(const AABB& aabb)
 						penetration.y *= -1.0f;
 					}
 
+					// 既に累積された押し出し量と逆向きの成分は無視する（隣接オブジェクト同士で打ち消し合うのを防ぐ）
+					if (result.x != 0.0f && penetration.x * result.x < 0.0f) { penetration.x = 0.0f; }
+					if (result.y != 0.0f && penetration.y * result.y < 0.0f) { penetration.y = 0.0f; }
+					if (result.z != 0.0f && penetration.z * result.z < 0.0f) { penetration.z = 0.0f; }
+
 					// 押し出しの量を格納する
 					result += penetration;
 				}
@@ -301,7 +315,7 @@ void CollisionManager::DeleteCollision(const std::string key)
 {
 	if (!collisionObject.contains(key))
 	{
-		Log("指定されたキーは現在登録されていません\n実行 : DeleteCollision コード : CollisionManager.cpp\n");
+		Log("指定されたキーは現在登録されていません\n実行 : DeleteCollision コード : CollisionManager.cpp\n		");
 	}
 	collisionObject.erase(key);
 }

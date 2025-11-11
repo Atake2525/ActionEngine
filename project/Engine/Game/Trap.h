@@ -24,6 +24,9 @@ struct Traps
 class Trap
 {
 public:
+    Trap();
+    ~Trap();
+
     void Initialize();
     void Update();
     void Draw();

@@ -3,9 +3,21 @@
 #include "GameTime.h"
 #include "ImGuiManager.h"
 #include "StageCount.h"
+#include "CollisionManager.h"
 
 using namespace Logger;
 using namespace std;
+
+Trap::Trap() {
+
+}
+
+Trap::~Trap() {
+	for (int i = 0; i < traps.size(); i++)
+	{
+		CollisionManager::GetInstance()->DeleteCollision("trap" + to_string(i));
+	}
+}
 
 void Trap::Initialize() {
 
@@ -15,6 +27,7 @@ void Trap::Initialize() {
 	string str = "map" + to_string(StageCount::GetInstance()->GetStageCount());
 	vector<JsonData> json = JsonLoader::GetInstance()->GetJsonData(str, "trap");
 	Log("指定したデータが" + std::to_string(json.size()) + "個見つかりました\n");
+	int num = 0;
 	for (auto data : json) {
 		Traps trap;
 		trap.type = TrapType::Spike;
@@ -33,7 +46,10 @@ void Trap::Initialize() {
 		{
 			trap.reverse = false;
 		}
+		trap.object->Update();
 		traps.push_back(std::move(trap));
+		CollisionManager::GetInstance()->AddCollision(traps[num].object.get(), "trap" + to_string(num));
+		num++;
 	}
 }
 
