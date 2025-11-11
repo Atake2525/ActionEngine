@@ -20,6 +20,7 @@
 #include <memory>
 #include "Trap.h"
 #include "GameOver.h"
+#include "GameClearScene.h"
 
 #pragma once
 
@@ -89,5 +90,6 @@ private:
 	std::unique_ptr<Goal> goal_;
 
 	std::unique_ptr<GameOver> gameOver_ = nullptr;
+	std::unique_ptr<GameClearScene> gameClear_ = nullptr;
 };
 

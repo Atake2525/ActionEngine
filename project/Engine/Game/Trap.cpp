@@ -34,7 +34,7 @@ void Trap::Initialize() {
 		trap.object = make_unique<Object3d>();
 		trap.object->Initialize();
 		trap.object->SetTransform(data.transform);
-		trap.object->SetModel("Resources/Debug/obj", "box.obj", true);
+		trap.object->SetModel("Resources/Model/obj", "trap.obj", true);
 		trap.start = data.transform;
 		trap.trapData = data.trap;
 		trap.startFrame = gameTimer_;
@@ -120,5 +120,13 @@ void Trap::Draw() {
 	for (int i = 0; i < traps.size(); i++)
 	{
 		traps[i].object->Draw();
+	}
+}
+
+void Trap::SetDrawHeight(const float height)
+{
+	for (int i = 0; i < traps.size(); i++)
+	{
+		traps[i].object->SetDrawHeiht(height);
 	}
 }

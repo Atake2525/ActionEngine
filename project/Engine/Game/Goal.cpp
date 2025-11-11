@@ -26,8 +26,9 @@ void Goal::Initalize() {
 		unique_ptr<Object3d> goal;
 		goal = make_unique<Object3d>();
 		goal->Initialize();
-		goal->SetModel("Resources/Debug/obj", "box.obj");
+		goal->SetModel("Resources/Model/obj", "goal.obj");
 		goal->SetTransform(jsonDatas[i].transform);
+		goal->SetColor({ 0.0f, 1.0f, 0.2f, 0.4f });
 		goalObjects.push_back(move(goal));
 	}
 }

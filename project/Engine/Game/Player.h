@@ -22,7 +22,7 @@ public:
 
     ~Player();
 
-    void Initialize(Camera* camera, Input* input, const Transform startPoint, const bool DebugMode = false);
+    void Initialize(Camera* camera, Input* input, const bool DebugMode = false);
 
     void Update();
 
