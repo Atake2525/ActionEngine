@@ -66,7 +66,7 @@ void Trap::Update() {
 		Log("更新初期処理終了 : " + std::to_string(gameTimer_) + "\n");
 		start = true;
 	}
-#ifndef _NDEBUG
+#ifndef NDEBUG
 	ImGui::Begin("Trap");
 	ImGui::TextColored({ 1.0f, 1.0f, 1.0f, 1.0f }, "経過時間 %.1f", gameTimer_);
 	if (ImGui::Button("Json再読み込み"))
