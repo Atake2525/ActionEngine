@@ -5,10 +5,15 @@
 #include "GameTime.h"
 #include "JsonLoader.h"
 #include "GameOver.h"
+#include "StageCount.h"
 
 using namespace std;
 
 void GameScene::Initialize() {
+	
+	int stageCount = StageCount::GetInstance()->GetStageCount();
+	string str = "Resources/Json/Stage/map" + to_string(stageCount) + ".json";
+	JsonLoader::GetInstance()->LoadJson(str, "map" + to_string(stageCount), false);
 
 	TextureManager::GetInstance()->LoadTexture("Resources/rostock_laage_airport_4k.dds");
 
@@ -23,18 +28,14 @@ void GameScene::Initialize() {
 
 	gameOver_ = make_unique<GameOver>();
 	gameOver_->Initialize();
+	gameClear_ = make_unique<GameClearScene>();
+	gameClear_->Initialize();
 
 	
 	Object3dBase::GetInstance()->SetDefaultCamera(camera.get());
 
-	Transform pl = {
-		{1.0f, 1.0f, 1.0f},
-		{0.0f, 0.0f, 0.0f},
-		{0.0f, 0.1f, 0.0f}
-	};
 	player_ = make_unique<Player>();
-	player_->Initialize(camera.get(), input, pl, false);
-	player_->SetClearDistance(50.0f);
+	player_->Initialize(camera.get(), input, false);
 	player_->Freeze(true);
 
 	land = make_unique<Object3d>();
@@ -54,6 +55,9 @@ void GameScene::Initialize() {
 	goal_ = make_unique<Goal>();
 	goal_->Initalize();
 
+	trap_ = make_unique<Trap>();
+	trap_->Initialize();
+	trap_->SetDrawHeight(0.0f);
 
 	GameTime::GetInstance()->SetDeltaPoint();
 	FadeManager::GetInstance()->FadeIn(1.0f);
@@ -79,13 +83,13 @@ void GameScene::Update() {
 		input->UpdateDevice();
 	}
 	ImGui::DragFloat("カメラ速度", &speed, 0.01f);
-	
+
 	float drawHeight = land->GetCullingTemplateData().drawHeight;
 
 	ImGui::DragFloat("カリング高さ", &drawHeight, 0.1f);
 
 	land->SetDrawHeiht(drawHeight);
-	
+
 	ImGui::Checkbox("マウスカーソル表示", &cursorshow);
 	if (ImGui::Button("タイトルへ"))
 	{
@@ -103,6 +107,7 @@ void GameScene::Update() {
 	input->Update();
 
 	player_->Update();
+	trap_->Update();
 
 	if (input->TriggerKey(DIK_ESCAPE))
 	{
@@ -154,6 +159,7 @@ void GameScene::Update() {
 		case 1:
 			height = Lerp(-1.0f, 35.0f, movieTimer_ / movieTime_);
 			land->SetDrawHeiht(height);
+			trap_->SetDrawHeight(height);
 			break;
 		}
 
@@ -179,27 +185,17 @@ void GameScene::Update() {
 		}
 	}
 
-	if (isGoal_)
-	{
-		goal_->Update();
-	}
-	else
-	{
-		if (player_->IsClear())
-		{
-			player_->Freeze(true);
-			isGoal_ = true;
-			Audio::GetInstance()->Stop("bgm");
-		}
-	}
+	goal_->Update(player_->GetAABB());
 
-	if (input->TriggerKey(DIK_RETURN))
+	if (player_->IsGameOver())
 	{
-		back = true;
-	}
-	if (back)
-	{
+		player_->Freeze(true);
 		gameOver_->Update();
+	}
+	if (goal_->IsGoal())
+	{
+		player_->Freeze(true);
+		gameClear_->Update();
 	}
 }
 
@@ -212,6 +208,8 @@ void GameScene::Draw() {
 
 		land->Draw();
 		floor->Draw();
+		goal_->Draw();
+		trap_->Draw();
 
 		SkinningObject3dBase::GetInstance()->ShaderDraw();
 
@@ -219,11 +217,8 @@ void GameScene::Draw() {
 
 		SpriteBase::GetInstance()->ShaderDraw();
 
-		if (isGoal_)
-		{
-			goal_->Draw();
-		}
 		gameOver_->Draw();
+		gameClear_->Draw();
 }
 
 void GameScene::Finalize() {

@@ -97,7 +97,7 @@ public:
 	/// <param name="path">Jsonのパス</param>
 	/// <param name="jsonName">保存するJson名</param>
 	/// <param name="Overwrite">上書きするか</param>
-	void LoadJsonTransform(const std::string& path, const std::string& jsonName, const bool Overwrite = false);
+	void LoadJson(const std::string& path, const std::string& jsonName, const bool Overwrite = false);
 
 	void SerchTransformFunctional(const std::string& jsonName, const std::string file_name, std::function<void(Transform transform)> function);
 

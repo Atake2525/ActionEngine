@@ -8,12 +8,18 @@
 #include <functional>
 #include "Logger.h"
 #include "GameTime.h"
+#include "StageCount.h"
 
 using namespace Logger;
+using namespace std;
 
 void TestScene::Initialize() {
 
 	//ModelManager::GetInstance()->LoadModel("Resources/Model/gltf/human", "walkMultiMaterial.gltf", true, true);
+
+	int stageCount = StageCount::GetInstance()->GetStageCount();
+	string str = "Resources/Json/Stage/map" + to_string(stageCount) + ".json";
+	JsonLoader::GetInstance()->LoadJson(str, "map" + to_string(stageCount), false);
 
 	camera = std::make_unique<Camera>();
 	camera->SetRotate(Vector3(SwapRadian(0.0f), 0.0f, 0.0f));
@@ -54,21 +60,20 @@ void TestScene::Initialize() {
 	//plate->SetEnableMetallic(true);
 
 	CollisionManager::GetInstance()->AddCollision(plate.get(), "plate");
-	CollisionManager::GetInstance()->AddCollision(box2.get(), "box");
+	//CollisionManager::GetInstance()->AddCollision(box2.get(), "box");
+
 
 	player = std::make_unique<Player>();
-	Transform t = {
-		{1.0f, 1.0f, 1.0f},
-		{0.0f, 0.0f, 0.0f},
-		{0.0f, 1.0f, 0.0f},
-	};
-	player->Initialize(camera.get(), input, t, true);
+	player->Initialize(camera.get(), input, true);
 
 	gameOverSprite = std::make_unique<GameOver>();
 	gameOverSprite->Initialize();
 
 	trap = std::make_unique<Trap>();
-	trap->Initialize("Resources/Debug/json/trap.json");
+	trap->Initialize();
+
+	goal = make_unique<Goal>();
+	goal->Initalize();
 
 	Audio::GetInstance()->LoadMP3("Resources/sekiranun.mp3", "bgm", 1.0f);
 
@@ -82,7 +87,6 @@ void TestScene::Update() {
 		gameOverSprite->Update();
 	}
 
-	//player->Update();
 	grid->Update();
 
 	camera->Update();
@@ -112,6 +116,10 @@ void TestScene::Update() {
 	box2->Update();
 
 	trap->Update();
+	player->Update();
+
+	goal->Update(player->GetAABB());
+
 
 	bool flag = false;
 
@@ -145,8 +153,9 @@ void TestScene::Draw() {
 
 	//box1->Draw();
 	//box2->Draw();
-	//plate->Draw();
+	plate->Draw();
 	trap->Draw();
+	goal->Draw();
 	//player->Draw();
 
 	SkinningObject3dBase::GetInstance()->ShaderDraw();

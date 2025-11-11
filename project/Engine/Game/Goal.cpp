@@ -2,39 +2,51 @@
 #include "ImGuiManager.h"
 #include "SceneManager.h"
 #include "FadeManager.h"
+#include "Logger.h"
+#include "StageCount.h"
+#include "Collision.h"
+
+using namespace Logger;
+using namespace std;
 
 
-Goal::~Goal()
-{
-	delete clearBackScreenSprite_;
-	delete clearTextSprite_;
+Goal::~Goal() {
+
 }
 
 void Goal::Initalize() {
-	clearBackScreenSprite_ = new Sprite();
-	clearBackScreenSprite_->Initialize("Resources/Sprite/UI/stageClearBackScreen.png");
 
-	clearTextSprite_ = new Sprite();
-	clearTextSprite_->Initialize("Resources/Sprite/UI/stageClearText.png");
-
+	isGoal_ = false;
 	input = Input::GetInstance();
+	int stageCount = StageCount::GetInstance()->GetStageCount();
+	jsonDatas = JsonLoader::GetInstance()->GetJsonData("map" + to_string(stageCount), "goal");
+
+	for (int i = 0; i < jsonDatas.size(); i++)
+	{
+		unique_ptr<Object3d> goal;
+		goal = make_unique<Object3d>();
+		goal->Initialize();
+		goal->SetModel("Resources/Model/obj", "goal.obj");
+		goal->SetTransform(jsonDatas[i].transform);
+		goal->SetColor({ 0.0f, 1.0f, 0.2f, 0.4f });
+		goalObjects.push_back(move(goal));
+	}
 }
 
-void Goal::Update() {
-	clearBackScreenSprite_->Update();
-	clearTextSprite_->Update();
-
-	if (input->TriggerKey(DIK_SPACE) || input->TriggerKey(DIK_RETURN) || input->TriggerMouse(0))
+void Goal::Update(AABB aabb) {
+	for (int i = 0; i < jsonDatas.size(); i++)
 	{
-		SceneManager::GetInstance()->SetNextScene("TITLE");
-		//FadeManager::GetInstance()->FadeOut(1.0f);
+		goalObjects[i]->Update();
+		if (CollisionAABB(goalObjects[i]->GetAABB(), aabb))
+		{
+			isGoal_ = true;
+		}
 	}
-
 }
 
 void Goal::Draw() {
-
-	clearBackScreenSprite_->Draw();
-	clearTextSprite_->Draw();
-
+	for (int i = 0; i < jsonDatas.size(); i++)
+	{
+		goalObjects[i]->Draw();
+	}
 }
