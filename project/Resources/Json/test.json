@@ -21,7 +21,6 @@
                     1.0
                 ]
             },
-            "file_name": "trap",
             "trap": {
                 "move": "true",
                 "velocity_translation": [
@@ -42,7 +41,11 @@
                 "loop": "true",
                 "reverse": "true",
                 "runtime": 0.4790419340133667,
-                "enable_spawner": "false"
+                "spawner": "random",
+                "random_spawn_time": [
+                    1.9909908771514893,
+                    2.607142925262451
+                ]
             }
         }
     ]
