@@ -27,7 +27,7 @@ public:
     Trap();
     ~Trap();
 
-    void Initialize();
+    void Initialize(std::string jsonName = "normal");
     void Update();
     void Draw();
 
@@ -40,6 +40,7 @@ private:
     float gameTimer_ = 0.0f;
 
     bool start = false;
+
 
 };
 

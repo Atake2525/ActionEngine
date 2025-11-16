@@ -19,13 +19,21 @@ Trap::~Trap() {
 	}
 }
 
-void Trap::Initialize() {
+void Trap::Initialize(std::string jsonName) {
 
 	gameTimer_ = 0.0f;
 	traps.clear();
-
-	string str = "map" + to_string(StageCount::GetInstance()->GetStageCount());
-	vector<JsonData> json = JsonLoader::GetInstance()->GetJsonData(str, "trap");
+	string str;
+	vector<JsonData> json;
+	if (jsonName == "normal")
+	{
+		str = "map" + to_string(StageCount::GetInstance()->GetStageCount());
+		json = JsonLoader::GetInstance()->GetJsonData(str, "trap");
+	}
+	else
+	{
+		json = JsonLoader::GetInstance()->GetJsonData(jsonName, "trap");
+	}
 	Log("指定したデータが" + std::to_string(json.size()) + "個見つかりました\n");
 	int num = 0;
 	for (auto data : json) {
@@ -77,25 +85,33 @@ void Trap::Update() {
 #endif
 	for (int i = 0; i < traps.size(); i++)
 	{
-		if (gameTimer_ > traps[i].startFrame + traps[i].trapData.runTime && traps[i].trapData.runTime > 0.0f)
+		if (gameTimer_ > traps[i].startFrame + traps[i].trapData.runTime && traps[i].trapData.runTime > 0.0f && traps[i].trapData.move)
 		{
-			if (!traps[i].trapData.loop && traps[i].reverse)
+			switch (traps[i].trapData.spawner)
 			{
-				traps.erase(traps.cbegin() + i);
-				continue;
+			case true:
+
+				break;
+			case false:
+				if (!traps[i].trapData.loop && traps[i].reverse)
+				{
+					traps.erase(traps.cbegin() + i);
+					continue;
+				}
+				if (!traps[i].trapData.reverse)
+				{
+					traps[i].object->SetTransform(traps[i].start);
+					traps[i].reverse = true;
+				}
+				else
+				{
+					traps[i].trapData.velocity *= -1.0f;
+					traps[i].start = traps[i].object->GetTransform();
+					traps[i].reverse = !traps[i].reverse;
+				}
+				traps[i].startFrame = gameTimer_;
+				break;
 			}
-			if (!traps[i].trapData.reverse)
-			{
-				traps[i].object->SetTransform(traps[i].start);
-				traps[i].reverse = true;
-			}
-			else
-			{
-				traps[i].trapData.velocity *= -1.0f;
-				traps[i].start = traps[i].object->GetTransform();
-				traps[i].reverse = !traps[i].reverse;
-			}
-			traps[i].startFrame = gameTimer_;
 
 
 		}

@@ -16,7 +16,7 @@
                     0.0
                 ],
                 "scaling": [
-                    1.0,
+                    4.989999771118164,
                     1.0,
                     1.0
                 ]
@@ -25,7 +25,7 @@
             "trap": {
                 "move": "true",
                 "velocity_translation": [
-                    0.25,
+                    0.0,
                     0.0,
                     0.0
                 ],
@@ -39,9 +39,9 @@
                     0.0,
                     0.0
                 ],
-                "loop": "true",
-                "reverse": "true",
-                "runtime": 0.4790419340133667,
+                "loop": "false",
+                "reverse": "false",
+                "runtime": 0.0,
                 "enable_spawner": "false"
             }
         }
