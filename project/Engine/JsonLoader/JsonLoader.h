@@ -32,7 +32,8 @@ struct TrapData
 	float runTime;
 
 	bool spawner;
-	Vector2 spawnTime;
+	float spawnTime;
+	Vector2 spawnerTime;
 };
 
 struct JsonData

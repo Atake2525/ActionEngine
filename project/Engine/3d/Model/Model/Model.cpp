@@ -1,4 +1,3 @@
-#define NOMINMAX
 #include "Model.h"
 #include "ModelBase.h"
 #include "DirectXBase.h"

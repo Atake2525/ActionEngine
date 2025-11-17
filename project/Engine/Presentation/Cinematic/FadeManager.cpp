@@ -1,4 +1,3 @@
-#define NOMINMAX
 
 #include "FadeManager.h"
 #include "kMath.h"

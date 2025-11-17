@@ -205,15 +205,16 @@ void JsonLoader::LoadJson(const std::string& path, const std::string& jsonName, 
 
                 if (trap["enable_spawner"].get<std::string>() == "true")
                 {
+                    jsonData.trap.spawner = true;
                     nlohmann::json spawner = trap["spawner"];
                     nlohmann::json& spawnTime = spawner["spawn_time"];
                     if (spawner["type"].get<std::string>() == "constant")
                     {
-                        jsonData.trap.spawnTime = { (float)spawnTime, -1.0f };
+                        jsonData.trap.spawnerTime = { (float)spawnTime, -1.0f };
                     }
                     else if (spawner["type"].get<std::string>() == "random")
                     {
-                        jsonData.trap.spawnTime = { (float)spawnTime[0], (float)spawnTime[1] };
+                        jsonData.trap.spawnerTime = { (float)spawnTime[0], (float)spawnTime[1] };
                     }
                 }
 

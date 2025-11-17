@@ -8,7 +8,7 @@
                 "translation": [
                     0.0,
                     0.0,
-                    0.0
+                    1.0
                 ],
                 "rotation": [
                     0.0,
@@ -21,12 +21,13 @@
                     1.0
                 ]
             },
+            "file_name": "trap",
             "trap": {
                 "move": "true",
                 "velocity_translation": [
-                    0.25,
                     0.0,
-                    0.0
+                    0.0,
+                    4.0
                 ],
                 "velocity_rotation": [
                     0.0,
@@ -38,14 +39,14 @@
                     0.0,
                     0.0
                 ],
-                "loop": "true",
+                "loop": "false",
                 "reverse": "true",
-                "runtime": 0.4790419340133667,
-                "spawner": "random",
-                "random_spawn_time": [
-                    1.9909908771514893,
-                    2.607142925262451
-                ]
+                "runtime": 2.0,
+                "enable_spawner": "true",
+                "spawner": {
+                    "type": "constant",
+                    "spawn_time": 2.0
+                }
             }
         }
     ]

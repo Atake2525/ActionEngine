@@ -1,4 +1,3 @@
-#define NOMINMAX
 #include "Object3d.h"
 #include "Object3dBase.h"
 #include "DirectXBase.h"

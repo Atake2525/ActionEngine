@@ -3,9 +3,9 @@
 #include "kMath.h"
 #include "Logger.h"
 
-#define NOMINMAX
 
 using namespace Logger;
+using namespace std;
 
 CollisionManager* CollisionManager::instance = nullptr;
 

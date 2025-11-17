@@ -69,8 +69,10 @@ void TestScene::Initialize() {
 	gameOverSprite = std::make_unique<GameOver>();
 	gameOverSprite->Initialize();
 
+	JsonLoader::GetInstance()->LoadJson("Resources/Json/test.json", "test", false);
+
 	trap = std::make_unique<Trap>();
-	trap->Initialize();
+	trap->Initialize("test");
 
 	goal = make_unique<Goal>();
 	goal->Initalize();
