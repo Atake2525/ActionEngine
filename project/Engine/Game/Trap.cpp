@@ -28,6 +28,7 @@ void Trap::Initialize(std::string jsonName) {
 	traps.clear();
 	string str;
 	vector<JsonData> json;
+	jsonName_ = jsonName;
 	if (jsonName == "normal")
 	{
 		str = "map" + to_string(StageCount::GetInstance()->GetStageCount());
@@ -54,6 +55,10 @@ void Trap::Initialize(std::string jsonName) {
 		else
 		{
 			trap.reverse = false;
+		}
+		if (data.trap.reverse)
+		{
+			trap.trapData.runTime /= 2.0f;
 		}
 		if (data.trap.spawner)
 		{
@@ -99,7 +104,7 @@ void Trap::Update() {
 		{
 			CollisionManager::GetInstance()->DeleteCollision("trap" + to_string(traps[i].number));
 		}
-		Initialize();
+		Initialize(jsonName_);
 	}
 	ImGui::End();
 #endif

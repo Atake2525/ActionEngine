@@ -159,8 +159,8 @@ void JsonLoader::LoadJson(const std::string& path, const std::string& jsonName, 
             }
             // 拡大縮小 "scaling"
             jsonData.transform.scale.x = (float)transform["scaling"][0];
-            jsonData.transform.scale.y = (float)transform["scaling"][1];
-            jsonData.transform.scale.z = (float)transform["scaling"][2];
+            jsonData.transform.scale.y = (float)transform["scaling"][2];
+            jsonData.transform.scale.z = (float)transform["scaling"][1];
             
             nlohmann::json trap = object["trap"];
 

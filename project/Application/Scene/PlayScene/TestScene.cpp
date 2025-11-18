@@ -55,8 +55,8 @@ void TestScene::Initialize() {
 
 	plate = std::make_unique<Object3d>();
 	plate->Initialize();
-	//plate->SetModel("Resources/Debug/gltf", "Plante.gltf", true);
-	plate->SetModel("Resources/Model/obj/Stage/map01", "map01.obj", true);
+	plate->SetModel("Resources/Debug", "LandPlate.obj", true);
+	//plate->SetModel("Resources/Model/obj/Stage/map01", "map01.obj", true);
 	//plate->SetEnableMetallic(true);
 
 	CollisionManager::GetInstance()->AddCollision(plate.get(), "plate");
@@ -166,7 +166,7 @@ void TestScene::Draw() {
 
 	WireFrameObjectBase::GetInstance()->ShaderDraw();
 
-	grid->Draw();
+	//grid->Draw();
 
 	SpriteBase::GetInstance()->ShaderDraw();
 
