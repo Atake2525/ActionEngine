@@ -33,7 +33,7 @@ void Camera::Update() {
 	ImGui::DragFloat3("Position", &transform.translate.x, 0.1f);
 	ImGui::DragFloat3("Rotation", &rotate.x, 0.5f);
 	Vector3 angle = SwapDegree(rotateAngle);
-	ImGui::DragFloat3("AxisRotation", &angle.x, 0.1f);
+	ImGui::DragFloat3("AxisRotation", &angle.x, 1.0f);
 	rotateAngle = SwapRadian(angle);
 	ImGui::DragFloat3("Direction1", &direction.x);
 	ImGui::DragFloat3("Direction2", &dirc.x);

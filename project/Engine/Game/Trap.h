@@ -33,6 +33,8 @@ private:
 
     void MakeTrap(Traps& data);
 
+    std::string jsonName_;
+
     std::vector<Traps> traps;
 
     float gameTimer_ = 0.0f;
