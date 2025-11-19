@@ -7,8 +7,8 @@
             "transform": {
                 "translation": [
                     0.0,
-                    0.0,
-                    0.0
+                    8.0,
+                    1.0
                 ],
                 "rotation": [
                     0.0,
@@ -16,33 +16,39 @@
                     0.0
                 ],
                 "scaling": [
-                    4.989999771118164,
+                    1.0,
                     1.0,
                     1.0
                 ]
             },
-            "file_name": "trap",
+            "file_name": "goal",
             "trap": {
-                "move": "true",
-                "velocity_translation": [
+                "move": "false"
+            }
+        },
+        {
+            "type": "MESH",
+            "name": "立方体.001",
+            "transform": {
+                "translation": [
                     0.0,
                     0.0,
+                    1.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
                     0.0
                 ],
-                "velocity_rotation": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "velocity_scale": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "loop": "false",
-                "reverse": "false",
-                "runtime": 0.0,
-                "enable_spawner": "false"
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "startpoint",
+            "trap": {
+                "move": "false"
             }
         }
     ]

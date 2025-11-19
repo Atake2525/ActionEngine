@@ -90,7 +90,7 @@ void GameClearScene::Update() {
     }
     if (push && FadeManager::GetInstance()->CompleteFade())
     {
-        SceneManager::GetInstance()->SetNextScene("TITLE");
+        SceneManager::GetInstance()->SetNextScene("GAMESCENE");
     }
 
     frame->Update();

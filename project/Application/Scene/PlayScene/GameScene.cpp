@@ -35,7 +35,7 @@ void GameScene::Initialize() {
 	Object3dBase::GetInstance()->SetDefaultCamera(camera.get());
 
 	player_ = make_unique<Player>();
-	player_->Initialize(camera.get(), input, true);
+	player_->Initialize(camera.get(), input, false);
 	player_->Freeze(true);
 
 	land = make_unique<Object3d>();
@@ -106,7 +106,7 @@ void GameScene::Update() {
 
 	input->Update();
 
-	//player_->Update();
+	player_->Update();
 	trap_->Update();
 
 	if (input->TriggerKey(DIK_ESCAPE))
