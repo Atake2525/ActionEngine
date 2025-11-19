@@ -157,7 +157,7 @@ void TestScene::Draw() {
 	//box2->Draw();
 	plate->Draw();
 	trap->Draw();
-	goal->Draw();
+	//goal->Draw();
 	//player->Draw();
 
 	SkinningObject3dBase::GetInstance()->ShaderDraw();
