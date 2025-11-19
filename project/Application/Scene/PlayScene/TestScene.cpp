@@ -93,11 +93,6 @@ void TestScene::Update() {
 
 	camera->Update();
 
-	if (input->TriggerKey(DIK_RETURN))
-	{
-		SceneManager::GetInstance()->SetNextScene("GAMESCENE");
-	}
-
 	SkyBox::GetInstance()->Update();
 
 	Transform t = box2->GetTransform();
