@@ -6,27 +6,6 @@
     <ClCompile Include="Engine\Math\kMath.cpp">
       <Filter>Math</Filter>
     </ClCompile>
-    <ClCompile Include="externels\imgui\imgui.cpp">
-      <Filter>External\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="externels\imgui\imgui_demo.cpp">
-      <Filter>External\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="externels\imgui\imgui_draw.cpp">
-      <Filter>External\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="externels\imgui\imgui_impl_dx12.cpp">
-      <Filter>External\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="externels\imgui\imgui_impl_win32.cpp">
-      <Filter>External\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="externels\imgui\imgui_tables.cpp">
-      <Filter>External\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="externels\imgui\imgui_widgets.cpp">
-      <Filter>External\ImGui</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\BlackBox\ImGui\ImGuiManager.cpp">
       <Filter>External\ImGui</Filter>
     </ClCompile>
@@ -155,11 +134,16 @@
     <ClCompile Include="Application\StageManager\StageCount.cpp" />
     <ClCompile Include="Stage.cpp" />
     <ClCompile Include="Application\Scene\PlayScene\GameClearScene.cpp" />
+    <ClCompile Include="Application\ActionPlayer.cpp" />
+    <ClCompile Include="externels\imgui\imgui.cpp" />
+    <ClCompile Include="externels\imgui\imgui_demo.cpp" />
+    <ClCompile Include="externels\imgui\imgui_draw.cpp" />
+    <ClCompile Include="externels\imgui\imgui_tables.cpp" />
+    <ClCompile Include="externels\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="externels\imgui\imgui_impl_dx12.cpp" />
+    <ClCompile Include="externels\imgui\imgui_impl_win32.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="externels\imgui\imstb_rectpack.h" />
-    <ClInclude Include="externels\imgui\imstb_textedit.h" />
-    <ClInclude Include="externels\imgui\imstb_truetype.h" />
     <ClInclude Include="Engine\Math\EasingUtility.h" />
     <ClInclude Include="Engine\Math\AABB.h">
       <Filter>Math</Filter>
@@ -187,18 +171,6 @@
     </ClInclude>
     <ClInclude Include="Engine\Math\Vector4.h">
       <Filter>Math</Filter>
-    </ClInclude>
-    <ClInclude Include="externels\imgui\imgui.h">
-      <Filter>External\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="externels\imgui\imgui_impl_dx12.h">
-      <Filter>External\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="externels\imgui\imgui_impl_win32.h">
-      <Filter>External\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="externels\imgui\imgui_internal.h">
-      <Filter>External\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="Engine\BlackBox\ImGui\ImGuiManager.h">
       <Filter>External\ImGui</Filter>
@@ -314,9 +286,6 @@
     <ClInclude Include="Engine\Core\Timer\GameTime.h">
       <Filter>Engine</Filter>
     </ClInclude>
-    <ClInclude Include="externels\imgui\imconfig.h">
-      <Filter>External</Filter>
-    </ClInclude>
     <ClInclude Include="Application\Scene\MyGame.h">
       <Filter>Scene</Filter>
     </ClInclude>
@@ -349,6 +318,15 @@
     <ClInclude Include="Application\StageManager\StageCount.h" />
     <ClInclude Include="Stage.h" />
     <ClInclude Include="Application\Scene\PlayScene\GameClearScene.h" />
+    <ClInclude Include="Application\ActionPlayer.h" />
+    <ClInclude Include="externels\imgui\imconfig.h" />
+    <ClInclude Include="externels\imgui\imgui.h" />
+    <ClInclude Include="externels\imgui\imgui_internal.h" />
+    <ClInclude Include="externels\imgui\imstb_rectpack.h" />
+    <ClInclude Include="externels\imgui\imstb_textedit.h" />
+    <ClInclude Include="externels\imgui\imstb_truetype.h" />
+    <ClInclude Include="externels\imgui\imgui_impl_dx12.h" />
+    <ClInclude Include="externels\imgui\imgui_impl_win32.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\PostEffect\BoxFilter.PS.hlsl" />
@@ -400,10 +378,5 @@
     <Library Include="externels\assimp\lib\Release\assimp-vc143-mtd.lib">
       <Filter>External\Assimp</Filter>
     </Library>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="externels\imgui\LICENSE.txt">
-      <Filter>External</Filter>
-    </Text>
   </ItemGroup>
 </Project>

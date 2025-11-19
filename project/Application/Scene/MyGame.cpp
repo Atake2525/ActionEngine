@@ -67,6 +67,8 @@ void MyGame::Update() {
 
 	GameTime::GetInstance()->Update();
 
+	Input::GetInstance()->Update();
+
 	if (WinApp::GetInstance()->ProcessMessage()) {
 		finished = true;
 	}
