@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="Application\FrameWork\main.cpp" />
-    <ClCompile Include="Engine\Game\Goal.cpp" />
+    <ClCompile Include="Application\Goal.cpp" />
     <ClCompile Include="Engine\Math\kMath.cpp">
       <Filter>Math</Filter>
     </ClCompile>
@@ -111,7 +111,7 @@
     <ClCompile Include="Engine\LoadManager\TextureManager\TextureManager.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Game\Trap.cpp">
+    <ClCompile Include="Application\Trap.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
     <ClCompile Include="Engine\UI\UI.cpp">
@@ -135,7 +135,7 @@
     <ClCompile Include="Application\Scene\Manager\SceneManager.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Game\Player.cpp">
+    <ClCompile Include="Application\Player.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
     <ClCompile Include="Engine\2d\SpriteBase\SpriteBase.cpp">
@@ -263,7 +263,7 @@
     <ClInclude Include="Engine\3d\Model\ModelBase\ModelBase.h">
       <Filter>Engine</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Game\Goal.h">
+    <ClInclude Include="Application\Goal.h">
       <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="Engine\LoadManager\ModelManager\ModelManager.h">
@@ -299,7 +299,7 @@
     <ClInclude Include="Engine\Math\Transform.h">
       <Filter>Engine</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Game\Trap.h">
+    <ClInclude Include="Application\Trap.h">
       <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="Engine\UI\UI.h">
@@ -326,7 +326,7 @@
     <ClInclude Include="Application\Scene\Manager\SceneManager.h">
       <Filter>Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Game\Player.h">
+    <ClInclude Include="Application\Player.h">
       <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="Engine\2d\SpriteBase\SpriteBase.h">
