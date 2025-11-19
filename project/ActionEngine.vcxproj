@@ -107,6 +107,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Application\ActionPlayer.cpp" />
     <ClCompile Include="Application\Scene\PlayScene\DemoScene.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -128,13 +129,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\3d\Camera\Camera.cpp" />
     <ClCompile Include="Engine\BlackBox\LeakChecker\D3DResourceLeakChecker.cpp" />
     <ClCompile Include="Engine\Core\BaseEngine\DirectXBase.cpp" />
-    <ClCompile Include="externels\imgui\imgui.cpp" />
-    <ClCompile Include="externels\imgui\imgui_demo.cpp" />
-    <ClCompile Include="externels\imgui\imgui_draw.cpp" />
-    <ClCompile Include="externels\imgui\imgui_impl_dx12.cpp" />
-    <ClCompile Include="externels\imgui\imgui_impl_win32.cpp" />
-    <ClCompile Include="externels\imgui\imgui_tables.cpp" />
-    <ClCompile Include="externels\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Engine\Core\Input\Input.cpp" />
     <ClCompile Include="Engine\Math\kMath.cpp" />
     <ClCompile Include="Application\FrameWork\main.cpp" />
@@ -156,7 +150,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Scene\Manager\SceneManager.cpp" />
     <ClCompile Include="Application\Scene\PlayScene\TitleScene.cpp" />
     <ClCompile Include="Application\Scene\Manager\SceneFactory.cpp" />
-    <ClCompile Include="Application\Player.cpp" />
+    <ClCompile Include="Application\Player.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Engine\3d\SkyBox\SkyBox.cpp" />
     <ClCompile Include="Engine\JsonLoader\JsonLoader.cpp" />
     <ClCompile Include="Application\Scene\PlayScene\TestScene.cpp" />
@@ -167,9 +164,17 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Scene\PlayScene\GameOver.cpp" />
     <ClCompile Include="Application\StageManager\StageCount.cpp" />
     <ClCompile Include="Application\Scene\PlayScene\GameClearScene.cpp" />
+    <ClCompile Include="externels\imgui\imgui.cpp" />
+    <ClCompile Include="externels\imgui\imgui_demo.cpp" />
+    <ClCompile Include="externels\imgui\imgui_draw.cpp" />
+    <ClCompile Include="externels\imgui\imgui_impl_dx12.cpp" />
+    <ClCompile Include="externels\imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="externels\imgui\imgui_tables.cpp" />
+    <ClCompile Include="externels\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Stage.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Application\ActionPlayer.h" />
     <ClInclude Include="Application\Scene\Manager\AbstractSceneFactory.h" />
     <ClInclude Include="Application\Scene\PlayScene\DemoScene.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -201,14 +206,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\3d\Camera\Camera.h" />
     <ClInclude Include="Engine\BlackBox\LeakChecker\D3DResourceLeakChecker.h" />
     <ClInclude Include="Engine\Core\BaseEngine\DirectXBase.h" />
-    <ClInclude Include="externels\imgui\imconfig.h" />
-    <ClInclude Include="externels\imgui\imgui.h" />
-    <ClInclude Include="externels\imgui\imgui_impl_dx12.h" />
-    <ClInclude Include="externels\imgui\imgui_impl_win32.h" />
-    <ClInclude Include="externels\imgui\imgui_internal.h" />
-    <ClInclude Include="externels\imgui\imstb_rectpack.h" />
-    <ClInclude Include="externels\imgui\imstb_textedit.h" />
-    <ClInclude Include="externels\imgui\imstb_truetype.h" />
     <ClInclude Include="Engine\Core\Input\Input.h" />
     <ClInclude Include="Engine\Math\kMath.h" />
     <ClInclude Include="Engine\Math\Matrix3x3.h" />
@@ -236,7 +233,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Scene\Manager\SceneManager.h" />
     <ClInclude Include="Application\Scene\PlayScene\TitleScene.h" />
     <ClInclude Include="Application\Scene\Manager\SceneFactory.h" />
-    <ClInclude Include="Application\Player.h" />
+    <ClInclude Include="Application\Player.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="Engine\3d\SkyBox\SkyBox.h" />
     <ClInclude Include="Application\Scene\PlayScene\TestScene.h" />
     <ClInclude Include="Engine\Presentation\Cinematic\FadeManager.h" />
@@ -246,10 +246,15 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Scene\PlayScene\GameOver.h" />
     <ClInclude Include="Application\StageManager\StageCount.h" />
     <ClInclude Include="Application\Scene\PlayScene\GameClearScene.h" />
+    <ClInclude Include="externels\imgui\imconfig.h" />
+    <ClInclude Include="externels\imgui\imgui.h" />
+    <ClInclude Include="externels\imgui\imgui_impl_dx12.h" />
+    <ClInclude Include="externels\imgui\imgui_impl_win32.h" />
+    <ClInclude Include="externels\imgui\imgui_internal.h" />
+    <ClInclude Include="externels\imgui\imstb_rectpack.h" />
+    <ClInclude Include="externels\imgui\imstb_textedit.h" />
+    <ClInclude Include="externels\imgui\imstb_truetype.h" />
     <ClInclude Include="Stage.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="externels\imgui\LICENSE.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="externels\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">

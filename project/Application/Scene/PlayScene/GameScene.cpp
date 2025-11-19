@@ -104,7 +104,7 @@ void GameScene::Update() {
 	land->Update();
 	floor->Update();
 
-	input->Update();
+	//input->Update();
 
 	player_->Update();
 	trap_->Update();
