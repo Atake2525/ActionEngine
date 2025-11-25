@@ -66,7 +66,6 @@ void Player::Initialize(Camera* camera, Input* input, const bool DebugMode)
 }
 
 void Player::Update() {
-	cameraTransform.rotate = camera->GetAxisRotate();
 	playerTransform_ = playerModel_->GetTransform();
 	playerAABB_ = playerCollisionModel_->GetAABB();
 	if (parent_)
@@ -155,7 +154,6 @@ void Player::Rotation() {
 
 	cameraTransform.rotate.x = std::clamp(cameraTransform.rotate.x, SwapRadian(-90.0f), SwapRadian(90.0f));
 
-	camera->SetAxisRotate(cameraTransform.rotate);
 
 }
 
@@ -442,7 +440,6 @@ void Player::Move()
 	}
 
 	// カメラの方向を調べて移動方向を決める
-	cameraTransform.rotate = camera->GetAxisRotate();
 
 	// カメラのY軸回転角度のみを使用（上下の視点は完全に無視）
 	float cameraYRotation = cameraTransform.rotate.y;

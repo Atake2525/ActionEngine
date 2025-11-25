@@ -36,6 +36,7 @@ void TestScene::Initialize() {
 	Object3dBase::GetInstance()->SetDefaultCamera(camera.get());
 
 	ParticleManager::GetInstance()->SetCamera(camera.get());
+	ParticleManager::GetInstance()->CreateParticleGroup(ParticleType::plane, "Resources/Particle/circle.png", "circle");
 
 	grid = new Object3d();
 	grid->Initialize();
@@ -55,8 +56,8 @@ void TestScene::Initialize() {
 
 	plate = std::make_unique<Object3d>();
 	plate->Initialize();
-	plate->SetModel("Resources/Debug", "LandPlate.obj", true);
-	//plate->SetModel("Resources/Model/obj/Stage/map01", "map01.obj", true);
+	//plate->SetModel("Resources/Debug", "LandPlate.obj", true);
+	plate->SetModel("Resources/Model/obj/Stage/map01", "map01.obj", true);
 	//plate->SetEnableMetallic(true);
 
 	CollisionManager::GetInstance()->AddCollision(plate.get(), "plate");
@@ -65,6 +66,9 @@ void TestScene::Initialize() {
 
 	player = std::make_unique<Player>();
 	player->Initialize(camera.get(), input, true);
+
+	actionPlayer = std::make_unique<ActionPlayer>();
+	actionPlayer->Initialize(camera.get());
 
 	gameOverSprite = std::make_unique<GameOver>();
 	gameOverSprite->Initialize();
@@ -91,7 +95,7 @@ void TestScene::Update() {
 
 	grid->Update();
 
-	camera->Update();
+	//camera->Update();
 
 	SkyBox::GetInstance()->Update();
 
@@ -105,6 +109,11 @@ void TestScene::Update() {
 	ImGui::DragFloat3("MAX", &aabb.max.x, 0.0f);
 	ImGui::End();
 
+	if (input->TriggerKey(DIK_P))
+	{
+		ParticleManager::GetInstance()->Emit("circle", { 0.0f, 1.0f, 0.0f }, 5);
+	}
+
 	/*t.rotate.z += SwapRadian(4.0f);
 
 	box1->SetTransform(t);
@@ -113,7 +122,8 @@ void TestScene::Update() {
 	box2->Update();
 
 	trap->Update();
-	player->Update();
+	//player->Update();
+	actionPlayer->Update();
 
 	goal->Update(player->GetAABB());
 
@@ -138,7 +148,7 @@ void TestScene::Update() {
 
 	plate->Update();
 
-	input->Update();
+	//input->Update();
 }
 
 void TestScene::Draw() {
@@ -161,13 +171,12 @@ void TestScene::Draw() {
 
 	WireFrameObjectBase::GetInstance()->ShaderDraw();
 
+	actionPlayer->Draw();
 	//grid->Draw();
 
 	SpriteBase::GetInstance()->ShaderDraw();
 
 	gameOverSprite->Draw();
-
-	ParticleManager::GetInstance()->Draw();
 
 }
 
