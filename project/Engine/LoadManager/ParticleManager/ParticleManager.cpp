@@ -356,9 +356,9 @@ void ParticleManager::Update() {
 
 			Matrix4x4 scaleMatrix = MakeScaleMatrix((*particleIterator).transform.scale);
 			Matrix4x4 translateMatrix = MakeTranslateMatrix((*particleIterator).transform.translate);
-			//billboardMatrix = MakeRotateZMatrix((*particleIterator).transform.rotate.z);
-			//Matrix4x4 worldMatrix = Multiply(scaleMatrix, Multiply(billboardMatrix, translateMatrix));
-			Matrix4x4 worldMatrix = MakeAffineMatrix((*particleIterator).transform.scale, (*particleIterator).transform.rotate, (*particleIterator).transform.translate);
+			billboardMatrix = MakeRotateZMatrix((*particleIterator).transform.rotate.z);
+			Matrix4x4 worldMatrix = Multiply(scaleMatrix, Multiply(billboardMatrix, translateMatrix));
+			//Matrix4x4 worldMatrix = MakeAffineMatrix((*particleIterator).transform.scale, (*particleIterator).transform.rotate, (*particleIterator).transform.translate);
 			const Matrix4x4& viewProjectionMatrix = camera->GetViewProjectionMatrix();
 			Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
 			// インスタンスが最大数を超えないようにする
@@ -551,53 +551,53 @@ ModelData ParticleManager::CreatePlaneModel()
 	model.matVertexData[L"Plane"];
 
 	vData = {
-		{-1.0f, 1.0f, 0.0f, 1.0f},
-		{0.0f, 1.0f},
-		{0.0f, 0.0f, 1.0f}
+		.position{-1.0f, 1.0f, 0.0f, 1.0f},
+		.texcoord{0.0f, 1.0f},
+		.normal{0.0f, 0.0f, 1.0f}
 	};
 	model.vertices.push_back(vData);
 	model.matVertexData[L"Plane"].vertices.push_back(vData);
 
 	vData = {
-		{1.0f, 1.0f, 0.0f, 1.0f},
-		{1.0f, 1.0f},
-		{0.0f, 0.0f, 1.0f}
-	};
-
-	model.vertices.push_back(vData);
-	model.matVertexData[L"Plane"].vertices.push_back(vData);
-
-	vData = {
-		{-1.0f, -1.0f, 0.0f, 1.0f},
-		{0.0f, 0.0f},
-		{0.0f, 0.0f, 1.0f}
+		.position{1.0f, 1.0f, 0.0f, 1.0f},
+		.texcoord{1.0f, 1.0f},
+		.normal{0.0f, 0.0f, 1.0f}
 	};
 
 	model.vertices.push_back(vData);
 	model.matVertexData[L"Plane"].vertices.push_back(vData);
 
 	vData = {
-		{1.0f, 1.0f, 0.0f, 1.0f},
-		{1.0f, 1.0f},
-		{0.0f, 0.0f, 1.0f}
+		.position{-1.0f, -1.0f, 0.0f, 1.0f},
+		.texcoord{0.0f, 0.0f},
+		.normal{0.0f, 0.0f, 1.0f}
 	};
 
 	model.vertices.push_back(vData);
 	model.matVertexData[L"Plane"].vertices.push_back(vData);
 
 	vData = {
-		{1.0f, -1.0f, 0.0f, 1.0f},
-		{1.0f, -1.0f},
-		{0.0f, 0.0f, 1.0f}
+		.position{1.0f, 1.0f, 0.0f, 1.0f},
+		.texcoord{1.0f, 1.0f},
+		.normal{0.0f, 0.0f, 1.0f}
 	};
 
 	model.vertices.push_back(vData);
 	model.matVertexData[L"Plane"].vertices.push_back(vData);
 
 	vData = {
-		{-1.0f, -1.0f, 0.0f, 1.0f},
-		{0.0f, 0.0f},
-		{0.0f, 0.0f, 1.0f}
+		.position{1.0f, -1.0f, 0.0f, 1.0f},
+		.texcoord{1.0f, -1.0f},
+		.normal{0.0f, 0.0f, 1.0f}
+	};
+
+	model.vertices.push_back(vData);
+	model.matVertexData[L"Plane"].vertices.push_back(vData);
+
+	vData = {
+		.position{-1.0f, -1.0f, 0.0f, 1.0f},
+		.texcoord{0.0f, 0.0f},
+		.normal{0.0f, 0.0f, 1.0f}
 	};
 
 	model.vertices.push_back(vData);

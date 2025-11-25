@@ -107,7 +107,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Application\ActionPlayer.cpp" />
+    <ClCompile Include="Application\ActionPlayer.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Application\Scene\PlayScene\DemoScene.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -174,7 +177,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Stage.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Application\ActionPlayer.h" />
+    <ClInclude Include="Application\ActionPlayer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="Application\Scene\Manager\AbstractSceneFactory.h" />
     <ClInclude Include="Application\Scene\PlayScene\DemoScene.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -195,7 +201,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Math\Collision.h" />
     <ClInclude Include="Engine\Math\Culling.h" />
     <ClInclude Include="Engine\Math\EasingUtility.h" />
+    <ClInclude Include="Engine\Math\OBB.h" />
+    <ClInclude Include="Engine\Math\Plane.h" />
     <ClInclude Include="Engine\Math\Segment.h" />
+    <ClInclude Include="Engine\Math\Sphere.h" />
     <ClInclude Include="Engine\UI\Text.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>

@@ -383,8 +383,8 @@ Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Ve
 	Matrix4x4 R = { 0 };
 	Matrix4x4 ans = { 0 };
 
-	R = Multiply(MakeRotateXMatrix(rotate.x), Multiply(MakeRotateYMatrix(rotate.y), MakeRotateZMatrix(rotate.z)));
-
+	//R = Multiply(MakeRotateXMatrix(rotate.x), Multiply(MakeRotateYMatrix(rotate.y), MakeRotateZMatrix(rotate.z)));
+	R = Multiply(MakeRotateZMatrix(rotate.z), Multiply(MakeRotateXMatrix(rotate.x), MakeRotateYMatrix(rotate.y)));
 
 	ans.m[0][0] = scale.x * R.m[0][0];
 	ans.m[0][1] = scale.x * R.m[0][1];

@@ -155,9 +155,6 @@ void Trap::Update() {
 		newTransform.rotate = Lerp(traps[i].start.rotate, traps[i].start.rotate + traps[i].trapData.velocity.rotate, time);
 		newTransform.translate = Lerp(traps[i].start.translate, traps[i].start.translate + traps[i].trapData.velocity.translate, time);
 
-		/*newTransform.scale += traps[i].trapData.velocity.scale;
-		newTransform.rotate += traps[i].trapData.velocity.rotate;
-		newTransform.translate += traps[i].trapData.velocity.translate;*/
 		traps[i].object->SetTransform(newTransform);
 		traps[i].object->Update();
 	}
