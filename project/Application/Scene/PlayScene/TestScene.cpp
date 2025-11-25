@@ -36,7 +36,7 @@ void TestScene::Initialize() {
 	Object3dBase::GetInstance()->SetDefaultCamera(camera.get());
 
 	ParticleManager::GetInstance()->SetCamera(camera.get());
-	ParticleManager::GetInstance()->CreateParticleGroup(ParticleType::plane, "Resources/Particle/circle.png", "circle");
+	ParticleManager::GetInstance()->CreateParticleGroup(ParticleType::plane, "Resources/Particle/circle2.png", "circle");
 
 	grid = new Object3d();
 	grid->Initialize();
