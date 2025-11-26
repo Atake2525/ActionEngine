@@ -2,13 +2,16 @@
 #include "Matrix4x4.h"
 #include "kMath.h"
 
+// hlslに送るための構造体
 struct CameraForGPU {
 	Vector3 worldPosition;
 };
 
 #pragma once
+// カメラ
 class Camera {
 public:
+	// コンストラクタ
 	Camera();
 
 	/// <summary>

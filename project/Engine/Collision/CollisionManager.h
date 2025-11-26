@@ -21,7 +21,7 @@ enum class CollisionDirection {
 };
 
 
-
+// 当たり判定マネージャー
 class CollisionManager {
 private:
 	// シングルトンパターンの適用
@@ -36,18 +36,30 @@ private:
 
 public:
 
+	// インスタンスの取得
 	static CollisionManager* GetInstance();
 
+	/// <summary>
+	/// 取得
+	/// </summary>
 	void Initialize();
 
+	/// <summary>
+	/// 更新
+	/// </summary>
 	void Update(const std::string& targetName);
 
 	// 対象(Capsule)と障害物(AABB)の衝突量を求める
 	//void UpdateCupsulCollision(const std::string& targetName);
 
-
+	/// <summary>
+	/// 終了処理
+	/// </summary>
 	void Finalize();
 
+	/// <summary>
+	/// 貫通量を取得
+	/// </summary>
 	const Vector3& GetPenetration() const { return penetration_; }
 
 	// 対象と地面との距離を求める

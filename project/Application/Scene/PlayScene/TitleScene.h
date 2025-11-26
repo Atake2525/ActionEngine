@@ -20,6 +20,7 @@
 
 #pragma once
 
+// タイトルシーン
 class TitleScene : public BaseScene
 {
 public:

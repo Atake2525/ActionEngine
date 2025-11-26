@@ -10,7 +10,7 @@
 
 #pragma once
 
-
+// ImGui初期化
 class ImGuiManager
 {
 private:
