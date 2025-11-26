@@ -215,6 +215,19 @@ void ParticleManager::CreateParticleGroup(ParticleType particleType, std::string
 
 #pragma endregion
 
+#pragma region InitializeIndexBufferResource
+
+		group.callData[index].indexResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(uint32_t) * matVData.second.indices.size());
+
+		group.callData[index].indexBufferView.BufferLocation = group.callData[index].indexResource->GetGPUVirtualAddress();
+		group.callData[index].indexBufferView.SizeInBytes = UINT(sizeof(uint32_t) * matVData.second.indices.size());
+		group.callData[index].indexBufferView.Format = DXGI_FORMAT_R32_UINT;
+
+		group.callData[index].indexResource->Map(0, nullptr, reinterpret_cast<void**>(&group.callData[index].mappedIndex));
+
+		std::memcpy(group.callData[index].mappedIndex, matVData.second.indices.data(), sizeof(uint32_t) * matVData.second.indices.size());
+#pragma endregion
+
 		size = sizeof(ParticleForGPU) * maxNumInstance;
 
 		group.callData[index].instancingResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(ParticleForGPU) * maxNumInstance);
@@ -356,9 +369,9 @@ void ParticleManager::Update() {
 
 			Matrix4x4 scaleMatrix = MakeScaleMatrix((*particleIterator).transform.scale);
 			Matrix4x4 translateMatrix = MakeTranslateMatrix((*particleIterator).transform.translate);
-			//billboardMatrix = MakeRotateZMatrix((*particleIterator).transform.rotate.z);
-			//Matrix4x4 worldMatrix = Multiply(scaleMatrix, Multiply(billboardMatrix, translateMatrix));
-			Matrix4x4 worldMatrix = MakeAffineMatrix((*particleIterator).transform.scale, (*particleIterator).transform.rotate, (*particleIterator).transform.translate);
+			billboardMatrix = MakeRotateZMatrix((*particleIterator).transform.rotate.z);
+			Matrix4x4 worldMatrix = Multiply(scaleMatrix, Multiply(billboardMatrix, translateMatrix));
+			//Matrix4x4 worldMatrix = MakeAffineMatrix((*particleIterator).transform.scale, (*particleIterator).transform.rotate, (*particleIterator).transform.translate);
 			const Matrix4x4& viewProjectionMatrix = camera->GetViewProjectionMatrix();
 			Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
 			// インスタンスが最大数を超えないようにする
@@ -398,7 +411,7 @@ void ParticleManager::Draw() {
 			{
 				// VBVを設定
 				DirectXBase::GetInstance()->GetCommandList()->IASetVertexBuffers(0, 1, &particleGroup->second.callData[index].vertexBufferView);
-
+				DirectXBase::GetInstance()->GetCommandList()->IASetIndexBuffer(&particleGroup->second.callData[index].indexBufferView); // VBVを設定
 				// インスタンシングデータのSRVのDescriptorTableを設定
 				SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(1, particleGroup->second.callData[index].srvIndex);
 
@@ -407,7 +420,8 @@ void ParticleManager::Draw() {
 				SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(2, particleGroup->second.modelData.material[index].textureIndex);
 
 				// DrawCall
-				DirectXBase::GetInstance()->GetCommandList()->DrawInstanced(UINT(matVData.second.vertices.size()), particleGroup->second.numInstance, 0, 0);
+				//DirectXBase::GetInstance()->GetCommandList()->DrawInstanced(UINT(matVData.second.vertices.size()), particleGroup->second.numInstance, 0, 0);
+				DirectXBase::GetInstance()->GetCommandList()->DrawIndexedInstanced(UINT(matVData.second.indices.size()), particleGroup->second.numInstance, 0, 0, 0);
 				index++;
 			}
 		}
@@ -551,57 +565,53 @@ ModelData ParticleManager::CreatePlaneModel()
 	model.matVertexData[L"Plane"];
 
 	vData = {
-		{-1.0f, 1.0f, 0.0f, 1.0f},
-		{0.0f, 1.0f},
-		{0.0f, 0.0f, 1.0f}
+		.position{-1.0f, 1.0f, 0.0f, 1.0f}, // 左上
+		.texcoord{0.0f, 0.0f},
+		.normal{0.0f, 0.0f, 1.0f}
 	};
 	model.vertices.push_back(vData);
+	model.indices.push_back(0);
+	model.matVertexData[L"Plane"].indices.push_back(0);
 	model.matVertexData[L"Plane"].vertices.push_back(vData);
 
 	vData = {
-		{1.0f, 1.0f, 0.0f, 1.0f},
-		{1.0f, 1.0f},
-		{0.0f, 0.0f, 1.0f}
+		.position{1.0f, 1.0f, 0.0f, 1.0f}, // 右上
+		.texcoord{1.0f, 0.0f},
+		.normal{0.0f, 0.0f, 1.0f}
 	};
 
 	model.vertices.push_back(vData);
+	model.indices.push_back(1);
+	model.matVertexData[L"Plane"].indices.push_back(1);
 	model.matVertexData[L"Plane"].vertices.push_back(vData);
 
 	vData = {
-		{-1.0f, -1.0f, 0.0f, 1.0f},
-		{0.0f, 0.0f},
-		{0.0f, 0.0f, 1.0f}
+		.position{-1.0f, -1.0f, 0.0f, 1.0f}, // 左下
+		.texcoord{0.0f, 1.0f},
+		.normal{0.0f, 0.0f, 1.0f}
 	};
 
 	model.vertices.push_back(vData);
+	model.indices.push_back(2);
+	model.matVertexData[L"Plane"].indices.push_back(2);
 	model.matVertexData[L"Plane"].vertices.push_back(vData);
+
+	model.indices.push_back(1);
+	model.matVertexData[L"Plane"].indices.push_back(1);
 
 	vData = {
-		{1.0f, 1.0f, 0.0f, 1.0f},
-		{1.0f, 1.0f},
-		{0.0f, 0.0f, 1.0f}
+		.position{1.0f, -1.0f, 0.0f, 1.0f}, // 右下
+		.texcoord{1.0f, 1.0f},
+		.normal{0.0f, 0.0f, 1.0f}
 	};
 
 	model.vertices.push_back(vData);
+	model.indices.push_back(3);
+	model.matVertexData[L"Plane"].indices.push_back(3);
 	model.matVertexData[L"Plane"].vertices.push_back(vData);
 
-	vData = {
-		{1.0f, -1.0f, 0.0f, 1.0f},
-		{1.0f, -1.0f},
-		{0.0f, 0.0f, 1.0f}
-	};
-
-	model.vertices.push_back(vData);
-	model.matVertexData[L"Plane"].vertices.push_back(vData);
-
-	vData = {
-		{-1.0f, -1.0f, 0.0f, 1.0f},
-		{0.0f, 0.0f},
-		{0.0f, 0.0f, 1.0f}
-	};
-
-	model.vertices.push_back(vData);
-	model.matVertexData[L"Plane"].vertices.push_back(vData);
+	model.indices.push_back(2);
+	model.matVertexData[L"Plane"].indices.push_back(2);
 	return model;
 }
 

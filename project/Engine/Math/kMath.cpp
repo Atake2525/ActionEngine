@@ -332,7 +332,10 @@ Vector3 MatrixTransform(const Vector3& vector, const Matrix4x4& matrix) {
 	ans.y = vector.x * matrix.m[0][1] + vector.y * matrix.m[1][1] + vector.z * matrix.m[2][1] + 1.0f * matrix.m[3][1];
 	ans.z = vector.x * matrix.m[0][2] + vector.y * matrix.m[1][2] + vector.z * matrix.m[2][2] + 1.0f * matrix.m[3][2];
 	float w = vector.x * matrix.m[0][3] + vector.y * matrix.m[1][3] + vector.z * matrix.m[2][3] + 1.0f * matrix.m[3][3];
-	assert(w != 0.0f);
+	if (w == 0.0f)
+	{
+		w = 1.0f;
+	}
 	ans.x /= w;
 	ans.y /= w;
 	ans.z /= w;
@@ -383,8 +386,8 @@ Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Ve
 	Matrix4x4 R = { 0 };
 	Matrix4x4 ans = { 0 };
 
-	R = Multiply(MakeRotateXMatrix(rotate.x), Multiply(MakeRotateYMatrix(rotate.y), MakeRotateZMatrix(rotate.z)));
-
+	//R = Multiply(MakeRotateXMatrix(rotate.x), Multiply(MakeRotateYMatrix(rotate.y), MakeRotateZMatrix(rotate.z)));
+	R = Multiply(MakeRotateZMatrix(rotate.z), Multiply(MakeRotateXMatrix(rotate.x), MakeRotateYMatrix(rotate.y)));
 
 	ans.m[0][0] = scale.x * R.m[0][0];
 	ans.m[0][1] = scale.x * R.m[0][1];

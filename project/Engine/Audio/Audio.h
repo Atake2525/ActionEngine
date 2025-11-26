@@ -42,6 +42,7 @@ struct SoundData {
 	XAUDIO2_VOICE_DETAILS sourceVoiceDetails;
 };
 
+// 再生中のオーディオリスト
 struct AudioList
 {
 	IXAudio2SourceVoice* sourceVoice;
@@ -51,6 +52,7 @@ struct AudioList
 };
 
 
+// 音声 クラス
 class Audio {
 private:
 	// シングルトンパターンを適用

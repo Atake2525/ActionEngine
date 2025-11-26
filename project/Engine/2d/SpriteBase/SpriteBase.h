@@ -3,6 +3,7 @@
 #include <dxcapi.h>
 #pragma once
 
+// スプライト描画用クラス
 class SpriteBase {
 private:
 	// シングルトンパターンを適用

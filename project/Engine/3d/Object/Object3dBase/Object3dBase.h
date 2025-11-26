@@ -6,7 +6,7 @@
 
 class Camera;
 
-
+// オブジェクト描画用クラス
 class Object3dBase {
 private:
 	// シングルトンパターンを適用

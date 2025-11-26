@@ -24,6 +24,7 @@
 
 #pragma once
 
+// ゲームシーン
 class GameScene : public BaseScene
 {
 public:
@@ -47,6 +48,7 @@ public:
 	/// </summary>
 	void Draw() override;
 
+	// 終了処理
 	const bool& EndRequest() override { return finished; }
 
 private:

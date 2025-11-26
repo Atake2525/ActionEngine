@@ -306,7 +306,7 @@ void TitleScene::Update() {
 
 	SkyBox::GetInstance()->Update();
 
-	input->Update();
+	//input->Update();
 
 	Transform titleTransform = title->GetTransform();
 

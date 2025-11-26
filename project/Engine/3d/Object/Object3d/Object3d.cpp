@@ -1,4 +1,3 @@
-#define NOMINMAX
 #include "Object3d.h"
 #include "Object3dBase.h"
 #include "DirectXBase.h"
@@ -139,6 +138,13 @@ void Object3d::Update() {
         cameraData->drawHeihgt = camera->GetDrawHeihgt();
 		const Matrix4x4& viewProjectionMatrix = camera->GetViewProjectionMatrix();
 		worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
+
+		Vector3 clipPos = MatrixTransform(transform.translate, worldViewProjectionMatrix);
+
+		// NDC → スクリーン座標
+		float screenX = (clipPos.x * 0.5f + 0.5f) * (float)WinApp::GetInstance()->GetkClientWidth();
+		float screenY = (1.0f - (clipPos.y * 0.5f + 0.5f)) * (float)WinApp::GetInstance()->GetkClientHeight();
+		float t = screenX;
 	}
 	else {
 		worldViewProjectionMatrix = worldMatrix;

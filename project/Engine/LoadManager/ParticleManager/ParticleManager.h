@@ -207,26 +207,6 @@ private:
 	// PSOを作成する
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
 
-	//Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource;
-	//// 頂点バッファビューを作成する
-	//D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
-	//VertexData* vertexData = nullptr;
-
-	//ModelData modelData;
-
-	//// バッファリソース
-	//Microsoft::WRL::ComPtr<ID3D12Resource> indexResource;
-	//// バッファリソース内のデータを指すポインタ
-	//uint32_t* indexData = nullptr;
-
-	//// バッファリソース
-	//Microsoft::WRL::ComPtr<ID3D12Resource> materialResource;
-	//// バッファリソース内のデータを指すポインタ
-	//Material* materialData = nullptr;
-
-	//D3D12_INDEX_BUFFER_VIEW indexbufferView;
-
-
 
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState = nullptr;
 

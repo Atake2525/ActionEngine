@@ -5,6 +5,7 @@
 
 class Camera;
 
+// モデルのワイヤーフレーム用クラス
 class WireFrameObjectBase {
 private:
 	// シングルトンパターンを適用

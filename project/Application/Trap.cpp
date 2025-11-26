@@ -15,22 +15,32 @@ Trap::Trap() {
 Trap::~Trap() {
 	for (int i = 0; i < traps.size(); i++)
 	{
-		CollisionManager::GetInstance()->DeleteCollision("trap" + to_string(i));
+		CollisionManager::GetInstance()->DeleteCollision("trap" + to_string(traps[i].number));
 	}
 }
 
-void Trap::Initialize() {
-
+void Trap::Initialize(std::string jsonName) {
+	random_device seedGenerator;
+	mt19937 random(seedGenerator());
+	randomEngine = random;
+	num = 0;
 	gameTimer_ = 0.0f;
 	traps.clear();
-
-	string str = "map" + to_string(StageCount::GetInstance()->GetStageCount());
-	vector<JsonData> json = JsonLoader::GetInstance()->GetJsonData(str, "trap");
+	string str;
+	vector<JsonData> json;
+	jsonName_ = jsonName;
+	if (jsonName == "normal")
+	{
+		str = "map" + to_string(StageCount::GetInstance()->GetStageCount());
+		json = JsonLoader::GetInstance()->GetJsonData(str, "trap");
+	}
+	else
+	{
+		json = JsonLoader::GetInstance()->GetJsonData(jsonName, "trap");
+	}
 	Log("指定したデータが" + std::to_string(json.size()) + "個見つかりました\n");
-	int num = 0;
 	for (auto data : json) {
 		Traps trap;
-		trap.type = TrapType::Spike;
 		trap.object = make_unique<Object3d>();
 		trap.object->Initialize();
 		trap.object->SetTransform(data.transform);
@@ -46,6 +56,25 @@ void Trap::Initialize() {
 		{
 			trap.reverse = false;
 		}
+		if (data.trap.reverse)
+		{
+			trap.trapData.runTime /= 2.0f;
+		}
+		if (data.trap.spawner)
+		{
+			if (data.trap.spawnerTime.y == -1.0f)
+			{
+				trap.trapData.spawnTime = data.trap.spawnerTime.x;
+			}
+			else
+			{
+				trap.trapData.spawnerTime = data.trap.spawnerTime;
+				uniform_real_distribution<float> distribution(data.trap.spawnerTime.x, data.trap.spawnerTime.y);
+				trap.trapData.spawnTime = distribution(randomEngine);
+			}
+
+		}
+		trap.number = num;
 		trap.object->Update();
 		traps.push_back(std::move(trap));
 		CollisionManager::GetInstance()->AddCollision(traps[num].object.get(), "trap" + to_string(num));
@@ -66,21 +95,41 @@ void Trap::Update() {
 		Log("更新初期処理終了 : " + std::to_string(gameTimer_) + "\n");
 		start = true;
 	}
-#ifndef _NDEBUG
+#ifndef NDEBUG
 	ImGui::Begin("Trap");
 	ImGui::TextColored({ 1.0f, 1.0f, 1.0f, 1.0f }, "経過時間 %.1f", gameTimer_);
 	if (ImGui::Button("Json再読み込み"))
 	{
-		Initialize();
+		for (int i = 0; i < traps.size(); i++)
+		{
+			CollisionManager::GetInstance()->DeleteCollision("trap" + to_string(traps[i].number));
+		}
+		Initialize(jsonName_);
 	}
 	ImGui::End();
 #endif
 	for (int i = 0; i < traps.size(); i++)
 	{
-		if (gameTimer_ > traps[i].startFrame + traps[i].trapData.runTime && traps[i].trapData.runTime > 0.0f)
+		if (traps[i].trapData.spawner)
+		{
+			if (traps[i].trapData.spawnTime <= gameTimer_)
+			{
+				MakeTrap(traps[i]);
+				if (traps[i].trapData.spawnerTime.y != -1.0f)
+				{
+					uniform_real_distribution<float> distribution(traps[i].trapData.spawnerTime.x, traps[i].trapData.spawnerTime.y);
+					traps[i].trapData.spawnTime = distribution(randomEngine) + gameTimer_;
+				}
+				else
+				{
+					traps[i].trapData.spawnTime = traps[i].trapData.spawnerTime.x + gameTimer_;
+				}
+			}
+		}else if (gameTimer_ > traps[i].startFrame + traps[i].trapData.runTime && traps[i].trapData.runTime > 0.0f && traps[i].trapData.move)
 		{
 			if (!traps[i].trapData.loop && traps[i].reverse)
 			{
+				CollisionManager::GetInstance()->DeleteCollision("trap" + to_string(traps[i].number));
 				traps.erase(traps.cbegin() + i);
 				continue;
 			}
@@ -97,7 +146,6 @@ void Trap::Update() {
 			}
 			traps[i].startFrame = gameTimer_;
 
-
 		}
 		Transform newTransform = traps[i].object->GetTransform();
 
@@ -107,9 +155,6 @@ void Trap::Update() {
 		newTransform.rotate = Lerp(traps[i].start.rotate, traps[i].start.rotate + traps[i].trapData.velocity.rotate, time);
 		newTransform.translate = Lerp(traps[i].start.translate, traps[i].start.translate + traps[i].trapData.velocity.translate, time);
 
-		/*newTransform.scale += traps[i].trapData.velocity.scale;
-		newTransform.rotate += traps[i].trapData.velocity.rotate;
-		newTransform.translate += traps[i].trapData.velocity.translate;*/
 		traps[i].object->SetTransform(newTransform);
 		traps[i].object->Update();
 	}
@@ -119,14 +164,45 @@ void Trap::Draw() {
 
 	for (int i = 0; i < traps.size(); i++)
 	{
-		traps[i].object->Draw();
+		if (!traps[i].trapData.spawner)
+		{
+			traps[i].object->Draw();
+		}
 	}
 }
 
-void Trap::SetDrawHeight(const float height)
-{
+void Trap::SetDrawHeight(const float height) {
+
 	for (int i = 0; i < traps.size(); i++)
 	{
-		traps[i].object->SetDrawHeiht(height);
+		if (!traps[i].trapData.spawner)
+		{
+			traps[i].object->SetDrawHeiht(height);
+		}
 	}
+}
+
+void Trap::MakeTrap(Traps& data) {
+	Traps trap;
+	trap.object = make_unique<Object3d>();
+	trap.object->Initialize();
+	trap.object->SetTransform(data.start);
+	trap.object->SetModel("Resources/Model/obj", "trap.obj", true);
+	trap.start = data.start;
+	trap.trapData = data.trapData;
+	trap.startFrame = gameTimer_;
+	if (!data.trapData.loop && !data.trapData.reverse)
+	{
+		trap.reverse = true;
+	}
+	else
+	{
+		trap.reverse = false;
+	}
+	trap.trapData.spawner = false;
+	trap.number = num;
+	trap.object->Update();
+	traps.push_back(std::move(trap));
+	CollisionManager::GetInstance()->AddCollision(traps[int(traps.size() - 1)].object.get(), "trap" + to_string(num));
+	num++;
 }

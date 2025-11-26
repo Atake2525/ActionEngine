@@ -16,24 +16,49 @@ enum class PlayerMoveType {
     Jump,
 };
 
+/// <summary>
+/// プレイヤー
+/// </summary>
 class Player
 {
 public:
 
+    // デストラクタ
     ~Player();
 
+    /// <summary>
+    /// 初期化
+    /// </summary>
     void Initialize(Camera* camera, Input* input, const bool DebugMode = false);
 
+    /// <summary>
+    /// 更新
+    /// </summary>
     void Update();
 
+    /// <summary>
+    /// 描画
+    /// </summary>
     void Draw();
 
+    /// <summary>
+    /// 入力を受け付けないようにする
+    /// </summary>
     void Freeze(bool flag) { freeze_ = flag; }
 
+    /// <summary>
+    /// ゲームオーバーのGetter
+    /// </summary>
     const bool IsGameOver() const;
 
+    /// <summary>
+    /// プレイヤーのAABBの当たり判定を取得
+    /// </summary>
     const AABB& GetAABB() const { return playerAABB_; }
 
+    /// <summary>
+    /// プレイヤーのOBBの当たり判定を取得
+    /// </summary>
     const OBB& GetOBB() const { return playerOBB_; }
 
 private: // メンバ変数宣言
@@ -111,13 +136,25 @@ private: // ステータス関係の関数宣言
 
     bool freeze_ = false;
 
+    /// <summary>
+    /// 回転
+    /// </summary>
     void Rotation();
 
+    /// <summary>
+    /// 移動
+    /// </summary>
     void Move();
 
+    /// <summary>
+    /// しゃがみ
+    /// </summary>
     void Sneak();
 
 private:
+    /// <summary>
+    /// デバッグモードの更新(ImGui関連)
+    /// </summary>
     void DebugUpdate();
 };
 

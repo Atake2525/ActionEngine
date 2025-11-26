@@ -13,9 +13,6 @@ Camera::Camera()
 	, viewMatrix(Inverse(worldMatrix))
 	, projectionMatrix(MakePrespectiveFovMatrix(fovY, aspect, nearClipDistance, farClipDistance))
 	, viewProjectionMatrix(Multiply(viewMatrix, projectionMatrix))
-	, axisAngle({ 0.0f, 1.0f, 0.0f })
-	, rotateQuaternionMatrix(MakeRotateAxisAngle(axisAngle, 0.0f))
-	, rotateAngle(0.0f)
     , drawHeihgt(1.0f)
 {
 }
@@ -32,20 +29,14 @@ void Camera::Update() {
 	ImGui::SetWindowSize(ImVec2{ 300.0f, 128.0f });
 	ImGui::DragFloat3("Position", &transform.translate.x, 0.1f);
 	ImGui::DragFloat3("Rotation", &rotate.x, 0.5f);
-	Vector3 angle = SwapDegree(rotateAngle);
-	ImGui::DragFloat3("AxisRotation", &angle.x, 0.1f);
-	rotateAngle = SwapRadian(angle);
 	ImGui::DragFloat3("Direction1", &direction.x);
 	ImGui::DragFloat3("Direction2", &dirc.x);
 	ImGui::DragFloat("Fov", &fovY, 0.01f);
 	ImGui::DragFloat("farClipDist", &farClipDistance, 1.0f);
     ImGui::DragFloat("drawHeihgt", &drawHeihgt, 0.1f);
-	/*ImGui::DragFloat3("AxisAngle", &axisAngle.x);
-	axisAngle = Normalize(axisAngle);*/
 	ImGui::End();
 
-	rotate = SwapRadian(rotate);
-	transform.rotate = rotate;
+	transform.rotate = SwapRadian(rotate);
 #endif // _CAMERADEBUG
 
 
@@ -53,18 +44,7 @@ void Camera::Update() {
 	transform.rotate.y = std::fmod(transform.rotate.y, 2 * std::numbers::pi_v<float>);
 	transform.rotate.z = std::fmod(transform.rotate.z, 2 * std::numbers::pi_v<float>);
 
-	rotateAngle.x = std::fmod(rotateAngle.x, 2 * std::numbers::pi_v<float>);
-	rotateAngle.y = std::fmod(rotateAngle.y, 2 * std::numbers::pi_v<float>);
-	rotateAngle.z = std::fmod(rotateAngle.z, 2 * std::numbers::pi_v<float>);
-
-	rotateQuaternionMatrix = MakeRotateAxisAngle({1.0f, 0.0f, 0.0f}, rotateAngle.x);
-	Matrix4x4 yRotateQuaternionMatrix = MakeRotateAxisAngle(axisAngle, rotateAngle.y);
-	Matrix4x4 zRotateQuaternionMatrix = MakeRotateAxisAngle({0.0f, 0.0f, 1.0f}, rotateAngle.z);
-
 	worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
-	worldMatrix = Multiply(worldMatrix, rotateQuaternionMatrix);
-	worldMatrix = Multiply(worldMatrix, yRotateQuaternionMatrix);
-	worldMatrix = Multiply(worldMatrix, zRotateQuaternionMatrix);
 	if (isParent)
 	{
 		worldMatrix = Multiply(worldMatrix, parent);
