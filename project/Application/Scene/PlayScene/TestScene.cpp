@@ -169,9 +169,9 @@ void TestScene::Draw() {
 
 	//player->Draw();
 
-	WireFrameObjectBase::GetInstance()->ShaderDraw();
+	//WireFrameObjectBase::GetInstance()->ShaderDraw();
 
-	actionPlayer->Draw();
+	//actionPlayer->Draw();
 	//grid->Draw();
 
 	SpriteBase::GetInstance()->ShaderDraw();

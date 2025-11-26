@@ -25,6 +25,7 @@
 
 #pragma once
 
+// テスト用シーン
 class TestScene : public BaseScene
 {
 public:

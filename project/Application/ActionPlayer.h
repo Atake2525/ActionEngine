@@ -9,12 +9,28 @@
 class Camera;
 class Input;
 
+/// <summary>
+/// プレイヤー
+/// </summary>
 class ActionPlayer {
 public:
+    // コンストラクタ
     ActionPlayer();
 
+    /// <summary>
+    /// 初期化
+    /// </summary>
+    /// <param name="camera">Objectに適用しているカメラのポインタ</param>
     void Initialize(Camera* camera);
+
+    /// <summary>
+    /// 更新
+    /// </summary>
     void Update();
+
+    /// <summary>
+    /// 描画
+    /// </summary>
     void Draw();
 
 private: // メンバ変数

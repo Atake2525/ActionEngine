@@ -39,7 +39,7 @@ Transform playerTransform;
 void ActionPlayer::Initialize(Camera* camera) {
     m_pPlayerModel = make_unique<Object3d>();
     m_pPlayerModel->Initialize();
-    m_pPlayerModel->SetModel("Resources/Model/obj/Player", "player.obj");
+    m_pPlayerModel->SetModel("Resources/Model/gltf/Player", "PlayerCollision.gltf");
     playerTransform = m_pPlayerModel->GetTransform();
     m_pCamera = camera;
 

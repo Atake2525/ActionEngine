@@ -7,12 +7,14 @@
 
 class Camera;
 
+// SkyBoxのhlslに送るデータ用の構造体
 struct SkyBoXData
 {
 	std::vector<uint32_t> indices;
 	std::vector<Vector4> positions;
 };
 
+// SkyBox Class
 class SkyBox {
 private:
 	// シングルトンパターンを適用

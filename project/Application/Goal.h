@@ -8,18 +8,35 @@
 #include <memory>
 #include "AABB.h"
 
+/// <summary>
+/// ゴール
+/// </summary>
 class Goal
 {
 public:
-
+	// デストラクタ
 	~Goal();
 
+	/// <summary>
+	/// 初期化
+	/// </summary>
 	void Initalize();
 
+	/// <summary>
+	/// 更新
+	/// </summary>
+	/// <param name="aabb">処理の対象となるAABB</param>
 	void Update(AABB aabb);
 
+	/// <summary>
+	/// 描画
+	/// </summary>
 	void Draw();
 
+	/// <summary>
+	/// 対象が触れてゴール判定になったかどうか
+	/// </summary>
+	/// <returns></returns>
 	const bool& IsGoal() const { return isGoal_; }
 
 private:
