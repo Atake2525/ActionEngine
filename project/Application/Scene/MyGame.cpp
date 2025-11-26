@@ -55,7 +55,7 @@ void MyGame::Initialize() {
 
 	SceneManager::GetInstance();
 	
-	SceneManager::GetInstance()->SetNextScene("TITLE");
+	SceneManager::GetInstance()->SetNextScene("TEST");
 
 	//gameScene->Initialize();
 
@@ -66,6 +66,8 @@ void MyGame::Update() {
 	FrameWork::Update();
 
 	GameTime::GetInstance()->Update();
+
+	Input::GetInstance()->Update();
 
 	if (WinApp::GetInstance()->ProcessMessage()) {
 		finished = true;

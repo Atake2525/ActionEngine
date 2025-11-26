@@ -7,6 +7,7 @@
 
 class Camera;
 
+// スキニングモデル描画用クラス
 class SkinningObject3dBase {
 private:
 	// シングルトンパターンを適用

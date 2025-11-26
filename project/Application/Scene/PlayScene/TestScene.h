@@ -17,6 +17,7 @@
 #include <wrl.h>
 #include <memory>
 #include "Player.h"
+#include "ActionPlayer.h"
 #include "JsonLoader.h"
 #include "GameOver.h"
 #include "Trap.h"
@@ -24,6 +25,7 @@
 
 #pragma once
 
+// テスト用シーン
 class TestScene : public BaseScene
 {
 public:
@@ -65,6 +67,7 @@ private:
 	std::unique_ptr<GameOver> gameOverSprite;
 
 	std::unique_ptr<Player> player;
+	std::unique_ptr<ActionPlayer> actionPlayer;
 
 	Object3d* grid = nullptr;
 

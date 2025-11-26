@@ -6,6 +6,7 @@
 #include "externels/imgui/imgui_impl_dx12.h"
 #include "externels/imgui/imgui_impl_win32.h"
 
+using namespace std;
 
 Light* Light::instance = nullptr;
 

@@ -19,6 +19,7 @@
 
 #pragma once
 
+// 頂点情報を格納するための構造体
 struct VertexData {
 	Vector4 position;
 	Vector2 texcoord;
@@ -27,6 +28,7 @@ struct VertexData {
 	Vector3 binormal;
 };
 
+// マルチメッシュ、マルチマテリアル用の各種情報を格納するための構造体
 struct MaterialVertexData {
 	std::vector<VertexData> vertices;
 	std::vector<uint32_t> indices;
@@ -34,6 +36,7 @@ struct MaterialVertexData {
 	size_t materialIndex;
 };
 
+// マテリアル
 struct Material {
 	Vector4 color;
 
@@ -53,6 +56,7 @@ struct Material {
 	float pad2[2];
 };
 
+// マテリアル
 struct MaterialTemplate
 {
 	float metallic;

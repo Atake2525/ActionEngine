@@ -7,6 +7,7 @@
 #include <Windows.h>
 #include <map>
 #include <memory>
+#include "Vector2.h"
 
 struct Children
 {
@@ -29,6 +30,10 @@ struct TrapData
 	bool reverse;
 
 	float runTime;
+
+	bool spawner;
+	float spawnTime;
+	Vector2 spawnerTime;
 };
 
 struct JsonData

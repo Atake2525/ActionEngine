@@ -1,7 +1,9 @@
 #include <memory>
 #pragma once
 
-
+/// <summary>
+/// ステージカウント
+/// </summary>
 class StageCount
 {
 private:
@@ -24,8 +26,10 @@ public:
 	/// </summary>
 	void Initialize();
 
+	// ステージカウントのセット
 	void SetStageCount(int count) { stageCount_ = count; }
 
+	// ステージカウントの取得
 	const int& GetStageCount() const { return stageCount_; }
 
 private:
