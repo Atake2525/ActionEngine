@@ -21,15 +21,18 @@ ActionPlayer::ActionPlayer()
     , m_crouchSpeed(0.08f)
     , m_jumpForce(6.0f)
     , m_gravity(1.2f)
-    , m_inputDirection({0.0f, 0.0f})
+    , m_inputDirection({ 0.0f, 0.0f })
     , m_isGround(false)
     , m_isDash(false)
     , m_isCrouch(false)
     , m_isWallRun(false)
     , m_isWallJump(false)
-    , m_wallNormal({0.0f, 0.0f, 0.0f})
+    , m_wallNormal({ 0.0f, 0.0f, 0.0f })
     , m_groundDistance(0.0f)
     , m_wallDistance(0.0f)
+    , m_walkFov(1.0f)
+    , m_dashFov(1.3f)
+    , m_fovChangeTime(0.1f)
 {
 }
 
@@ -50,6 +53,7 @@ void ActionPlayer::Initialize(Camera* camera) {
     m_pInput = Input::GetInstance();
 }
 
+bool firstUpdate = false;
 void ActionPlayer::Update() {
 	HandleMouseLock();
 	//UpdateStates();
@@ -84,6 +88,14 @@ void ActionPlayer::Update() {
     playerTransform.translate += m_velocity;
     m_pPlayerModel->SetTranslate({ playerTransform.translate.x, playerTransform.translate.y, playerTransform.translate.z + 0.05f });
     m_pPlayerModel->Update();
+
+    if (!firstUpdate)
+    {
+        m_pCamera->SetTranslate({ 0.0f, m_pPlayerModel->GetAABB().max.y - 1.0f, 0.0f });
+        firstUpdate = true;
+    }
+
+    UpdateEffects();
     
     m_pCamera->SetParent(m_pPlayerModel->GetWorldMatrix());
     m_pCamera->SetRotate(cameraRotate);
@@ -114,11 +126,7 @@ void ActionPlayer::HandleInput() {
     {
         m_inputDirection.x = 1.0f;
     }
-   /* if (m_inputDirection.x != 0.0f && m_inputDirection.y != 0.0f)
-    {
-        m_inputDirection.x /= 2.0f;
-        m_inputDirection.y /= 2.0f;
-    }*/
+   
     m_moveSpeed = m_walkSpeed;
     if (m_pInput->PushKey(DIK_LSHIFT))
     {
@@ -153,13 +161,12 @@ void ActionPlayer::HandleInput() {
 Vector3 moveVelocity = { 0.0f, 0.0f, 0.0f };
 // 移動処理 (地上・空中)
 void ActionPlayer::Move() {
-    Matrix4x4 mat = MakeAffineMatrix({ 1.0f, 1.0f, 1.0f }, Vector3{0.0f, cameraRotate.y, 0.0f}, playerTransform.translate);
 
     if (m_inputDirection.x != 0.0f)
     {
         if (Sign(moveVelocity.x) != m_inputDirection.x)
         {
-            moveVelocity.x += m_moveSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime * m_inputDirection.x * 2.0f;
+            moveVelocity.x += m_moveSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime * m_inputDirection.x * 6.0f;
             moveVelocity.x = clamp(moveVelocity.x, -m_moveSpeed, m_moveSpeed);
         }
         else
@@ -187,9 +194,9 @@ void ActionPlayer::Move() {
 
     if (m_inputDirection.y != 0.0f)
     {
-        if (Sign(moveVelocity.x) != m_inputDirection.x)
+        if (Sign(moveVelocity.z) != m_inputDirection.y)
         {
-            moveVelocity.z += m_moveSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime * m_inputDirection.y * 2.0f;
+            moveVelocity.z += m_moveSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime * m_inputDirection.y * 6.0f;
             moveVelocity.z = clamp(moveVelocity.z, -m_moveSpeed, m_moveSpeed);
         }
         else
@@ -214,11 +221,20 @@ void ActionPlayer::Move() {
             moveVelocity.z = 0.0f;
         }
     }
+    if (m_inputDirection.x != 0.0f && m_inputDirection.y != 0.0f)
+    {
+        float len = Length(moveVelocity);
+        if (len == 0.0f)
+        {
+            len = 1.0f;
+        }
+        moveVelocity = moveVelocity / len * m_moveSpeed;
+    }
 
-
-
+    Matrix4x4 mat = MakeAffineMatrix({ 1.0f, 1.0f, 1.0f }, Vector3{ 0.0f, cameraRotate.y, 0.0f }, playerTransform.translate);
     Vector3 normalDir = TransformNormal(moveVelocity, mat);
-    m_velocity = normalDir;
+    m_velocity.x = normalDir.x;
+    m_velocity.z = normalDir.z;
 }
 
 // 重力の適用
@@ -246,7 +262,7 @@ void ActionPlayer::Jump() {
 }
 
 // しゃがみ切り替え
-void ActionPlayer::Crouch(bool IsPressed) {
+void ActionPlayer::Crouch() {
 
 }
 
@@ -280,6 +296,7 @@ void ActionPlayer::UpdateStates() {
 
 }
 
+
 // マウスによる視点操作
 void ActionPlayer::HandleMouseLock() {
     cameraRotate = m_pCamera->GetRotate();
@@ -290,6 +307,42 @@ void ActionPlayer::HandleMouseLock() {
     cameraRotate.x = clamp(cameraRotate.x, SwapRadian(-90.0f), SwapRadian(90.0f));
 
 }
+
+bool changeFov = false;
+float fovChangeTimer = 0.0f;
+float currentFov = 0.0f;
+float fovEnd = 0.0f;
+// 演出系更新
+void ActionPlayer::UpdateEffects() {
+    if (!changeFov)
+    {
+        currentFov = m_pCamera->GetfovY();
+        if (currentFov != m_dashFov && (moveVelocity.x * Sign(moveVelocity.x) == m_dashSpeed || moveVelocity.z * Sign(moveVelocity.z) == m_dashSpeed))
+        {
+            changeFov = true;
+            fovEnd = m_dashFov;
+        }
+        else if (currentFov != m_walkFov && (moveVelocity.x * Sign(moveVelocity.x) <= m_walkSpeed && moveVelocity.z * Sign(moveVelocity.z) <= m_walkSpeed))
+        {
+            changeFov = true;
+            fovEnd = m_walkFov;
+        }
+    }
+    else
+    {
+        fovChangeTimer += GameTime::GetInstance()->GetDeltaTime() / m_fovChangeTime;
+        fovChangeTimer = clamp(fovChangeTimer, 0.0f, 1.0f);
+        float fov = Lerp(currentFov, fovEnd, fovChangeTimer);
+        m_pCamera->SetFovY(fov);
+        if (fovChangeTimer == 1.0f)
+        {
+            changeFov = false;
+            fovChangeTimer = 0.0f;
+        }
+    }
+
+}
+
 
 bool showImGui = false;
 void ActionPlayer::Debug() {

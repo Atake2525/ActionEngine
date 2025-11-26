@@ -63,6 +63,12 @@ private: // メンバ変数
     float m_groundDistance; // 地面との距離判定
     float m_wallDistance;   // 壁との距離判定
 
+
+/// ===== 演出 =====///
+    float m_walkFov;
+    float m_dashFov;
+    float m_fovChangeTime;
+
 private: // 関数
 ///===== 入力・移動処理 =====///
 
@@ -70,7 +76,7 @@ private: // 関数
     void Move();                   // 移動処理 (地上・空中)
     void ApplyGravity();           // 重力の適用
     void Jump();                   // ジャンプ処理
-    void Crouch(bool IsPressed);   // しゃがみ切り替え
+    void Crouch();   // しゃがみ切り替え
 
 ///===== 壁アクション =====///
 
@@ -87,6 +93,11 @@ private: // 関数
 ///===== カメラ制御 =====///
 
     void HandleMouseLock(); // マウスによる視点操作
+
+
+///===== 演出系更新 =====///
+
+    void UpdateEffects();
 
 ///===== デバッグ用関数 =====//
 
