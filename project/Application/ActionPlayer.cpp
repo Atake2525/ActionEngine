@@ -17,11 +17,11 @@ ActionPlayer::ActionPlayer()
     : m_velocity({ 0.0f, 0.0f, 0.0f })
     , m_accelTime(0.4f)
     , m_moveSpeed(0.0f)
-    , m_walkSpeed(0.1f)
-    , m_dashSpeed(0.2f)
+    , m_walkSpeed(0.15f)
+    , m_dashSpeed(0.3f)
     , m_crouchSpeed(0.08f)
-    , m_jumpForce(6.0f)
-    , m_gravity(1.2f)
+    , m_jumpForce(3.0f)
+    , m_gravity(0.8f)
     , m_inputDirection({ 0.0f, 0.0f })
     , m_isGround(false)
     , m_isDash(false)
@@ -40,6 +40,7 @@ ActionPlayer::ActionPlayer()
 
 Vector3 cameraRotate;
 Transform playerTransform;
+Vector3 panetration = { 0.0f, 0.0f, 0.0f };
 
 void ActionPlayer::Initialize(Camera* camera) {
     m_pPlayerModel = make_unique<Object3d>();
@@ -48,10 +49,6 @@ void ActionPlayer::Initialize(Camera* camera) {
     playerTransform = m_pPlayerModel->GetTransform();
     CollisionManager::GetInstance()->AddCollisionTarget(m_playerAABB, "player");
     m_pCamera = camera;
-
-    m_jumpForce = 6.0f;
-    m_gravity = 2.0f;
-    m_velocity = { 0.0f, 0.0f, 0.0f };
 
     m_pInput = Input::GetInstance();
 }
@@ -72,16 +69,17 @@ void ActionPlayer::Update() {
     Move();
     Jump();
 
+    playerTransform.translate += m_velocity;
     ApplyCollision();
 
-    /*if (m_isWallJumping) {
-        if (m_isWallRunning) {
-            WallJump();
-        }
-        else if (m_isGrounded) {
-            Jump();
-        }
-    }*/
+    /* if (CheckWall()) {
+         if (m_isWallRunning) {
+             WallJump();
+         }
+         else if (m_isGrounded) {
+             Jump();
+         }
+     }*/
 
     ApplyGravity();       // 重力適用（空中時）
 
@@ -90,13 +88,12 @@ void ActionPlayer::Update() {
     Debug();
 #endif // !NDEBUG
 
-    playerTransform.translate += m_velocity;
     m_pPlayerModel->SetTranslate({ playerTransform.translate.x, playerTransform.translate.y, playerTransform.translate.z + 0.05f });
     m_pPlayerModel->Update();
 
     if (!firstUpdate)
     {
-        m_pCamera->SetTranslate({ 0.0f, m_pPlayerModel->GetAABB().max.y - 1.0f, 0.0f });
+        m_pCamera->SetTranslate({ 0.0f, m_pPlayerModel->GetAABB().max.y - 0.2f, 0.0f });
         firstUpdate = true;
     }
 
@@ -256,18 +253,49 @@ void ActionPlayer::Move() {
 
 // 重力の適用
 void ActionPlayer::ApplyGravity() {
+
+    if (CollisionManager::GetInstance()->GetGroundDistance("player") > 0.2f && m_isGround)
+    {
+        m_isGround = false;
+    }
+
     if (!m_isGround)
     {
         m_velocity.y -= m_gravity * GameTime::GetInstance()->GetDeltaTime();
+        m_velocity.y = clamp(m_velocity.y, -2.4f, 10.0f);
     }
-    if (CollisionManager::GetInstance()->GetGroundDistance("player") < 0.2f)
+
+    if (panetration.y < 0.0f)
     {
         m_isGround = true;
+        m_velocity.y = 0.0f;
     }
+
 }
 
 // ジャンプ処理
 void ActionPlayer::Jump() {
+    if (m_velocity.y < 0.0f && !m_isGround && CheckWall())
+    {
+        if (m_velocity.x > 0.0f || m_velocity.z > 0.0f)
+        {
+            cameraRotate.z = SwapRadian(35.0f);
+        }
+        else if (m_velocity.x < 0.0f || m_velocity.z < 0.0f)
+        {
+            cameraRotate.z = -SwapRadian(35.0f);
+        }
+        else
+        {
+            cameraRotate.z = 0.0f;
+        }
+    }
+    else
+    {
+        cameraRotate.z = 0.0f;
+    }
+
+
     if (m_pInput->PushKey(DIK_SPACE) && m_isGround)
     {
         m_isGround = false;
@@ -281,9 +309,8 @@ void ActionPlayer::ApplyCollision() {
     m_playerAABB += m_velocity;
     CollisionManager::GetInstance()->UpdateCollisionTarget(m_playerAABB, "player");
     CollisionManager::GetInstance()->Update("player");
-    auto panetration = CollisionManager::GetInstance()->GetPenetration();
-    m_velocity.x -= panetration.x;
-    m_velocity.z -= panetration.z;
+    panetration = CollisionManager::GetInstance()->GetPenetration();
+    playerTransform.translate -= panetration;
 }
 
 // しゃがみ切り替え
@@ -291,8 +318,13 @@ void ActionPlayer::Crouch() {
 
 }
 
+float wallCheckHeihgt = -2.0f; // 壁走りが可能な壁の高さを設定(欲しい高さ * -1.0f)
 // 壁との接触判定
 bool ActionPlayer::CheckWall() {
+    if (CollisionManager::GetInstance()->GetGroundDistance("player") <= -2.0f)
+    {
+        return true;
+    }
     return false;
 }
 
@@ -326,8 +358,8 @@ void ActionPlayer::UpdateStates() {
 void ActionPlayer::HandleMouseLock() {
     cameraRotate = m_pCamera->GetRotate();
 
-    cameraRotate.y += m_pInput->GetMouseVel2().x / 100.0f;
-    cameraRotate.x += m_pInput->GetMouseVel2().y / 100.0f;
+    cameraRotate.y += m_pInput->GetMouseVel2().x / 100.0f / 10.0f;
+    cameraRotate.x += m_pInput->GetMouseVel2().y / 100.0f / 10.0f;
 
     cameraRotate.x = clamp(cameraRotate.x, SwapRadian(-90.0f), SwapRadian(90.0f));
 
