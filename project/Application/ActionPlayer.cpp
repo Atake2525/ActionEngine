@@ -3,10 +3,11 @@
 #include "GameTime.h"
 #include "Camera.h"
 #include "ImGuiManager.h"
+#include "CollisionManager.h"
 
 #ifndef NDEBUG	
-	#include "Logger.h"
-	using namespace Logger;
+#include "Logger.h"
+using namespace Logger;
 #endif // !NDEBUG
 
 
@@ -33,6 +34,7 @@ ActionPlayer::ActionPlayer()
     , m_walkFov(1.0f)
     , m_dashFov(1.3f)
     , m_fovChangeTime(0.1f)
+    , m_playerAABB({ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f })
 {
 }
 
@@ -44,6 +46,7 @@ void ActionPlayer::Initialize(Camera* camera) {
     m_pPlayerModel->Initialize();
     m_pPlayerModel->SetModel("Resources/Model/gltf/Player", "PlayerCollision.gltf");
     playerTransform = m_pPlayerModel->GetTransform();
+    CollisionManager::GetInstance()->AddCollisionTarget(m_playerAABB, "player");
     m_pCamera = camera;
 
     m_jumpForce = 6.0f;
@@ -55,19 +58,21 @@ void ActionPlayer::Initialize(Camera* camera) {
 
 bool firstUpdate = false;
 void ActionPlayer::Update() {
-	HandleMouseLock();
-	//UpdateStates();
+    HandleMouseLock();
+    //UpdateStates();
 
     HandleInput();                  // 入力取得（WASD, ジャンプ, しゃがみなど）
 
- //   if (m_isWallRunning) {
- //      // 壁走り中の移動処理
- //   }
- //   else {
- //       Move();           // 通常移動（地上・空中）
- //   }
+    //   if (m_isWallRunning) {
+    //      // 壁走り中の移動処理
+    //   }
+    //   else {
+    //       Move();           // 通常移動（地上・空中）
+    //   }
     Move();
     Jump();
+
+    ApplyCollision();
 
     /*if (m_isWallJumping) {
         if (m_isWallRunning) {
@@ -80,7 +85,7 @@ void ActionPlayer::Update() {
 
     ApplyGravity();       // 重力適用（空中時）
 
- //   // 実際の位置更新（RigidbodyやTransformに反映）
+    //   // 実際の位置更新（RigidbodyやTransformに反映）
 #ifndef NDEBUG
     Debug();
 #endif // !NDEBUG
@@ -96,7 +101,7 @@ void ActionPlayer::Update() {
     }
 
     UpdateEffects();
-    
+
     m_pCamera->SetParent(m_pPlayerModel->GetWorldMatrix());
     m_pCamera->SetRotate(cameraRotate);
     m_pCamera->Update();
@@ -126,7 +131,7 @@ void ActionPlayer::HandleInput() {
     {
         m_inputDirection.x = 1.0f;
     }
-   
+
     m_moveSpeed = m_walkSpeed;
     if (m_pInput->PushKey(DIK_LSHIFT))
     {
@@ -159,9 +164,11 @@ void ActionPlayer::HandleInput() {
 }
 
 Vector3 moveVelocity = { 0.0f, 0.0f, 0.0f };
+float velocityLerpTimer = 0.0f;
 // 移動処理 (地上・空中)
 void ActionPlayer::Move() {
 
+    m_playerAABB = m_pPlayerModel->GetAABB();
     if (m_inputDirection.x != 0.0f)
     {
         if (Sign(moveVelocity.x) != m_inputDirection.x)
@@ -175,8 +182,8 @@ void ActionPlayer::Move() {
             moveVelocity.x = clamp(moveVelocity.x, -m_moveSpeed, m_moveSpeed);
         }
     }
-    else if(moveVelocity.x > 0.0f)
-    { 
+    else if (moveVelocity.x > 0.0f)
+    {
         moveVelocity.x -= m_moveSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime * 3.0f;
         if (moveVelocity.x < 0.0f)
         {
@@ -230,9 +237,19 @@ void ActionPlayer::Move() {
         }
         moveVelocity = moveVelocity / len * m_moveSpeed;
     }
+    if (m_inputDirection.x != 0.0f || m_inputDirection.y != 0.0f)
+    {
+        velocityLerpTimer += GameTime::GetInstance()->GetDeltaTime() / 10.0f;
+    }
+    else
+    {
+        velocityLerpTimer -= GameTime::GetInstance()->GetDeltaTime() / 10.0f;
+    }
+    velocityLerpTimer = clamp(velocityLerpTimer, 0.0f, 1.0f);
 
     Matrix4x4 mat = MakeAffineMatrix({ 1.0f, 1.0f, 1.0f }, Vector3{ 0.0f, cameraRotate.y, 0.0f }, playerTransform.translate);
     Vector3 normalDir = TransformNormal(moveVelocity, mat);
+
     m_velocity.x = normalDir.x;
     m_velocity.z = normalDir.z;
 }
@@ -243,11 +260,9 @@ void ActionPlayer::ApplyGravity() {
     {
         m_velocity.y -= m_gravity * GameTime::GetInstance()->GetDeltaTime();
     }
-    if (playerTransform.translate.y < 1.0f)
+    if (CollisionManager::GetInstance()->GetGroundDistance("player") < 0.2f)
     {
-        playerTransform.translate.y = 1.0f;
         m_isGround = true;
-        m_velocity.y = 0.0f;
     }
 }
 
@@ -261,6 +276,16 @@ void ActionPlayer::Jump() {
     }
 }
 
+// 当たり判定の適用
+void ActionPlayer::ApplyCollision() {
+    m_playerAABB += m_velocity;
+    CollisionManager::GetInstance()->UpdateCollisionTarget(m_playerAABB, "player");
+    CollisionManager::GetInstance()->Update("player");
+    auto panetration = CollisionManager::GetInstance()->GetPenetration();
+    m_velocity.x -= panetration.x;
+    m_velocity.z -= panetration.z;
+}
+
 // しゃがみ切り替え
 void ActionPlayer::Crouch() {
 
@@ -268,7 +293,7 @@ void ActionPlayer::Crouch() {
 
 // 壁との接触判定
 bool ActionPlayer::CheckWall() {
-	return false;
+    return false;
 }
 
 // 壁走り開始処理
@@ -344,7 +369,7 @@ void ActionPlayer::UpdateEffects() {
 }
 
 
-bool showImGui = false;
+bool showImGui = true;
 void ActionPlayer::Debug() {
     if (m_pInput->TriggerKey(DIK_F6)) showImGui = !showImGui;
     if (!showImGui) return;
@@ -356,6 +381,11 @@ void ActionPlayer::Debug() {
     ImGui::DragFloat("ジャンプ量", &m_jumpForce, 0.1f);
     ImGui::DragFloat("重力加速度", &m_gravity, 0.1f);
     ImGui::DragFloat2("平行移動用Velocity", &moveVelocity.x, 0.1f);
+    ImGui::DragFloat("LerpTimer", &velocityLerpTimer, 0.0f);
+    auto groundDist = CollisionManager::GetInstance()->GetGroundDistance("player");
+    ImGui::DragFloat("GroundDistance", &groundDist, 0.0f);
+    auto panetration = CollisionManager::GetInstance()->GetPenetration();
+    ImGui::DragFloat3("Penetration", &panetration.x, 0.0f);
 
     ImGui::End();
 }

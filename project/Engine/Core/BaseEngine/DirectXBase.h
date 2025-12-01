@@ -113,6 +113,7 @@ private:
 
 	// 起動時間(FPS固定用)
 	std::chrono::steady_clock::time_point reference_;
+	float m_MaxFPS = 120.0f;
 
 	/// <summary>
 	/// デバイス初期化
