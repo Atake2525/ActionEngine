@@ -38,6 +38,7 @@ private: // メンバ変数
     Input* m_pInput;
     Camera* m_pCamera;
     std::unique_ptr<Object3d> m_pPlayerModel;
+    AABB m_playerAABB;
     Transform m_playerTransform;
 
 ///===== 入力・移動処理 =====///
@@ -94,6 +95,9 @@ private: // 関数
 
     void HandleMouseLock(); // マウスによる視点操作
 
+///===== 当たり判定の適用 =====///
+
+    void ApplyCollision(); // 当たり判定の適用
 
 ///===== 演出系更新 =====///
 

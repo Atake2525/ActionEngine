@@ -115,6 +115,7 @@ void MyGame::Update() {
 	ImGui::SetWindowPos(ImVec2{ float(WinApp::GetInstance()->GetkClientWidth()) - 300.0f, 128.0f + 165.0f });
 	ImGui::SetWindowSize(ImVec2{ 300.0f, 82.5f });
 	float fps = 1.0f / GameTime::GetInstance()->GetDeltaTime();
+	fps = std::round(fps);
 	ImGui::Text("FPS:");
 	ImGui::SameLine();
 	if (fps > fps * 0.75f)
