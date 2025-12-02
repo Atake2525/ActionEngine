@@ -164,91 +164,84 @@ Vector3 moveVelocity = { 0.0f, 0.0f, 0.0f };
 float velocityLerpTimer = 0.0f;
 // 移動処理 (地上・空中)
 void ActionPlayer::Move() {
-
     m_playerAABB = m_pPlayerModel->GetAABB();
-    if (m_inputDirection.x != 0.0f)
-    {
-        if (Sign(moveVelocity.x) != m_inputDirection.x)
-        {
-            moveVelocity.x += m_moveSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime * m_inputDirection.x * 6.0f;
-            moveVelocity.x = clamp(moveVelocity.x, -m_moveSpeed, m_moveSpeed);
-        }
-        else
-        {
-            moveVelocity.x += m_moveSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime * m_inputDirection.x;
-            moveVelocity.x = clamp(moveVelocity.x, -m_moveSpeed, m_moveSpeed);
-        }
-    }
-    else if (moveVelocity.x > 0.0f)
-    {
-        moveVelocity.x -= m_moveSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime * 3.0f;
-        if (moveVelocity.x < 0.0f)
-        {
-            moveVelocity.x = 0.0f;
-        }
-    }
-    else if (moveVelocity.x < 0.0f)
-    {
-        moveVelocity.x += m_moveSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime * 3.0f;
-        if (moveVelocity.x > 0.0f)
-        {
-            moveVelocity.x = 0.0f;
-        }
-    }
 
-    if (m_inputDirection.y != 0.0f)
-    {
-        if (Sign(moveVelocity.z) != m_inputDirection.y)
-        {
-            moveVelocity.z += m_moveSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime * m_inputDirection.y * 6.0f;
-            moveVelocity.z = clamp(moveVelocity.z, -m_moveSpeed, m_moveSpeed);
-        }
-        else
-        {
-            moveVelocity.z += m_moveSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime * m_inputDirection.y;
-            moveVelocity.z = clamp(moveVelocity.z, -m_moveSpeed, m_moveSpeed);
-        }
-    }
-    else if (moveVelocity.z > 0.0f)
-    {
-        moveVelocity.z -= m_moveSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime * 3.0f;
-        if (moveVelocity.z < 0.0f)
-        {
-            moveVelocity.z = 0.0f;
-        }
-    }
-    else if (moveVelocity.z < 0.0f)
-    {
-        moveVelocity.z += m_moveSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime * 3.0f;
-        if (moveVelocity.z > 0.0f)
-        {
-            moveVelocity.z = 0.0f;
-        }
-    }
+    moveVelocity.x = m_inputDirection.x;
+    moveVelocity.z = m_inputDirection.y;
+
     if (m_inputDirection.x != 0.0f && m_inputDirection.y != 0.0f)
     {
+        Vector3 vel = m_velocity;
         float len = Length(moveVelocity);
         if (len == 0.0f)
         {
             len = 1.0f;
         }
-        moveVelocity = moveVelocity / len * m_moveSpeed;
+        moveVelocity = moveVelocity / len;
     }
-    if (m_inputDirection.x != 0.0f || m_inputDirection.y != 0.0f)
-    {
-        velocityLerpTimer += GameTime::GetInstance()->GetDeltaTime() / 10.0f;
-    }
-    else
-    {
-        velocityLerpTimer -= GameTime::GetInstance()->GetDeltaTime() / 10.0f;
-    }
-    velocityLerpTimer = clamp(velocityLerpTimer, 0.0f, 1.0f);
 
     Matrix4x4 mat = MakeAffineMatrix({ 1.0f, 1.0f, 1.0f }, Vector3{ 0.0f, cameraRotate.y, 0.0f }, playerTransform.translate);
     Vector3 normalDir = TransformNormal(moveVelocity, mat);
+    Vector3 clampSpeedDir = Normalize(normalDir);
 
-    m_velocity.x = normalDir.x;
-    m_velocity.z = normalDir.z;
+    if (m_pInput->TriggerKey(DIK_T))
+    {
+        float t = 0;
+    }
+
+    // 速度を落とす
+    if (m_velocity.x > 0.0f && m_inputDirection.x == 0.0f)
+    {
+        m_velocity.x -= m_moveSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime;
+        if (m_velocity.x < 0.0f)
+        {
+            m_velocity.x = 0.0f;
+        }
+    }
+    else if (m_velocity.x < 0.0f && m_inputDirection.x == 0.0f)
+    {
+        m_velocity.x += m_moveSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime;
+        if (m_velocity.x > 0.0f)
+        {
+            m_velocity.x = 0.0f;
+        }
+    }
+    if (m_velocity.z > 0.0f && m_inputDirection.y == 0.0f)
+    {
+        m_velocity.z -= m_moveSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime;
+        if (m_velocity.z < 0.0f)
+        {
+            m_velocity.z = 0.0f;
+        }
+    }
+    else if (m_velocity.z < 0.0f && m_inputDirection.y == 0.0f)
+    {
+        m_velocity.z += m_moveSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime;
+        if (m_velocity.z > 0.0f)
+        {
+            m_velocity.z = 0.0f;
+        }
+    }
+
+    // 移動用Velocityに格納
+    m_velocity.x += normalDir.x * GameTime::GetInstance()->GetDeltaTime();
+    m_velocity.z += normalDir.z * GameTime::GetInstance()->GetDeltaTime();
+
+    // Clamp
+    clampSpeedDir.x *= Sign(clampSpeedDir.x);
+    clampSpeedDir.z *= Sign(clampSpeedDir.z);
+    Vector3 mapSpeed = { m_moveSpeed * clampSpeedDir.x, m_moveSpeed * clampSpeedDir.y, m_moveSpeed * clampSpeedDir.z };
+    if (clampSpeedDir.x == 0.0f || clampSpeedDir.z == 0.0f)
+    {
+        m_velocity.x = clamp(m_velocity.x, -m_moveSpeed, m_moveSpeed);
+        m_velocity.z = clamp(m_velocity.z, -m_moveSpeed, m_moveSpeed);
+    }
+    else
+    {
+        m_velocity.x = clamp(m_velocity.x, -mapSpeed.x, mapSpeed.x);
+        m_velocity.z = clamp(m_velocity.z, -mapSpeed.z, mapSpeed.z);
+    }
+
 }
 
 // 重力の適用
