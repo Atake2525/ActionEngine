@@ -13,8 +13,12 @@ using namespace Logger;
 
 using namespace std;
 
+ActionPlayer::~ActionPlayer() {
+    CollisionManager::GetInstance()->DeleteCollisionTarget("player");
+}
+
 ActionPlayer::ActionPlayer()
-    : m_velocity({ 0.0f, 0.0f, 0.0f })
+    : m_velocity(Vector3::Zero)
     , m_accelTime(0.4f)
     , m_moveSpeed(0.0f)
     , m_walkSpeed(0.15f)
@@ -28,19 +32,19 @@ ActionPlayer::ActionPlayer()
     , m_isCrouch(false)
     , m_isWallRun(false)
     , m_isWallJump(false)
-    , m_wallNormal({ 0.0f, 0.0f, 0.0f })
+    , m_wallNormal(Vector3::Zero)
     , m_groundDistance(0.0f)
     , m_wallDistance(0.0f)
     , m_walkFov(1.0f)
     , m_dashFov(1.3f)
     , m_fovChangeTime(0.1f)
-    , m_playerAABB({ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f })
+    , m_playerAABB(Vector3::Zero, Vector3::Zero)
 {
 }
 
 Vector3 cameraRotate;
 Transform playerTransform;
-Vector3 panetration = { 0.0f, 0.0f, 0.0f };
+Vector3 panetration = Vector3::Zero;
 
 void ActionPlayer::Initialize(Camera* camera) {
     m_pPlayerModel = make_unique<Object3d>();
@@ -160,8 +164,11 @@ void ActionPlayer::HandleInput() {
     }
 }
 
-Vector3 moveVelocity = { 0.0f, 0.0f, 0.0f };
+Vector3 moveVelocity = Vector3::Zero;
 float velocityLerpTimer = 0.0f;
+
+Vector3 moveStart = Vector3::Zero;
+Vector3 moveEnd = Vector3::Zero;
 // 移動処理 (地上・空中)
 void ActionPlayer::Move() {
     m_playerAABB = m_pPlayerModel->GetAABB();
@@ -186,7 +193,7 @@ void ActionPlayer::Move() {
 
     if (m_pInput->TriggerKey(DIK_T))
     {
-        float t = 0;
+        float t = 0.0f;
     }
 
     // 速度を落とす
@@ -223,9 +230,11 @@ void ActionPlayer::Move() {
         }
     }
 
+    velocityLerpTimer += GameTime::GetInstance()->GetDeltaTime();
+
     // 移動用Velocityに格納
-    m_velocity.x += normalDir.x * GameTime::GetInstance()->GetDeltaTime();
-    m_velocity.z += normalDir.z * GameTime::GetInstance()->GetDeltaTime();
+    m_velocity.x = normalDir.x;
+    m_velocity.z = normalDir.z;
 
     // Clamp
     clampSpeedDir.x *= Sign(clampSpeedDir.x);

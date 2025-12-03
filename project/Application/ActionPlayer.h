@@ -16,6 +16,8 @@ class ActionPlayer {
 public:
     // コンストラクタ
     ActionPlayer();
+    // デストラクタ
+    ~ActionPlayer();
 
     /// <summary>
     /// 初期化
