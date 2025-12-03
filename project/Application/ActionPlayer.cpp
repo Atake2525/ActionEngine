@@ -25,6 +25,7 @@ ActionPlayer::ActionPlayer()
     , m_dashSpeed(0.3f)
     , m_crouchSpeed(0.08f)
     , m_jumpForce(3.0f)
+    , m_wallJumpForce(25.0f)
     , m_gravity(0.8f)
     , m_inputDirection({ 0.0f, 0.0f })
     , m_isGround(false)
@@ -58,7 +59,14 @@ void ActionPlayer::Initialize(Camera* camera) {
 }
 
 bool firstUpdate = false;
+
+Vector3 moveVelocity = Vector3::Zero;
+Vector3 vel = Vector3::Zero;
+Vector3 jumpVelocity = Vector3::Zero;
+
 void ActionPlayer::Update() {
+    m_velocity = Vector3::Zero;
+
     HandleMouseLock();
     //UpdateStates();
 
@@ -73,6 +81,7 @@ void ActionPlayer::Update() {
     Move();
     Jump();
 
+    m_velocity = vel + jumpVelocity;
     playerTransform.translate += m_velocity;
     ApplyCollision();
 
@@ -164,7 +173,7 @@ void ActionPlayer::HandleInput() {
     }
 }
 
-Vector3 moveVelocity = Vector3::Zero;
+
 float velocityLerpTimer = 0.0f;
 
 Vector3 moveStart = Vector3::Zero;
@@ -172,85 +181,82 @@ Vector3 moveEnd = Vector3::Zero;
 // 移動処理 (地上・空中)
 void ActionPlayer::Move() {
     m_playerAABB = m_pPlayerModel->GetAABB();
+    if (m_inputDirection.x != 0.0f)
+    {
+        if (Sign(moveVelocity.x) != m_inputDirection.x)
+        {
+            moveVelocity.x += m_moveSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime * m_inputDirection.x * 6.0f;
+            moveVelocity.x = clamp(moveVelocity.x, -m_moveSpeed, m_moveSpeed);
+        }
+        else
+        {
+            moveVelocity.x += m_moveSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime * m_inputDirection.x;
+            moveVelocity.x = clamp(moveVelocity.x, -m_moveSpeed, m_moveSpeed);
+        }
+    }
+    else if (moveVelocity.x > 0.0f)
+    {
+        moveVelocity.x -= m_moveSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime * 3.0f;
+        if (moveVelocity.x < 0.0f)
+        {
+            moveVelocity.x = 0.0f;
+        }
+    }
+    else if (moveVelocity.x < 0.0f)
+    {
+        moveVelocity.x += m_moveSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime * 3.0f;
+        if (moveVelocity.x > 0.0f)
+        {
+            moveVelocity.x = 0.0f;
+        }
+    }
 
-    moveVelocity.x = m_inputDirection.x;
-    moveVelocity.z = m_inputDirection.y;
-
+    if (m_inputDirection.y != 0.0f)
+    {
+        if (Sign(moveVelocity.z) != m_inputDirection.y)
+        {
+            moveVelocity.z += m_moveSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime * m_inputDirection.y * 6.0f;
+            moveVelocity.z = clamp(moveVelocity.z, -m_moveSpeed, m_moveSpeed);
+        }
+        else
+        {
+            moveVelocity.z += m_moveSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime * m_inputDirection.y;
+            moveVelocity.z = clamp(moveVelocity.z, -m_moveSpeed, m_moveSpeed);
+        }
+    }
+    else if (moveVelocity.z > 0.0f)
+    {
+        moveVelocity.z -= m_moveSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime * 3.0f;
+        if (moveVelocity.z < 0.0f)
+        {
+            moveVelocity.z = 0.0f;
+        }
+    }
+    else if (moveVelocity.z < 0.0f)
+    {
+        moveVelocity.z += m_moveSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime * 3.0f;
+        if (moveVelocity.z > 0.0f)
+        {
+            moveVelocity.z = 0.0f;
+        }
+    }
     if (m_inputDirection.x != 0.0f && m_inputDirection.y != 0.0f)
     {
-        Vector3 vel = m_velocity;
         float len = Length(moveVelocity);
         if (len == 0.0f)
         {
             len = 1.0f;
         }
-        moveVelocity = moveVelocity / len;
+        moveVelocity = moveVelocity / len * m_moveSpeed;
     }
+    
+    velocityLerpTimer = clamp(velocityLerpTimer, 0.0f, 1.0f);
 
     Matrix4x4 mat = MakeAffineMatrix({ 1.0f, 1.0f, 1.0f }, Vector3{ 0.0f, cameraRotate.y, 0.0f }, playerTransform.translate);
     Vector3 normalDir = TransformNormal(moveVelocity, mat);
-    Vector3 clampSpeedDir = Normalize(normalDir);
 
-    if (m_pInput->TriggerKey(DIK_T))
-    {
-        float t = 0.0f;
-    }
-
-    // 速度を落とす
-    if (m_velocity.x > 0.0f && m_inputDirection.x == 0.0f)
-    {
-        m_velocity.x -= m_moveSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime;
-        if (m_velocity.x < 0.0f)
-        {
-            m_velocity.x = 0.0f;
-        }
-    }
-    else if (m_velocity.x < 0.0f && m_inputDirection.x == 0.0f)
-    {
-        m_velocity.x += m_moveSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime;
-        if (m_velocity.x > 0.0f)
-        {
-            m_velocity.x = 0.0f;
-        }
-    }
-    if (m_velocity.z > 0.0f && m_inputDirection.y == 0.0f)
-    {
-        m_velocity.z -= m_moveSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime;
-        if (m_velocity.z < 0.0f)
-        {
-            m_velocity.z = 0.0f;
-        }
-    }
-    else if (m_velocity.z < 0.0f && m_inputDirection.y == 0.0f)
-    {
-        m_velocity.z += m_moveSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime;
-        if (m_velocity.z > 0.0f)
-        {
-            m_velocity.z = 0.0f;
-        }
-    }
-
-    velocityLerpTimer += GameTime::GetInstance()->GetDeltaTime();
-
-    // 移動用Velocityに格納
-    m_velocity.x = normalDir.x;
-    m_velocity.z = normalDir.z;
-
-    // Clamp
-    clampSpeedDir.x *= Sign(clampSpeedDir.x);
-    clampSpeedDir.z *= Sign(clampSpeedDir.z);
-    Vector3 mapSpeed = { m_moveSpeed * clampSpeedDir.x, m_moveSpeed * clampSpeedDir.y, m_moveSpeed * clampSpeedDir.z };
-    if (clampSpeedDir.x == 0.0f || clampSpeedDir.z == 0.0f)
-    {
-        m_velocity.x = clamp(m_velocity.x, -m_moveSpeed, m_moveSpeed);
-        m_velocity.z = clamp(m_velocity.z, -m_moveSpeed, m_moveSpeed);
-    }
-    else
-    {
-        m_velocity.x = clamp(m_velocity.x, -mapSpeed.x, mapSpeed.x);
-        m_velocity.z = clamp(m_velocity.z, -mapSpeed.z, mapSpeed.z);
-    }
-
+    vel.x = normalDir.x;
+    vel.z = normalDir.z;
 }
 
 // 重力の適用
@@ -263,46 +269,113 @@ void ActionPlayer::ApplyGravity() {
 
     if (!m_isGround)
     {
-        m_velocity.y -= m_gravity * GameTime::GetInstance()->GetDeltaTime();
-        m_velocity.y = clamp(m_velocity.y, -2.4f, 10.0f);
+        jumpVelocity.y -= m_gravity * GameTime::GetInstance()->GetDeltaTime();
+        jumpVelocity.y = clamp(jumpVelocity.y, -2.4f, 10.0f);
     }
 
     if (panetration.y < 0.0f)
     {
         m_isGround = true;
-        m_velocity.y = 0.0f;
+        jumpVelocity.y = 0.0f;
+    }
+
+    if (jumpVelocity.x > 0.0f)
+    {
+        jumpVelocity.x -= m_walkSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime * 2.0f;
+        if (jumpVelocity.x <= 0.0f)
+        {
+            jumpVelocity.x = 0.0f;
+        }
+        else
+        {
+            moveVelocity.x = 0.0f;
+        }
+    }
+    else if (jumpVelocity.x < 0.0f)
+    {
+        jumpVelocity.x += m_walkSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime * 2.0f;
+        if (jumpVelocity.x >= 0.0f)
+        {
+            jumpVelocity.x = 0.0f;
+        }
+        else
+        {
+            moveVelocity.x = 0.0f;
+        }
+    }
+
+    if (jumpVelocity.z > 0.0f)
+    {
+        jumpVelocity.z -= m_walkSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime * 2.0f;
+        if (jumpVelocity.z <= 0.0f)
+        {
+            jumpVelocity.z = 0.0f;
+        }
+        else
+        {
+            moveVelocity.z = 0.0f;
+        }
+    }
+    else if (jumpVelocity.z < 0.0f)
+    {
+        jumpVelocity.z += m_walkSpeed * GameTime::GetInstance()->GetDeltaTime() / m_accelTime * 2.0f;
+        if (jumpVelocity.z >= 0.0f)
+        {
+            jumpVelocity.z = 0.0f;
+        }
+        else
+        {
+            moveVelocity.z = 0.0f;
+        }
     }
 
 }
 
 // ジャンプ処理
 void ActionPlayer::Jump() {
-    if (m_velocity.y < 0.0f && !m_isGround && CheckWall())
+    if (jumpVelocity.y < 0.0f && !m_isGround && CheckWall())
     {
-        if (m_velocity.x > 0.0f || m_velocity.z > 0.0f)
+        Vector3 cameraDirection = m_pCamera->GetDirection();
+        if (panetration.x != 0.0f)
         {
-            cameraRotate.z = SwapRadian(35.0f);
+            cameraRotate.z = SwapRadian(35.0f) * Sign(cameraDirection.z) * Sign(panetration.x);
         }
-        else if (m_velocity.x < 0.0f || m_velocity.z < 0.0f)
+        else if (panetration.z != 0.0f)
         {
-            cameraRotate.z = -SwapRadian(35.0f);
+            cameraRotate.z = -SwapRadian(35.0f) * Sign(cameraDirection.x) * Sign(panetration.z);
         }
-        else
-        {
-            cameraRotate.z = 0.0f;
-        }
+        m_isWallRun = true;
     }
     else
     {
+        m_isWallRun = false;
         cameraRotate.z = 0.0f;
     }
 
-
-    if (m_pInput->PushKey(DIK_SPACE) && m_isGround)
+    // ジャンプ処理
+    if (m_pInput->PushKey(DIK_SPACE))
     {
-        m_isGround = false;
-        float jumpVelocity = sqrtf(2.0f * m_gravity * GameTime::GetInstance()->GetDeltaTime() * m_jumpForce);
-        m_velocity.y = jumpVelocity;
+        // 通常のジャンプと壁ジャンプを分ける
+        if (!m_isWallRun && m_isGround)
+        {
+            m_isGround = false;
+            float jumpVel = sqrtf(2.0f * m_gravity * GameTime::GetInstance()->GetDeltaTime() * m_jumpForce);
+            jumpVelocity.y = jumpVel;
+        }
+        else if (m_isWallRun && !m_isGround)
+        {
+            m_isGround = false;
+            float jumpVel = sqrtf(2.0f * m_gravity * GameTime::GetInstance()->GetDeltaTime() * m_jumpForce);
+            if (panetration.x != 0.0f)
+            {
+                jumpVelocity.x -= m_wallJumpForce * GameTime::GetInstance()->GetDeltaTime() * Sign(panetration.x);
+            }
+            else if (panetration.z != 0.0f)
+            {
+                jumpVelocity.z -= m_wallJumpForce * GameTime::GetInstance()->GetDeltaTime() * Sign(panetration.z);
+            }
+            jumpVelocity.y = jumpVel;
+        }
     }
 }
 
@@ -360,8 +433,8 @@ void ActionPlayer::UpdateStates() {
 void ActionPlayer::HandleMouseLock() {
     cameraRotate = m_pCamera->GetRotate();
 
-    cameraRotate.y += m_pInput->GetMouseVel2().x / 100.0f / 10.0f;
-    cameraRotate.x += m_pInput->GetMouseVel2().y / 100.0f / 10.0f;
+    cameraRotate.y += m_pInput->GetMouseVel2().x / 100.0f / 5.0f;
+    cameraRotate.x += m_pInput->GetMouseVel2().y / 100.0f / 5.0f;
 
     cameraRotate.x = clamp(cameraRotate.x, SwapRadian(-90.0f), SwapRadian(90.0f));
 
@@ -410,9 +483,12 @@ void ActionPlayer::Debug() {
     ImGui::Begin("PlayerStetas");
     ImGui::DragFloat3("Translate", &playerTransform.translate.x, 0.1f);
     ImGui::DragFloat3("Velocity", &m_velocity.x, 0.1f);
+    ImGui::DragFloat3("MoveVelocity", &moveVelocity.x, 0.1f);
+    ImGui::DragFloat3("JumpVelocity", &jumpVelocity.x, 0.1f);
     ImGui::DragFloat2("InputDirection", &m_inputDirection.x, 0.0f);
     ImGui::DragFloat("速度", &m_walkSpeed, 0.1f);
     ImGui::DragFloat("ジャンプ量", &m_jumpForce, 0.1f);
+    ImGui::DragFloat("壁ジャンプ力", &m_wallJumpForce, 0.1f);
     ImGui::DragFloat("重力加速度", &m_gravity, 0.1f);
     ImGui::DragFloat2("平行移動用Velocity", &moveVelocity.x, 0.1f);
     ImGui::DragFloat("LerpTimer", &velocityLerpTimer, 0.0f);
