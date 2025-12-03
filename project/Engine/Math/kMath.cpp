@@ -750,6 +750,24 @@ float Lerp(const float& befor, const float& after, float t) {
 	return ans;
 }
 
+float LerpInverse(float start, float end, float now)
+{
+	if (fabs(end - start) < 1e-6f) {
+		return 0.0f; // 分母が0になるのを防ぐ
+	}
+	return (now - start) / (end - start);
+
+}
+
+Vector3 LerpInverse(Vector3 start, Vector3 end, Vector3 now)
+{
+	return {
+		LerpInverse(start.x, end.x, now.x),
+		LerpInverse(start.y, end.y, now.y),
+		LerpInverse(start.z, end.z, now.z)
+	};
+}
+
 float Dot(const Quaternion& v1, const Quaternion& v2) { return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z + v1.w * v2.w; }
 
 // 逆Quaternionを返す
