@@ -181,7 +181,7 @@ Vector3 moveEnd = Vector3::Zero;
 // 移動処理 (地上・空中)
 void ActionPlayer::Move() {
     m_playerAABB = m_pPlayerModel->GetAABB();
-    if (m_inputDirection.x != 0.0f)
+    /*if (m_inputDirection.x != 0.0f)
     {
         if (Sign(moveVelocity.x) != m_inputDirection.x)
         {
@@ -256,7 +256,34 @@ void ActionPlayer::Move() {
     Vector3 normalDir = TransformNormal(moveVelocity, mat);
 
     vel.x = normalDir.x;
-    vel.z = normalDir.z;
+    vel.z = normalDir.z;*/
+
+    if (m_inputDirection.x != 0.0f)
+    {
+        float sign = Sign(m_inputDirection.x);
+        if (m_inputDirection.x == sign)
+        {
+            moveVelocity.x += m_walkSpeed * GameTime::GetInstance()->GetDeltaTime() * sign;
+        }
+        else
+        {
+            moveVelocity.x += m_walkSpeed * GameTime::GetInstance()->GetDeltaTime() * 2.0f * sign;
+        }
+    }
+    if (m_inputDirection.y != 0.0f)
+    {
+        float sign = Sign(m_inputDirection.y);
+        if (m_inputDirection.y == sign)
+        {
+            moveVelocity.z += m_walkSpeed * GameTime::GetInstance()->GetDeltaTime() * sign;
+        }
+        else
+        {
+            moveVelocity.z += m_walkSpeed * GameTime::GetInstance()->GetDeltaTime() * sign;
+        }
+    }
+
+
 }
 
 // 重力の適用
@@ -360,9 +387,10 @@ void ActionPlayer::Jump() {
         {
             m_isGround = false;
             float jumpVel = sqrtf(2.0f * m_gravity * GameTime::GetInstance()->GetDeltaTime() * m_jumpForce);
-            jumpVelocity.y = jumpVel;
+            //jumpVelocity.y = jumpVel;
+            moveVelocity.y = jumpVel;
         }
-        else if (m_isWallRun && !m_isGround)
+        /*else if (m_isWallRun && !m_isGround)
         {
             m_isGround = false;
             float jumpVel = sqrtf(2.0f * m_gravity * GameTime::GetInstance()->GetDeltaTime() * m_jumpForce);
@@ -375,7 +403,7 @@ void ActionPlayer::Jump() {
                 jumpVelocity.z -= m_wallJumpForce * GameTime::GetInstance()->GetDeltaTime() * Sign(panetration.z);
             }
             jumpVelocity.y = jumpVel;
-        }
+        }*/
     }
 }
 
