@@ -2,6 +2,7 @@
 #include <chrono>
 #include <windows.h>
 #include <pdh.h>
+#include "DirectXBase.h"
 #pragma comment(lib, "pdh.lib")
 
 GameTime* GameTime::instance = nullptr;
@@ -20,12 +21,16 @@ void GameTime::Finalize() {
 
 void GameTime::Initialize() {
 	deltaTime = 0.0f;
+    maxFPS = DirectXBase::GetInstance()->GetMaxFPS();
 }
 
 void GameTime::UpdateDeltaTime() {
 	static auto lastTime = std::chrono::high_resolution_clock::now();
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<float> delta = currentTime - lastTime;
+    
+
+
 	lastTime = currentTime;
 	deltaTime = delta.count();
 }

@@ -39,6 +39,8 @@ public:
 
 	const float& GetDeltaTime() const { return deltaTime; }
 
+	const float& GetUnFixedDeltaTime() const { return 1.0f / maxFPS; }
+
     const float& GetCPUUsagePDH() const { return cpuUsage; }
 
     const float& GetGPUUsageNVML() const { return gpuUsage; }
@@ -54,10 +56,11 @@ private:
 
     float gpuUsage = 0.0f;
 
+	float maxFPS = 60.0f;
 
 
 	void UpdateDeltaTime();
     void UpdateCPUUsagePDH();
-    void UpdateGPUUsageNVML();
+    //void UpdateGPUUsageNVML();
 
 };

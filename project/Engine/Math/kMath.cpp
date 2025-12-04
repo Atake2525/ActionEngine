@@ -814,3 +814,8 @@ float Sign(float value)
 		return 1.0f;
 	}
 }
+
+Vector3 Sign(Vector3 value)
+{
+	return { Sign(value.x), Sign(value.y), Sign(value.z) };
+}
