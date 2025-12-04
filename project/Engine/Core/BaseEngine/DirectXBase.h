@@ -98,6 +98,8 @@ public:
 	[[nodiscard]]
 	Microsoft::WRL::ComPtr<ID3D12Resource> UploadTextureData(Microsoft::WRL::ComPtr<ID3D12Resource> texture, const DirectX::ScratchImage& mipImages);
 
+	float GetMaxFPS() const { return m_MaxFPS; }
+
 private:
 
 
@@ -113,7 +115,7 @@ private:
 
 	// 起動時間(FPS固定用)
 	std::chrono::steady_clock::time_point reference_;
-	float m_MaxFPS = 120.0f;
+	float m_MaxFPS = 60.0f;
 
 	/// <summary>
 	/// デバイス初期化

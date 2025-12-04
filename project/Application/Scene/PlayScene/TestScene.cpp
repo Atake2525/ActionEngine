@@ -121,9 +121,9 @@ void TestScene::Update() {
 	box2->Update();
 
 	//camera->Update();
+	actionPlayer->Update();
 	trap->Update();
 	//player->Update();
-	actionPlayer->Update();
 
 	goal->Update(player->GetAABB());
 
