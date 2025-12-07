@@ -25,7 +25,7 @@ ActionPlayer::ActionPlayer()
     , m_dashSpeed(18.0f)
     , m_crouchSpeed(8.0f)
     , m_jumpForce(3.0f)
-    , m_wallJumpForce(25.0f)
+    , m_wallJumpForce(15.0f)
     , m_gravity(0.8f)
     , m_inputDirection({ 0.0f, 0.0f })
     , m_isGround(false)
@@ -82,6 +82,11 @@ void ActionPlayer::Update() {
     Jump();
 
     m_velocity = moveVelocity + jumpVelocity;
+    float maxSpeed = m_moveSpeed * GameTime::GetInstance()->GetDeltaTime();
+    maxSpeed *= Sign(maxSpeed);
+
+	m_velocity.x = clamp(m_velocity.x, -maxSpeed, maxSpeed);
+    m_velocity.z = clamp(m_velocity.z, -maxSpeed, maxSpeed);
     playerTransform.translate += m_velocity;
     ApplyCollision();
 
@@ -219,9 +224,10 @@ void ActionPlayer::Move() {
     else
     {
         // JumpVelocityの値をいじる
-        if (Sign(m_inputDirection.x) != Sign(jumpVelocity.x))
+		// InputDirectionとCameraの向きから計算
+        if (Sign(m_inputDirection.x) * Sign(m_pCamera->GetDirection().z) != Sign(jumpVelocity.x))
         {
-            float sign = Sign(m_inputDirection.x);
+            float sign = Sign(m_inputDirection.x) * Sign(m_pCamera->GetDirection().z);
             float moveSign = Sign(moveVel.x);
             if (moveSign == sign)
             {
@@ -348,9 +354,12 @@ void ActionPlayer::ApplyGravity() {
         m_isGround = true;
 		m_isWallJump = false;
         moveVelocity.y = 0.0f;
+        moveVelocity.x = jumpVelocity.x;
+        moveVelocity.z = jumpVelocity.z;
+		jumpVelocity = Vector3::Zero;
     }
 
-    if (jumpVelocity.x > 0.0f)
+   /* if (jumpVelocity.x > 0.0f)
     {
         jumpVelocity.x -= m_accelTime * GameTime::GetInstance()->GetDeltaTime();
         if (jumpVelocity.x <= 0.0f)
@@ -398,7 +407,7 @@ void ActionPlayer::ApplyGravity() {
         {
             moveVelocity.z = 0.0f;
         }
-    }
+    }*/
 
 }
 
@@ -598,6 +607,7 @@ void ActionPlayer::Debug() {
     ImGui::DragFloat3("Penetration", &panetration.x, 0.0f);
     ImGui::DragFloat("Walk", &m_walkSpeed, 0.1f);
     ImGui::DragFloat("Dash", &m_dashSpeed, 0.1f);
+	ImGui::DragFloat("AccelTime", &m_accelTime, 0.1f);
     ImGui::DragFloat("Crouch", &m_crouchSpeed, 0.1f);
 
     ImGui::End();
