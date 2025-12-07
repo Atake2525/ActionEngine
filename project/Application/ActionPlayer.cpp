@@ -219,7 +219,7 @@ void ActionPlayer::Move() {
     else
     {
         // JumpVelocityの値をいじる
-        if (m_inputDirection.x != 0.0f)
+        if (Sign(m_inputDirection.x) != Sign(jumpVelocity.x))
         {
             float sign = Sign(m_inputDirection.x);
             float moveSign = Sign(moveVel.x);
@@ -352,7 +352,7 @@ void ActionPlayer::ApplyGravity() {
 
     if (jumpVelocity.x > 0.0f)
     {
-        jumpVelocity.x -= m_gravity * GameTime::GetInstance()->GetDeltaTime();
+        jumpVelocity.x -= m_accelTime * GameTime::GetInstance()->GetDeltaTime();
         if (jumpVelocity.x <= 0.0f)
         {
             jumpVelocity.x = 0.0f;
@@ -431,24 +431,25 @@ void ActionPlayer::Jump() {
         {
             m_isGround = false;
             float jumpVel = sqrtf(2.0f * m_gravity * GameTime::GetInstance()->GetDeltaTime() * m_jumpForce);
-            //jumpVelocity.y = jumpVel;
             moveVelocity.y = jumpVel;
         }
         else if (m_isWallRun && !m_isGround)
         {
 			m_isWallJump = true;
+            m_isWallRun = false;
             moveVel.x = 0.0f;
             m_isGround = false;
             float jumpVel = sqrtf(2.0f * m_gravity * GameTime::GetInstance()->GetDeltaTime() * m_jumpForce);
+            moveVelocity.y = jumpVel;
+            float wallJumpVel = sqrtf(2.0f * m_accelTime * GameTime::GetInstance()->GetDeltaTime() * m_wallJumpForce);
             if (panetration.x != 0.0f)
             {
-                jumpVelocity.x = -(jumpVel * Sign(panetration.x));
+                jumpVelocity.x = -(wallJumpVel * Sign(panetration.x));
             }
             else if (panetration.z != 0.0f)
             {
-                jumpVelocity.z = -(jumpVel * Sign(panetration.z));
+                jumpVelocity.z = -(wallJumpVel * Sign(panetration.z));
             }
-            moveVelocity.y = jumpVel;
         }
     }
 }
