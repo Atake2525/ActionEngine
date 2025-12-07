@@ -805,6 +805,10 @@ float LengthSquared(const Vector3& v)
 
 float Sign(float value)
 {
+	if (value == 0.0f)
+	{
+		return 0.0f;
+	}
 	if (value < 0.0f)
 	{
 		return -1.0f;
