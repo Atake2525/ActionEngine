@@ -53,6 +53,7 @@ private: // メンバ変数
     float m_jumpForce;        // ジャンプ力
     float m_wallJumpForce;    // 壁ジャンプ力
     float m_gravity;          // 重力加速度
+    float m_fallLimit;       // 落下制限速度
     Vector2 m_inputDirection; // WASD入力方向
 
 ///===== プレイヤー状態 =====///
