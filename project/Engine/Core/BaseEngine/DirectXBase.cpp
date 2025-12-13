@@ -298,7 +298,7 @@ void DirectXBase::PostDraw() {
     }
 
     // FPS 固定
-    UpdateFixFPS();
+    //UpdateFixFPS();
 
     // 次のフレーム用のコマンドリストを準備
     hr = commandAllocator->Reset();

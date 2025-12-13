@@ -7,7 +7,7 @@
 #include <random>
 #pragma once
 
-// ã©‚Ìî•ñ‚ğŠi”[‚·‚é‚½‚ß‚Ì\‘¢‘Ì
+// ç½ ã®æƒ…å ±ã‚’æ ¼ç´ã™ã‚‹ãŸã‚ã®æ§‹é€ ä½“
 struct Traps
 {
     std::unique_ptr<Object3d> object;
@@ -19,7 +19,7 @@ struct Traps
 };
 
 /// <summary>
-/// ƒgƒ‰ƒbƒv
+/// ãƒˆãƒ©ãƒƒãƒ—
 /// </summary>
 class Trap
 {
@@ -28,30 +28,30 @@ public:
     ~Trap();
 
     /// <summary>
-    /// ‰Šú‰»
+    /// åˆæœŸåŒ–
     /// </summary>
-    /// <param name="jsonName">JsonLoader‚É“o˜^‚µ‚½–¼‘O</param>
+    /// <param name="jsonName">JsonLoaderã«ç™»éŒ²ã—ãŸåå‰</param>
     void Initialize(std::string jsonName = "normal");
 
     /// <summary>
-    /// XV
+    /// æ›´æ–°
     /// </summary>
     void Update();
 
     /// <summary>
-    /// •`‰æ
+    /// æç”»
     /// </summary>
     void Draw();
 
     /// <summary>
-    /// ƒXƒ^[ƒgƒV[ƒ“—p‚Ì‚‚³ƒJƒŠƒ“ƒO—pSetter
+    /// ã‚¹ã‚¿ãƒ¼ãƒˆã‚·ãƒ¼ãƒ³ç”¨ã®é«˜ã•ã‚«ãƒªãƒ³ã‚°ç”¨Setter
     /// </summary>
     void SetDrawHeight(const float height);
 
 private:
 
     /// <summary>
-    /// ƒgƒ‰ƒbƒv‚ğì¬‚·‚éŠÖ”
+    /// ãƒˆãƒ©ãƒƒãƒ—ã‚’ä½œæˆã™ã‚‹é–¢æ•°
     /// </summary>
     void MakeTrap(Traps& data);
 

@@ -40,6 +40,8 @@ ActionPlayer::ActionPlayer()
     , m_dashFov(1.3f)
     , m_fovChangeTime(0.1f)
     , m_playerAABB(Vector3::Zero, Vector3::Zero)
+    , m_wallJumpCount(0)
+    , m_maxWallJumpCount(2)
 {
 }
 
@@ -85,7 +87,7 @@ void ActionPlayer::Update() {
     float maxSpeed = m_moveSpeed * GameTime::GetInstance()->GetDeltaTime();
     maxSpeed *= Sign(maxSpeed);
 
-	m_velocity.x = clamp(m_velocity.x, -maxSpeed, maxSpeed);
+    m_velocity.x = clamp(m_velocity.x, -maxSpeed, maxSpeed);
     m_velocity.z = clamp(m_velocity.z, -maxSpeed, maxSpeed);
     playerTransform.translate += m_velocity;
     ApplyCollision();
@@ -184,61 +186,41 @@ Vector3 moveVel = Vector3::Zero;
 // 移動処理 (地上・空中)
 void ActionPlayer::Move() {
     m_playerAABB = m_pPlayerModel->GetAABB();
-  
+
     // 左右移動のみ壁ジャンプ中は操作を受け付けないようにする
-    if (!m_isWallJump)
+    if (m_inputDirection.x != 0.0f)
     {
-        if (m_inputDirection.x != 0.0f)
+        float sign = Sign(m_inputDirection.x);
+        float moveSign = Sign(moveVel.x);
+        if (moveSign == sign)
         {
-            float sign = Sign(m_inputDirection.x);
-            float moveSign = Sign(moveVel.x);
-            if (moveSign == sign)
-            {
-                moveVel.x += m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 2.0f * sign;
-            }
-            else
-            {
-                moveVel.x += m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 4.0f * sign;
-            }
+            moveVel.x += m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 2.0f * sign;
         }
         else
         {
-            if (moveVel.x > 0.0f)
-            {
-                moveVel.x -= m_accelTime * GameTime::GetInstance()->GetDeltaTime();
-                if (moveVel.x < 0.0f)
-                {
-                    moveVel.x = 0.0f;
-                }
-            }
-            else if (moveVel.x < 0.0f)
-            {
-                moveVel.x += m_accelTime * GameTime::GetInstance()->GetDeltaTime();
-                if (moveVel.x > 0.0f)
-                {
-                    moveVel.x = 0.0f;
-                }
-            }
+            moveVel.x += m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 4.0f * sign;
         }
     }
     else
     {
-        // JumpVelocityの値をいじる
-		// InputDirectionとCameraの向きから計算
-        if (Sign(m_inputDirection.x) * Sign(m_pCamera->GetDirection().z) != Sign(jumpVelocity.x))
+        if (moveVel.x > 0.0f)
         {
-            float sign = Sign(m_inputDirection.x) * Sign(m_pCamera->GetDirection().z);
-            float moveSign = Sign(moveVel.x);
-            if (moveSign == sign)
+            moveVel.x -= m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 2.0f;
+            if (moveVel.x < 0.0f)
             {
-                jumpVelocity.x += m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 2.0f * sign;
+                moveVel.x = 0.0f;
             }
-            else
+        }
+        else if (moveVel.x < 0.0f)
+        {
+            moveVel.x += m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 2.0f;
+            if (moveVel.x > 0.0f)
             {
-                jumpVelocity.x += m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 4.0f * sign;
+                moveVel.x = 0.0f;
             }
         }
     }
+
     if (m_inputDirection.y != 0.0f)
     {
         float sign = Sign(m_inputDirection.y);
@@ -256,7 +238,7 @@ void ActionPlayer::Move() {
     {
         if (moveVel.z > 0.0f)
         {
-            moveVel.z -= m_accelTime * GameTime::GetInstance()->GetDeltaTime();
+            moveVel.z -= m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 2.0f;
             if (moveVel.z < 0.0f)
             {
                 moveVel.z = 0.0f;
@@ -264,7 +246,7 @@ void ActionPlayer::Move() {
         }
         else if (moveVel.z < 0.0f)
         {
-            moveVel.z += m_accelTime * GameTime::GetInstance()->GetDeltaTime();
+            moveVel.z += m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 2.0f;
             if (moveVel.z > 0.0f)
             {
                 moveVel.z = 0.0f;
@@ -272,12 +254,12 @@ void ActionPlayer::Move() {
         }
     }
 
-	float maxSpeed = m_moveSpeed * GameTime::GetInstance()->GetDeltaTime();
-	maxSpeed *= Sign(maxSpeed);
+    float maxSpeed = m_moveSpeed * GameTime::GetInstance()->GetDeltaTime();
+    maxSpeed *= Sign(maxSpeed);
 
     if (m_inputDirection.x != 0.0f && m_inputDirection.y != 0.0f)
     {
-		Vector3 DirVel = { m_inputDirection.x, 0.0f, m_inputDirection.y };
+        Vector3 DirVel = { m_inputDirection.x, 0.0f, m_inputDirection.y };
         float len = Length(DirVel);
         if (len == 0.0f)
         {
@@ -294,37 +276,6 @@ void ActionPlayer::Move() {
 
     moveVelocity.x = normalDir.x;
     moveVelocity.z = normalDir.z;
-
-    // 入力方向を正規化
-    //Vector3 inputDir = { m_inputDirection.x, 0.0f, m_inputDirection.y };
-    //if (inputDir.x != 0.0f && inputDir.z != 0.0f)
-    //{
-    //    float len = Length(inputDir);
-    //    inputDir = inputDir / len;
-    //}
-
-    //// 視点の方向に応じて移動量を変えたいのでTransformNormalを行う
-    //Matrix4x4 rotMatrix = MakeAffineMatrix({ 1.0f, 1.0f, 1.0f }, Vector3{ 0.0, cameraRotate.y, 0.0f }, playerTransform.translate);
-    //Vector3 moveDir = TransformNormal(inputDir, rotMatrix);
-
-    //// 入力方向を使って最高速度を計算
-    ////Vector3 SignDir = Sign(moveDir);
-    //Vector3 maxSpeed = moveDir * m_moveSpeed * GameTime::GetInstance()->GetUnFixedDeltaTime();
-    //maxSpeed *= Sign(maxSpeed);
-
-    //moveVel += moveDir * (1.0f - exp(-m_accelTime * GameTime::GetInstance()->GetDeltaTime()));
-
-    //if (m_inputDirection.x != 0.0f)
-    //{
-    //    float t = 0.0f;
-    //}
-
-    //moveVel.x = clamp(moveVel.x, -maxSpeed.x, maxSpeed.x);
-    //moveVel.z = clamp(moveVel.z, -maxSpeed.z, maxSpeed.z);
-
-
-    //moveVelocity.x = moveVel.x;
-    //moveVelocity.z = moveVel.z;
 
 }
 
@@ -345,69 +296,20 @@ void ActionPlayer::ApplyGravity() {
         }
         else
         {
-			moveVelocity.y = -m_gravity * 1.2f * GameTime::GetInstance()->GetDeltaTime();
+            moveVelocity.y = -m_gravity * 1.2f * GameTime::GetInstance()->GetDeltaTime();
         }
     }
 
     if (panetration.y < 0.0f && moveVelocity.y < 0.0f)
     {
         m_isGround = true;
-		m_isWallJump = false;
+        m_isWallJump = false;
+        m_wallJumpCount = 0;
         moveVelocity.y = 0.0f;
         moveVelocity.x = jumpVelocity.x;
         moveVelocity.z = jumpVelocity.z;
-		jumpVelocity = Vector3::Zero;
+        jumpVelocity = Vector3::Zero;
     }
-
-   /* if (jumpVelocity.x > 0.0f)
-    {
-        jumpVelocity.x -= m_accelTime * GameTime::GetInstance()->GetDeltaTime();
-        if (jumpVelocity.x <= 0.0f)
-        {
-            jumpVelocity.x = 0.0f;
-        }
-        else
-        {
-            moveVelocity.x = 0.0f;
-        }
-    }
-    else if (jumpVelocity.x < 0.0f)
-    {
-        jumpVelocity.x += m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 2.0f;
-        if (jumpVelocity.x >= 0.0f)
-        {
-            jumpVelocity.x = 0.0f;
-        }
-        else
-        {
-            moveVelocity.x = 0.0f;
-        }
-    }
-
-    if (jumpVelocity.z > 0.0f)
-    {
-        jumpVelocity.z -= m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 2.0f;
-        if (jumpVelocity.z <= 0.0f)
-        {
-            jumpVelocity.z = 0.0f;
-        }
-        else
-        {
-            moveVelocity.z = 0.0f;
-        }
-    }
-    else if (jumpVelocity.z < 0.0f)
-    {
-        jumpVelocity.z += m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 2.0f;
-        if (jumpVelocity.z >= 0.0f)
-        {
-            jumpVelocity.z = 0.0f;
-        }
-        else
-        {
-            moveVelocity.z = 0.0f;
-        }
-    }*/
 
 }
 
@@ -442,9 +344,10 @@ void ActionPlayer::Jump() {
             float jumpVel = sqrtf(2.0f * m_gravity * GameTime::GetInstance()->GetDeltaTime() * m_jumpForce);
             moveVelocity.y = jumpVel;
         }
-        else if (m_isWallRun && !m_isGround)
+        else if (m_isWallRun && !m_isGround && m_wallJumpCount < m_maxWallJumpCount)
         {
-			m_isWallJump = true;
+            m_wallJumpCount++;
+            m_isWallJump = true;
             m_isWallRun = false;
             moveVel.x = 0.0f;
             m_isGround = false;
@@ -471,10 +374,12 @@ void ActionPlayer::ApplyCollision() {
     panetration = CollisionManager::GetInstance()->GetPenetration();
     if (panetration.x != 0.0f)
     {
-        moveVel.x = 0.0f;
+        moveVelocity.x = 0.0f;
+        jumpVelocity.x = 0.0f;
     }
     else if (panetration.z != 0.0f) {
-        moveVel.z = 0.0f;
+        moveVelocity.z = 0.0f;
+        jumpVelocity.z = 0.0f;
     }
     playerTransform.translate -= panetration;
 }
@@ -596,6 +501,7 @@ void ActionPlayer::Debug() {
     ImGui::DragFloat3("JumpVelocity", &jumpVelocity.x, 0.1f);
     ImGui::DragFloat2("InputDirection", &m_inputDirection.x, 0.0f);
     ImGui::DragFloat("速度", &m_walkSpeed, 0.1f);
+    ImGui::DragFloat("加速", &m_accelTime, 0.1f);
     ImGui::DragFloat("ジャンプ量", &m_jumpForce, 0.1f);
     ImGui::DragFloat("壁ジャンプ力", &m_wallJumpForce, 0.1f);
     ImGui::DragFloat("重力加速度", &m_gravity, 0.1f);
@@ -607,7 +513,7 @@ void ActionPlayer::Debug() {
     ImGui::DragFloat3("Penetration", &panetration.x, 0.0f);
     ImGui::DragFloat("Walk", &m_walkSpeed, 0.1f);
     ImGui::DragFloat("Dash", &m_dashSpeed, 0.1f);
-	ImGui::DragFloat("AccelTime", &m_accelTime, 0.1f);
+    ImGui::DragFloat("AccelTime", &m_accelTime, 0.1f);
     ImGui::DragFloat("Crouch", &m_crouchSpeed, 0.1f);
 
     ImGui::End();
