@@ -107,6 +107,8 @@ void Player::Update() {
 		Move();
 	}
 
+	camera->SetRotate(cameraTransform.rotate);
+
 	playerOBB_ = CreateOBB(playerTransform_, playerAABB_);
 	playerModel_->SetAnimationSpeed(1.0f);
 	playerModel_->SetTransform(playerTransform_);
@@ -267,7 +269,8 @@ void Player::Move()
 	{
 		wallDashRotateTimer_ += GameTime::GetInstance()->GetDeltaTime() / wallDashRotateTime_;
 		wallDashRotateTimer_ = std::clamp(wallDashRotateTimer_, 0.0f, 1.0f);
-		camera->SetRotate({ 0.0f ,0.0f, EaseOutExpo(wallDashRotateTimer_, wallDashRotateStart_, wallDashRotateEnd_) });
+		cameraTransform.rotate.z = EaseOutExpo(wallDashRotateTimer_, wallDashRotateStart_, wallDashRotateEnd_);
+		//camera->SetRotate({ 0.0f ,0.0f, EaseOutExpo(wallDashRotateTimer_, wallDashRotateStart_, wallDashRotateEnd_) });
 	}
 
 

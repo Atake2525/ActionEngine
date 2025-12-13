@@ -114,7 +114,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Scene\PlayScene\DemoScene.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Application\Scene\Manager\BaseScene.cpp" />
+    <ClCompile Include="Application\Scene\Manager\BaseScene.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Engine\3d\Object\Skinning\SkinningObject3dBase.cpp" />
     <ClCompile Include="Engine\BlackBox\Log\Logger.cpp" />
     <ClCompile Include="Engine\BlackBox\Log\StringUtility.cpp" />
@@ -175,6 +178,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="externels\imgui\imgui_tables.cpp" />
     <ClCompile Include="externels\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Stage.cpp" />
+    <ClCompile Include="Application\Scene\PlayScene\StageSelectScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\ActionPlayer.h">
@@ -185,7 +189,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Scene\PlayScene\DemoScene.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="Application\Scene\Manager\BaseScene.h" />
+    <ClInclude Include="Application\Scene\Manager\BaseScene.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="Engine\3d\Object\Skinning\SkinningObject3dBase.h" />
     <ClInclude Include="Engine\BlackBox\Log\Logger.h" />
     <ClInclude Include="Engine\BlackBox\Log\StringUtility.h" />
@@ -264,6 +271,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externels\imgui\imstb_textedit.h" />
     <ClInclude Include="externels\imgui\imstb_truetype.h" />
     <ClInclude Include="Stage.h" />
+    <ClInclude Include="Application\Scene\PlayScene\StageSelectScene.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="externels\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">

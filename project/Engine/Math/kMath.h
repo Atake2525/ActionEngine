@@ -157,6 +157,10 @@ Vector3 Lerp(const Vector3& v1, const Vector3& v2, float t);
 
 float Lerp(const float& v1, const float& v2, float t);
 
+float LerpInverse(float start, float end, float now);
+
+Vector3 LerpInverse(Vector3 start, Vector3 end, Vector3 now);
+
 float Dot(const Quaternion& v1, const Quaternion& v2);
 
 // 逆Quaternionを返す
@@ -171,3 +175,5 @@ Vector3 ClosestPoint(const AABB& aabb, const Vector3& segment);
 float LengthSquared(const Vector3& v);
 
 float Sign(float value);
+
+Vector3 Sign(Vector3 value);

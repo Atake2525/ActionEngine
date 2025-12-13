@@ -95,7 +95,6 @@ void TestScene::Update() {
 
 	grid->Update();
 
-	//camera->Update();
 
 	SkyBox::GetInstance()->Update();
 
@@ -121,9 +120,10 @@ void TestScene::Update() {
 	box2->SetTransform(t);
 	box2->Update();
 
+	//camera->Update();
+	actionPlayer->Update();
 	trap->Update();
 	//player->Update();
-	actionPlayer->Update();
 
 	goal->Update(player->GetAABB());
 
