@@ -5,22 +5,22 @@
 
 #pragma once
 
-// ƒQ[ƒ€ƒI[ƒo[ƒV[ƒ“
+// ã‚²ãƒ¼ãƒ ã‚ªãƒ¼ãƒãƒ¼ã‚·ãƒ¼ãƒ³
 class GameOver
 {
 public:
     /// <summary>
-    /// ‰Šú‰»
+    /// åˆæœŸåŒ–
     /// </summary>
     void Initialize();
 
     /// <summary>
-    /// XV
+    /// æ›´æ–°
     /// </summary>
     void Update();
 
     /// <summary>
-    /// •`‰æ
+    /// æç”»
     /// </summary>
     void Draw();
 

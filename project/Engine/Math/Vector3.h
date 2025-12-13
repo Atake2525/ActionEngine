@@ -10,6 +10,8 @@ struct Vector3
 
 	// 減算演算子のオーバーロード
 	Vector3 operator-(const Vector3& other) const;
+
+	static const Vector3 Zero;
 };
 
 inline Vector3 operator*=(Vector3& v, const float& n) {
@@ -109,3 +111,5 @@ inline Vector3 Vector3Clamp(Vector3& v, const float min, const Vector3 max) {
 
 	return v;
 }
+
+inline const Vector3 Vector3::Zero = Vector3{ 0.0f, 0.0f, 0.0f };

@@ -139,11 +139,11 @@ const float CollisionManager::GetGroundDistance(const std::string& targetName) c
 			if (CollisionAABBXZ(target, terrainAABB))
 			{
 				float dist = target.min.y - terrainAABB.max.y;
-				distance = std::min(distance, dist);
-				/*if (distance >= 0.0f)
+				if (distance == 0.0f && dist < 0.0f)
 				{
-
-				}*/
+					break;
+				}
+				distance = std::min(distance, dist);
 			}
 		}
 		//}

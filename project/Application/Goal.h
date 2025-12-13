@@ -9,32 +9,32 @@
 #include "AABB.h"
 
 /// <summary>
-/// �S�[��
+/// ゴール
 /// </summary>
 class Goal
 {
 public:
-	// �f�X�g���N�^
+	// デストラクタ
 	~Goal();
 
 	/// <summary>
-	/// ������
+	/// 初期化
 	/// </summary>
 	void Initalize();
 
 	/// <summary>
-	/// �X�V
+	/// 更新
 	/// </summary>
-	/// <param name="aabb">�����̑ΏۂƂȂ�AABB</param>
+	/// <param name="aabb">処理の対象となるAABB</param>
 	void Update(AABB aabb);
 
 	/// <summary>
-	/// �`��
+	/// 描画
 	/// </summary>
 	void Draw();
 
 	/// <summary>
-	/// �Ώۂ��G��ăS�[������ɂȂ������ǂ���
+	/// 対象が触れてゴール判定になったかどうか
 	/// </summary>
 	/// <returns></returns>
 	const bool& IsGoal() const { return isGoal_; }
