@@ -5,6 +5,7 @@
 #include "ImGuiManager.h"
 #include "CollisionManager.h"
 #include "EasingUtility.h"
+#include "StageCount.h"
 
 #ifndef NDEBUG	
 #include "Logger.h"
@@ -55,7 +56,20 @@ void ActionPlayer::Initialize(Camera* camera) {
     m_pPlayerModel = make_unique<Object3d>();
     m_pPlayerModel->Initialize();
     m_pPlayerModel->SetModel("Resources/Model/gltf/Player", "PlayerCollision.gltf");
+
+
     playerTransform = m_pPlayerModel->GetTransform();
+    vector<JsonData> data = JsonLoader::GetInstance()->GetJsonData("map" + to_string(StageCount::GetInstance()->GetStageCount()), "startpoint");
+    Transform startPoint = {
+        {1.0f, 1.0f, 1.0f},
+        {0.0f, 0.0f, 0.0f},
+        {0.0f, 0.1f, 0.0f}
+    };
+    if (data.size() != 0)
+    {
+        startPoint = data[0].transform;
+    }
+    playerTransform = startPoint;
     CollisionManager::GetInstance()->AddCollisionTarget(m_playerAABB, "player");
     m_pCamera = camera;
 
