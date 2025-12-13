@@ -4,6 +4,7 @@
 #include "Camera.h"
 #include "ImGuiManager.h"
 #include "CollisionManager.h"
+#include "EasingUtility.h"
 
 #ifndef NDEBUG	
 #include "Logger.h"
@@ -27,6 +28,7 @@ ActionPlayer::ActionPlayer()
     , m_jumpForce(3.0f)
     , m_wallJumpForce(15.0f)
     , m_gravity(0.8f)
+    , m_fallLimit(-2.4f)
     , m_inputDirection({ 0.0f, 0.0f })
     , m_isGround(false)
     , m_isDash(false)
@@ -91,15 +93,6 @@ void ActionPlayer::Update() {
     m_velocity.z = clamp(m_velocity.z, -maxSpeed, maxSpeed);
     playerTransform.translate += m_velocity;
     ApplyCollision();
-
-    /* if (CheckWall()) {
-         if (m_isWallRunning) {
-             WallJump();
-         }
-         else if (m_isGrounded) {
-             Jump();
-         }
-     }*/
 
     ApplyGravity();       // 重力適用（空中時）
 
@@ -183,6 +176,7 @@ void ActionPlayer::HandleInput() {
 
 float velocityLerpTimer = 0.0f;
 Vector3 moveVel = Vector3::Zero;
+float jumpMoveSign = 0.0f;
 // 移動処理 (地上・空中)
 void ActionPlayer::Move() {
     m_playerAABB = m_pPlayerModel->GetAABB();
@@ -292,7 +286,7 @@ void ActionPlayer::ApplyGravity() {
         if (!m_isWallRun)
         {
             moveVelocity.y -= m_gravity * GameTime::GetInstance()->GetDeltaTime();
-            moveVelocity.y = clamp(moveVelocity.y, -2.4f, 10.0f);
+            moveVelocity.y = clamp(moveVelocity.y, m_fallLimit, 10.0f);
         }
         else
         {
@@ -303,13 +297,62 @@ void ActionPlayer::ApplyGravity() {
     if (panetration.y < 0.0f && moveVelocity.y < 0.0f)
     {
         m_isGround = true;
-        m_isWallJump = false;
-        m_wallJumpCount = 0;
+		m_isWallJump = false;
         moveVelocity.y = 0.0f;
         moveVelocity.x = jumpVelocity.x;
         moveVelocity.z = jumpVelocity.z;
         jumpVelocity = Vector3::Zero;
     }
+
+   /* if (jumpVelocity.x > 0.0f)
+    {
+        jumpVelocity.x -= m_accelTime * GameTime::GetInstance()->GetDeltaTime();
+        if (jumpVelocity.x <= 0.0f)
+        {
+            jumpVelocity.x = 0.0f;
+        }
+        else
+        {
+            moveVelocity.x = 0.0f;
+        }
+    }
+    else if (jumpVelocity.x < 0.0f)
+    {
+        jumpVelocity.x += m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 2.0f;
+        if (jumpVelocity.x >= 0.0f)
+        {
+            jumpVelocity.x = 0.0f;
+        }
+        else
+        {
+            moveVelocity.x = 0.0f;
+        }
+    }
+
+    if (jumpVelocity.z > 0.0f)
+    {
+        jumpVelocity.z -= m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 2.0f;
+        if (jumpVelocity.z <= 0.0f)
+        {
+            jumpVelocity.z = 0.0f;
+        }
+        else
+        {
+            moveVelocity.z = 0.0f;
+        }
+    }
+    else if (jumpVelocity.z < 0.0f)
+    {
+        jumpVelocity.z += m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 2.0f;
+        if (jumpVelocity.z >= 0.0f)
+        {
+            jumpVelocity.z = 0.0f;
+        }
+        else
+        {
+            moveVelocity.z = 0.0f;
+        }
+    }*/
 
 }
 
@@ -317,15 +360,6 @@ void ActionPlayer::ApplyGravity() {
 void ActionPlayer::Jump() {
     if (moveVelocity.y < 0.0f && !m_isGround && CheckWall())
     {
-        Vector3 cameraDirection = m_pCamera->GetDirection();
-        if (panetration.x != 0.0f)
-        {
-            cameraRotate.z = SwapRadian(35.0f) * Sign(cameraDirection.z) * Sign(panetration.x);
-        }
-        else if (panetration.z != 0.0f)
-        {
-            cameraRotate.z = -SwapRadian(35.0f) * Sign(cameraDirection.x) * Sign(panetration.z);
-        }
         m_isWallRun = true;
     }
     else
@@ -346,8 +380,7 @@ void ActionPlayer::Jump() {
         }
         else if (m_isWallRun && !m_isGround && m_wallJumpCount < m_maxWallJumpCount)
         {
-            m_wallJumpCount++;
-            m_isWallJump = true;
+			m_isWallJump = true;
             m_isWallRun = false;
             moveVel.x = 0.0f;
             m_isGround = false;
@@ -362,6 +395,7 @@ void ActionPlayer::Jump() {
             {
                 jumpVelocity.z = -(wallJumpVel * Sign(panetration.z));
             }
+            jumpMoveSign = Sign(jumpVelocity.x);
         }
     }
 }
@@ -440,8 +474,20 @@ bool changeFov = false;
 float fovChangeTimer = 0.0f;
 float currentFov = 0.0f;
 float fovEnd = 0.0f;
+
+bool fallEffect = false;
+float cameraYOffset = 0.0f;
+float fallEffectTimer = 0.0f;
+bool playFallEffect = false;
+
+bool cameraRotateZEffect = false;
+float cameraRotateZTimer = 0.0f;
+float startRotateZ = 0.0f;
+float endRotateZ = 0.0f;
+
 // 演出系更新
 void ActionPlayer::UpdateEffects() {
+    // FOV変更
     if (!changeFov)
     {
         currentFov = m_pCamera->GetfovY();
@@ -469,6 +515,69 @@ void ActionPlayer::UpdateEffects() {
         }
     }
 
+    // 落下エフェクト
+    if (!m_isGround && moveVelocity.y < -0.5f)
+    {
+        fallEffect = true;
+    }
+    if (fallEffect && m_isGround)
+    {
+        cameraYOffset = m_pCamera->GetTranslate().y;
+        m_pCamera->SetTranslate({ 0.0f, cameraYOffset - 1.0f, 0.0f });
+        playFallEffect = true;
+        fallEffect = false;
+    }
+    if (playFallEffect)
+    {
+        fallEffectTimer += GameTime::GetInstance()->GetDeltaTime() / 0.4f;
+        fallEffectTimer = clamp(fallEffectTimer, 0.0f, 1.0f);
+        float yOffset = EaseInOut(fallEffectTimer, cameraYOffset - 1.0f, cameraYOffset);
+        m_pCamera->SetTranslate({ 0.0f, yOffset, 0.0f });
+        if (fallEffectTimer == 1.0f)
+        {
+            playFallEffect = false;
+            cameraYOffset = 0.0f;
+            fallEffectTimer = 0.0f;
+        }
+    }
+
+    //// 壁走り時のカメラ傾き
+    //if (m_isWallRun && cameraRotate.z == 0.0f)
+    //{
+    //    cameraRotateZEffect = true;
+    //}
+    //if (moveVelocity.y < 0.0f && !m_isGround && CheckWall())
+    //{
+    //    Vector3 cameraDirection = m_pCamera->GetDirection();
+
+    //    if (panetration.x != 0.0f)
+    //    {
+    //        startRotateZ = 0.0f;
+    //        endRotateZ = SwapRadian(35.0f) * Sign(cameraDirection.z) * Sign(panetration.x);
+    //    }
+    //    else if (panetration.z != 0.0f)
+    //    {
+    //        startRotateZ = 0.0f;
+    //        endRotateZ = -SwapRadian(35.0f) * Sign(cameraDirection.x) * Sign(panetration.z);
+    //    }
+    //}
+    //if (cameraRotate.z != 0.0f && !m_isWallRun)
+    //{
+    //    startRotateZ = cameraRotate.z;
+    //    endRotateZ = 0.0f;
+    //    cameraRotateZEffect = true;
+    //}
+    //if (cameraRotateZEffect)
+    //{
+    //    cameraRotateZTimer += GameTime::GetInstance()->GetDeltaTime() / 0.2f;
+    //    cameraRotateZTimer = clamp(cameraRotateZTimer, 0.0f, 1.0f);
+    //    cameraRotate.z = Lerp(startRotateZ, endRotateZ, cameraRotateZTimer);
+    //    if (cameraRotateZTimer > 1.0f)
+    //    {
+    //        cameraRotateZTimer = 0.0f;
+    //        cameraRotateZEffect = false;
+    //    }
+    //}
 }
 
 
