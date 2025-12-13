@@ -56,12 +56,14 @@ private: // メンバ変数
     Vector2 m_inputDirection; // WASD入力方向
 
 ///===== プレイヤー状態 =====///
-    bool m_isGround;      // 地面に接しているか
-    bool m_isDash;        // ダッシュ状態か
-    bool m_isCrouch;      // しゃがみ状態か
-    bool m_isWallRun;     // 壁走り中か
-    bool m_isWallJump;    // 壁ジャンプ中か
-    Vector3 m_wallNormal; // 壁の法線
+    bool m_isGround;          // 地面に接しているか
+    bool m_isDash;            // ダッシュ状態か
+    bool m_isCrouch;          // しゃがみ状態か
+    bool m_isWallRun;         // 壁走り中か
+    bool m_isWallJump;        // 壁ジャンプ中か
+    Vector3 m_wallNormal;     // 壁の法線
+    int m_wallJumpCount;    // 壁ジャンプした回数
+    int m_maxWallJumpCount; // 壁ジャンプの最大回数
 
 ///===== 環境判定 =====///
     float m_groundDistance; // 地面との距離判定
