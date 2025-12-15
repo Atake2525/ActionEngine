@@ -823,3 +823,15 @@ Vector3 Sign(Vector3 value)
 {
 	return { Sign(value.x), Sign(value.y), Sign(value.z) };
 }
+
+const Vector2 Vector2::Clamp(Vector2 target, Vector2 min, Vector2 max) {
+	target.x = std::clamp(target.x, min.x, max.x);
+	target.y = std::clamp(target.y, min.y, max.y);
+	return target;
+}
+
+const Vector2 Vector2::Clamp(Vector2 target, float min, float max) {
+	target.x = std::clamp(target.x, min, max);
+	target.y = std::clamp(target.y, min, max);
+	return target;
+}
