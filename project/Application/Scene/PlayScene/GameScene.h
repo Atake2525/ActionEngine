@@ -21,6 +21,7 @@
 #include "Trap.h"
 #include "GameOver.h"
 #include "GameClearScene.h"
+#include "ActionPlayer.h"
 
 #pragma once
 
@@ -77,7 +78,7 @@ private:
 	Vector2 leftTop;
 	Transform transformSprite;
 
-	std::unique_ptr<Player> player_ = nullptr;
+	std::unique_ptr<ActionPlayer> player_ = nullptr;
 
 	bool start_ = false;
 

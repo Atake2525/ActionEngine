@@ -7,6 +7,7 @@
 
 using namespace Logger;
 using namespace std;
+using namespace ActionEngine::Stage;
 
 Trap::Trap() {
 

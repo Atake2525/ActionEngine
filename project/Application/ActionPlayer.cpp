@@ -12,8 +12,8 @@
 using namespace Logger;
 #endif // !NDEBUG
 
-
 using namespace std;
+using namespace ActionEngine::Stage;
 
 ActionPlayer::~ActionPlayer() {
     CollisionManager::GetInstance()->DeleteCollisionTarget("player");
@@ -96,8 +96,11 @@ void ActionPlayer::Update() {
     //   else {
     //       Move();           // 通常移動（地上・空中）
     //   }
-    Move();
-    Jump();
+    if (!m_isFreeze)
+    {
+        Move();
+        Jump();
+    }
 
     m_velocity = moveVelocity + jumpVelocity;
     float maxSpeed = m_moveSpeed * GameTime::GetInstance()->GetDeltaTime();
@@ -120,7 +123,7 @@ void ActionPlayer::Update() {
 
     if (!firstUpdate)
     {
-        m_pCamera->SetTranslate({ 0.0f, m_pPlayerModel->GetAABB().max.y - 0.2f, 0.0f });
+        m_pCamera->SetTranslate({ 0.0f, 1.8f, 0.0f });
         firstUpdate = true;
     }
 
@@ -133,6 +136,11 @@ void ActionPlayer::Update() {
 
 void ActionPlayer::Draw() {
     m_pPlayerModel->Draw();
+}
+
+void ActionPlayer::Freeze(const bool& isFreeze)
+{
+    m_isFreeze = isFreeze;
 }
 
 // WASDやジャンプなどの入力処理
@@ -592,6 +600,14 @@ void ActionPlayer::UpdateEffects() {
     //        cameraRotateZEffect = false;
     //    }
     //}
+}
+
+const bool ActionPlayer::IsGameOver() const {
+    if (playerTransform.translate.y < -10.0f)
+    {
+        return true;
+    }
+    return false;
 }
 
 
