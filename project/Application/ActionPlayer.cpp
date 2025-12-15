@@ -85,19 +85,19 @@ Vector3 jumpVelocity = Vector3::Zero;
 void ActionPlayer::Update() {
     m_velocity = Vector3::Zero;
 
-    HandleMouseLock();
-    //UpdateStates();
-
-    HandleInput();                  // 入力取得（WASD, ジャンプ, しゃがみなど）
-
-    //   if (m_isWallRunning) {
-    //      // 壁走り中の移動処理
-    //   }
-    //   else {
-    //       Move();           // 通常移動（地上・空中）
-    //   }
     if (!m_isFreeze)
     {
+        HandleMouseLock();
+        //UpdateStates();
+
+        HandleInput();                  // 入力取得（WASD, ジャンプ, しゃがみなど）
+
+        //   if (m_isWallRunning) {
+        //      // 壁走り中の移動処理
+        //   }
+        //   else {
+        //       Move();           // 通常移動（地上・空中）
+        //   }
         Move();
         Jump();
     }
