@@ -1,5 +1,7 @@
 #include "MyGame.h"
 
+using namespace ActionEngine::Stage;
+
 void MyGame::Initialize() {
 
 	FrameWork::Initialize();

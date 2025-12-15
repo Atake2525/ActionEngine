@@ -35,6 +35,24 @@ public:
     /// </summary>
     void Draw();
 
+    /// <summary>
+    /// ゲームオーバーになったかどうか
+    /// </summary>
+    /// <returns></returns>
+    const bool IsGameOver() const;
+
+    /// <summary>
+    /// プレイヤーを行動不可にする
+    /// </summary>
+    /// <param name="isFreeze"></param>
+    void Freeze(const bool& isFreeze);
+
+    /// <summary>
+    /// AABBの取得
+    /// </summary>
+    /// <returns></returns>
+    const AABB GetAABB() const { return m_pPlayerModel->GetAABB(); }
+
 private: // メンバ変数
 
     Input* m_pInput;
@@ -42,6 +60,8 @@ private: // メンバ変数
     std::unique_ptr<Object3d> m_pPlayerModel;
     AABB m_playerAABB;
     Transform m_playerTransform;
+
+    bool m_isFreeze = false;
 
 ///===== 入力・移動処理 =====///
     Vector3 m_velocity;       // 現在の移動速度

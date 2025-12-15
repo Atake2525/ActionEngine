@@ -5,14 +5,15 @@
 #include "ImGuiManager.h"
 #include "CollisionManager.h"
 #include "EasingUtility.h"
+#include "StageCount.h"
 
 #ifndef NDEBUG	
 #include "Logger.h"
 using namespace Logger;
 #endif // !NDEBUG
 
-
 using namespace std;
+using namespace ActionEngine::Stage;
 
 ActionPlayer::~ActionPlayer() {
     CollisionManager::GetInstance()->DeleteCollisionTarget("player");
@@ -55,7 +56,20 @@ void ActionPlayer::Initialize(Camera* camera) {
     m_pPlayerModel = make_unique<Object3d>();
     m_pPlayerModel->Initialize();
     m_pPlayerModel->SetModel("Resources/Model/gltf/Player", "PlayerCollision.gltf");
+
+
     playerTransform = m_pPlayerModel->GetTransform();
+    vector<JsonData> data = JsonLoader::GetInstance()->GetJsonData("map" + to_string(StageCount::GetInstance()->GetStageCount()), "startpoint");
+    Transform startPoint = {
+        {1.0f, 1.0f, 1.0f},
+        {0.0f, 0.0f, 0.0f},
+        {0.0f, 0.1f, 0.0f}
+    };
+    if (data.size() != 0)
+    {
+        startPoint = data[0].transform;
+    }
+    playerTransform = startPoint;
     CollisionManager::GetInstance()->AddCollisionTarget(m_playerAABB, "player");
     m_pCamera = camera;
 
@@ -71,19 +85,22 @@ Vector3 jumpVelocity = Vector3::Zero;
 void ActionPlayer::Update() {
     m_velocity = Vector3::Zero;
 
-    HandleMouseLock();
-    //UpdateStates();
+    if (!m_isFreeze)
+    {
+        HandleMouseLock();
+        //UpdateStates();
 
-    HandleInput();                  // 入力取得（WASD, ジャンプ, しゃがみなど）
+        HandleInput();                  // 入力取得（WASD, ジャンプ, しゃがみなど）
 
-    //   if (m_isWallRunning) {
-    //      // 壁走り中の移動処理
-    //   }
-    //   else {
-    //       Move();           // 通常移動（地上・空中）
-    //   }
-    Move();
-    Jump();
+        //   if (m_isWallRunning) {
+        //      // 壁走り中の移動処理
+        //   }
+        //   else {
+        //       Move();           // 通常移動（地上・空中）
+        //   }
+        Move();
+        Jump();
+    }
 
     m_velocity = moveVelocity + jumpVelocity;
     float maxSpeed = m_moveSpeed * GameTime::GetInstance()->GetDeltaTime();
@@ -106,7 +123,7 @@ void ActionPlayer::Update() {
 
     if (!firstUpdate)
     {
-        m_pCamera->SetTranslate({ 0.0f, m_pPlayerModel->GetAABB().max.y - 0.2f, 0.0f });
+        m_pCamera->SetTranslate({ 0.0f, 1.8f, 0.0f });
         firstUpdate = true;
     }
 
@@ -119,6 +136,11 @@ void ActionPlayer::Update() {
 
 void ActionPlayer::Draw() {
     m_pPlayerModel->Draw();
+}
+
+void ActionPlayer::Freeze(const bool& isFreeze)
+{
+    m_isFreeze = isFreeze;
 }
 
 // WASDやジャンプなどの入力処理
@@ -578,6 +600,14 @@ void ActionPlayer::UpdateEffects() {
     //        cameraRotateZEffect = false;
     //    }
     //}
+}
+
+const bool ActionPlayer::IsGameOver() const {
+    if (playerTransform.translate.y < -10.0f)
+    {
+        return true;
+    }
+    return false;
 }
 
 

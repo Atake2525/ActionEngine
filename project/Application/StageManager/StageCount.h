@@ -4,36 +4,41 @@
 /// <summary>
 /// ステージカウント
 /// </summary>
-class StageCount
-{
-private:
-	static StageCount* instance;
+namespace ActionEngine {
+    namespace Stage {
+		class StageCount
+		{
+		private:
+			static StageCount* instance;
 
-	StageCount() = default;
-	~StageCount() = default;
+			StageCount() = default;
+			~StageCount() = default;
 
-	StageCount(StageCount&) = delete;
-	StageCount& operator=(StageCount&) = delete;
+			StageCount(StageCount&) = delete;
+			StageCount& operator=(StageCount&) = delete;
 
-public:
-	static StageCount* GetInstance();
+		public:
+			static StageCount* GetInstance();
 
-	// 終了処理
-	void Finalize();
+			// 終了処理
+			void Finalize();
 
-	/// <summary>
-	/// 初期化
-	/// </summary>
-	void Initialize();
+			/// <summary>
+			/// 初期化
+			/// </summary>
+			void Initialize();
 
-	// ステージカウントのセット
-	void SetStageCount(int count) { stageCount_ = count; }
+			// ステージカウントのセット
+			void SetStageCount(int count) { stageCount_ = count; }
 
-	// ステージカウントの取得
-	const int& GetStageCount() const { return stageCount_; }
+			// ステージカウントの取得
+			const int& GetStageCount() const { return stageCount_; }
 
-private:
-	int stageCount_;
+		private:
+			int stageCount_;
 
-};
+		};
 
+
+    }
+}
