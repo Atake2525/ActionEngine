@@ -1,7 +1,9 @@
 #include "StageSelectScene.h"
 #include "TextureManager.h"
+#include "StageCount.h"
 
 using namespace std;
+using namespace ActionEngine::Stage;
 
 void StageSelectScene::Initialize() {
 	camera = make_unique<Camera>();

@@ -8,6 +8,7 @@
 #include "StageCount.h"
 
 using namespace std;
+using namespace ActionEngine::Stage;
 
 void GameScene::Initialize() {
 	
@@ -34,9 +35,9 @@ void GameScene::Initialize() {
 	
 	Object3dBase::GetInstance()->SetDefaultCamera(camera.get());
 
-	player_ = make_unique<Player>();
-	player_->Initialize(camera.get(), input, false);
-	player_->Freeze(true);
+	player_ = make_unique<ActionPlayer>();
+	player_->Initialize(camera.get());
+	//player_->Freeze(true);
 
 	land = make_unique<Object3d>();
 	land->Initialize();
@@ -148,16 +149,21 @@ void GameScene::Update() {
 
 		float farClip = camera->GetFarClipDistance();
 		float height;
+
+		AABB landAABB = land->GetAABB();
+		Vector3 landSize = landAABB.max - landAABB.min;
+		float flatLandSize = landSize.x * landSize.z;
+
 		switch (phase_)
 		{
 		case 0:
 
-			farClip = Lerp(1.0f, 48.0f, movieTimer_ / movieTime_);
+			farClip = Lerp(1.0f, flatLandSize, movieTimer_ / movieTime_);
 
 			camera->SetFarClipDistance(farClip);
 			break;
 		case 1:
-			height = Lerp(-1.0f, 35.0f, movieTimer_ / movieTime_);
+			height = Lerp(-1.0f, landAABB.max.y + 10.0f, movieTimer_ / movieTime_);
 			land->SetDrawHeiht(height);
 			trap_->SetDrawHeight(height);
 			break;
