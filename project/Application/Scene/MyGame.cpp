@@ -62,6 +62,9 @@ void MyGame::Initialize() {
 	//gameScene->Initialize();
 
 	//// ↑---- シーンの初期化 ----↑ ////
+
+	WinApp::GetInstance()->DrawWindow();
+	WinApp::GetInstance()->DrawWindow();
 }
 
 void MyGame::Update() {

@@ -27,7 +27,7 @@ ActionPlayer::ActionPlayer()
     , m_dashSpeed(18.0f)
     , m_crouchSpeed(8.0f)
     , m_jumpForce(3.0f)
-    , m_wallJumpForce(15.0f)
+    , m_wallJumpForce(9.8f)
     , m_gravity(0.8f)
     , m_fallLimit(-2.4f)
     , m_inputDirection({ 0.0f, 0.0f })
@@ -82,9 +82,11 @@ Vector3 moveVelocity = Vector3::Zero;
 Vector3 vel = Vector3::Zero;
 Vector3 jumpVelocity = Vector3::Zero;
 
+float delta;
 void ActionPlayer::Update() {
     m_velocity = Vector3::Zero;
 
+    delta = GameTime::GetInstance()->GetDeltaTime();
     if (!m_isFreeze)
     {
         HandleMouseLock();
@@ -149,20 +151,55 @@ void ActionPlayer::HandleInput() {
     // 平行移動行動処理
     if (m_pInput->PushKey(DIK_W))
     {
-        m_inputDirection.y = 1.0f;
+
+        m_inputDirection.y += delta;
+    }
+    else if (m_inputDirection.y > 0.0f) // 入力していない場合、又は入力方向が+だった場合に処理する
+    {
+        m_inputDirection.y -= delta;
+        if (m_inputDirection.y < 0.0f)
+        {
+            m_inputDirection.y = 0.0f;
+        }
     }
     if (m_pInput->PushKey(DIK_S))
     {
-        m_inputDirection.y = -1.0f;
+        m_inputDirection.y -= delta;
+    }
+    else if (m_inputDirection.y < 0.0f)
+    {
+        m_inputDirection.y += delta;
+        if (m_inputDirection.y > 0.0f)
+        {
+            m_inputDirection.y = 0.0f;
+        }
     }
     if (m_pInput->PushKey(DIK_A))
     {
-        m_inputDirection.x = -1.0f;
+        m_inputDirection.x -= delta;
+    }
+    else if (m_inputDirection.x < 0.0f)
+    {
+        m_inputDirection.x += delta;
+        if (m_inputDirection.x > 0.0f)
+        {
+            m_inputDirection.x = 0.0f;
+        }
     }
     if (m_pInput->PushKey(DIK_D))
     {
-        m_inputDirection.x = 1.0f;
+        m_inputDirection.x += delta;
     }
+    else if (m_inputDirection.x > 0.0f)
+    {
+        m_inputDirection.x -= delta;
+        if (m_inputDirection.x < 0.0f)
+        {
+            m_inputDirection.x = 0.0f;
+        }
+    }
+
+    m_inputDirection = Vector2::Clamp(m_inputDirection, 0.0f, 1.0f);
 
     m_moveSpeed = m_walkSpeed;
     if (m_pInput->PushKey(DIK_LSHIFT))
@@ -201,97 +238,100 @@ Vector3 moveVel = Vector3::Zero;
 float jumpMoveSign = 0.0f;
 // 移動処理 (地上・空中)
 void ActionPlayer::Move() {
+    //m_playerAABB = m_pPlayerModel->GetAABB();
+
+    //// 左右移動のみ壁ジャンプ中は操作を受け付けないようにする
+    //if (m_inputDirection.x != 0.0f)
+    //{
+    //    float sign = Sign(m_inputDirection.x);
+    //    float moveSign = Sign(moveVel.x);
+    //    if (moveSign == sign)
+    //    {
+    //        moveVel.x += m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 2.0f * sign;
+    //    }
+    //    else
+    //    {
+    //        moveVel.x += m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 4.0f * sign;
+    //    }
+    //}
+    //else
+    //{
+    //    if (moveVel.x > 0.0f)
+    //    {
+    //        moveVel.x -= m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 2.0f;
+    //        if (moveVel.x < 0.0f)
+    //        {
+    //            moveVel.x = 0.0f;
+    //        }
+    //    }
+    //    else if (moveVel.x < 0.0f)
+    //    {
+    //        moveVel.x += m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 2.0f;
+    //        if (moveVel.x > 0.0f)
+    //        {
+    //            moveVel.x = 0.0f;
+    //        }
+    //    }
+    //}
+
+    //if (m_inputDirection.y != 0.0f)
+    //{
+    //    float sign = Sign(m_inputDirection.y);
+    //    float moveSign = Sign(moveVel.z);
+    //    if (moveSign == sign)
+    //    {
+    //        moveVel.z += m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 2.0f * sign;
+    //    }
+    //    else
+    //    {
+    //        moveVel.z += m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 4.0f * sign;
+    //    }
+    //}
+    //else
+    //{
+    //    if (moveVel.z > 0.0f)
+    //    {
+    //        moveVel.z -= m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 2.0f;
+    //        if (moveVel.z < 0.0f)
+    //        {
+    //            moveVel.z = 0.0f;
+    //        }
+    //    }
+    //    else if (moveVel.z < 0.0f)
+    //    {
+    //        moveVel.z += m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 2.0f;
+    //        if (moveVel.z > 0.0f)
+    //        {
+    //            moveVel.z = 0.0f;
+    //        }
+    //    }
+    //}
+
+    //float maxSpeed = m_moveSpeed * GameTime::GetInstance()->GetDeltaTime();
+    //maxSpeed *= Sign(maxSpeed);
+
+    //if (m_inputDirection.x != 0.0f && m_inputDirection.y != 0.0f)
+    //{
+    //    Vector3 DirVel = { m_inputDirection.x, 0.0f, m_inputDirection.y };
+    //    float len = Length(DirVel);
+    //    if (len == 0.0f)
+    //    {
+    //        len = 1.0f;
+    //    }
+    //    maxSpeed = maxSpeed / len;
+    //}
+
+    //moveVel.x = clamp(moveVel.x, -maxSpeed, maxSpeed);
+    //moveVel.z = clamp(moveVel.z, -maxSpeed, maxSpeed);
+
+    //Matrix4x4 mat = MakeAffineMatrix({ 1.0f, 1.0f, 1.0f }, Vector3{ 0.0f, cameraRotate.y, 0.0f }, playerTransform.translate);
+    //Vector3 normalDir = TransformNormal(moveVel, mat);
+
+    //moveVelocity.x = normalDir.x;
+    //moveVelocity.z = normalDir.z;
+    
     m_playerAABB = m_pPlayerModel->GetAABB();
 
-    // 左右移動のみ壁ジャンプ中は操作を受け付けないようにする
-    if (m_inputDirection.x != 0.0f)
-    {
-        float sign = Sign(m_inputDirection.x);
-        float moveSign = Sign(moveVel.x);
-        if (moveSign == sign)
-        {
-            moveVel.x += m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 2.0f * sign;
-        }
-        else
-        {
-            moveVel.x += m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 4.0f * sign;
-        }
-    }
-    else
-    {
-        if (moveVel.x > 0.0f)
-        {
-            moveVel.x -= m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 2.0f;
-            if (moveVel.x < 0.0f)
-            {
-                moveVel.x = 0.0f;
-            }
-        }
-        else if (moveVel.x < 0.0f)
-        {
-            moveVel.x += m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 2.0f;
-            if (moveVel.x > 0.0f)
-            {
-                moveVel.x = 0.0f;
-            }
-        }
-    }
-
-    if (m_inputDirection.y != 0.0f)
-    {
-        float sign = Sign(m_inputDirection.y);
-        float moveSign = Sign(moveVel.z);
-        if (moveSign == sign)
-        {
-            moveVel.z += m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 2.0f * sign;
-        }
-        else
-        {
-            moveVel.z += m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 4.0f * sign;
-        }
-    }
-    else
-    {
-        if (moveVel.z > 0.0f)
-        {
-            moveVel.z -= m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 2.0f;
-            if (moveVel.z < 0.0f)
-            {
-                moveVel.z = 0.0f;
-            }
-        }
-        else if (moveVel.z < 0.0f)
-        {
-            moveVel.z += m_accelTime * GameTime::GetInstance()->GetDeltaTime() * 2.0f;
-            if (moveVel.z > 0.0f)
-            {
-                moveVel.z = 0.0f;
-            }
-        }
-    }
-
-    float maxSpeed = m_moveSpeed * GameTime::GetInstance()->GetDeltaTime();
-    maxSpeed *= Sign(maxSpeed);
-
-    if (m_inputDirection.x != 0.0f && m_inputDirection.y != 0.0f)
-    {
-        Vector3 DirVel = { m_inputDirection.x, 0.0f, m_inputDirection.y };
-        float len = Length(DirVel);
-        if (len == 0.0f)
-        {
-            len = 1.0f;
-        }
-        maxSpeed = maxSpeed / len;
-    }
-
-    moveVel.x = clamp(moveVel.x, -maxSpeed, maxSpeed);
-    moveVel.z = clamp(moveVel.z, -maxSpeed, maxSpeed);
-
-    Matrix4x4 mat = MakeAffineMatrix({ 1.0f, 1.0f, 1.0f }, Vector3{ 0.0f, cameraRotate.y, 0.0f }, playerTransform.translate);
-    Vector3 normalDir = TransformNormal(moveVel, mat);
-
-    moveVelocity.x = normalDir.x;
-    moveVelocity.z = normalDir.z;
 
 }
 
