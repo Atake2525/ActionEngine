@@ -9,6 +9,13 @@
 class Camera;
 class Input;
 
+enum class Direction {
+    NONE,
+    X,
+    Y,
+    Z
+};
+
 /// <summary>
 /// プレイヤー
 /// </summary>
@@ -62,6 +69,8 @@ private: // メンバ変数
     Transform m_playerTransform;
 
     bool m_isFreeze = false;
+
+    Direction m_WallRunDirection = Direction::X;
 
 ///===== 入力・移動処理 =====///
     Vector3 m_velocity;       // 現在の移動速度
