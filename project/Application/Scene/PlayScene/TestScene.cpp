@@ -94,6 +94,18 @@ void TestScene::Update() {
 		gameOverSprite->Update();
 	}*/
 
+	if (!start_)
+	{
+		if (FadeManager::GetInstance()->CompleteFade())
+		{
+			start_ = true;
+		}
+		else
+		{
+			return;
+		}
+	}
+
 	grid->Update();
 
 

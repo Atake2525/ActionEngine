@@ -105,5 +105,7 @@ private:
 
 	float easeTime = 0.0f;
 
+	bool start_ = false;
+
 };
 
