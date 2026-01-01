@@ -42,7 +42,7 @@ void TitleScene::Initialize() {
 
 	stageModel = make_unique<Object3d>();
 	stageModel->Initialize();
-	stageModel->SetModel("Resources/Model/obj/Stage/map01", "map01.obj", true);
+	stageModel->SetModel("Resources/Model/obj/Stage/StageSelect", "LobbyModel.obj", true);
 
 	startUI = make_unique<UI>();
 	startUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f), float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) - 64.0f * 3.0f }, Origin::Center, "Resources/Sprite/UI/start.png");
@@ -107,6 +107,17 @@ void TitleScene::Update() {
 
 	if (start && !FadeManager::GetInstance()->IsFade())
 	{
+		if (!start_)
+		{
+			if (FadeManager::GetInstance()->CompleteFade())
+			{
+				start_ = true;
+			}
+			else
+			{
+				return;
+			}
+		}
 		Vector3 position;
 
 		if (input->TriggerKey(DIK_S) || input->TriggerKey(DIK_DOWN) || input->TriggerXButton(DPad::Down))

@@ -74,5 +74,7 @@ private:
 	std::unique_ptr<Trap> trap;
 
 	std::unique_ptr<Goal> goal;
+
+	bool start_ = false;
 };
 
