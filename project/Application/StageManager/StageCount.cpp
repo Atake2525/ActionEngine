@@ -3,6 +3,7 @@
 
 using namespace std;
 using namespace Logger;
+using namespace ActionEngine::Stage;
 
 StageCount* StageCount::instance = nullptr;
 

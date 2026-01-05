@@ -12,6 +12,7 @@
 
 using namespace Logger;
 using namespace std;
+using namespace ActionEngine::Stage;
 
 void TestScene::Initialize() {
 
@@ -64,8 +65,8 @@ void TestScene::Initialize() {
 	//CollisionManager::GetInstance()->AddCollision(box2.get(), "box");
 
 
-	player = std::make_unique<Player>();
-	player->Initialize(camera.get(), input, true);
+	/*player = std::make_unique<Player>();
+	player->Initialize(camera.get(), input, true);*/
 
 	actionPlayer = std::make_unique<ActionPlayer>();
 	actionPlayer->Initialize(camera.get());
@@ -87,10 +88,22 @@ void TestScene::Initialize() {
 
 void TestScene::Update() {
 
-	if (player->IsGameOver())
+	/*if (player->IsGameOver())
 	{
 		player->Freeze(true);
 		gameOverSprite->Update();
+	}*/
+
+	if (!start_)
+	{
+		if (FadeManager::GetInstance()->CompleteFade())
+		{
+			start_ = true;
+		}
+		else
+		{
+			return;
+		}
 	}
 
 	grid->Update();
@@ -125,7 +138,7 @@ void TestScene::Update() {
 	trap->Update();
 	//player->Update();
 
-	goal->Update(player->GetAABB());
+	//goal->Update(player->GetAABB());
 
 
 	bool flag = false;

@@ -1,5 +1,7 @@
 #include "MyGame.h"
 
+using namespace ActionEngine::Stage;
+
 void MyGame::Initialize() {
 
 	FrameWork::Initialize();
@@ -55,11 +57,13 @@ void MyGame::Initialize() {
 
 	SceneManager::GetInstance();
 	
-	SceneManager::GetInstance()->SetNextScene("TEST");
+	SceneManager::GetInstance()->SetNextScene("TITLE");
 
 	//gameScene->Initialize();
 
 	//// ↑---- シーンの初期化 ----↑ ////
+
+	WinApp::GetInstance()->OpenWindow();
 }
 
 void MyGame::Update() {

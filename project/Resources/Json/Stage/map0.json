@@ -3,37 +3,12 @@
     "objects": [
         {
             "type": "MESH",
-            "name": "立方体",
+            "name": "立方体.003",
             "transform": {
                 "translation": [
-                    0.0,
-                    8.0,
-                    1.0
-                ],
-                "rotation": [
-                    0.0,
-                    -0.0,
-                    0.0
-                ],
-                "scaling": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "file_name": "goal",
-            "trap": {
-                "move": "false"
-            }
-        },
-        {
-            "type": "MESH",
-            "name": "立方体.001",
-            "transform": {
-                "translation": [
-                    0.0,
-                    0.0,
-                    1.0
+                    25.0,
+                    10.0,
+                    51.0
                 ],
                 "rotation": [
                     0.0,

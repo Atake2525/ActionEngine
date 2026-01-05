@@ -10,6 +10,7 @@
 #include "StageCount.h"
 
 using namespace std;
+using namespace ActionEngine::Stage;
 
 Player::~Player()
 {

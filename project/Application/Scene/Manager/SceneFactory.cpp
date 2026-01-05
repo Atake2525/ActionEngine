@@ -2,6 +2,7 @@
 #include "TitleScene.h"
 #include "GameScene.h"
 #include "TestScene.h"
+#include "StageSelectScene.h"
 #include "Logger.h"
 
 using namespace Logger;
@@ -39,6 +40,11 @@ BaseScene* SceneFactory::ChangeScene(const std::string& sceneName)
     else if (sceneName == "TEST") {
         Log("テストシーンに切り替えます\n");
         newScene = new TestScene();
+    }
+    else if (sceneName == "STAGESELECT")
+    {
+        Log("ステージセレクトシーンに切り替えます\n");
+        newScene = new StageSelectScene();
     }
     else
     {
