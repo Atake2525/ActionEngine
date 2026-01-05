@@ -58,7 +58,7 @@ void TestScene::Initialize() {
 	plate = std::make_unique<Object3d>();
 	plate->Initialize();
 	//plate->SetModel("Resources/Debug", "LandPlate.obj", true);
-	plate->SetModel("Resources/Model/obj/Stage/map01", "map01.obj", true);
+	plate->SetModel("Resources/Model/obj/Stage/tStage", "tStage.obj", true);
 	//plate->SetEnableMetallic(true);
 
 	CollisionManager::GetInstance()->AddCollision(plate.get(), "plate");
@@ -108,18 +108,15 @@ void TestScene::Update() {
 
 	grid->Update();
 
-
-	SkyBox::GetInstance()->Update();
-
 	Transform t = box2->GetTransform();
 	AABB aabb = box2->GetAABB();
-	ImGui::Begin("Box");
+	/*ImGui::Begin("Box");
 	ImGui::DragFloat3("Translate", &t.translate.x, 0.1f);
 	ImGui::DragFloat3("Scale", &t.scale.x, 0.1f);
 	ImGui::DragFloat3("Rotate", &t.rotate.x, SwapRadian(1.0f));
 	ImGui::DragFloat3("MIN", &aabb.min.x, 0.0f);
 	ImGui::DragFloat3("MAX", &aabb.max.x, 0.0f);
-	ImGui::End();
+	ImGui::End();*/
 
 	if (input->TriggerKey(DIK_P))
 	{
@@ -161,6 +158,7 @@ void TestScene::Update() {
 
 	plate->Update();
 
+	SkyBox::GetInstance()->Update();
 	//input->Update();
 }
 
@@ -174,7 +172,7 @@ void TestScene::Draw() {
 	//box1->Draw();
 	//box2->Draw();
 	plate->Draw();
-	trap->Draw();
+	//trap->Draw();
 	//goal->Draw();
 	//player->Draw();
 

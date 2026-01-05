@@ -53,13 +53,16 @@ Transform playerTransform;
 Vector3 panetration = Vector3::Zero;
 
 void ActionPlayer::Initialize(Camera* camera) {
+
     m_pPlayerModel = make_unique<Object3d>();
     m_pPlayerModel->Initialize();
     m_pPlayerModel->SetModel("Resources/Model/gltf/Player", "PlayerCollision.gltf");
 
 
     playerTransform = m_pPlayerModel->GetTransform();
-    vector<JsonData> data = JsonLoader::GetInstance()->GetJsonData("map" + to_string(StageCount::GetInstance()->GetStageCount()), "startpoint");
+    //vector<JsonData> data = JsonLoader::GetInstance()->GetJsonData("map" + to_string(StageCount::GetInstance()->GetStageCount()), "startpoint");
+    JsonLoader::GetInstance()->LoadJson("Resources/Model/obj/Stage/tStage/tStage.json", "tStage");
+    vector<JsonData> data = JsonLoader::GetInstance()->GetJsonData("tStage", "startpoint");
     Transform startPoint = {
         {1.0f, 1.0f, 1.0f},
         {0.0f, 0.0f, 0.0f},

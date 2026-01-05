@@ -19,8 +19,15 @@ enum class PlayerMoveType {
 /// <summary>
 /// プレイヤー
 /// </summary>
-class Player
-{
+class Player {
+private:
+    enum class CharacterStatus
+    {
+        Idle,
+        Crouch,
+        Walk,
+        Dash
+    };
 public:
 
     // デストラクタ

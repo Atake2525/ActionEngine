@@ -37,6 +37,10 @@ const bool FadeManager::CompleteFade()
 {
 	bool complete = completeFade_;
 	completeFade_ = false;
+	if (!fade_)
+	{
+		complete = true;
+	}
 	return complete;
 	// TODO: return ステートメントをここに挿入します
 }

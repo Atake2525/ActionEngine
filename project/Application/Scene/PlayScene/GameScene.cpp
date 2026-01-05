@@ -100,14 +100,14 @@ void GameScene::Update() {
 
 #endif // _DEBUG
 
-	camera->Update();
+	//camera->Update();
 
+	player_->Update();
 	land->Update();
 	floor->Update();
 
 	//input->Update();
 
-	player_->Update();
 	trap_->Update();
 
 	if (input->TriggerKey(DIK_ESCAPE))
@@ -125,9 +125,6 @@ void GameScene::Update() {
 	{
 		Audio::GetInstance()->Play2D("bgm", { 0.0f, 0.0f }, false);
 	}
-
-
-	SkyBox::GetInstance()->Update();
 
 	if (!start_)
 	{
@@ -203,6 +200,8 @@ void GameScene::Update() {
 		player_->Freeze(true);
 		gameClear_->Update();
 	}
+
+	SkyBox::GetInstance()->Update();
 }
 
 void GameScene::Draw() {
