@@ -6,6 +6,8 @@ struct Vector2
 	float x;
 	float y;
 
+	static const Vector2 Clamp(Vector2 target, Vector2 min, Vector2 max);
+	static const Vector2 Clamp(Vector2 target, float min, float max);
 };
 
 inline Vector2 Normalize(const Vector2& v) {
