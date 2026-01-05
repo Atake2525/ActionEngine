@@ -35,10 +35,7 @@ public:
 
 	void Update();
 
-	/// <summary>
-	/// 初期化処理が終わってからウィンドウを出す
-	/// </summary>
-	void DrawWindow();
+	void OpenWindow();
 
 	// 終了
 	void Finalize();
