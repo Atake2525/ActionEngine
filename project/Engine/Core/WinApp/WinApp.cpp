@@ -67,7 +67,6 @@ void WinApp::Initialize(const int32_t& width, const uint32_t& height, WindowMode
 
 		// ウィンドウの生成
 		hwnd = CreateWindow(wc.lpszClassName, windowname, WS_POPUP, CW_USEDEFAULT, CW_USEDEFAULT, wrc.right - wrc.left, wrc.bottom - wrc.top, nullptr, nullptr, wc.hInstance, nullptr);
-
 	} else {
 		// クライアント領域をもとに実際のサイズにwrcを変更してもらう
 		AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
@@ -77,10 +76,22 @@ void WinApp::Initialize(const int32_t& width, const uint32_t& height, WindowMode
 
 		// ウィンドウの生成
 		hwnd = CreateWindow(wc.lpszClassName, windowname, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, wrc.right - wrc.left, wrc.bottom - wrc.top, nullptr, nullptr, wc.hInstance, nullptr);
-
 	}
 
 	HRESULT hr = CoInitializeEx(0, COINIT_MULTITHREADED);
+}
+
+void WinApp::OpenWindow() {
+	if (windowMode == WindowMode::FullScreen)
+	{
+		// ウィンドウを表示する
+		ShowWindow(hwnd, SW_MAXIMIZE);
+	}
+	else
+	{
+		// ウィンドウを表示する
+		ShowWindow(hwnd, SW_SHOW);
+	}
 }
 
 const AABB WinApp::GetWindowAABB() const {
