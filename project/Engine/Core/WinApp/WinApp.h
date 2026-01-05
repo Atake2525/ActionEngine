@@ -35,6 +35,8 @@ public:
 
 	void Update();
 
+	void OpenWindow();
+
 	// 終了
 	void Finalize();
 
