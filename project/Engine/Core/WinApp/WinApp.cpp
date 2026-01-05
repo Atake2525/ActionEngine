@@ -129,19 +129,6 @@ void WinApp::Update() {
 		ShowWindow(hwnd, SW_MAXIMIZE);
 }
 
-void WinApp::DrawWindow() {
-	if (windowMode == WindowMode::Window)
-	{
-		// ウィンドウを表示する
-		ShowWindow(hwnd, SW_SHOW);
-	}
-	else
-	{
-		// ウィンドウを表示する
-		ShowWindow(hwnd, SW_MAXIMIZE);
-	}
-}
-
 // 終了
 void WinApp::Finalize() { 
 	CloseWindow(hwnd);
