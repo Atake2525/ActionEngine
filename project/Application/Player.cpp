@@ -69,6 +69,8 @@ void Player::Initialize(Camera* camera, Input* input, const bool DebugMode)
 void Player::Update() {
 	playerTransform_ = playerModel_->GetTransform();
 	playerAABB_ = playerCollisionModel_->GetAABB();
+    cameraTransform = camera->GetTransform();
+
 	if (parent_)
 	{
 		// プレイヤーの回転からcameraOffsetを計算してparent
@@ -587,7 +589,7 @@ void Player::Sneak()
 void Player::DebugUpdate()
 {
 	Transform transform = camera->GetTransform();
-	ImGui::Begin("Animation");
+	ImGui::Begin("Player");
 	ImGui::SetWindowPos(ImVec2{ 0.0f, 18.0f * 3.0f });
 	ImGui::SetWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) - 18.0f * 3.0f });
 	/*if (ImGui::Button("Idle"))
