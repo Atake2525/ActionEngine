@@ -66,7 +66,7 @@ private:
 
 	std::unique_ptr<GameOver> gameOverSprite;
 
-	//std::unique_ptr<Player> player;
+	std::unique_ptr<Player> player;
 	std::unique_ptr<ActionPlayer> actionPlayer;
 
 	Object3d* grid = nullptr;
