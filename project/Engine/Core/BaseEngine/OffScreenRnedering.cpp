@@ -6,8 +6,8 @@
 #include "SrvManager.h"
 #include "TextureManager.h"
 
-#include "externels/imgui/imgui_impl_dx12.h"
-#include "externels/imgui/imgui_impl_win32.h"
+#include "externals/imgui/imgui_impl_dx12.h"
+#include "externals/imgui/imgui_impl_win32.h"
 
 using namespace Microsoft::WRL;
 using namespace Logger;
