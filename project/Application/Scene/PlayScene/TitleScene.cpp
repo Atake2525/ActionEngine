@@ -1,7 +1,7 @@
 #include "TitleScene.h"
-#include "externels/imgui/imgui.h"
-#include "externels/imgui/imgui_impl_dx12.h"
-#include "externels/imgui/imgui_impl_win32.h"
+#include "externals/imgui/imgui.h"
+#include "externals/imgui/imgui_impl_dx12.h"
+#include "externals/imgui/imgui_impl_win32.h"
 #include "WinApp.h"
 #include "GameTime.h"
 #include "EasingUtility.h"
@@ -37,6 +37,7 @@ void TitleScene::Initialize() {
 	playerModel = make_unique<Object3d>();
 	playerModel->Initialize();
 	playerModel->SetModel("Resources/Model/gltf/char", "idle.gltf", true, true);
+	//playerModel->SetAnimationSpeed(0.1f);
 	playerModel->ToggleStartAnimation();
 	playerModel->SetTranslate({ 0.0f, 0.1f, 0.0f });
 

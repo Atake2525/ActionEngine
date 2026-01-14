@@ -16,9 +16,9 @@
 #include "Logger.h"
 #include "GameTime.h"
 
-#include "externels/imgui/imgui.h"
-#include "externels/imgui/imgui_impl_dx12.h"
-#include "externels/imgui/imgui_impl_win32.h"
+#include "externals/imgui/imgui.h"
+#include "externals/imgui/imgui_impl_dx12.h"
+#include "externals/imgui/imgui_impl_win32.h"
 
 using namespace Logger;
 using namespace Microsoft::WRL;
@@ -85,7 +85,7 @@ void Object3d::Update() {
 
 	if (model_->IsAnimation() && startAnimation)
 	{
-		animationTime += animationSpeed / GameTime::GetInstance()->GetDeltaTime(); // 時刻を進める。1/60で固定してあるが、計測した時間を使って可変フレーム対応する方が望ましい
+		animationTime += animationSpeed / std::round(1.0f / GameTime::GetInstance()->GetDeltaTime()); // 時刻を進める。1/60で固定してあるが、計測した時間を使って可変フレーム対応する方が望ましい
 		animationTime = std::fmod(animationTime, animation[animationKey].duration); // 最後まで行ったら最初からリピート再生。リピートしなくても別に良い
 		if (animationTime < 0.0f) // 逆再生に備えてanimationTimeが0を下回ったら最後のアニメーション時間を代入
 		{
