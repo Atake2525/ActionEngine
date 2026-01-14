@@ -65,8 +65,8 @@ void TestScene::Initialize() {
 	//CollisionManager::GetInstance()->AddCollision(box2.get(), "box");
 
 
-	/*player = std::make_unique<Player>();
-	player->Initialize(camera.get(), input, true);*/
+	player = std::make_unique<Player>();
+	player->Initialize(camera.get(), input, true);
 
 	actionPlayer = std::make_unique<ActionPlayer>();
 	actionPlayer->Initialize(camera.get());
@@ -74,10 +74,11 @@ void TestScene::Initialize() {
 	gameOverSprite = std::make_unique<GameOver>();
 	gameOverSprite->Initialize();
 
-	JsonLoader::GetInstance()->LoadJson("Resources/Json/test.json", "test", false);
+	//JsonLoader::GetInstance()->LoadJson("Resources/Json/test.json", "test", false);
+	JsonLoader::GetInstance()->LoadJson("Resources/Json/wp1.json", "wp1", false);
 
 	trap = std::make_unique<Trap>();
-	trap->Initialize("test");
+	trap->Initialize("wp1");
 
 	goal = make_unique<Goal>();
 	goal->Initalize();
@@ -96,7 +97,7 @@ void TestScene::Update() {
 
 	if (!start_)
 	{
-		if (FadeManager::GetInstance()->CompleteFade())
+		if (FadeManager::GetInstance()->CompleteFade() || !FadeManager::GetInstance()->IsFade())
 		{
 			start_ = true;
 		}
@@ -109,17 +110,29 @@ void TestScene::Update() {
 	grid->Update();
 
 
-	SkyBox::GetInstance()->Update();
 
 	Transform t = box2->GetTransform();
 	AABB aabb = box2->GetAABB();
-	ImGui::Begin("Box");
+	/*ImGui::Begin("Box");
 	ImGui::DragFloat3("Translate", &t.translate.x, 0.1f);
 	ImGui::DragFloat3("Scale", &t.scale.x, 0.1f);
 	ImGui::DragFloat3("Rotate", &t.rotate.x, SwapRadian(1.0f));
 	ImGui::DragFloat3("MIN", &aabb.min.x, 0.0f);
 	ImGui::DragFloat3("MAX", &aabb.max.x, 0.0f);
+	ImGui::End();*/
+
+	ImGui::Begin("JSON");
+    ImGui::Text("このボタン又はSキーでJSONを再読み込みします");
+	if (ImGui::Button("JSON再読み込み"))
+	{
+		JsonLoader::GetInstance()->LoadJson("Resources/Json/wp1.json", "wp1", true);
+	}
 	ImGui::End();
+
+	if (input->TriggerKey(DIK_S))
+	{
+		JsonLoader::GetInstance()->LoadJson("Resources/Json/wp1.json", "wp1", true);
+	}
 
 	if (input->TriggerKey(DIK_P))
 	{
@@ -133,10 +146,10 @@ void TestScene::Update() {
 	box2->SetTransform(t);
 	box2->Update();
 
-	//camera->Update();
-	actionPlayer->Update();
+	player->Update();
+	camera->Update();
+	//actionPlayer->Update();
 	trap->Update();
-	//player->Update();
 
 	//goal->Update(player->GetAABB());
 
@@ -161,6 +174,8 @@ void TestScene::Update() {
 
 	plate->Update();
 
+	SkyBox::GetInstance()->Update();
+
 	//input->Update();
 }
 
@@ -173,7 +188,7 @@ void TestScene::Draw() {
 
 	//box1->Draw();
 	//box2->Draw();
-	plate->Draw();
+	//plate->Draw();
 	trap->Draw();
 	//goal->Draw();
 	//player->Draw();

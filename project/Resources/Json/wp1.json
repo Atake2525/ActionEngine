@@ -1,0 +1,49 @@
+{
+    "name": "scene",
+    "objects": [
+        {
+            "type": "MESH",
+            "name": "Cube",
+            "transform": {
+                "translation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "trap",
+            "trap": {
+                "move": "true",
+                "velocity_translation": [
+                    0.0,
+                    0.0,
+                    4.170000076293945
+                ],
+                "velocity_rotation": [
+                    41.0,
+                    0.0,
+                    0.0
+                ],
+                "velocity_scale": [
+                    0.0,
+                    0.4399999976158142,
+                    0.0
+                ],
+                "loop": "true",
+                "reverse": "true",
+                "runtime": 3.0674848556518555,
+                "enable_spawner": "false"
+            }
+        }
+    ]
+}

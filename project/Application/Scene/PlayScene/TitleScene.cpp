@@ -37,6 +37,7 @@ void TitleScene::Initialize() {
 	playerModel = make_unique<Object3d>();
 	playerModel->Initialize();
 	playerModel->SetModel("Resources/Model/gltf/char", "idle.gltf", true, true);
+	//playerModel->SetAnimationSpeed(0.1f);
 	playerModel->ToggleStartAnimation();
 	playerModel->SetTranslate({ 0.0f, 0.1f, 0.0f });
 
