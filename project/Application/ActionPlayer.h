@@ -54,6 +54,9 @@ public:
     /// <param name="isFreeze"></param>
     void Freeze(const bool& isFreeze);
 
+    const bool IsWallDash() const { return m_isWallRun; }
+    const bool IsWallJump() const { return m_isWallJump; }
+
     /// <summary>
     /// AABBの取得
     /// </summary>

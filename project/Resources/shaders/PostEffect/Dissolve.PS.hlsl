@@ -10,17 +10,17 @@ struct Dissolve
 };
 ConstantBuffer<Dissolve> gDissolve : register(b3);
 
-PixelShaderOutput main(VertexShaderOutput input)
+PixelShaderOutput ShadingDissolve(VertexShaderOutput input)
 {
     PixelShaderOutput output;
     
     output = ShadingBoxFilter(input);
-    // •K—v‚È‚ç box filter ‚ğæ“¾i¡‰ñ‚ÍƒV[ƒ“F‚ğg‚¤j
-    // output = ShadingBoxFilter(input); // ‚à‚µƒtƒBƒ‹ƒ^‚ğg‚¤ê‡‚Í scene ‚ğã‘‚«‚¹‚¸•Û‚·‚é
+    // å¿…è¦ãªã‚‰ box filter ã‚’å–å¾—ï¼ˆä»Šå›ã¯ã‚·ãƒ¼ãƒ³è‰²ã‚’ä½¿ã†ï¼‰
+    // output = ShadingBoxFilter(input); // ã‚‚ã—ãƒ•ã‚£ãƒ«ã‚¿ã‚’ä½¿ã†å ´åˆã¯ scene ã‚’ä¸Šæ›¸ãã›ãšä¿æŒã™ã‚‹
 
     float mask = gMaskTexture.Sample(gSampler, input.texcoord); // 0..1
 
-    // ƒtƒF[ƒh‚ğŠŠ‚ç‚©‚É‚·‚é
+    // ãƒ•ã‚§ãƒ¼ãƒ‰ã‚’æ»‘ã‚‰ã‹ã«ã™ã‚‹
     //float t = mask - gDissolve.threshold/* / max(gDissolve.edgeRange, 1e-6))*/;
     if (mask <= gDissolve.threshold)
     {
@@ -28,10 +28,10 @@ PixelShaderOutput main(VertexShaderOutput input)
         return output;
     }
 
-    // ƒV[ƒ“F‚ğæ“¾iƒ|ƒXƒgˆ—‘O‚Ì¶‚ÌF‚ğQÆ‚·‚é‚±‚Æj
+    // ã‚·ãƒ¼ãƒ³è‰²ã‚’å–å¾—ï¼ˆãƒã‚¹ãƒˆå‡¦ç†å‰ã®ç”Ÿã®è‰²ã‚’å‚ç…§ã™ã‚‹ã“ã¨ï¼‰
     //output.color += gTexture.Sample(gSampler, input.texcoord);
 
-    //// —n‰ğF‚ÆƒV[ƒ“F‚ğüŒ`•âŠÔ‚µ‚Äo—Í
+    //// æº¶è§£è‰²ã¨ã‚·ãƒ¼ãƒ³è‰²ã‚’ç·šå½¢è£œé–“ã—ã¦å‡ºåŠ›
     //float3 outRgb = (t * output.color.rgb) * ((1.0f - t) * gDissolve.edgeColor);
     
     //output.color = float4(outRgb, output.color.a);
