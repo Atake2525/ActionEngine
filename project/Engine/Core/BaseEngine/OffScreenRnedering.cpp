@@ -64,11 +64,6 @@ void OffScreenRnedering::Initialize() {
     dissolveResource->Map(0, nullptr, reinterpret_cast<void**>(&dissolve));
     dissolve->edgeColor = { 1.0f, 1.0f, 1.0f };
     dissolve->threshold = 0.0f;
-
-	motionBluerResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(MotionBluer));
-    motionBluerResource->Map(0, nullptr, reinterpret_cast<void**>(&motionBluer));
-	motionBluer->iResolution = { static_cast<float>(WinApp::GetInstance()->GetkClientWidth()), static_cast<float>(WinApp::GetInstance()->GetkClientHeight()) };
-    motionBluer->iTime = 0.0f;
 }
 
 void OffScreenRnedering::Update() {
@@ -80,37 +75,28 @@ void OffScreenRnedering::Update() {
 	}*/
 	ImGui::SetWindowPos(ImVec2{ 0.0f, 18.0f });
 	ImGui::SetWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) - 18.0f });
-	if (ImGui::TreeNode("Grayscale / グレイスケール")) {
+	if (ImGui::CollapsingHeader("Grayscale / グレイスケール", ImGuiTreeNodeFlags_DefaultOpen)) {
 		ImGui::SliderFloat("グレースケール強度", &grayscale->grayscaleIntensity, 0.0f, 1.0f);
 		ImGui::ColorEdit3("ColTone", &grayscale->toneColor.x);
 		ImGui::DragFloat("Alpha", &grayscale->alpah);
-		ImGui::TreePop();
 	}
-	if (ImGui::TreeNode("Vignette / ビネット")) {
-		ImGui::Checkbox("有効化", &vignette->enableVignette);
+	if (ImGui::CollapsingHeader("Vignette / ビネット")) {
+		ImGui::Checkbox("enable Vignette", &vignette->enableVignette);
 		ImGui::DragFloat("intensity", &vignette->intensity, 0.1f);
 		ImGui::DragFloat("scale", &vignette->scale, 0.1f);
-		ImGui::TreePop();
 	}
-	if (ImGui::TreeNode("BoxFilter / ボックスフィルター")) {
-		ImGui::SliderFloat("有効化", &boxFilter->boxFilterIntensity, 0.0f, 1.0f);
+	if (ImGui::CollapsingHeader("BoxFilter / ボックスフィルター")) {
+		ImGui::SliderFloat("enable BoxFilter", &boxFilter->boxFilterIntensity, 0.0f, 1.0f);
 		ImGui::SliderInt("size", &boxFilter->size, 1, 50);
-		ImGui::TreePop();
 	}
 	/*if (ImGui::TreeNode("GaussianFilter / ガウシアンフィルター")) {
 		ImGui::Checkbox("有効化", &gaussianFilter->enableGaussianFilter);
 		ImGui::SliderFloat("size", &gaussianFilter->sigma, 1.0f, 10.0f);
 		ImGui::TreePop();
 	}*/
-	if (ImGui::TreeNode("Dissolve / ディゾルブ")) {
+	if (ImGui::CollapsingHeader("Dissolve / ディゾルブ")) {
         ImGui::ColorEdit3("EdgeColor", &dissolve->edgeColor.x);
         ImGui::SliderFloat("Threshold", &dissolve->threshold, 0.0f, 1.0f);
-		ImGui::TreePop();
-	}
-	if (ImGui::TreeNode("MotionBluer / モーションブラー"))
-	{
-        ImGui::DragFloat("iTime", &motionBluer->iTime, 0.1f);
-        ImGui::TreePop();
 	}
 	ImGui::End();
 #endif _DEBUG
@@ -172,9 +158,6 @@ void OffScreenRnedering::CreateRootSignature() {
 	rootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;           // PixelShaderで使う
 	rootParameters[6].DescriptorTable.pDescriptorRanges = &descriptorRange[1];        // Tableの中身の配列を指定
 	rootParameters[6].DescriptorTable.NumDescriptorRanges = 1;
-    rootParameters[7].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;    // CBVを使う
-    rootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderを使う
-    rootParameters[7].Descriptor.ShaderRegister = 4;                    // レジスタ番号4を使う
 	descriptionRootSignature.pParameters = rootParameters;              // ルートパラメータ配列へのポインタ
 	descriptionRootSignature.NumParameters = _countof(rootParameters);  // 配列の長さ
 
@@ -218,7 +201,7 @@ void OffScreenRnedering::CreateRootSignature() {
 	// Shaderをコンパイルする
 	vertexShaderBlob = DirectXBase::GetInstance()->CompileShader(L"Resources/shaders/PostEffect/Fullscreen.VS.hlsl", L"vs_6_0");
 	assert(vertexShaderBlob != nullptr);
-	pixelShaderBlob = DirectXBase::GetInstance()->CompileShader(L"Resources/shaders/PostEffect/MotionBluer.PS.hlsl", L"ps_6_0");
+	pixelShaderBlob = DirectXBase::GetInstance()->CompileShader(L"Resources/shaders/PostEffect/Dissolve.PS.hlsl", L"ps_6_0");
 	assert(pixelShaderBlob != nullptr);
 
 	// DepthStencilStateの設定
@@ -269,8 +252,6 @@ void OffScreenRnedering::Draw() {
 	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(4, boxFilterResource->GetGPUVirtualAddress());
 	// dissolve
 	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(5, dissolveResource->GetGPUVirtualAddress());
-    // motionBluer
-    DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(7, motionBluerResource->GetGPUVirtualAddress());
 
 	SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(6, TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/Sprite/noise0.png"));
 	// srvGPUHandleの設定

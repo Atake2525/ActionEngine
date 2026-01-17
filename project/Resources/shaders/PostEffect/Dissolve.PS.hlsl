@@ -10,7 +10,7 @@ struct Dissolve
 };
 ConstantBuffer<Dissolve> gDissolve : register(b3);
 
-PixelShaderOutput ShadingDissolve(VertexShaderOutput input)
+PixelShaderOutput main(VertexShaderOutput input)
 {
     PixelShaderOutput output;
     
