@@ -1,6 +1,7 @@
 #include <d3d12.h>
 #include <wrl.h>
 #include <dxcapi.h>
+#include "Vector2.h"
 #include "Vector4.h"
 #include "Vector3.h"
 #include <stdint.h>
@@ -129,4 +130,5 @@ private:
 
     Dissolve* dissolve = nullptr;
     Microsoft::WRL::ComPtr<ID3D12Resource> dissolveResource;
+
 };

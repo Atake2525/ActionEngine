@@ -17,30 +17,33 @@ Player::~Player()
 	CollisionManager::GetInstance()->DeleteCollisionTarget("player");
 }
 
-void Player::Initialize(Camera* camera, Input* input, const bool DebugMode)
+void Player::Initialize(Camera* camera, const bool DebugMode)
 {
 	debugMode_ = DebugMode;
 	this->camera = camera;
 	fovY_ = this->camera->GetfovY();
 	//this->camera->SetTranslate({ 0.0f, 1.7f, 0.15f });
-	this->input = input;
+	this->input = Input::GetInstance();
 	parent_ = !DebugMode;
+
+	playerTransform_.scale = Vector3::Zero;
+	playerTransform_.rotate = Vector3::Zero;
+	playerTransform_.translate = { 0.0f, 2.0f, 0.0f };
 	if (!DebugMode)
 	{
 		this->input->ShowMouseCursor(false);
+		vector<JsonData> data = JsonLoader::GetInstance()->GetJsonData("map" + to_string(StageCount::GetInstance()->GetStageCount()), "startpoint");
+		Transform startPoint = {
+			{1.0f, 1.0f, 1.0f},
+			{0.0f, 0.0f, 0.0f},
+			{0.0f, 0.1f, 0.0f}
+		};
+		if (data.size() != 0)
+		{
+			startPoint = data[0].transform;
+		}
+		playerTransform_ = startPoint;
 	}
-
-	vector<JsonData> data = JsonLoader::GetInstance()->GetJsonData("map" + to_string(StageCount::GetInstance()->GetStageCount()), "startpoint");
-	Transform startPoint = {
-		{1.0f, 1.0f, 1.0f},
-		{0.0f, 0.0f, 0.0f},
-		{0.0f, 0.1f, 0.0f}
-	};
-	if (data.size() != 0)
-	{
-		startPoint = data[0].transform;
-	}
-	playerTransform_ = startPoint;
 
 	moveVelocity_ = { 0.0f, 0.0f, 0.0f };
 
@@ -589,84 +592,130 @@ void Player::Sneak()
 void Player::DebugUpdate()
 {
 	Transform transform = camera->GetTransform();
+	// ウィンドウ設定
 	ImGui::Begin("Player");
-	ImGui::SetWindowPos(ImVec2{ 0.0f, 18.0f * 3.0f });
-	ImGui::SetWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) - 18.0f * 3.0f });
-	/*if (ImGui::Button("Idle"))
 	{
-		moveType_ = PlayerMoveType::Idle;
-	}
-	if (ImGui::Button("Walk"))
-	{
-		moveType_ = PlayerMoveType::Walk;
-	}
-	if (ImGui::Button("Sneak"))
-	{
-		moveType_ = PlayerMoveType::Sneak;
-	}
-	if (ImGui::Button("Dash"))
-	{
-		moveType_ = PlayerMoveType::Dash;
-	}*/
-	ImGui::Checkbox("カメラ移動", &cameraMove_);
-	ImGui::Checkbox("カメラ追従", &parent_);
-	ImGui::DragFloat3("カメラオフセット", &cameraOffset_.x, 0.1f);
-	ImGui::DragFloat3("移動量", &speed_.x);
-	ImGui::DragFloat3("MoveVelocity", &moveVelocity_.x, 0.1f);
-	ImGui::DragFloat3("Translate", &playerTransform_.translate.x, 0.1f);
-	ImGui::DragFloat3("Rotate", &playerTransform_.rotate.x, 0.1f);
-	ImGui::DragFloat3("Scale", &playerTransform_.scale.x, 0.1f);
-	ImGui::DragFloat("最大落下速度", &fallLimit_, 0.1f);
-	ImGui::DragFloat("ジャンプ量", &jumpAcceleration_, 0.1f);
-	ImGui::DragFloat("落下量", &fallAcceleration_, 0.1f);
-	if (ImGui::TreeNode("カメラ関係")) {
-		ImGui::DragFloat("視野角", &normalFovY_, 0.01f);
-		ImGui::DragFloat("視野角の上昇値", &fovYBoost_, 0.01f);
-		ImGui::TreePop();
-	}
-	if (ImGui::TreeNode("壁走り")) {
-		ImGui::DragFloat("壁走りカメラ回転タイマー", &wallDashRotateTimer_, 0.01f);
-		ImGui::DragFloat("壁走りカメラ回転時間", &wallDashRotateTime_, 0.01f);
-		ImGui::TreePop();
-	}
-	Vector3 cameraDirection = camera->GetDirection();
-	float angleX = wallDashAngle_ * Sign(cameraDirection.x);
-	ImGui::DragFloat("回転X", &angleX, 0.01f);
-	float angleZ = wallDashAngle_ * Sign(cameraDirection.z);
-	ImGui::DragFloat("回転Z", &angleZ, 0.01f);
+		// レイアウト定数 (マジックナンバーを避けるため変数化推奨ですが、元のロジックを維持)
+		float headerHeight = 18.0f * 3.0f;
+		float clientHeight = float(WinApp::GetInstance()->GetkClientHeight());
 
-	Vector3 directionCamera = camera->GetDirection();
-	if (directionCamera.x > 0.0f)
-	{
-		ImGui::Text("右");
-		ImGui::SameLine();
-	} 
-	else if (directionCamera.x < 0.0f)
-	{
+		ImGui::SetWindowPos(ImVec2{ 0.0f, headerHeight });
+		ImGui::SetWindowSize(ImVec2{ 300.0f, clientHeight - headerHeight });
 
-		ImGui::Text("左");
-		ImGui::SameLine();
-	}
-	if (directionCamera.z > 0.0f)
-	{
-		ImGui::Text("前");
-	}
-	else if (directionCamera.z < 0.0f)
-	{
-		ImGui::Text("後");
-	}
+		// ---------------------------------------------------------
+		// General Settings
+		// ---------------------------------------------------------
+		if (ImGui::CollapsingHeader("General Settings", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			ImGui::Checkbox("Camera Move (操作有効)", &cameraMove_);
+			ImGui::Checkbox("Camera Follow (追従)", &parent_);
+		}
 
-	float dist = CollisionManager::GetInstance()->GetGroundDistance("player");
-	ImGui::TextColored({ 1.0f, 1.0f, 1.0f, 1.0f }, "GroundDistance: %.1f", dist);
-	Vector3 penetrationAmount = CollisionManager::GetInstance()->GetPenetration();
-	ImGui::TextColored({ 1.0f, 1.0f, 1.0f, 1.0f }, "PenetrationAmount : X=%.1f Y=%.1f  Z=%.1f", penetrationAmount.x, penetrationAmount.y, penetrationAmount.z);
+		// ---------------------------------------------------------
+		// Transform
+		// ---------------------------------------------------------
+		if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			ImGui::DragFloat3("Position", &playerTransform_.translate.x, 0.1f);
+			ImGui::DragFloat3("Rotate", &playerTransform_.rotate.x, 0.1f);
+			ImGui::DragFloat3("Scale", &playerTransform_.scale.x, 0.1f);
+		}
 
+		// ---------------------------------------------------------
+		// Physics & Movement
+		// ---------------------------------------------------------
+		if (ImGui::CollapsingHeader("移動関係"))
+		{
+			ImGui::TextDisabled("Velocity / Acceleration");
+			ImGui::DragFloat3("Move Speed Input", &speed_.x, 0.1f);
+			ImGui::DragFloat3("Current Velocity", &moveVelocity_.x, 0.1f);
+
+			ImGui::Separator();
+
+			ImGui::TextDisabled("Jump & Gravity");
+			ImGui::DragFloat("Jump Power", &jumpAcceleration_, 0.1f);
+			ImGui::DragFloat("Gravity Force", &fallAcceleration_, 0.01f);
+			ImGui::DragFloat("Max Fall Speed", &fallLimit_, 0.1f);
+		}
+
+		// ---------------------------------------------------------
+		// Camera Details
+		// ---------------------------------------------------------
+		if (ImGui::CollapsingHeader("カメラ関係"))
+		{
+			ImGui::DragFloat3("Offset", &cameraOffset_.x, 0.1f);
+
+			if (ImGui::TreeNode("FOV Settings"))
+			{
+				ImGui::DragFloat("Base FOV", &normalFovY_, 0.01f);
+				ImGui::DragFloat("FOV Boost", &fovYBoost_, 0.01f);
+				ImGui::TreePop();
+			}
+
+			if (ImGui::TreeNode("ダッシュ / 壁走り"))
+			{
+				ImGui::DragFloat("Rotate Timer", &wallDashRotateTimer_, 0.01f);
+				ImGui::DragFloat("Rotate Time", &wallDashRotateTime_, 0.01f);
+
+				// 計算値の表示のみにするか、編集可能にするか確認が必要ですが、元のままDragFloatにします
+				Vector3 camDir = camera->GetDirection();
+				float angleX = wallDashAngle_ * Sign(camDir.x);
+				float angleZ = wallDashAngle_ * Sign(camDir.z);
+
+				// ※ここは計算結果を表示しているように見えますが、ポインタを渡しているので
+				// 変数を書き換える意図がある場合は元の変数を渡す必要があります。
+				// 一時変数への操作になるため、表示のみであれば InputFloat ではなく Text 推奨です。
+				ImGui::DragFloat("Calc Angle X", &angleX, 0.01f);
+				ImGui::DragFloat("Calc Angle Z", &angleZ, 0.01f);
+
+				ImGui::TreePop();
+			}
+		}
+
+		// ---------------------------------------------------------
+		// Debug Info (Read Only)
+		// ---------------------------------------------------------
+		if (ImGui::CollapsingHeader("Debug Info", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			// Direction
+			Vector3 dir = camera->GetDirection();
+			ImGui::Text("Camera Direction:");
+			ImGui::SameLine();
+			ImGui::TextColored(ImVec4(1, 1, 0, 1), "[ %.2f, %.2f, %.2f ]", dir.x, dir.y, dir.z);
+
+			ImGui::Bullet();
+			ImGui::Text("Orientation: ");
+			ImGui::SameLine();
+			if (dir.x > 0.1f)  ImGui::TextColored(ImVec4(0.5f, 1, 0.5f, 1), "Right");
+			if (dir.x < -0.1f) ImGui::TextColored(ImVec4(0.5f, 1, 0.5f, 1), "Left");
+
+			ImGui::SameLine();
+			if (dir.z > 0.1f)  ImGui::TextColored(ImVec4(0.5f, 1, 0.5f, 1), "Forward");
+			if (dir.z < -0.1f) ImGui::TextColored(ImVec4(0.5f, 1, 0.5f, 1), "Back");
+
+			ImGui::Separator();
+
+			// Collision
+			float dist = CollisionManager::GetInstance()->GetGroundDistance("player");
+			Vector3 pen = CollisionManager::GetInstance()->GetPenetration();
+
+			ImGui::Text("Ground Dist:");
+			ImGui::SameLine();
+			ImGui::TextColored(ImVec4(1, 0.5f, 0.5f, 1), "%.2f", dist);
+
+			ImGui::Text("Penetration:");
+			ImGui::SameLine();
+			ImGui::TextColored(ImVec4(1, 0.5f, 0.5f, 1), "X:%.1f Y:%.1f Z:%.1f", pen.x, pen.y, pen.z);
+		}
+	}
 	ImGui::End();
+
 
 	if (input->TriggerKey(DIK_R))
 	{
 		moveVelocity_ = { 0.0f };
 		playerModel_->SetTranslate({ 0.0f, 1.0f, 0.0f });
+		speed_ = { 0.0f, 0.0f, 0.0f };
 	}
 	if (cameraMove_)
 	{

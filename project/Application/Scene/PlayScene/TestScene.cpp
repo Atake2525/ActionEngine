@@ -58,7 +58,7 @@ void TestScene::Initialize() {
 	plate = std::make_unique<Object3d>();
 	plate->Initialize();
 	//plate->SetModel("Resources/Debug", "LandPlate.obj", true);
-	plate->SetModel("Resources/Model/obj/Stage/map01", "map01.obj", true);
+	plate->SetModel("Resources/Model/obj/tutorial", "tutorial.obj", true);
 	//plate->SetEnableMetallic(true);
 
 	CollisionManager::GetInstance()->AddCollision(plate.get(), "plate");
@@ -66,7 +66,7 @@ void TestScene::Initialize() {
 
 
 	player = std::make_unique<Player>();
-	player->Initialize(camera.get(), input, true);
+	player->Initialize(camera.get(), true);
 
 	actionPlayer = std::make_unique<ActionPlayer>();
 	actionPlayer->Initialize(camera.get());
@@ -146,9 +146,9 @@ void TestScene::Update() {
 	box2->SetTransform(t);
 	box2->Update();
 
-	player->Update();
-	camera->Update();
-	//actionPlayer->Update();
+	//player->Update();
+	//camera->Update();
+	actionPlayer->Update();
 	trap->Update();
 
 	//goal->Update(player->GetAABB());
@@ -188,7 +188,7 @@ void TestScene::Draw() {
 
 	//box1->Draw();
 	//box2->Draw();
-	//plate->Draw();
+	plate->Draw();
 	trap->Draw();
 	//goal->Draw();
 	//player->Draw();
