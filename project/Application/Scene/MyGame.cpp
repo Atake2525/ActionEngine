@@ -108,13 +108,6 @@ void MyGame::Update() {
 	}
 	ImGui::End();
 
-    
-
-
-	
-
-#endif // _SceneDEBUG
-
 	ImGui::Begin("パフォーマンス");
 	ImGui::SetWindowPos(ImVec2{ float(WinApp::GetInstance()->GetkClientWidth()) - 300.0f, 128.0f + 165.0f });
 	ImGui::SetWindowSize(ImVec2{ 300.0f, 82.5f });
@@ -149,7 +142,9 @@ void MyGame::Update() {
 	{
 		ImGui::TextColored({ 1.0f, 0.0f, 0.0f, 1.0f }, "%.1f %%", cpuusage);
 	}
-	ImGui::End();
+	ImGui::End();	
+
+#endif // _SceneDEBUG
 
 	if (SceneManager::GetInstance()->EndRequest())
 	{

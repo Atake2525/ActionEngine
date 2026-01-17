@@ -41,12 +41,6 @@ struct Dissolve
 	//float edgerange;
 };
 
-struct MotionBluer {
-	Vector2 iResolution; // 画面解像度
-	float iTime; // 経過時間
-	float padding; // アライメント用
-};
-
 class OffScreenRnedering
 {
 public:
@@ -88,7 +82,7 @@ private:
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
 	// Resource作る度に配列を増やしす
 	// RootParameter作成、PixelShaderのMatrixShaderのTransform
-	D3D12_ROOT_PARAMETER rootParameters[8] = {};
+	D3D12_ROOT_PARAMETER rootParameters[7] = {};
 	// シリアライズしてバイナリにする
 	Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob = nullptr;
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
@@ -137,6 +131,4 @@ private:
     Dissolve* dissolve = nullptr;
     Microsoft::WRL::ComPtr<ID3D12Resource> dissolveResource;
 
-	MotionBluer* motionBluer = nullptr;
-    Microsoft::WRL::ComPtr<ID3D12Resource> motionBluerResource;
 };
