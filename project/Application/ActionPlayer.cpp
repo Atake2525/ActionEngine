@@ -52,19 +52,21 @@ Vector3 cameraRotate;
 Transform playerTransform;
 Vector3 panetration = Vector3::Zero;
 
-void ActionPlayer::Initialize(Camera* camera) {
+void ActionPlayer::Initialize(Camera* camera, std::string jsonName) {
     m_pPlayerModel = make_unique<Object3d>();
     m_pPlayerModel->Initialize();
     m_pPlayerModel->SetModel("Resources/Model/gltf/Player", "PlayerCollision.gltf");
 
 
     playerTransform = m_pPlayerModel->GetTransform();
-    vector<JsonData> data = JsonLoader::GetInstance()->GetJsonData("map" + to_string(StageCount::GetInstance()->GetStageCount()), "startpoint");
     Transform startPoint = {
         {1.0f, 1.0f, 1.0f},
         {0.0f, 0.0f, 0.0f},
         {0.0f, 0.1f, 0.0f}
     };
+    // スタート地点の取得
+    vector<JsonData> data = JsonLoader::GetInstance()->GetJsonData(jsonName, "startpoint");
+    // スタート地点が設定されていない又はjsonが読み込めなかった場合はデフォルト位置を使用
     if (data.size() != 0)
     {
         startPoint = data[0].transform;

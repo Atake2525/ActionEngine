@@ -96,6 +96,18 @@ public:
 	/// </summary>
 	void Initialize();
 
+    /// <summary>
+    /// 指定した名前のJSONが読み込まれているかを確認します。
+    /// </summary>
+    /// <param name="jsonName">確認対象のJSONの名前または識別子を表す文字列。</param>
+    /// <returns>指定したJSONが読み込まれている場合はtrue、そうでない場合はfalse。</returns>
+    bool CheckJsonLoaded(const std::string& jsonName);
+
+	/// <summary>
+	/// 指定したJSONの削除
+	/// </summary>
+    void DeleteJson(const std::string& jsonName);
+
 	/// <summary>
 	/// 
 	/// </summary>
