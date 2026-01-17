@@ -36,7 +36,7 @@ void GameScene::Initialize() {
     Object3dBase::GetInstance()->SetDefaultCamera(camera.get());
 
     player_ = make_unique<ActionPlayer>();
-    player_->Initialize(camera.get());
+    player_->Initialize(camera.get(), "t");
     //player_->Freeze(true);
 
     land = make_unique<Object3d>();
@@ -224,9 +224,6 @@ void GameScene::Update() {
         tutorial[1].sprite->Update();
 
     }
-    /*ImGui::Begin("test");
-    ImGui::DragFloat4("color", &tutorial[1].color.x, 0.01f, 0.0f, 1.0f);
-    ImGui::End();*/
     if (player_->IsWallDash())
     {
         tutorial[2].isClear = true;

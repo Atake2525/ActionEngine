@@ -3,7 +3,6 @@
 #include "Object3d.h"
 #include "Input.h"
 
-
 #pragma once
 
 class Camera;
@@ -30,7 +29,7 @@ public:
     /// 初期化
     /// </summary>
     /// <param name="camera">Objectに適用しているカメラのポインタ</param>
-    void Initialize(Camera* camera);
+    void Initialize(Camera* camera, std::string JsonName);
 
     /// <summary>
     /// 更新

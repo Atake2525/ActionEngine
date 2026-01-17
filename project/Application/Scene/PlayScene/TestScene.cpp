@@ -2,8 +2,6 @@
 #include "externals/imgui/imgui.h"
 #include "externals/imgui/imgui_impl_dx12.h"
 #include "externals/imgui/imgui_impl_win32.h"
-#include "CollisionManager.h"
-#include "Collision.h"
 #include "JsonLoader.h"
 #include <functional>
 #include "Logger.h"
@@ -24,7 +22,7 @@ void TestScene::Initialize() {
 
 	camera = std::make_unique<Camera>();
 	camera->SetRotate(Vector3(SwapRadian(0.0f), 0.0f, 0.0f));
-	camera->SetTranslate({ 0.0f, 0.0f, 0.0f });
+	//camera->SetTranslate({ 0.0f, 0.0f, 0.0f });
 
 	TextureManager::GetInstance()->LoadTexture("Resources/rostock_laage_airport_4k.dds");
 
@@ -39,37 +37,15 @@ void TestScene::Initialize() {
 	ParticleManager::GetInstance()->SetCamera(camera.get());
 	ParticleManager::GetInstance()->CreateParticleGroup(ParticleType::plane, "Resources/Particle/circle2.png", "circle");
 
-	grid = new Object3d();
-	grid->Initialize();
-	grid->SetModel("Resources/Debug", "Grid.obj");
+	stage = std::make_unique<TutorialStage>();
+	stage->Initialize();
 
-	/*box1 = std::make_unique<Object3d>();
-	box1->Initialize();
-	box1->SetModel("Resources/Debug/gltf", "trap.gltf", true);
-	box1->SetTranslate({ 14.5f, 15.0f, 26.2f });*/
-
-    //CollisionManager::GetInstance()->AddCollision(box1.get(), "box1");
-
-	box2 = std::make_unique<Object3d>();
-	box2->Initialize();
-	box2->SetModel("Resources/Debug/gltf", "Box.gltf", true);
-	box2->SetTranslate({ 0.0f, 0.0f, 5.0f });
-
-	plate = std::make_unique<Object3d>();
-	plate->Initialize();
-	//plate->SetModel("Resources/Debug", "LandPlate.obj", true);
-	plate->SetModel("Resources/Model/obj/tutorial", "tutorial.obj", true);
-	//plate->SetEnableMetallic(true);
-
-	CollisionManager::GetInstance()->AddCollision(plate.get(), "plate");
-	//CollisionManager::GetInstance()->AddCollision(box2.get(), "box");
-
-
+	
 	player = std::make_unique<Player>();
 	player->Initialize(camera.get(), true);
 
 	actionPlayer = std::make_unique<ActionPlayer>();
-	actionPlayer->Initialize(camera.get());
+	actionPlayer->Initialize(camera.get(), stage->GetJsonName());
 
 	gameOverSprite = std::make_unique<GameOver>();
 	gameOverSprite->Initialize();
@@ -107,49 +83,12 @@ void TestScene::Update() {
 		}
 	}
 
-	grid->Update();
-
-
-
-	Transform t = box2->GetTransform();
-	AABB aabb = box2->GetAABB();
-	/*ImGui::Begin("Box");
-	ImGui::DragFloat3("Translate", &t.translate.x, 0.1f);
-	ImGui::DragFloat3("Scale", &t.scale.x, 0.1f);
-	ImGui::DragFloat3("Rotate", &t.rotate.x, SwapRadian(1.0f));
-	ImGui::DragFloat3("MIN", &aabb.min.x, 0.0f);
-	ImGui::DragFloat3("MAX", &aabb.max.x, 0.0f);
-	ImGui::End();*/
-
-	ImGui::Begin("JSON");
-    ImGui::Text("このボタン又はSキーでJSONを再読み込みします");
-	if (ImGui::Button("JSON再読み込み"))
-	{
-		JsonLoader::GetInstance()->LoadJson("Resources/Json/wp1.json", "wp1", true);
-	}
-	ImGui::End();
-
-	if (input->TriggerKey(DIK_S))
-	{
-		JsonLoader::GetInstance()->LoadJson("Resources/Json/wp1.json", "wp1", true);
-	}
-
-	if (input->TriggerKey(DIK_P))
-	{
-		ParticleManager::GetInstance()->Emit("circle", { 0.0f, 1.0f, 0.0f }, 5);
-	}
-
-	/*t.rotate.z += SwapRadian(4.0f);
-
-	box1->SetTransform(t);
-	box1->Update();*/
-	box2->SetTransform(t);
-	box2->Update();
-
 	//player->Update();
 	//camera->Update();
 	actionPlayer->Update();
 	trap->Update();
+
+	stage->Update();
 
 	//goal->Update(player->GetAABB());
 
@@ -172,23 +111,18 @@ void TestScene::Update() {
 	}
 	input->ShowMouseCursor(cursorshow);
 
-	plate->Update();
-
 	SkyBox::GetInstance()->Update();
-
-	//input->Update();
 }
 
 void TestScene::Draw() {
 
 	SpriteBase::GetInstance()->ShaderDraw();
 
+	stage->DrawFrontSprite();
 
 	Object3dBase::GetInstance()->ShaderDraw();
 
-	//box1->Draw();
-	//box2->Draw();
-	plate->Draw();
+	stage->DrawObject3d();
 	trap->Draw();
 	//goal->Draw();
 	//player->Draw();
@@ -197,21 +131,14 @@ void TestScene::Draw() {
 
 	//player->Draw();
 
-	//WireFrameObjectBase::GetInstance()->ShaderDraw();
-
-	//actionPlayer->Draw();
-	//grid->Draw();
-
 	SpriteBase::GetInstance()->ShaderDraw();
 
+	stage->DrawBackSprite();
 	gameOverSprite->Draw();
+
 
 }
 
 void TestScene::Finalize() {
-
-	delete grid;
-
-	CollisionManager::GetInstance()->DeleteCollision("plate");
-	CollisionManager::GetInstance()->DeleteCollision("box");
+	stage->Finalize();
 }

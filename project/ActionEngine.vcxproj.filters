@@ -132,7 +132,7 @@
     <ClCompile Include="Application\Scene\PlayScene\GameOver.cpp" />
     <ClCompile Include="Engine\UI\Text.cpp" />
     <ClCompile Include="Application\StageManager\StageCount.cpp" />
-    <ClCompile Include="Stage.cpp" />
+    <ClCompile Include="Application\StageManager\BaseStage.cpp" />
     <ClCompile Include="Application\Scene\PlayScene\GameClearScene.cpp" />
     <ClCompile Include="Application\ActionPlayer.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp" />
@@ -143,6 +143,7 @@
     <ClCompile Include="externals\imgui\imgui_impl_dx12.cpp" />
     <ClCompile Include="externals\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="Application\Scene\PlayScene\StageSelectScene.cpp" />
+    <ClCompile Include="Application\StageManager\TutorialStage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Math\EasingUtility.h" />
@@ -317,7 +318,7 @@
     <ClInclude Include="Engine\JsonLoader\JsonLoader.h" />
     <ClInclude Include="Engine\JsonLoader\json.hpp" />
     <ClInclude Include="Application\StageManager\StageCount.h" />
-    <ClInclude Include="Stage.h" />
+    <ClInclude Include="Application\StageManager\BaseStage.h" />
     <ClInclude Include="Application\Scene\PlayScene\GameClearScene.h" />
     <ClInclude Include="Application\ActionPlayer.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />
@@ -332,6 +333,7 @@
     <ClInclude Include="Engine\Math\Sphere.h" />
     <ClInclude Include="Engine\Math\Plane.h" />
     <ClInclude Include="Application\Scene\PlayScene\StageSelectScene.h" />
+    <ClInclude Include="Application\StageManager\TutorialStage.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\PostEffect\BoxFilter.PS.hlsl" />
