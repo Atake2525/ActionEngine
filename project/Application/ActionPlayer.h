@@ -71,6 +71,7 @@ private: // メンバ変数
     Transform m_playerTransform;
 
     bool m_isFreeze = false;
+    bool firstUpdate = false;
 
     Direction m_WallRunDirection = Direction::X;
 

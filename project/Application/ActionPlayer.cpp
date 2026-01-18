@@ -52,7 +52,31 @@ Vector3 cameraRotate;
 Transform playerTransform;
 Vector3 panetration = Vector3::Zero;
 
+Vector3 moveVelocity = Vector3::Zero;
+Vector3 vel = Vector3::Zero;
+Vector3 jumpVelocity = Vector3::Zero;
+
+float delta;
+
+float velocityLerpTimer = 0.0f;
+Vector3 moveVel = Vector3::Zero;
+float jumpMoveSign = 0.0f;
+
 void ActionPlayer::Initialize(Camera* camera, std::string jsonName) {
+
+    cameraRotate = Vector3::Zero;
+    playerTransform.rotate = Vector3::Zero;
+    playerTransform.translate = Vector3::Zero;
+    playerTransform.scale = { 1.0f, 1.0f, 1.0f };
+    panetration = Vector3::Zero;
+    moveVelocity = Vector3::Zero;
+    vel = Vector3::Zero;
+    jumpVelocity = Vector3::Zero;
+    delta = 0.0f;
+    velocityLerpTimer = 0.0f;
+    moveVel = Vector3::Zero;
+    jumpMoveSign = 0.0f;
+
     m_pPlayerModel = make_unique<Object3d>();
     m_pPlayerModel->Initialize();
     m_pPlayerModel->SetModel("Resources/Model/gltf/Player", "PlayerCollision.gltf");
@@ -78,13 +102,7 @@ void ActionPlayer::Initialize(Camera* camera, std::string jsonName) {
     m_pInput = Input::GetInstance();
 }
 
-bool firstUpdate = false;
 
-Vector3 moveVelocity = Vector3::Zero;
-Vector3 vel = Vector3::Zero;
-Vector3 jumpVelocity = Vector3::Zero;
-
-float delta;
 void ActionPlayer::Update() {
     m_velocity = Vector3::Zero;
 
@@ -227,10 +245,6 @@ void ActionPlayer::HandleInput() {
     }
 }
 
-
-float velocityLerpTimer = 0.0f;
-Vector3 moveVel = Vector3::Zero;
-float jumpMoveSign = 0.0f;
 // 移動処理 (地上・空中)
 void ActionPlayer::Move() {
     m_playerAABB = m_pPlayerModel->GetAABB();
@@ -370,7 +384,7 @@ void ActionPlayer::ApplyGravity() {
 void ActionPlayer::Jump() {
     if (moveVelocity.y < 0.0f && !m_isGround && CheckWall())
     {
-        m_isWallRun = true;
+        //m_isWallRun = true;
     }
     else
     {
