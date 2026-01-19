@@ -159,7 +159,6 @@ void Player::Rotation() {
 
 	cameraTransform.rotate.x = std::clamp(cameraTransform.rotate.x, SwapRadian(-90.0f), SwapRadian(90.0f));
 
-
 }
 
 void Player::Move()
