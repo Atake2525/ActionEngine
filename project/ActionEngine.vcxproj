@@ -118,11 +118,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="Application\StageManager\TutorialStage.cpp" />
     <ClCompile Include="Engine\3d\Object\Skinning\SkinningObject3dBase.cpp" />
     <ClCompile Include="Engine\BlackBox\Log\Logger.cpp" />
     <ClCompile Include="Engine\BlackBox\Log\StringUtility.cpp" />
     <ClCompile Include="Engine\Collision\CollisionManager.cpp" />
-    <ClCompile Include="Engine\Core\BaseEngine\OffScreenRnedering.cpp" />
+    <ClCompile Include="Engine\Core\BaseEngine\OffScreenRendering.cpp" />
     <ClCompile Include="Engine\BlackBox\Animation\DebugAnimation.cpp" />
     <ClCompile Include="Engine\LoadManager\ParticleManager\ParticleManager.cpp" />
     <ClCompile Include="Engine\UI\Text.cpp">
@@ -156,10 +157,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Scene\Manager\SceneManager.cpp" />
     <ClCompile Include="Application\Scene\PlayScene\TitleScene.cpp" />
     <ClCompile Include="Application\Scene\Manager\SceneFactory.cpp" />
-    <ClCompile Include="Application\Player.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="Engine\3d\SkyBox\SkyBox.cpp" />
     <ClCompile Include="Engine\JsonLoader\JsonLoader.cpp" />
     <ClCompile Include="Application\Scene\PlayScene\TestScene.cpp" />
@@ -177,7 +174,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="externals\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="externals\imgui\imgui_tables.cpp" />
     <ClCompile Include="externals\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="Stage.cpp" />
+    <ClCompile Include="Application\StageManager\BaseStage.cpp" />
     <ClCompile Include="Application\Scene\PlayScene\StageSelectScene.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -197,7 +194,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\BlackBox\Log\Logger.h" />
     <ClInclude Include="Engine\BlackBox\Log\StringUtility.h" />
     <ClInclude Include="Engine\Collision\CollisionManager.h" />
-    <ClInclude Include="Engine\Core\BaseEngine\OffScreenRnedering.h" />
+    <ClInclude Include="Engine\Core\BaseEngine\OffScreenRendering.h" />
     <ClInclude Include="Engine\BlackBox\Animation\DebugAnimation.h" />
     <ClInclude Include="Engine\JsonLoader\json.hpp" />
     <ClInclude Include="Engine\JsonLoader\JsonLoader.h" />
@@ -249,10 +246,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Scene\Manager\SceneManager.h" />
     <ClInclude Include="Application\Scene\PlayScene\TitleScene.h" />
     <ClInclude Include="Application\Scene\Manager\SceneFactory.h" />
-    <ClInclude Include="Application\Player.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
-    </ClInclude>
     <ClInclude Include="Engine\3d\SkyBox\SkyBox.h" />
     <ClInclude Include="Application\Scene\PlayScene\TestScene.h" />
     <ClInclude Include="Engine\Presentation\Cinematic\FadeManager.h" />
@@ -270,8 +263,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\imgui\imstb_rectpack.h" />
     <ClInclude Include="externals\imgui\imstb_textedit.h" />
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
-    <ClInclude Include="Stage.h" />
+    <ClInclude Include="Application\StageManager\BaseStage.h" />
     <ClInclude Include="Application\Scene\PlayScene\StageSelectScene.h" />
+    <ClInclude Include="Application\StageManager\TutorialStage.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="externals\assimp\lib\Release\assimp-vc143-mtd.lib">

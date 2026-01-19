@@ -20,7 +20,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initalize();
+	void Initialize();
 
 	/// <summary>
 	/// 更新

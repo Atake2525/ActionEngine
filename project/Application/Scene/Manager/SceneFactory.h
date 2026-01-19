@@ -31,6 +31,6 @@ public:
     /// </summary>
     /// <param name="sceneName">シーン名</param>
     /// <returns></returns>
-    BaseScene* ChangeScene(const std::string& sceneName) override;
+    std::unique_ptr<BaseScene> ChangeScene(const std::string& sceneName) override;
 };
 
