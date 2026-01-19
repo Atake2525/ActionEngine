@@ -29,7 +29,7 @@ public:
     /// <summary>
     /// 初期化
     /// </summary>
-    void Initialize(Camera* camera, const bool DebugMode = false);
+    void Initialize(Camera* camera, std::string jsonName, const bool DebugMode = false);
 
     /// <summary>
     /// 更新
