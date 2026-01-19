@@ -57,7 +57,7 @@ void TestScene::Initialize() {
 	trap->Initialize("wp1");
 
 	goal = make_unique<Goal>();
-	goal->Initalize();
+	goal->Initialize();
 
 	Audio::GetInstance()->LoadMP3("Resources/sekiranun.mp3", "bgm", 1.0f);
 

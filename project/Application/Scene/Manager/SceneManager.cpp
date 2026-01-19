@@ -1,12 +1,13 @@
 #include "SceneManager.h"
 #include "GameTime.h"
 
+using namespace std;
+
 SceneManager* SceneManager::instance = nullptr;
 
 void SceneManager::Finalize() {
     nextScene_ = nullptr;
     scene_->Finalize();
-    delete scene_;
 
     SceneFactory::GetInstance()->Finalize();
     delete instance;
@@ -35,11 +36,10 @@ void SceneManager::Update() {
         if (scene_)
         {
             scene_->Finalize();
-            delete scene_;
         }
 
         // シーン切り替え
-        scene_ = nextScene_;
+        scene_ = move(nextScene_);
         nextScene_ = nullptr;
 
         scene_->SetSceneManager(this);
@@ -51,7 +51,7 @@ void SceneManager::Update() {
 
     if (scene_->EndRequest())
     {
-        roopOut_ = true;
+        loopOut_ = true;
     }
 }
 

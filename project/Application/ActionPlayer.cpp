@@ -50,7 +50,7 @@ ActionPlayer::ActionPlayer()
 
 Vector3 cameraRotate;
 Transform playerTransform;
-Vector3 panetration = Vector3::Zero;
+Vector3 penetration = Vector3::Zero;
 
 Vector3 moveVelocity = Vector3::Zero;
 Vector3 vel = Vector3::Zero;
@@ -68,7 +68,7 @@ void ActionPlayer::Initialize(Camera* camera, std::string jsonName) {
     playerTransform.rotate = Vector3::Zero;
     playerTransform.translate = Vector3::Zero;
     playerTransform.scale = { 1.0f, 1.0f, 1.0f };
-    panetration = Vector3::Zero;
+    penetration = Vector3::Zero;
     moveVelocity = Vector3::Zero;
     vel = Vector3::Zero;
     jumpVelocity = Vector3::Zero;
@@ -153,7 +153,7 @@ void ActionPlayer::Draw() {
     m_pPlayerModel->Draw();
 }
 
-void ActionPlayer::Freeze(const bool& isFreeze)
+void ActionPlayer::Freeze(bool isFreeze)
 {
     m_isFreeze = isFreeze;
 }
@@ -368,7 +368,7 @@ void ActionPlayer::ApplyGravity() {
         }
     }
 
-    if (panetration.y < 0.0f && moveVelocity.y < 0.0f)
+    if (penetration.y < 0.0f && moveVelocity.y < 0.0f)
     {
         m_isGround = true;
 		m_isWallJump = false;
@@ -411,13 +411,13 @@ void ActionPlayer::Jump() {
             float jumpVel = sqrtf(2.0f * m_gravity * GameTime::GetInstance()->GetDeltaTime() * m_jumpForce);
             moveVelocity.y = jumpVel;
             float wallJumpVel = sqrtf(2.0f * m_accelTime * GameTime::GetInstance()->GetDeltaTime() * m_wallJumpForce);
-            if (panetration.x != 0.0f)
+            if (penetration.x != 0.0f)
             {
-                moveVelocity.x = -(wallJumpVel * Sign(panetration.x));
+                moveVelocity.x = -(wallJumpVel * Sign(penetration.x));
             }
-            else if (panetration.z != 0.0f)
+            else if (penetration.z != 0.0f)
             {
-                moveVelocity.z = -(wallJumpVel * Sign(panetration.z));
+                moveVelocity.z = -(wallJumpVel * Sign(penetration.z));
             }
         }
     }
@@ -428,17 +428,17 @@ void ActionPlayer::ApplyCollision() {
     m_playerAABB += m_velocity;
     CollisionManager::GetInstance()->UpdateCollisionTarget(m_playerAABB, "player");
     CollisionManager::GetInstance()->Update("player");
-    panetration = CollisionManager::GetInstance()->GetPenetration();
-    if (panetration.x != 0.0f)
+    penetration = CollisionManager::GetInstance()->GetPenetration();
+    if (penetration.x != 0.0f)
     {
         moveVel.x = 0.0f;
         jumpVelocity.x = 0.0f;
     }
-    else if (panetration.z != 0.0f) {
+    else if (penetration.z != 0.0f) {
         moveVel.x = 0.0f;
         jumpVelocity.z = 0.0f;
     }
-    playerTransform.translate -= panetration;
+    playerTransform.translate -= penetration;
 }
 
 // しゃがみ切り替え
@@ -446,7 +446,7 @@ void ActionPlayer::Crouch() {
 
 }
 
-float wallCheckHeihgt = -2.0f; // 壁走りが可能な壁の高さを設定(欲しい高さ * -1.0f)
+//float wallCheckHeight = -2.0f; // 壁走りが可能な壁の高さを設定(欲しい高さ * -1.0f)
 // 壁との接触判定
 bool ActionPlayer::CheckWall() {
     if (CollisionManager::GetInstance()->GetGroundDistance("player") <= -2.0f)
@@ -612,8 +612,8 @@ void ActionPlayer::Debug() {
     ImGui::DragFloat("LerpTimer", &velocityLerpTimer, 0.0f);
     auto groundDist = CollisionManager::GetInstance()->GetGroundDistance("player");
     ImGui::DragFloat("GroundDistance", &groundDist, 0.0f);
-    auto panetration = CollisionManager::GetInstance()->GetPenetration();
-    ImGui::DragFloat3("Penetration", &panetration.x, 0.0f);
+    auto penetration = CollisionManager::GetInstance()->GetPenetration();
+    ImGui::DragFloat3("Penetration", &penetration.x, 0.0f);
     ImGui::DragFloat("Walk", &m_walkSpeed, 0.1f);
     ImGui::DragFloat("Dash", &m_dashSpeed, 0.1f);
     ImGui::DragFloat("AccelTime", &m_accelTime, 0.1f);

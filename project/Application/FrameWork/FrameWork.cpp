@@ -21,7 +21,7 @@ void FrameWork::Run() {
 		// 更新
 		Update();
 		// ループ脱出
-		if (RoopOut()) {
+		if (LoopOut()) {
 			break;
 		}
 		// 描画

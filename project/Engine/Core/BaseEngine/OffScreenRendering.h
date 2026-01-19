@@ -41,7 +41,7 @@ struct Dissolve
 	//float edgerange;
 };
 
-class OffScreenRnedering
+class OffScreenRendering
 {
 public:
 	/// <summary>

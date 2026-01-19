@@ -156,5 +156,7 @@ private:
     /// デバッグモードの更新(ImGui関連)
     /// </summary>
     void DebugUpdate();
+
+    std::string m_jsonName;
 };
 
