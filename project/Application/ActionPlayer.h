@@ -1,35 +1,35 @@
-#include "Transform.h"
-#include <memory>
-#include "Object3d.h"
+#include "Camera.h"
 #include "Input.h"
+#include "Object3d.h"
+#include <memory>
 
 #pragma once
 
-class Camera;
-class Input;
-
-enum class Direction {
-    NONE,
-    X,
-    Y,
-    Z
+// プレイヤーの行動ステータス
+enum class PlayerMoveType {
+    Idle,
+    Crouch,
+    Walk,
+    Backwalk,
+    Sneak,
+    Dash,
+    Jump,
 };
 
 /// <summary>
 /// プレイヤー
 /// </summary>
-class ActionPlayer {
+class ActionPlayer
+{
 public:
-    // コンストラクタ
-    ActionPlayer();
+
     // デストラクタ
     ~ActionPlayer();
 
     /// <summary>
     /// 初期化
     /// </summary>
-    /// <param name="camera">Objectに適用しているカメラのポインタ</param>
-    void Initialize(Camera* camera, std::string JsonName);
+    void Initialize(Camera* camera, std::string jsonName, const bool DebugMode = false);
 
     /// <summary>
     /// 更新
@@ -42,107 +42,121 @@ public:
     void Draw();
 
     /// <summary>
-    /// ゲームオーバーになったかどうか
+    /// 入力を受け付けないようにする
     /// </summary>
-    /// <returns></returns>
+    void Freeze(bool flag) { freeze_ = flag; }
+
+    /// <summary>
+    /// ゲームオーバーのGetter
+    /// </summary>
     const bool IsGameOver() const;
 
     /// <summary>
-    /// プレイヤーを行動不可にする
+    /// プレイヤーのAABBの当たり判定を取得
     /// </summary>
-    /// <param name="isFreeze"></param>
-    void Freeze(bool isFreeze);
-
-    const bool IsWallDash() const { return m_isWallRun; }
-    const bool IsWallJump() const { return m_isWallJump; }
+    const AABB& GetAABB() const { return playerAABB_; }
 
     /// <summary>
-    /// AABBの取得
+    /// プレイヤーのOBBの当たり判定を取得
     /// </summary>
-    /// <returns></returns>
-    const AABB GetAABB() const { return m_pPlayerModel->GetAABB(); }
+    const OBB& GetOBB() const { return playerOBB_; }
 
-private: // メンバ変数
+private: // メンバ変数宣言
 
-    Input* m_pInput;
-    Camera* m_pCamera;
-    std::unique_ptr<Object3d> m_pPlayerModel;
-    AABB m_playerAABB;
-    Transform m_playerTransform;
+    bool debugMode_ = false;
+    bool cameraMove_ = true;
+    bool parent_ = true;
+    Camera* camera = nullptr;
+    Input* input = nullptr;
 
-    bool m_isFreeze = false;
-    bool firstUpdate = false;
+    std::unique_ptr<Object3d> playerModel_;
 
-    Direction m_WallRunDirection = Direction::X;
+    std::unique_ptr<Object3d> playerCollisionModel_;
 
-///===== 入力・移動処理 =====///
-    Vector3 m_velocity;       // 現在の移動速度
-    float m_accelTime;        // 加速時間
-    float m_moveSpeed;        // 移動速度保管用
-    float m_walkSpeed;        // 通常移動速度
-    float m_dashSpeed;        // ダッシュ速度
-    float m_crouchSpeed;      // しゃがみ時の移動速度
-    float m_jumpForce;        // ジャンプ力
-    float m_wallJumpForce;    // 壁ジャンプ力
-    float m_gravity;          // 重力加速度
-    float m_fallLimit;       // 落下制限速度
-    Vector2 m_inputDirection; // WASD入力方向
+    AABB playerAABB_;
 
-///===== プレイヤー状態 =====///
-    bool m_isGround;          // 地面に接しているか
-    bool m_isDash;            // ダッシュ状態か
-    bool m_isCrouch;          // しゃがみ状態か
-    bool m_isWallRun;         // 壁走り中か
-    bool m_isWallJump;        // 壁ジャンプ中か
-    Vector3 m_wallNormal;     // 壁の法線
-    int m_wallJumpCount;    // 壁ジャンプした回数
-    int m_maxWallJumpCount; // 壁ジャンプの最大回数
+    OBB playerOBB_;
 
-///===== 環境判定 =====///
-    float m_groundDistance; // 地面との距離判定
-    float m_wallDistance;   // 壁との距離判定
+private: // ステータス(移動系)宣言
+    Transform playerTransform_;
+    PlayerMoveType moveType_ = PlayerMoveType::Idle;
+    PlayerMoveType moveTypePre_ = PlayerMoveType::Idle;
 
+    Vector3 moveVelocity_;
+    Vector3 speed_ = { 0.0f, 0.0f, 0.0f }; // 移動速度
+    float speedLimit_ = 2.5f; // 移動速度限界
 
-/// ===== 演出 =====///
-    float m_walkFov;
-    float m_dashFov;
-    float m_fovChangeTime;
+    float translateAcceleration_ = 0.04f; // 慣性(接地状態)
+    float flyAcceleration_ = 0.022f; // 慣性(ジャンプ中)
+    float wallDashAcceleration_ = -0.04f; // 壁走り中の落下速度(固定)
 
-private: // 関数
-///===== 入力・移動処理 =====///
+    // 各アニメーションの速度倍率
+    float walkSpeed_ = 0.031f;
+    float backwalkSpeed_ = 0.031f;
+    float sneakSpeed_ = 0.032f;
+    float dashSpeed_ = 0.1f;
 
-    void HandleInput();            // WASDやジャンプなどの入力処理
-    void Move();                   // 移動処理 (地上・空中)
-    void ApplyGravity();           // 重力の適用
-    void Jump();                   // ジャンプ処理
-    void Crouch();   // しゃがみ切り替え
+    float easingTime = 0.0f;
 
-///===== 壁アクション =====///
+    bool jump_ = false;
 
-    bool CheckWall();    // 壁との接触判定
-    void StartWallRun(); // 壁走り開始処理
-    void StopWallRun();  // 壁走り終了処理
-    void WallJump();     // 壁ジャンプ処理
+    bool wallDash_ = false;
 
-///===== 状態処理 =====///
+    float jumpAcceleration_ = 0.24f; // ジャンプの移動量
+    float jumpAccelerationForWallDash_ = 0.12f; // 壁走り中のジャンプの移動量
+    float fallLimit_ = -2.4f; // 落下速度上限
 
-    void CheckGround();  // 地面判定
-    void UpdateStates(); // 各種状態の更新
+    float fallAcceleration_ = 0.01f; // 落下の加速度
 
-///===== カメラ制御 =====///
+private: // ステータス(カメラ系)宣言
+    Transform cameraTransform;
+    Vector2 cameraSpeed = { 0.3f, 0.3f };
+    Matrix4x4 cameraMatrix;
 
-    void HandleMouseLock(); // マウスによる視点操作
+    Vector3 cameraOffset_ = { 0.0f, 0.0f, 0.0f };
 
-///===== 当たり判定の適用 =====///
+    float fovTime_ = 0.0f;
+    float fovY_ = 0.45f; // 現在のFov数値
+    float afterFovY_ = 0.0f; // 変更後のFov数値
 
-    void ApplyCollision(); // 当たり判定の適用
+    float fovChangeSpeed_ = 0.2f;
 
-///===== 演出系更新 =====///
+    float normalFovY_ = 1.0f; // ダッシュ中以外のFov数値
+    float fovYBoost_ = 0.3f; // ダッシュ中のFovの上昇値(normalFovY_を参照)
 
-    void UpdateEffects();
+    float wallDashAngle_ = SwapRadian(25.0f); // 壁走り中のカメラの傾き
 
-///===== デバッグ用関数 =====//
+    float wallDashRotateTime_ = 0.35f; // 壁走り中のカメラの傾きのイージング用時間
+    float wallDashRotateTimer_ = 0.0f; // 壁走り中のカメラの傾きのイージング用タイマー
+    float wallDashRotateStart_ = 0.0f; // 壁走り中のカメラの傾きのイージング用前の傾き
+    float wallDashRotateEnd_ = 0.0f; // 壁走り中のカメラの傾きのイージング用前の傾き
+    bool isWallDashRotating_ = false;
 
-    void Debug();
+private: // ステータス関係の関数宣言
+
+    bool freeze_ = false;
+
+    /// <summary>
+    /// 回転
+    /// </summary>
+    void Rotation();
+
+    /// <summary>
+    /// 移動
+    /// </summary>
+    void Move();
+
+    /// <summary>
+    /// しゃがみ
+    /// </summary>
+    void Sneak();
+
+private:
+    /// <summary>
+    /// デバッグモードの更新(ImGui関連)
+    /// </summary>
+    void DebugUpdate();
+
+    std::string m_jsonName;
 };
 
