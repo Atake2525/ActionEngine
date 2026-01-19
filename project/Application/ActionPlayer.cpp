@@ -17,7 +17,7 @@ ActionPlayer::~ActionPlayer()
 	CollisionManager::GetInstance()->DeleteCollisionTarget("player");
 }
 
-void ActionPlayer::Initialize(Camera* camera, string jsonName, const bool DebugMode)
+void ActionPlayer::Initialize(Camera* camera, const string& jsonName, const bool DebugMode)
 {
 	debugMode_ = DebugMode;
 	this->camera = camera;

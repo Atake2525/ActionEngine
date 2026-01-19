@@ -24,6 +24,11 @@ void GameTime::Initialize() {
     maxFPS = DirectXBase::GetInstance()->GetMaxFPS();
 }
 
+int GameTime::CreateTimer()
+{
+    
+}
+
 void GameTime::UpdateDeltaTime() {
 	static auto lastTime = std::chrono::high_resolution_clock::now();
 	auto currentTime = std::chrono::high_resolution_clock::now();
@@ -63,5 +68,20 @@ void GameTime::Update()
     if (updateUPUUsageTimer >= 1.0f) {
         UpdateCPUUsagePDH();
         updateUPUUsageTimer = 0.0f;
+    }
+
+    if (!timers.empty())
+    {
+        for (int i = 0; i < timers.size(); i++)
+        {
+            if (!timers[i].isActive)
+            {
+                timers[i].timer += deltaTime;
+                if (timers[i].timer >= timers[i].maxTime)
+                {
+
+                }
+            }
+        }
     }
 }

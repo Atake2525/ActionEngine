@@ -13,6 +13,14 @@ private:
 	GameTime(GameTime&) = delete;
 	GameTime& operator=(GameTime&) = delete;
 
+	struct Timer
+	{
+		float timer;
+        float maxTime;
+        bool isLoop;
+        bool isActive;
+	};
+
 public:
 
 	/// <summary>
@@ -45,6 +53,8 @@ public:
 
     const float& GetGPUUsageNVML() const { return gpuUsage; }
 
+    int CreateTimer();
+
 private:
 	float deltaTime = 0.0f;
 
@@ -58,6 +68,7 @@ private:
 
 	float maxFPS = 60.0f;
 
+	std::vector<Timer> timers;
 
 	void UpdateDeltaTime();
     void UpdateCPUUsagePDH();
