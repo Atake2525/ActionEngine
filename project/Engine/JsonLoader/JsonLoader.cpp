@@ -24,6 +24,19 @@ void JsonLoader::Initialize() {
 
 }
 
+bool JsonLoader::CheckJsonLoaded(const std::string& jsonName)
+{
+    return levelDatas.contains(jsonName);
+}
+
+void JsonLoader::DeleteJson(const std::string& jsonName)
+{
+    if (levelDatas.contains(jsonName))
+    {
+        levelDatas.erase(jsonName);
+    }
+}
+
 void JsonLoader::LoadJson(const std::string& path, const std::string& jsonName, const bool overwrite)
 {
     LevelData lvData;

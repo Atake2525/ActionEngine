@@ -1,5 +1,5 @@
 #include <d3d12.h>
-#include "externels/DirectXTex/DirectXTex.h"
+#include "externals/DirectXTex/DirectXTex.h"
 #include <string>
 #include <wrl.h>
 #include <vector>

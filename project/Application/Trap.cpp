@@ -21,6 +21,11 @@ Trap::~Trap() {
 }
 
 void Trap::Initialize(std::string jsonName) {
+	// Jsonが読み込まれていなかったら早期return
+	if (!JsonLoader::GetInstance()->CheckJsonLoaded(jsonName)) {
+		Log("指定したJsonは読み込まれていません : " + jsonName + "\n");
+		return;
+	}
 	random_device seedGenerator;
 	mt19937 random(seedGenerator());
 	randomEngine = random;
@@ -30,15 +35,7 @@ void Trap::Initialize(std::string jsonName) {
 	string str;
 	vector<JsonData> json;
 	jsonName_ = jsonName;
-	if (jsonName == "normal")
-	{
-		str = "map" + to_string(StageCount::GetInstance()->GetStageCount());
-		json = JsonLoader::GetInstance()->GetJsonData(str, "trap");
-	}
-	else
-	{
-		json = JsonLoader::GetInstance()->GetJsonData(jsonName, "trap");
-	}
+	json = JsonLoader::GetInstance()->GetJsonData(jsonName, "trap");
 	Log("指定したデータが" + std::to_string(json.size()) + "個見つかりました\n");
 	for (auto data : json) {
 		Traps trap;

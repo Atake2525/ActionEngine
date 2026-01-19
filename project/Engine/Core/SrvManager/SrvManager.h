@@ -5,7 +5,7 @@
 #include <array>
 #include <dxcapi.h>
 #include <string>
-#include "externels/DirectXTex/DirectXTex.h"
+#include "externals/DirectXTex/DirectXTex.h"
 #pragma once
 
 class SrvManager

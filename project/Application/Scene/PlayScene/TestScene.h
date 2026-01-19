@@ -22,6 +22,8 @@
 #include "GameOver.h"
 #include "Trap.h"
 #include "Goal.h"
+#include "BaseStage.h"
+#include "TutorialStage.h"
 
 #pragma once
 
@@ -60,20 +62,16 @@ private:
 
 	bool cursorshow = true;
 
-	//std::unique_ptr<Object3d> box1;
-	std::unique_ptr<Object3d> box2;
-	std::unique_ptr<Object3d> plate;
-
 	std::unique_ptr<GameOver> gameOverSprite;
 
 	std::unique_ptr<Player> player;
 	std::unique_ptr<ActionPlayer> actionPlayer;
 
-	Object3d* grid = nullptr;
-
 	std::unique_ptr<Trap> trap;
 
 	std::unique_ptr<Goal> goal;
+
+	std::unique_ptr<BaseStage> stage;
 
 	bool start_ = false;
 };

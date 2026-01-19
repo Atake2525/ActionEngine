@@ -1,5 +1,5 @@
 #include "WinApp.h"
-#include "externels/imgui/imgui.h"
+#include "externals/imgui/imgui.h"
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 WinApp* WinApp::instance = nullptr;
