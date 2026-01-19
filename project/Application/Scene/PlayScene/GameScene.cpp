@@ -54,7 +54,7 @@ void GameScene::Initialize() {
     //LevelData levelData = JsonLoader::GetInstance()->LoadJsonTransform("Resources/Debug/json", "PlayerStartPoint.json");
 
     goal_ = make_unique<Goal>();
-    goal_->Initalize();
+    goal_->Initialize();
 
     trap_ = make_unique<Trap>();
     trap_->Initialize();

@@ -22,7 +22,6 @@ void Player::Initialize(Camera* camera, string jsonName, const bool DebugMode)
 	debugMode_ = DebugMode;
 	this->camera = camera;
 	fovY_ = this->camera->GetfovY();
-	//this->camera->SetTranslate({ 0.0f, 1.7f, 0.15f });
 	this->input = Input::GetInstance();
 	parent_ = !DebugMode;
 
@@ -40,6 +39,7 @@ void Player::Initialize(Camera* camera, string jsonName, const bool DebugMode)
 		{0.0f, 0.1f, 0.0f}
 	};
 	// スタート地点の取得
+    m_jsonName = jsonName;
 	vector<JsonData> data = JsonLoader::GetInstance()->GetJsonData(jsonName, "startpoint");
 	// スタート地点が設定されていない又はjsonが読み込めなかった場合はデフォルト位置を使用
 	if (data.size() != 0)
@@ -118,10 +118,8 @@ void Player::Update() {
 
 	camera->SetRotate(cameraTransform.rotate);
 
-	//playerOBB_ = CreateOBB(playerTransform_, playerAABB_);
 	playerModel_->SetAnimationSpeed(1.0f);
 	playerModel_->SetTransform(playerTransform_);
-	//playerCollisionModel_->SetAnimationSpeed(1.0f);
 	playerCollisionModel_->SetTransform(playerTransform_);
 	playerCollisionModel_->Update();
 	playerModel_->Update();
@@ -137,10 +135,6 @@ void Player::Update() {
 }
 
 void Player::Draw() {
-	/*if (moveType_ != PlayerMoveType::Jump)
-	{
-		playerModel_->Draw();
-	}*/
 	playerModel_->Draw();
 }
 
@@ -488,10 +482,6 @@ void Player::Move()
 		speed_.y = 0.0f;
 		moveVelocity_.y = 0.0f;
 	}
-	/*if (dist >= -0.3f && dist < -0.1f && !jump_ && (moveVelocity_.x != 0.0f || moveVelocity_.z != 0.0f || moveVelocity_.y != 0.0f))
-	{
-		playerTransform_.translate.y += -dist;
-	}*/
 	// プレイヤーの移動量を今のプレイヤーの位置に加算する
 	playerTransform_.translate += moveVelocity_;
 	playerAABB_ += moveVelocity_;
@@ -545,13 +535,10 @@ void Player::Move()
 		{
 		case PlayerMoveType::Idle:
 			playerModel_->ChangePlayAnimation();
-			//playerCollisionModel_->ChangePlayAnimation();
 			break;
 		case PlayerMoveType::Crouch:
 			playerModel_->SetChangeAnimationSpeed(0.14f);
 			playerModel_->ChangePlayAnimation("crouch");
-			//playerCollisionModel_->SetChangeAnimationSpeed(0.14f);
-			//playerCollisionModel_->ChangePlayAnimation("crouch");
 			break;
 		case PlayerMoveType::Walk:
 			playerModel_->SetChangeAnimationSpeed();
@@ -561,27 +548,18 @@ void Player::Move()
 			playerModel_->SetChangeAnimationSpeed();
 			playerModel_->SetAnimationSpeed(20.0f);
 			playerModel_->ChangePlayAnimation("backwalk");
-			//playerCollisionModel_->SetChangeAnimationSpeed();
-			//playerCollisionModel_->SetAnimationSpeed(20.0f);
-			//playerCollisionModel_->ChangePlayAnimation("backwalk");
 			break;
 		case PlayerMoveType::Sneak:
 			playerModel_->SetChangeAnimationSpeed(0.18f);
 			playerModel_->ChangePlayAnimation("sneak");
-			//playerCollisionModel_->SetChangeAnimationSpeed(0.18f);
-			//playerCollisionModel_->ChangePlayAnimation("sneak");
 			break;
 		case PlayerMoveType::Dash:
 			playerModel_->SetChangeAnimationSpeed(0.2f);
 			playerModel_->ChangePlayAnimation("dash");
-			//playerCollisionModel_->SetChangeAnimationSpeed(0.2f);
-			//playerCollisionModel_->ChangePlayAnimation("dash");
 			break;
 		case PlayerMoveType::Jump:
 			playerModel_->SetChangeAnimationSpeed(0.1f);
 			playerModel_->ChangePlayAnimation("fall");
-			//playerCollisionModel_->SetChangeAnimationSpeed(0.1f);
-			//playerCollisionModel_->ChangePlayAnimation("fall");
 			break;
 		}
 	}
@@ -716,8 +694,22 @@ void Player::DebugUpdate()
 
 	if (input->TriggerKey(DIK_R))
 	{
+		Transform startPoint = {
+			{1.0f, 1.0f, 1.0f},
+			{0.0f, 0.0f, 0.0f},
+			{0.0f, 0.1f, 0.0f}
+        };
+		vector<JsonData> data = JsonLoader::GetInstance()->GetJsonData(m_jsonName, "startpoint");
+		// スタート地点が設定されていない又はjsonが読み込めなかった場合はデフォルト位置を使用
+		if (data.size() != 0)
+		{
+			startPoint = data[0].transform;
+		}
+		playerTransform_ = startPoint;
+
+		moveVelocity_ = { 0.0f, 0.0f, 0.0f };
 		moveVelocity_ = { 0.0f };
-		playerModel_->SetTranslate({ 0.0f, 1.0f, 0.0f });
+        playerModel_->SetTransform(playerTransform_);
 		speed_ = { 0.0f, 0.0f, 0.0f };
 	}
 	if (cameraMove_)

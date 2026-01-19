@@ -50,7 +50,7 @@ public:
 	void Draw() override;
 
 	// ループ終了
-	bool RoopOut() override { return finished; }
+	bool LoopOut() override { return finished; }
 	
 
 	// ↑までシーンの作成に必須

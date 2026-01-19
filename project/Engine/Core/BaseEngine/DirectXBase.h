@@ -13,7 +13,8 @@
 #include "externals/DirectXTex/d3dx12.h"
 #include "Vector4.h"
 #include "Vector3.h"
-#include "OffScreenRnedering.h"
+#include "OffScreenRendering.h"
+#include <memory>
 
 class DirectXBase {
 private:
@@ -269,7 +270,7 @@ private:
 
 	uint32_t textureIndex;
 
-	OffScreenRnedering* offscreen = nullptr;
+	std::unique_ptr<OffScreenRendering> offscreen = nullptr;
 
 	float clearColor[4];
 

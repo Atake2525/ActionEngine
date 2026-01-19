@@ -1,5 +1,6 @@
 #include "BaseScene.h"
 #include "SceneFactory.h"
+#include <memory>
 
 #pragma once
 class SceneManager {
@@ -30,15 +31,15 @@ public:
 
     void CallStart();
 
-    const bool& EndRequest() { return roopOut_; }
+    const bool& EndRequest() { return loopOut_; }
 
 private:
     bool drawStart = false;
     // 実行中のシーン
-    BaseScene* scene_ = nullptr;
+    std::unique_ptr<BaseScene> scene_ = nullptr;
     // 次のシーン
-    BaseScene* nextScene_ = nullptr;
+    std::unique_ptr<BaseScene> nextScene_ = nullptr;
 
-    bool roopOut_ = false;
+    bool loopOut_ = false;
 };
 

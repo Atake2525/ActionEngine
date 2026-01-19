@@ -51,7 +51,7 @@ public:
     /// プレイヤーを行動不可にする
     /// </summary>
     /// <param name="isFreeze"></param>
-    void Freeze(const bool& isFreeze);
+    void Freeze(bool isFreeze);
 
     const bool IsWallDash() const { return m_isWallRun; }
     const bool IsWallJump() const { return m_isWallJump; }

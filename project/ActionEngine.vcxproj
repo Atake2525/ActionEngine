@@ -123,7 +123,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\BlackBox\Log\Logger.cpp" />
     <ClCompile Include="Engine\BlackBox\Log\StringUtility.cpp" />
     <ClCompile Include="Engine\Collision\CollisionManager.cpp" />
-    <ClCompile Include="Engine\Core\BaseEngine\OffScreenRnedering.cpp" />
+    <ClCompile Include="Engine\Core\BaseEngine\OffScreenRendering.cpp" />
     <ClCompile Include="Engine\BlackBox\Animation\DebugAnimation.cpp" />
     <ClCompile Include="Engine\LoadManager\ParticleManager\ParticleManager.cpp" />
     <ClCompile Include="Engine\UI\Text.cpp">
@@ -198,7 +198,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\BlackBox\Log\Logger.h" />
     <ClInclude Include="Engine\BlackBox\Log\StringUtility.h" />
     <ClInclude Include="Engine\Collision\CollisionManager.h" />
-    <ClInclude Include="Engine\Core\BaseEngine\OffScreenRnedering.h" />
+    <ClInclude Include="Engine\Core\BaseEngine\OffScreenRendering.h" />
     <ClInclude Include="Engine\BlackBox\Animation\DebugAnimation.h" />
     <ClInclude Include="Engine\JsonLoader\json.hpp" />
     <ClInclude Include="Engine\JsonLoader\JsonLoader.h" />
