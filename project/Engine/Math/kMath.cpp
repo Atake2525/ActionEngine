@@ -1,4 +1,4 @@
-﻿#include "kMath.h"
+#include "kMath.h"
 #include <algorithm>
 
 const Vector3 operator*(const Vector3& v, const float f) {
@@ -8,43 +8,6 @@ const Vector3 operator*(const Vector3& v, const float f) {
 	result.z = v.z * f;
 	return result;
 }
-
-//Vector3& operator+=(Vector3& v1, const Vector3& v2) {
-//	v1.x += v2.x;
-//	v1.y += v2.y;
-//	v1.z += v2.z;
-//	return v1;
-//}
-
-//const Vector3 operator+(const Vector3& v1, const Vector3 v2) {
-//	Vector3 result;
-//	result.x = v1.x + v2.x;
-//	result.y = v1.y + v2.y;
-//	result.z = v1.z + v2.z;
-//	return result;
-//}
-
-//Vector3& operator-=(Vector3& v1, const Vector3& v2) {
-//	v1.x -= v2.x;
-//	v1.y -= v2.y;
-//	v1.z -= v2.z;
-//	return v1;
-//}
-
-//const Vector3 operator-(Vector3& v1, const Vector3 v2) {
-//	Vector3 result;
-//	result.x = v1.x - v2.x;
-//	result.y = v1.y - v2.y;
-//	result.z = v1.z - v2.z;
-//	return result;
-//}
-
-//Vector3& operator*=(Vector3& v1, const Vector3& v2) {
-//	v1.x *= v2.x;
-//	v1.y *= v2.y;
-//	v1.z *= v2.z;
-//	return v1;
-//}
 
 const Vector3 operator*(const Vector3& v1, const Vector3& v2) {
 	Vector3 result;
@@ -628,31 +591,6 @@ Vector3 TransformNormal(const Vector3& v, const Matrix4x4& m) {
 }
 
 Quaternion Slerp(const Quaternion& befor, const Quaternion& after, float t) {
-	//float dot = Dot(q0, q1);
-	//
-	//Quaternion quat1 = q1;
-
-	//// 最短経路補正（反転処理）
-	////Quaternion q1Mod = (dot < 0.0f) ? -q1 : q1;
-	//if (dot < 0.0f)
-	//{
-	//	quat1 = -quat1;
-	//}
-	//dot = std::clamp(dot, -1.0f, 1.0f); // acosの定義域に収める
-
-	//const float epsilon = 1e-6f;
-	//if (dot > 1.0f - epsilon) {
-	//	// ほぼ同じ方向なら線形補間で近似
-	//	return QuaternionNormalize(q0 * (1.0f - t) + quat1 * t);
-	//}
-
-	//float theta = std::acos(dot);
-	//float sinTheta = std::sin(theta);
-	//float scale0 = std::sin((1.0f - t) * theta) / sinTheta;
-	//float scale1 = std::sin(t * theta) / sinTheta;
-
-	//Quaternion result = q0 * scale0 + quat1 * scale1;
-	//return QuaternionNormalize(result);
 
 	Quaternion quat0 = befor;
 	Quaternion quat1 = after;
@@ -681,44 +619,6 @@ Quaternion Slerp(const Quaternion& befor, const Quaternion& after, float t) {
 	float scale1 = sin(t * theta) / sin(theta);
 
 	return QuaternionNormalize(scale0 * quat0 + scale1 * quat1);
-
-
-	//float time = t;
-
-	//Quaternion q = q0;
-	//Quaternion result;
-	//float dot = Dot(q0, q1);
-
-	//if (dot > 0.0f) { // 符号逆にしているからどこかで問題が起こる可能性あり
-	//	q = Inverse(q0);
-	//	dot = -dot;
-	//}
-
-	//dot = std::clamp(dot, -1.0f, 1.0f);
-
-
-	//// なす角を求める
-	//float theta = std::acos(dot);
-
-	//float scale0 = sin((1 - time) * theta) / sin(theta);
-	//float scale1 = sin(time * theta) / sin(theta);
-
-	//result.x = scale0 * q.x + scale1 * q1.x;
-	//result.y = scale0 * q.y + scale1 * q1.y;
-	//result.z = scale0 * q.z + scale1 * q1.z;
-	//result.w = scale0 * q.w + scale1 * q1.w;
-
-	//assert(!std::isnan(result.x));
-	//assert(!std::isnan(result.y));
-	//assert(!std::isnan(result.z));
-	//assert(!std::isnan(result.w));
-
-	//if (result.w > 1.0f || result.w < -1.0f)
-	//{
-	//	assert(false);
-	//}
-
-	//return result;
 
 }
 

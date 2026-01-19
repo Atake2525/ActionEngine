@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Matrix3x3.h"
 #include "Matrix4x4.h"
 #include "Vector2.h"
@@ -15,17 +15,7 @@
 
 const Vector3 operator*(const Vector3& v, const float f);
 
-//Vector3& operator+=(Vector3& v1, const Vector3& v2);
-
-//Vector3& operator-=(Vector3& v1, const Vector3& v2);
-
-//Vector3& operator*=(Vector3& v1, const Vector3& v2);
-
 Vector3& operator/=(Vector3& v1, const Vector3& v2);
-
-//const Vector3 operator+(const Vector3& v1, const Vector3 v2);
-
-//const Vector3 operator-(const Vector3& v1, const Vector3 v2);
 
 const Vector3 operator*(const Vector3& v1, const Vector3& v2);
 
@@ -36,8 +26,6 @@ const Vector3 operator+(const Vector3& v1, const float f);
 const Vector3 operator-(const Vector3& v1, const float f);
 
 const Vector3 operator/(const Vector3& v1, const float f);
-
-//const Vector3 operator-(const Vector3& v1);
 
 //単位行列の作成
 Matrix4x4 MakeIdentity4x4();
@@ -125,9 +113,6 @@ Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float botto
 
 // 3, ビューポート変換行列
 Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, float minDepth, float maxDepth);
-
-// 球体描画
-//void DrawSphere(const Sphere& sphere, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color);
 
 Vector3 SwapDegree(Vector3 radian);
 
