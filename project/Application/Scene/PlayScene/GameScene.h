@@ -94,5 +94,15 @@ private:
 
 	std::unique_ptr<GameOver> gameOver_ = nullptr;
 	std::unique_ptr<GameClearScene> gameClear_ = nullptr;
+
+	struct Tutorial
+	{
+        std::unique_ptr<Sprite> sprite;
+		bool isClear = false;
+        float timer = 0.0f;
+		Vector4 color = { 0.0f, 0.0f, 0.0f, 1.0f };
+	};
+
+    std::array<Tutorial, 4> tutorial;
 };
 

@@ -66,7 +66,7 @@
     <ClCompile Include="Engine\3d\Object\Object3d\Object3d.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Core\BaseEngine\OffScreenRnedering.cpp">
+    <ClCompile Include="Engine\Core\BaseEngine\OffScreenRendering.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
     <ClCompile Include="Engine\3d\Object\Object3dBase\Object3dBase.cpp">
@@ -132,17 +132,18 @@
     <ClCompile Include="Application\Scene\PlayScene\GameOver.cpp" />
     <ClCompile Include="Engine\UI\Text.cpp" />
     <ClCompile Include="Application\StageManager\StageCount.cpp" />
-    <ClCompile Include="Stage.cpp" />
+    <ClCompile Include="Application\StageManager\BaseStage.cpp" />
     <ClCompile Include="Application\Scene\PlayScene\GameClearScene.cpp" />
     <ClCompile Include="Application\ActionPlayer.cpp" />
-    <ClCompile Include="externels\imgui\imgui.cpp" />
-    <ClCompile Include="externels\imgui\imgui_demo.cpp" />
-    <ClCompile Include="externels\imgui\imgui_draw.cpp" />
-    <ClCompile Include="externels\imgui\imgui_tables.cpp" />
-    <ClCompile Include="externels\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="externels\imgui\imgui_impl_dx12.cpp" />
-    <ClCompile Include="externels\imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="externals\imgui\imgui.cpp" />
+    <ClCompile Include="externals\imgui\imgui_demo.cpp" />
+    <ClCompile Include="externals\imgui\imgui_draw.cpp" />
+    <ClCompile Include="externals\imgui\imgui_tables.cpp" />
+    <ClCompile Include="externals\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="externals\imgui\imgui_impl_dx12.cpp" />
+    <ClCompile Include="externals\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="Application\Scene\PlayScene\StageSelectScene.cpp" />
+    <ClCompile Include="Application\StageManager\TutorialStage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Math\EasingUtility.h" />
@@ -245,7 +246,7 @@
     <ClInclude Include="Engine\3d\Object\Object3d\Object3d.h">
       <Filter>Engine</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Core\BaseEngine\OffScreenRnedering.h">
+    <ClInclude Include="Engine\Core\BaseEngine\OffScreenRendering.h">
       <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="Engine\3d\Object\Object3dBase\Object3dBase.h">
@@ -317,21 +318,22 @@
     <ClInclude Include="Engine\JsonLoader\JsonLoader.h" />
     <ClInclude Include="Engine\JsonLoader\json.hpp" />
     <ClInclude Include="Application\StageManager\StageCount.h" />
-    <ClInclude Include="Stage.h" />
+    <ClInclude Include="Application\StageManager\BaseStage.h" />
     <ClInclude Include="Application\Scene\PlayScene\GameClearScene.h" />
     <ClInclude Include="Application\ActionPlayer.h" />
-    <ClInclude Include="externels\imgui\imconfig.h" />
-    <ClInclude Include="externels\imgui\imgui.h" />
-    <ClInclude Include="externels\imgui\imgui_internal.h" />
-    <ClInclude Include="externels\imgui\imstb_rectpack.h" />
-    <ClInclude Include="externels\imgui\imstb_textedit.h" />
-    <ClInclude Include="externels\imgui\imstb_truetype.h" />
-    <ClInclude Include="externels\imgui\imgui_impl_dx12.h" />
-    <ClInclude Include="externels\imgui\imgui_impl_win32.h" />
+    <ClInclude Include="externals\imgui\imconfig.h" />
+    <ClInclude Include="externals\imgui\imgui.h" />
+    <ClInclude Include="externals\imgui\imgui_internal.h" />
+    <ClInclude Include="externals\imgui\imstb_rectpack.h" />
+    <ClInclude Include="externals\imgui\imstb_textedit.h" />
+    <ClInclude Include="externals\imgui\imstb_truetype.h" />
+    <ClInclude Include="externals\imgui\imgui_impl_dx12.h" />
+    <ClInclude Include="externals\imgui\imgui_impl_win32.h" />
     <ClInclude Include="Engine\Math\OBB.h" />
     <ClInclude Include="Engine\Math\Sphere.h" />
     <ClInclude Include="Engine\Math\Plane.h" />
     <ClInclude Include="Application\Scene\PlayScene\StageSelectScene.h" />
+    <ClInclude Include="Application\StageManager\TutorialStage.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\PostEffect\BoxFilter.PS.hlsl" />
@@ -380,7 +382,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="externels\assimp\lib\Release\assimp-vc143-mtd.lib">
+    <Library Include="externals\assimp\lib\Release\assimp-vc143-mtd.lib">
       <Filter>External\Assimp</Filter>
     </Library>
   </ItemGroup>
