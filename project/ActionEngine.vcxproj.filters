@@ -66,7 +66,7 @@
     <ClCompile Include="Engine\3d\Object\Object3d\Object3d.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Core\BaseEngine\OffScreenRnedering.cpp">
+    <ClCompile Include="Engine\Core\BaseEngine\OffScreenRendering.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
     <ClCompile Include="Engine\3d\Object\Object3dBase\Object3dBase.cpp">
@@ -114,9 +114,6 @@
     <ClCompile Include="Application\Scene\Manager\SceneManager.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Application\Player.cpp">
-      <Filter>Engine</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\2d\SpriteBase\SpriteBase.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
@@ -132,7 +129,7 @@
     <ClCompile Include="Application\Scene\PlayScene\GameOver.cpp" />
     <ClCompile Include="Engine\UI\Text.cpp" />
     <ClCompile Include="Application\StageManager\StageCount.cpp" />
-    <ClCompile Include="Stage.cpp" />
+    <ClCompile Include="Application\StageManager\BaseStage.cpp" />
     <ClCompile Include="Application\Scene\PlayScene\GameClearScene.cpp" />
     <ClCompile Include="Application\ActionPlayer.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp" />
@@ -143,6 +140,7 @@
     <ClCompile Include="externals\imgui\imgui_impl_dx12.cpp" />
     <ClCompile Include="externals\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="Application\Scene\PlayScene\StageSelectScene.cpp" />
+    <ClCompile Include="Application\StageManager\TutorialStage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Math\EasingUtility.h" />
@@ -245,7 +243,7 @@
     <ClInclude Include="Engine\3d\Object\Object3d\Object3d.h">
       <Filter>Engine</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Core\BaseEngine\OffScreenRnedering.h">
+    <ClInclude Include="Engine\Core\BaseEngine\OffScreenRendering.h">
       <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="Engine\3d\Object\Object3dBase\Object3dBase.h">
@@ -296,9 +294,6 @@
     <ClInclude Include="Application\Scene\Manager\SceneManager.h">
       <Filter>Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Player.h">
-      <Filter>Engine</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\2d\SpriteBase\SpriteBase.h">
       <Filter>Engine</Filter>
     </ClInclude>
@@ -317,7 +312,7 @@
     <ClInclude Include="Engine\JsonLoader\JsonLoader.h" />
     <ClInclude Include="Engine\JsonLoader\json.hpp" />
     <ClInclude Include="Application\StageManager\StageCount.h" />
-    <ClInclude Include="Stage.h" />
+    <ClInclude Include="Application\StageManager\BaseStage.h" />
     <ClInclude Include="Application\Scene\PlayScene\GameClearScene.h" />
     <ClInclude Include="Application\ActionPlayer.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />
@@ -332,6 +327,7 @@
     <ClInclude Include="Engine\Math\Sphere.h" />
     <ClInclude Include="Engine\Math\Plane.h" />
     <ClInclude Include="Application\Scene\PlayScene\StageSelectScene.h" />
+    <ClInclude Include="Application\StageManager\TutorialStage.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\PostEffect\BoxFilter.PS.hlsl" />

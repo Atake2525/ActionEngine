@@ -20,12 +20,12 @@ public:
 	void Run();
 
 	// 終了チェック
-	virtual bool RoopOut() { return roopOut_; }
+	virtual bool LoopOut() { return loopOut_; }
 
 	virtual ~FrameWork() = default;
 
 private:
-	bool roopOut_ = false;
+	bool loopOut_ = false;
 
 	//SceneManager* sceneManager_ = nullptr;
 };

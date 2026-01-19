@@ -1,4 +1,4 @@
-#include "OffScreenRnedering.h"
+#include "OffScreenRendering.h"
 
 #include "Logger.h"
 #include <cassert>
@@ -13,7 +13,7 @@ using namespace Microsoft::WRL;
 using namespace Logger;
 
 
-void OffScreenRnedering::Initialize() {
+void OffScreenRendering::Initialize() {
 	CreateGraphicsPipeLineState();
 
 	renderTextureResource = DirectXBase::GetInstance()->CreateRenderTextureResource(DirectXBase::GetInstance()->GetDevice(), WinApp::GetInstance()->GetkClientWidth(), WinApp::GetInstance()->GetkClientHeight(), DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, renderTargetClearValue);
@@ -66,7 +66,7 @@ void OffScreenRnedering::Initialize() {
     dissolve->threshold = 0.0f;
 }
 
-void OffScreenRnedering::Update() {
+void OffScreenRendering::Update() {
 #ifndef NDEBUG
 	ImGui::Begin("PostEffect");
 	/*if (ImGui::IsPopupOpen("PostEffect"))
@@ -104,7 +104,7 @@ void OffScreenRnedering::Update() {
 
 }
 
-void OffScreenRnedering::CreateRootSignature() {
+void OffScreenRendering::CreateRootSignature() {
 	descriptionRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 	// DescriptorRange
@@ -213,7 +213,7 @@ void OffScreenRnedering::CreateRootSignature() {
 	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 }
 
-void OffScreenRnedering::CreateGraphicsPipeLineState() {
+void OffScreenRendering::CreateGraphicsPipeLineState() {
 	CreateRootSignature();
 	// PSOを作成する
 	graphicsPipelineStateDesc.pRootSignature = rootSignature.Get();                                           // RootSignature
@@ -238,7 +238,7 @@ void OffScreenRnedering::CreateGraphicsPipeLineState() {
 	assert(SUCCEEDED(hr));
 }
 
-void OffScreenRnedering::Draw() {
+void OffScreenRendering::Draw() {
 
 	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());

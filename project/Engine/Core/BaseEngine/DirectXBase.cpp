@@ -25,7 +25,6 @@ DirectXBase* DirectXBase::GetInstance() {
 
 void DirectXBase::Finalize() {
     CloseHandle(fenceEvent);
-    delete offscreen;
 
     delete instance;
     instance = nullptr;
@@ -210,7 +209,7 @@ void DirectXBase::Initialize() {
 }
 
 void DirectXBase::InitializePosteffect() {
-    offscreen = new OffScreenRnedering();
+    offscreen = std::make_unique<OffScreenRendering>();
     offscreen->Initialize();
 
     Vector4 col = offscreen->GetRenderTargetClearValue();

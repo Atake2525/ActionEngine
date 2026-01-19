@@ -15,7 +15,7 @@ Goal::~Goal() {
 
 }
 
-void Goal::Initalize() {
+void Goal::Initialize() {
 
 	isGoal_ = false;
 	input = Input::GetInstance();

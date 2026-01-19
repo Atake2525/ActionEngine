@@ -57,7 +57,7 @@ void MyGame::Initialize() {
 
 	SceneManager::GetInstance();
 	
-	SceneManager::GetInstance()->SetNextScene("GAMESCENE");
+	SceneManager::GetInstance()->SetNextScene("TEST");
 
 	//gameScene->Initialize();
 
@@ -87,7 +87,6 @@ void MyGame::Update() {
 	ParticleManager::GetInstance()->Update();
 	Audio::GetInstance()->Update();
 	FadeManager::GetInstance()->Update();
-	//JsonLoader::GetInstance()->Update();
 
 #ifndef NDEBUG
 
@@ -218,12 +217,6 @@ void MyGame::Finalize() {
 	GameTime::GetInstance()->Finalize();
 
 	FadeManager::GetInstance()->Finalize();
-
-	//// ↓---- シーンの解放 ----↓ ////
-
-	//SceneManager::GetInstance()->Finalize();
-
-	//// ↑---- シーンの解放 ----↑ ////
 
 	FrameWork::Finalize();
 }
