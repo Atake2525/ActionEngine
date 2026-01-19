@@ -41,11 +41,11 @@ void TestScene::Initialize() {
 	stage->Initialize();
 
 	
-	player = std::make_unique<Player>();
-	player->Initialize(camera.get(), stage->GetJsonName(), true);
+	/*player = std::make_unique<Player>();
+	player->Initialize(camera.get(), stage->GetJsonName(), true);*/
 
-	/*actionPlayer = std::make_unique<ActionPlayer>();
-	actionPlayer->Initialize(camera.get(), stage->GetJsonName());*/
+	actionPlayer = std::make_unique<ActionPlayer>();
+	actionPlayer->Initialize(camera.get(), stage->GetJsonName(), true);
 
 	gameOverSprite = std::make_unique<GameOver>();
 	gameOverSprite->Initialize();
@@ -83,9 +83,9 @@ void TestScene::Update() {
 		}
 	}
 
-	player->Update();
+	//player->Update();
+	actionPlayer->Update();
 	camera->Update();
-	//actionPlayer->Update();
 	trap->Update();
 
 	stage->Update();

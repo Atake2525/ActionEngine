@@ -114,9 +114,6 @@
     <ClCompile Include="Application\Scene\Manager\SceneManager.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Application\Player.cpp">
-      <Filter>Engine</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\2d\SpriteBase\SpriteBase.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
@@ -296,9 +293,6 @@
     </ClInclude>
     <ClInclude Include="Application\Scene\Manager\SceneManager.h">
       <Filter>Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Player.h">
-      <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="Engine\2d\SpriteBase\SpriteBase.h">
       <Filter>Engine</Filter>

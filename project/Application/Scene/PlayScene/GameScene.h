@@ -13,7 +13,6 @@
 #include "ParticleManager.h"
 #include "Audio.h"
 #include "SceneManager.h"
-#include "Player.h"
 #include "SkyBox.h"
 #include "CollisionManager.h"
 #include "Goal.h"

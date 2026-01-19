@@ -2,7 +2,7 @@
 #include "GameTime.h"
 #include "EasingUtility.h"
 #include "TextureManager.h"
-#include "OffScreenRnedering.h"
+#include "OffScreenRendering.h"
 #include "WinApp.h"
 #include "FadeManager.h"
 #include "SceneManager.h"

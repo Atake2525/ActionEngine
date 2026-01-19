@@ -157,10 +157,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Scene\Manager\SceneManager.cpp" />
     <ClCompile Include="Application\Scene\PlayScene\TitleScene.cpp" />
     <ClCompile Include="Application\Scene\Manager\SceneFactory.cpp" />
-    <ClCompile Include="Application\Player.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="Engine\3d\SkyBox\SkyBox.cpp" />
     <ClCompile Include="Engine\JsonLoader\JsonLoader.cpp" />
     <ClCompile Include="Application\Scene\PlayScene\TestScene.cpp" />
@@ -250,10 +246,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Scene\Manager\SceneManager.h" />
     <ClInclude Include="Application\Scene\PlayScene\TitleScene.h" />
     <ClInclude Include="Application\Scene\Manager\SceneFactory.h" />
-    <ClInclude Include="Application\Player.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
-    </ClInclude>
     <ClInclude Include="Engine\3d\SkyBox\SkyBox.h" />
     <ClInclude Include="Application\Scene\PlayScene\TestScene.h" />
     <ClInclude Include="Engine\Presentation\Cinematic\FadeManager.h" />
