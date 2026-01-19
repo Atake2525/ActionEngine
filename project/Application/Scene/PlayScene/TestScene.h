@@ -16,7 +16,6 @@
 #include "SkyBox.h"
 #include <wrl.h>
 #include <memory>
-#include "Player.h"
 #include "ActionPlayer.h"
 #include "JsonLoader.h"
 #include "GameOver.h"
@@ -64,7 +63,6 @@ private:
 
 	std::unique_ptr<GameOver> gameOverSprite;
 
-	std::unique_ptr<Player> player;
 	std::unique_ptr<ActionPlayer> actionPlayer;
 
 	std::unique_ptr<Trap> trap;

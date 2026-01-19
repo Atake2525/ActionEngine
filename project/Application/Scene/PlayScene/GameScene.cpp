@@ -224,14 +224,14 @@ void GameScene::Update() {
         tutorial[1].sprite->Update();
 
     }
-    if (player_->IsWallDash())
+    /*if (player_->IsWallDash())
     {
         tutorial[2].isClear = true;
     }
     if (player_->IsWallJump())
     {
         tutorial[3].isClear = true;
-    }
+    }*/
 
     goal_->Update(player_->GetAABB());
 
