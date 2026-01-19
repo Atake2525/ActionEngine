@@ -17,7 +17,7 @@ Player::~Player()
 	CollisionManager::GetInstance()->DeleteCollisionTarget("player");
 }
 
-void Player::Initialize(Camera* camera, const bool DebugMode)
+void Player::Initialize(Camera* camera, string jsonName, const bool DebugMode)
 {
 	debugMode_ = DebugMode;
 	this->camera = camera;
@@ -32,18 +32,21 @@ void Player::Initialize(Camera* camera, const bool DebugMode)
 	if (!DebugMode)
 	{
 		this->input->ShowMouseCursor(false);
-		vector<JsonData> data = JsonLoader::GetInstance()->GetJsonData("map" + to_string(StageCount::GetInstance()->GetStageCount()), "startpoint");
-		Transform startPoint = {
-			{1.0f, 1.0f, 1.0f},
-			{0.0f, 0.0f, 0.0f},
-			{0.0f, 0.1f, 0.0f}
-		};
-		if (data.size() != 0)
-		{
-			startPoint = data[0].transform;
-		}
-		playerTransform_ = startPoint;
 	}
+
+	Transform startPoint = {
+		{1.0f, 1.0f, 1.0f},
+		{0.0f, 0.0f, 0.0f},
+		{0.0f, 0.1f, 0.0f}
+	};
+	// スタート地点の取得
+	vector<JsonData> data = JsonLoader::GetInstance()->GetJsonData(jsonName, "startpoint");
+	// スタート地点が設定されていない又はjsonが読み込めなかった場合はデフォルト位置を使用
+	if (data.size() != 0)
+	{
+		startPoint = data[0].transform;
+	}
+	playerTransform_ = startPoint;
 
 	moveVelocity_ = { 0.0f, 0.0f, 0.0f };
 
@@ -115,7 +118,7 @@ void Player::Update() {
 
 	camera->SetRotate(cameraTransform.rotate);
 
-	playerOBB_ = CreateOBB(playerTransform_, playerAABB_);
+	//playerOBB_ = CreateOBB(playerTransform_, playerAABB_);
 	playerModel_->SetAnimationSpeed(1.0f);
 	playerModel_->SetTransform(playerTransform_);
 	//playerCollisionModel_->SetAnimationSpeed(1.0f);
