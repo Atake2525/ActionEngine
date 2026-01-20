@@ -15,7 +15,13 @@ private:
         Jumping,
         Falling
     };
-    PlayerState currentState = PlayerState::Idle;
+
+    enum class ControlMode {
+        KeyboardMouse,
+        Gamepad
+    };
+    ControlMode m_controlMode = ControlMode::KeyboardMouse;
+
 public:
     /// <summary>
     /// 初期化処理
@@ -49,6 +55,9 @@ private: // プレイヤーモデル
 
     std::unique_ptr<Object3d> m_pModel;
     Camera* m_pCamera = nullptr;
+
+    PlayerState m_state = PlayerState::Idle;
+    PlayerState m_statePre = PlayerState::Idle;
 
     // プレイヤーの移動関連
     Transform m_transform = Transform::Default;

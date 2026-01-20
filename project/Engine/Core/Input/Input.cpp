@@ -467,6 +467,7 @@ float Input::GetJoyStickDirection3(const Vector3 joyStickPos)
 
 Vector2 Input::GetJoyStickVelocity(const Vector2 joyStickPos, const Vector3 velocity, const bool acceleration)
 {
+    // スティックの絶対値を取得
 	Vector2 joy = { std::fabs(joyStickPos.x), std::fabs(joyStickPos.y)};
 	// スティックの傾きの合計が1000以上(上限速度)なら合計を1000になるようにする
 	if (acceleration)
@@ -483,6 +484,7 @@ Vector2 Input::GetJoyStickVelocity(const Vector2 joyStickPos, const Vector3 velo
 	// 角度を求める
 	float rot = GetJoyStickDirection2(joyStickPos);
 
+    // 回転行列を作成してvelocityに適用
 	Matrix4x4 rotateMatrix = Multiply(Multiply(MakeRotateXMatrix(0.0f), MakeRotateYMatrix(rot)), MakeRotateZMatrix(0.0f));
 	Vector3 vel = TransformNormal(velocity, rotateMatrix);
 	if (acceleration)
