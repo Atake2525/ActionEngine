@@ -1,5 +1,7 @@
 #include "Player.h"
 #include "JsonLoader.h"
+#include "Camera.h"
+#include "Input.h"
 
 using namespace std;
 
@@ -39,4 +41,16 @@ void Player::Update()
 void Player::Draw()
 {
     m_pModel->Draw();
+}
+
+void Player::HandleInput()
+{
+    if (Input::GetInstance()->PushKey(DIK_W))
+    {
+        m_moveInput.y = -1.0f;
+    }
+    if (Input::GetInstance()->PushKey(DIK_S))
+    {
+
+    }
 }

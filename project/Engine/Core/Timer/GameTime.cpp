@@ -8,36 +8,37 @@
 GameTime* GameTime::instance = nullptr;
 
 GameTime* GameTime::GetInstance() {
-	if (instance == nullptr) {
-		instance = new GameTime;
-	}
-	return instance;
+    if (instance == nullptr) {
+        instance = new GameTime;
+    }
+    return instance;
 }
 
 void GameTime::Finalize() {
-	delete instance;
-	instance = nullptr;
+    delete instance;
+    instance = nullptr;
 }
 
 void GameTime::Initialize() {
-	deltaTime = 0.0f;
+    deltaTime = 0.0f;
     maxFPS = DirectXBase::GetInstance()->GetMaxFPS();
 }
 
-int GameTime::CreateTimer()
+int GameTime::CreateTimer(float time, bool loop)
 {
-    
+    timers.push_back(Timer{ 0.0f, time, loop, false });
+    return timers.size() - 1;
 }
 
 void GameTime::UpdateDeltaTime() {
-	static auto lastTime = std::chrono::high_resolution_clock::now();
-	auto currentTime = std::chrono::high_resolution_clock::now();
-	std::chrono::duration<float> delta = currentTime - lastTime;
-    
+    static auto lastTime = std::chrono::high_resolution_clock::now();
+    auto currentTime = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<float> delta = currentTime - lastTime;
 
 
-	lastTime = currentTime;
-	deltaTime = delta.count();
+
+    lastTime = currentTime;
+    deltaTime = delta.count();
 }
 
 void GameTime::UpdateCPUUsagePDH()
@@ -62,25 +63,23 @@ void GameTime::UpdateCPUUsagePDH()
 
 void GameTime::Update()
 {
-	UpdateDeltaTime();
-   
+    UpdateDeltaTime();
+
     updateUPUUsageTimer += deltaTime;
     if (updateUPUUsageTimer >= 1.0f) {
         UpdateCPUUsagePDH();
         updateUPUUsageTimer = 0.0f;
     }
 
-    if (!timers.empty())
+    for (int i = 0; i < timers.size(); i++)
     {
-        for (int i = 0; i < timers.size(); i++)
+        if (!timers[i].isFinished)
         {
-            if (!timers[i].isActive)
+            timers[i].timer += deltaTime;
+            if (timers[i].timer >= timers[i].maxTime)
             {
-                timers[i].timer += deltaTime;
-                if (timers[i].timer >= timers[i].maxTime)
-                {
-
-                }
+                timers[i].isFinished = true;
+                timers[i].timer = timers[i].maxTime;
             }
         }
     }
