@@ -34,15 +34,27 @@ public:
     /// </summary>
     void Draw();
 
+private: // プレイヤーステート管理
+    /// <summary>
+    /// 状態の更新
+    /// </summary>
+    void UpdateState();
 
-private:
+    /// <summary>
+    /// 入力の処理
+    /// </summary>
+    void HandleInput();
+
+private: // プレイヤーモデル
 
     std::unique_ptr<Object3d> m_pModel;
     Camera* m_pCamera = nullptr;
 
-    // プレイヤmeaningーの移動
+    // プレイヤーの移動関連
     Transform m_transform = Transform::Default;
     Transform m_velocity = Transform::Default;
+    Vector3 m_gravity = { 0.0f, -9.8f, 0.0f };
+    Vector2 m_moveInput = Vector2::Zero;
 
     // カメラ関連
     Transform m_cameraTransform = Transform::Default;

@@ -45,7 +45,7 @@ void TestScene::Initialize() {
 	player->Initialize(camera.get(), stage->GetJsonName(), true);*/
 
 	actionPlayer = std::make_unique<ActionPlayer>();
-	actionPlayer->Initialize(camera.get(), stage->GetJsonName(), true);
+	actionPlayer->Initialize(camera.get(), stage->GetJsonName(), false);
 
 	gameOverSprite = std::make_unique<GameOver>();
 	gameOverSprite->Initialize();
