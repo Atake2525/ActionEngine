@@ -22,6 +22,7 @@
 #include "FadeManager.h"
 #include "GameTime.h"
 #include "StageCount.h"
+#include "DebugLine.h"
 
 #include "algorithm"
 #include "externals/imgui/imgui.h"
