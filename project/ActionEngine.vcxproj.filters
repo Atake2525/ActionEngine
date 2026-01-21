@@ -142,6 +142,7 @@
     <ClCompile Include="Application\Scene\PlayScene\StageSelectScene.cpp" />
     <ClCompile Include="Application\StageManager\TutorialStage.cpp" />
     <ClCompile Include="Application\Player.cpp" />
+    <ClCompile Include="Engine\3d\DebugLine\DebugLineBase.cpp" />
     <ClCompile Include="Engine\3d\DebugLine\DebugLine.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -331,6 +332,7 @@
     <ClInclude Include="Application\Scene\PlayScene\StageSelectScene.h" />
     <ClInclude Include="Application\StageManager\TutorialStage.h" />
     <ClInclude Include="Application\Player.h" />
+    <ClInclude Include="Engine\3d\DebugLine\DebugLineBase.h" />
     <ClInclude Include="Engine\3d\DebugLine\DebugLine.h" />
   </ItemGroup>
   <ItemGroup>

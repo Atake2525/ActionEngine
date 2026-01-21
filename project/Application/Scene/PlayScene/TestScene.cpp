@@ -7,7 +7,7 @@
 #include "Logger.h"
 #include "GameTime.h"
 #include "StageCount.h"
-#include "DebugLine.h"
+#include "DebugLineBase.h"
 
 using namespace Logger;
 using namespace std;
@@ -25,7 +25,7 @@ void TestScene::Initialize() {
 	camera->SetRotate(Vector3(SwapRadian(0.0f), 0.0f, 0.0f));
 	//camera->SetTranslate({ 0.0f, 0.0f, 0.0f });
 
-    DebugLine::GetInstance()->SetCamera(camera.get());
+	DebugLineBase::GetInstance()->SetCamera(camera.get());
 
 	TextureManager::GetInstance()->LoadTexture("Resources/rostock_laage_airport_4k.dds");
 
@@ -62,6 +62,9 @@ void TestScene::Initialize() {
 	goal = make_unique<Goal>();
 	goal->Initialize();
 
+	debugLine = make_unique<DebugLine>();
+	debugLine->Initialize();
+
 	Audio::GetInstance()->LoadMP3("Resources/sekiranun.mp3", "bgm", 1.0f);
 
 }
@@ -85,6 +88,7 @@ void TestScene::Update() {
 			return;
 		}
 	}
+	debugLine->Update();
 
 	player->Update();
 	//actionPlayer->Update();
@@ -139,6 +143,9 @@ void TestScene::Draw() {
 	stage->DrawBackSprite();
 	gameOverSprite->Draw();
 
+	DebugLineBase::GetInstance()->ShaderDraw();
+
+	debugLine->Draw();
 
 }
 

@@ -29,7 +29,7 @@ void MyGame::Initialize() {
 
 	WireFrameObjectBase::GetInstance()->Initialize();
 
-    DebugLine::GetInstance()->Initialize();
+	DebugLineBase::GetInstance()->Initialize();
 
 	SkyBox::GetInstance()->Initialize();
 
@@ -86,7 +86,6 @@ void MyGame::Update() {
 	DirectXBase::GetInstance()->Update();
 	Light::GetInstance()->Update();
 	SceneManager::GetInstance()->Update();
-    DebugLine::GetInstance()->Update();
 	ParticleManager::GetInstance()->Update();
 	Audio::GetInstance()->Update();
 	FadeManager::GetInstance()->Update();
@@ -163,7 +162,6 @@ void MyGame::Draw() {
 
 	SkyBox::GetInstance()->Draw();
 	SceneManager::GetInstance()->Draw();
-    DebugLine::GetInstance()->Draw();
 	FadeManager::GetInstance()->Draw();
 
 	DirectXBase::GetInstance()->PostDrawRenderTexture();
@@ -198,7 +196,7 @@ void MyGame::Finalize() {
 
 	WireFrameObjectBase::GetInstance()->Finalize();
 
-    DebugLine::GetInstance()->Finalize();
+	DebugLineBase::GetInstance()->Finalize();
 
 	SkyBox::GetInstance()->Finalize();
 
