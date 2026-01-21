@@ -120,6 +120,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </ClCompile>
     <ClCompile Include="Application\StageManager\TutorialStage.cpp" />
     <ClCompile Include="Engine\3d\DebugLine\DebugLine.cpp" />
+    <ClCompile Include="Engine\3d\DebugLine\DebugLineBase.cpp" />
     <ClCompile Include="Engine\3d\Object\Skinning\SkinningObject3dBase.cpp" />
     <ClCompile Include="Engine\BlackBox\Log\Logger.cpp" />
     <ClCompile Include="Engine\BlackBox\Log\StringUtility.cpp" />
@@ -193,6 +194,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="Engine\3d\DebugLine\DebugLine.h" />
+    <ClInclude Include="Engine\3d\DebugLine\DebugLineBase.h" />
     <ClInclude Include="Engine\3d\Object\Skinning\SkinningObject3dBase.h" />
     <ClInclude Include="Engine\BlackBox\Log\Logger.h" />
     <ClInclude Include="Engine\BlackBox\Log\StringUtility.h" />
