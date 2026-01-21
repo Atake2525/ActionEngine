@@ -142,6 +142,7 @@
     <ClCompile Include="Application\Scene\PlayScene\StageSelectScene.cpp" />
     <ClCompile Include="Application\StageManager\TutorialStage.cpp" />
     <ClCompile Include="Application\Player.cpp" />
+    <ClCompile Include="Engine\3d\DebugLine\DebugLine.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Math\EasingUtility.h" />
@@ -330,6 +331,7 @@
     <ClInclude Include="Application\Scene\PlayScene\StageSelectScene.h" />
     <ClInclude Include="Application\StageManager\TutorialStage.h" />
     <ClInclude Include="Application\Player.h" />
+    <ClInclude Include="Engine\3d\DebugLine\DebugLine.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\PostEffect\BoxFilter.PS.hlsl" />
@@ -349,6 +351,8 @@
     <FxCompile Include="Resources\shaders\Sprite\Sprite.VS.hlsl" />
     <FxCompile Include="Resources\shaders\PostEffect\Dissolve.PS.hlsl" />
     <FxCompile Include="Resources\shaders\Model\DistanceCulling.PS.hlsl" />
+    <FxCompile Include="Resources\shaders\DebugLine\DebugLine.PS.hlsl" />
+    <FxCompile Include="Resources\shaders\DebugLine\DebugLine.VS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\shaders\PostEffect\Fullscreen.hlsli" />
@@ -356,6 +360,7 @@
     <None Include="Resources\shaders\Particle\Particle.hlsli" />
     <None Include="Resources\shaders\SkyBox\Skybox.hlsli" />
     <None Include="Resources\shaders\Sprite\Sprite.hlsli" />
+    <None Include="Resources\shaders\DebugLine\DebugLine.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Math">
