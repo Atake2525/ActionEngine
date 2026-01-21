@@ -51,7 +51,38 @@ private: // プレイヤーステート管理
     /// </summary>
     void HandleInput();
 
+    /// <summary>
+    /// 回転処理
+    /// </summary>
+    void Rotate();
+
+    /// <summary>
+    /// 移動処理
+    /// </summary>
+    void Move();
+
+    /// <summary>
+    /// 重力の適用
+    /// </summary>
+    void ApplyGravity();
+
+    /// <summary>
+    /// カメラのParent設定処理
+    /// </summary>
+    void UpdateCameraParent();
+
+    // デバッグUIの更新
+#ifndef NDEBUG
+    void UpdateDebugUI();
+    void ToggleGodMode() { m_godMode = !m_godMode; }
+    void MovementGodMode();
+#endif // !NDEBUG
+
+
 private: // プレイヤーモデル
+
+    // タイマー
+    float m_timer[5] = { 0.0f };
 
     std::unique_ptr<Object3d> m_pModel;
     Camera* m_pCamera = nullptr;
@@ -72,6 +103,13 @@ private: // プレイヤーモデル
     float m_afterFovY = 60.0f;
     float m_fovTimer = 0.0f;
     float m_fovTime = 0.3f;
+
+#ifndef NDEBUG
+    // デバッグ用の変数
+    bool m_godMode = false;
+
+#endif // !NDEBUG
+
 
 };
 

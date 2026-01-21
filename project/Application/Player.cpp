@@ -26,16 +26,195 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
     // プレイヤーモデルの初期化
     m_pModel = make_unique<Object3d>();
     m_pModel->Initialize();
-    m_pModel->SetModel("Resources/Model/obj/Player", "Player.obj", true);
+    m_pModel->SetModel("Resources/Model/obj/Player", "PlayerCollision.obj", true);
     m_pModel->SetTransform(m_transform);
+
+    // コントロールモードの初期設定
+    if (Input::GetInstance()->IsConnectedController())
+    {
+        m_controlMode = ControlMode::Gamepad;
+    }
+    else
+    {
+        m_controlMode = ControlMode::KeyboardMouse;
+    }
+
+    // デバッグ用の初期設定
+#ifndef NDEBUG
+    Input::GetInstance()->ShowMouseCursor(true);
+#else
+    Input::GetInstance()->ShowMouseCursor(false);
+#endif // !NDEBUG
+
 }
 
 void Player::Update()
 {
+    m_transform = m_pModel->GetTransform();
+#ifndef NDEBUG
+    // デバッグUIの更新
+    UpdateDebugUI();
+#endif // !NDEBUG
+
+#ifndef NDEBUG
+
+    // デバッグモードの処理
+    // 入力の処理
+    HandleInput();
+    // 状態の更新
+    UpdateState();
+    // 回転処理
+    Rotate();
+    // 移動処理
+    if (m_godMode)
+    {
+        MovementGodMode();
+    }
+    else
+    {
+        Move();
+    }
+
+#else
+    // リリースモードの処理
+
+    // 入力の処理
+    HandleInput();
+    // 状態の更新
+    UpdateState();
+    // 回転処理
+    Rotate();
+    // 移動処理
+    Move();
+#endif // !NDEBUG
+
     m_pModel->SetTransform(m_transform);
     m_pModel->Update();
-    m_pCamera->SetTranslate(m_transform.translate);
+    //m_pCamera->SetTranslate(m_transform.translate);
+    UpdateCameraParent();
     m_pCamera->Update();
+
+}
+
+void Player::Draw()
+{
+    m_pModel->Draw();
+}
+
+void Player::UpdateState()
+{
+    // 前回の状態を保存
+    m_statePre = m_state;
+
+    // 移動入力に基づく状態遷移
+    if (m_moveInput.x != 0.0f || m_moveInput.y != 0.0f)
+    {
+        m_state = PlayerState::Walking;
+    }
+    else // 移動入力なし
+    {
+        m_state = PlayerState::Idle;
+    }
+
+    switch (m_controlMode)
+    {
+    case Player::ControlMode::KeyboardMouse:
+        // ダッシュ入力
+        if (Input::GetInstance()->PushKey(DIK_LSHIFT))
+        {
+            m_state = PlayerState::Running;
+        }
+
+        // ジャンプ入力
+        if (Input::GetInstance()->PushKey(DIK_SPACE))
+        {
+            m_state = PlayerState::Jumping;
+        }
+        break;
+    case Player::ControlMode::Gamepad:
+        // ダッシュ入力
+        if (Input::GetInstance()->TriggerButton(Controller::LeftStick))
+        {
+            m_state = PlayerState::Running;
+        }
+
+        // ジャンプ入力
+        if (Input::GetInstance()->TriggerButton(Controller::A))
+        {
+            m_state = PlayerState::Jumping;
+        }
+        break;
+    }
+}
+
+void Player::HandleInput()
+{
+    // 移動入力のリセット
+    m_moveInput = Vector2::Zero;
+
+    switch (m_controlMode)
+    {
+    case Player::ControlMode::KeyboardMouse:
+        // キー入力による移動
+        if (Input::GetInstance()->PushKey(DIK_W))
+        {
+            m_moveInput.y = -1.0f;
+        }
+        if (Input::GetInstance()->PushKey(DIK_S))
+        {
+            m_moveInput.y = 1.0f;
+        }
+        if (Input::GetInstance()->PushKey(DIK_A))
+        {
+            m_moveInput.x = -1.0f;
+        }
+        if (Input::GetInstance()->PushKey(DIK_D))
+        {
+            m_moveInput.x = 1.0f;
+        }
+
+        break;
+    case Player::ControlMode::Gamepad:
+        // ジョイスティック入力による移動
+        m_moveInput = Input::GetInstance()->GetJoyStickVelocity(
+            Input::GetInstance()->GetLeftJoyStickPos2(0.2f),
+            Vector3{ 1.0f, 1.0f, 1.0f },
+            true
+        );
+
+        break;
+    }
+
+
+}
+
+void Player::Rotate() {
+    // カメラ処理の実装
+    // マウスの移動量に基づいてカメラの回転を更新    演出実装時に加速度を付けるなどの調整を行う予定
+    Vector3 rotate = Input::GetInstance()->GetMouseVel3() * 0.001f;
+    m_transform.rotate.x += rotate.y;
+    m_transform.rotate.y += rotate.x;
+
+
+
+}
+
+void Player::Move() {
+    // 移動処理の実装
+    if (m_moveInput.x != 0.0f && m_moveInput.y != 0.0f)
+    {
+        m_moveInput = (m_moveInput) * (1.0f / sqrtf(2.0f));
+    }
+}
+
+void Player::UpdateCameraParent() {
+    // カメラのParent設定処理の実装
+    m_pCamera->SetParent(m_pModel->GetWorldMatrix());
+    //m_pModel->SetParent(m_pCamera->GetWorldMatrix());
+}
+
+#ifndef NDEBUG
+void Player::UpdateDebugUI() {
 
     if (!ImGui::Begin("Player Debug")) {
         ImGui::End();
@@ -61,10 +240,12 @@ void Player::Update()
 
         // Transform
         if (ImGui::TreeNode("Transform")) {
-            ImGui::Text("Pos:  (%.2f, %.2f, %.2f)",
-                m_transform.translate.x, m_transform.translate.y, m_transform.translate.z);
-            ImGui::Text("Rot:  (%.2f, %.2f, %.2f)",
-                m_transform.rotate.x, m_transform.rotate.y, m_transform.rotate.z);
+            //ImGui::Text("Pos:  (%.2f, %.2f, %.2f)",
+                //m_transform.translate.x, m_transform.translate.y, m_transform.translate.z);
+            ImGui::DragFloat3("##Pos", &m_transform.translate.x, 0.1f);
+            /*ImGui::Text("Rot:  (%.2f, %.2f, %.2f)",
+                m_transform.rotate.x, m_transform.rotate.y, m_transform.rotate.z);*/
+            ImGui::DragFloat3("##Rot", &m_transform.rotate.x, 0.1f);
             ImGui::Text("Scale:(%.2f, %.2f, %.2f)",
                 m_transform.scale.x, m_transform.scale.y, m_transform.scale.z);
             ImGui::TreePop();
@@ -107,100 +288,11 @@ void Player::Update()
     }
 
     ImGui::End();
-
-
 }
 
-void Player::Draw()
+void Player::MovementGodMode()
 {
-    m_pModel->Draw();
-}
-
-void Player::UpdateState()
-{
-}
-
-void Player::HandleInput()
-{
-    // 移動入力のリセット
-    m_moveInput = Vector2::Zero;
-
-    // 前回の状態を保存
-    m_statePre = m_state;
-
-    switch (m_controlMode)
-    {
-    case Player::ControlMode::KeyboardMouse:
-        // キー入力による移動
-        if (Input::GetInstance()->PushKey(DIK_W))
-        {
-            m_moveInput.y = -1.0f;
-        }
-        if (Input::GetInstance()->PushKey(DIK_S))
-        {
-            m_moveInput.y = 1.0f;
-        }
-        if (Input::GetInstance()->PushKey(DIK_A))
-        {
-            m_moveInput.x = -1.0f;
-        }
-        if (Input::GetInstance()->PushKey(DIK_D))
-        {
-            m_moveInput.x = 1.0f;
-        }
-
-        // 移動入力に基づく状態遷移
-        if (m_moveInput.x != 0.0f || m_moveInput.y != 0.0f)
-        {
-            m_state = PlayerState::Walking;
-        }
-        else // 移動入力なし
-        {
-            m_state = PlayerState::Idle;
-        }
-
-        // ダッシュ入力
-        if (Input::GetInstance()->PushKey(DIK_LSHIFT))
-        {
-            m_state = PlayerState::Running;
-        }
-
-        // ジャンプ入力
-        if (Input::GetInstance()->PushKey(DIK_SPACE))
-        {
-            m_state = PlayerState::Jumping;
-        }
-        break;
-    case Player::ControlMode::Gamepad:
-        // ジョイスティック入力による移動
-        m_moveInput = Input::GetInstance()->GetJoyStickVelocity(
-            Input::GetInstance()->GetLeftJoyStickPos2(0.2f),
-            Vector3{ 1.0f, 1.0f, 1.0f },
-            true
-        );
-        // 移動入力に基づく状態遷移
-        if (m_moveInput.x != 0.0f || m_moveInput.y != 0.0f)
-        {
-            m_state = PlayerState::Walking;
-        }
-        else // 移動入力なし
-        {
-            m_state = PlayerState::Idle;
-        }
-
-        // ダッシュ入力
-        if (Input::GetInstance()->TriggerButton(Controller::LeftStick))
-        {
-            m_state = PlayerState::Running;
-        }
-
-        // ジャンプ入力
-        if (Input::GetInstance()->TriggerButton(Controller::A))
-        {
-            m_state = PlayerState::Jumping;
-        }
-        break;
-    }
-
 
 }
+
+#endif // !NDEBUG

@@ -27,7 +27,7 @@ void GameTime::Initialize() {
 int GameTime::CreateTimer(float time, bool loop)
 {
     timers.push_back(Timer{ 0.0f, time, loop, false });
-    return timers.size() - 1;
+    return static_cast<int>(timers.size()) - 1;
 }
 
 void GameTime::UpdateDeltaTime() {

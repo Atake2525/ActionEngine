@@ -17,6 +17,7 @@
 #include <wrl.h>
 #include <memory>
 #include "ActionPlayer.h"
+#include "Player.h"
 #include "JsonLoader.h"
 #include "GameOver.h"
 #include "Trap.h"
@@ -70,6 +71,8 @@ private:
 	std::unique_ptr<Goal> goal;
 
 	std::unique_ptr<BaseStage> stage;
+
+    std::unique_ptr<Player> player;
 
 	bool start_ = false;
 };
