@@ -119,6 +119,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Application\StageManager\TutorialStage.cpp" />
+    <ClCompile Include="Engine\3d\Object\Object3dBase\DebugObject3d.cpp" />
+    <ClCompile Include="Engine\3d\Model\Model\DebugModel.cpp" />
     <ClCompile Include="Engine\3d\DebugLine\DebugLine.cpp" />
     <ClCompile Include="Engine\3d\DebugLine\DebugLineBase.cpp" />
     <ClCompile Include="Engine\3d\Object\Skinning\SkinningObject3dBase.cpp" />
@@ -193,6 +195,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="Engine\3d\Object\Object3dBase\DebugObject3d.h" />
+    <ClInclude Include="Engine\3d\Model\Model\DebugModel.h" />
     <ClInclude Include="Engine\3d\DebugLine\DebugLine.h" />
     <ClInclude Include="Engine\3d\DebugLine\DebugLineBase.h" />
     <ClInclude Include="Engine\3d\Object\Skinning\SkinningObject3dBase.h" />

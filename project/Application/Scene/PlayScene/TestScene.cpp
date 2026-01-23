@@ -62,13 +62,26 @@ void TestScene::Initialize() {
 	goal = make_unique<Goal>();
 	goal->Initialize();
 
+	capsule = make_unique<Object3d>();
+	capsule->Initialize();
+	capsule->SetModel("Resources/Model/obj/Player", "player.obj", true);
+	capsule->CreateCapsule();
+	Capsule capsuleCol = capsule->GetCapsule();
+	capsule->SetTranslate({ 5.0f, 35.0f, 0.0f });
+
+	aabbBox = make_unique<Object3d>();
+	aabbBox->Initialize();
+	aabbBox->SetModel("Resources/Debug/obj", "box.obj", true);
+
 	debugLine = make_unique<DebugLine>();
 	debugLine->Initialize();
+	debugLine->AddCapsule(Length(capsuleCol.end - capsuleCol.start), capsuleCol.radius, Vector4{ 0.0f, 1.0f, 1.0f, 1.0f });
 
 	Audio::GetInstance()->LoadMP3("Resources/sekiranun.mp3", "bgm", 1.0f);
 
 }
 
+Transform boxTransform = Transform::Default;
 void TestScene::Update() {
 
 	/*if (player->IsGameOver())
@@ -88,7 +101,6 @@ void TestScene::Update() {
 			return;
 		}
 	}
-	debugLine->Update();
 
 	player->Update();
 	//actionPlayer->Update();
@@ -96,6 +108,29 @@ void TestScene::Update() {
 	trap->Update();
 
 	stage->Update();
+
+	ImGui::Begin("Box");
+	ImGui::DragFloat3("translate", &boxTransform.translate.x, 0.1f);
+	ImGui::DragFloat3("rotate", &boxTransform.rotate.x, 0.1f);
+	ImGui::DragFloat3("scale", &boxTransform.scale.x, 0.1f);
+	ImGui::End();
+
+	aabbBox->SetTransform(boxTransform);
+	aabbBox->Update();
+
+	capsule->Update();
+
+	debugLine->SetTransform(capsule->GetTransform());
+	debugLine->Update();
+
+	if (capsule->CheckCollisionCapsule(aabbBox.get()))
+	{
+		capsule->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
+	}
+	else
+	{
+		capsule->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+	}
 
 	//goal->Update(player->GetAABB());
 
@@ -131,6 +166,8 @@ void TestScene::Draw() {
 
 	stage->DrawObject3d();
 	trap->Draw();
+	capsule->Draw();
+	aabbBox->Draw();
 	//goal->Draw();
 	//player->Draw();
 

@@ -32,10 +32,12 @@ public:
     void AddCapsule(float height, float radius, const Vector4& color, int segments = 16);
     void AddOBB(const Vector3& size, const Vector4& color); // 実体はAddBoxと同じだが、名前で区別
 
+    void SetTransform(const Transform& transform) { this->transform = transform; }
+
 private:
     Camera* camera;
     UINT drawVertexCount;
-    UINT MAX_LINE_VERTEX_COUNT = 2048;
+    UINT MAX_LINE_VERTEX_COUNT = 1024;
 
     LineVertex* lineMap;
     std::vector<LineVertex> lineVertices;
