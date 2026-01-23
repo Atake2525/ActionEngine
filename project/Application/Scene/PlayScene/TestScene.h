@@ -77,6 +77,10 @@ private:
 
 	std::unique_ptr<DebugLine> debugLine;
 
+	std::unique_ptr<Object3d> capsule;
+
+	std::unique_ptr<Object3d> aabbBox;
+
 	bool start_ = false;
 };
 

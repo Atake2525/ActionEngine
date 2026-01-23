@@ -40,38 +40,40 @@ inline const bool& CollisionAABBSphere(const AABB& target1, const Sphere& target
 }
 
 inline const bool CollisionCapsuleAABB(const Capsule& capsule, const AABB& aabb) {
-    // 線分方向と長さ
-    Vector3 segDir = capsule.end - capsule.start;
-    float segLengthSq = Dot(segDir, segDir);
+	// aabbの中心点を求める
+	// 1. AABB の中心ではなく、カプセル線分の start を AABB にクランプする
+	//    → これが AABB に最も近い点の候補になる
+	Vector3 p = capsule.start;
+	Vector3 q;
 
-    // 線分が退化している場合（start == end）
-    if (segLengthSq == 0.0f) {
-        // 点と AABB の最近接点を比較
-        Vector3 clamped = {
-            std::clamp(capsule.start.x, aabb.min.x, aabb.max.x),
-            std::clamp(capsule.start.y, aabb.min.y, aabb.max.y),
-            std::clamp(capsule.start.z, aabb.min.z, aabb.max.z)
-        };
-        float distSq = LengthSquared(capsule.start - clamped);
-        return distSq <= capsule.radius * capsule.radius;
-    }
+	q.x = std::clamp(p.x, aabb.min.x, aabb.max.x);
+	q.y = std::clamp(p.y, aabb.min.y, aabb.max.y);
+	q.z = std::clamp(p.z, aabb.min.z, aabb.max.z);
 
-    // 線分上で AABB に最も近い点を求める
-    // AABB の中心から線分への垂線を使って近似
-    Vector3 boxCenter = (aabb.min + aabb.max) * 0.5f;
-    float t = Dot(boxCenter - capsule.start, segDir) / segLengthSq;
-    t = std::clamp(t, 0.0f, 1.0f);
-    Vector3 closestOnSegment = capsule.start + segDir * t;
+	Vector3 d = q - capsule.start;
+	Vector3 ba = capsule.end - capsule.start;
+	float t = Dot(d, ba) / Dot(ba, ba);
+	t = std::clamp(t, 0.0f, 1.0f);
 
-    // AABB 内にクランプ
-    Vector3 clampedPoint = {
-        std::clamp(closestOnSegment.x, aabb.min.x, aabb.max.x),
-        std::clamp(closestOnSegment.y, aabb.min.y, aabb.max.y),
-        std::clamp(closestOnSegment.z, aabb.min.z, aabb.max.z)
-    };
+	// 求めたt(AABBの中心の最近接点)を使用してAABBの最近接点を求める
 
-    // 距離判定
-    float distSq = LengthSquared(closestOnSegment - clampedPoint);
-    return distSq <= capsule.radius * capsule.radius;
+	Vector3 f = capsule.start * (1.0f - t) + capsule.end * t;
+
+	// 4. ★ AABB に対して f をクランプ（これが重要）
+	Vector3 closestOnAABB;
+
+	closestOnAABB.x = std::clamp(f.x, aabb.min.x, aabb.max.x);
+	closestOnAABB.y = std::clamp(f.y, aabb.min.y, aabb.max.y);
+	closestOnAABB.z = std::clamp(f.z, aabb.min.z, aabb.max.z);
+
+	// 5. カプセル線分最近接点 f と AABB 最近接点の距離
+	float distance = Length(closestOnAABB - f);
+
+
+	if (distance < capsule.radius)
+	{
+		return true;
+	}
+	return false;
 }
 
