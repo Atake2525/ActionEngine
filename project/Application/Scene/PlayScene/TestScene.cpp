@@ -56,15 +56,12 @@ void TestScene::Initialize() {
 	//JsonLoader::GetInstance()->LoadJson("Resources/Json/test.json", "test", false);
 	JsonLoader::GetInstance()->LoadJson("Resources/Json/wp1.json", "wp1", false);
 
-	trap = std::make_unique<Trap>();
-	trap->Initialize("wp1");
-
 	goal = make_unique<Goal>();
-	goal->Initialize();
+	goal->Initialize("t");
 
 	capsule = make_unique<Object3d>();
 	capsule->Initialize();
-	capsule->SetModel("Resources/Model/obj/Player", "player.obj", true);
+	capsule->SetModel("Resources/Model/obj/Player", "PlayerCollision.obj", true);
 	capsule->CreateCapsule();
 	Capsule capsuleCol = capsule->GetCapsule();
 	capsule->SetTranslate({ 5.0f, 35.0f, 0.0f });
@@ -105,7 +102,6 @@ void TestScene::Update() {
 	player->Update();
 	//actionPlayer->Update();
 	//camera->Update();
-	trap->Update();
 
 	stage->Update();
 
@@ -165,7 +161,6 @@ void TestScene::Draw() {
 	Object3dBase::GetInstance()->ShaderDraw();
 
 	stage->DrawObject3d();
-	trap->Draw();
 	capsule->Draw();
 	aabbBox->Draw();
 	//goal->Draw();

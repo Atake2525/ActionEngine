@@ -22,17 +22,19 @@ inline const bool CollisionAABBXZ(const AABB& a, const AABB& b) {
 	return false;
 }
 
-inline const bool& CollisionAABBSphere(const AABB& target1, const Sphere& target2) {
+inline const bool& CollisionAABBSphere(const AABB& aabb, const Sphere& sphere) {
 	// 最近接点を求める
 	Vector3 closestPoint{
-		std::clamp(target2.center.x, target1.min.x, target1.max.x),
-		std::clamp(target2.center.y, target1.min.y, target1.max.y),
-		std::clamp(target2.center.z, target1.min.z, target1.max.z)
+		std::clamp(sphere.center.x, aabb.min.x, aabb.max.x),
+		std::clamp(sphere.center.y, aabb.min.y, aabb.max.y),
+		std::clamp(sphere.center.z, aabb.min.z, aabb.max.z)
 	};
 	// 最近接点と球の中心との距離を求める
-	float distance = Length(closestPoint - target2.center);
+	Vector3 d = closestPoint - sphere.center;
+	float distance = Dot(d, d);
+
 	// 距離が半径よりも小さければ衝突
-	if (distance <= target2.radius)
+	if (distance <= sphere.radius * sphere.radius)
 	{
 		return true;
 	}
@@ -67,10 +69,11 @@ inline const bool CollisionCapsuleAABB(const Capsule& capsule, const AABB& aabb)
 	closestOnAABB.z = std::clamp(f.z, aabb.min.z, aabb.max.z);
 
 	// 5. カプセル線分最近接点 f と AABB 最近接点の距離
-	float distance = Length(closestOnAABB - f);
+	Vector3 dist = closestOnAABB - f;
+	float distance = Dot(d, d);
 
 
-	if (distance < capsule.radius)
+	if (distance < capsule.radius * capsule.radius)
 	{
 		return true;
 	}
