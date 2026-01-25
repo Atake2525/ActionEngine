@@ -221,6 +221,10 @@ void Player::UpdateDebugUI() {
         return;
     }
 
+    ImGui::Text("Input Push: %d", Input::GetInstance()->PushKeyInt(DIK_0));
+    ImGui::Text("Input Trigger: %d", Input::GetInstance()->TriggerKeyInt(DIK_0));
+    ImGui::Text("Input Return: %d", Input::GetInstance()->ReturnKeyInt(DIK_0));
+
     // --- Control Mode ---
     ImGui::Text("Control Mode: %s",
         m_controlMode == ControlMode::KeyboardMouse ? "Keyboard & Mouse" : "Gamepad");

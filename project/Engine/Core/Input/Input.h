@@ -78,6 +78,7 @@ public:
 	/// <param name="keyNumber">キー番号 例(DIK_0)</param>
 	/// <returns>押されているか</returns>
 	bool PushKey(BYTE keyNumber);
+	int PushKeyInt(BYTE keyNumber);
 
 	/// <summary>
 	/// キーのトリガーをチェック
@@ -85,6 +86,7 @@ public:
 	/// <param name="keyNumber">キー番号 例(DIK_0)</param>
 	/// <returns>押したかどうか</returns>
 	bool TriggerKey(BYTE keyNumber);
+	int TriggerKeyInt(BYTE keyNumber);
 
 
 	/// <summary>
@@ -93,6 +95,7 @@ public:
 	/// <param name="keyNumber">キー番号 例(DIK_0)</param>
 	/// <returns>離されたか</returns>
 	bool ReturnKey(BYTE keyNumber);
+	int ReturnKeyInt(BYTE keyNumber);
 
 	/// <summary>
 	/// マウスの押下をチェック
