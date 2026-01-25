@@ -20,7 +20,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize();
+	void Initialize(const std::string jsonName);
 
 	/// <summary>
 	/// 更新
