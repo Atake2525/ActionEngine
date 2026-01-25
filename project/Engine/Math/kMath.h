@@ -13,11 +13,7 @@
 #include <numbers>
 #include "Transform.h"
 
-const Vector3 operator*(const Vector3& v, const float f);
-
 Vector3& operator/=(Vector3& v1, const Vector3& v2);
-
-const Vector3 operator*(const Vector3& v1, const Vector3& v2);
 
 const Vector3 operator/(const Vector3& v1, const Vector3 v2);
 

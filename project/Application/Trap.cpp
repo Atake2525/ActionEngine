@@ -9,6 +9,12 @@ using namespace Logger;
 using namespace std;
 using namespace ActionEngine::Stage;
 
+std::string getFileName(const std::string& path) {
+	size_t pos = path.find_last_of("/\\");
+	return (pos == std::string::npos) ? path : path.substr(pos + 1);
+}
+
+
 Trap::Trap() {
 
 }
@@ -23,7 +29,6 @@ Trap::~Trap() {
 void Trap::Initialize(std::string jsonName) {
 	// Jsonが読み込まれていなかったら早期return
 	if (!JsonLoader::GetInstance()->CheckJsonLoaded(jsonName)) {
-		Log("指定したJsonは読み込まれていません : " + jsonName + "\n");
 		return;
 	}
 	random_device seedGenerator;
@@ -35,48 +40,59 @@ void Trap::Initialize(std::string jsonName) {
 	string str;
 	vector<JsonData> json;
 	jsonName_ = jsonName;
-	json = JsonLoader::GetInstance()->GetJsonData(jsonName, "trap");
-	Log("指定したデータが" + std::to_string(json.size()) + "個見つかりました\n");
-	for (auto data : json) {
-		Traps trap;
-		trap.object = make_unique<Object3d>();
-		trap.object->Initialize();
-		trap.object->SetTransform(data.transform);
-		trap.object->SetModel("Resources/Model/obj", "trap.obj", true);
-		trap.start = data.transform;
-		trap.trapData = data.trap;
-		trap.startFrame = gameTimer_;
-		if (!data.trap.loop && !data.trap.reverse)
+	if (JsonLoader::GetInstance()->CheckJsonLoaded(jsonName))
+	{
+		// スタート地点の取得
+		vector<JsonData> data = JsonLoader::GetInstance()->GetJsonData(jsonName, "trap");
+		// スタート地点が設定されていない又はjsonが読み込めなかった場合はデフォルト位置を使用
+		if (!data.empty())
 		{
-			trap.reverse = true;
+			for (auto data : json) {
+				Traps trap;
+				trap.object = make_unique<Object3d>();
+				trap.object->Initialize();
+				trap.object->SetTransform(data.transform);
+				trap.object->SetModel("Resources/Model/obj", "trap.obj", true);
+				trap.start = data.transform;
+				trap.trapData = data.trap;
+				trap.startFrame = gameTimer_;
+				if (!data.trap.loop && !data.trap.reverse)
+				{
+					trap.reverse = true;
+				}
+				else
+				{
+					trap.reverse = false;
+				}
+				if (data.trap.reverse)
+				{
+					trap.trapData.runTime /= 2.0f;
+				}
+				if (data.trap.spawner)
+				{
+					if (data.trap.spawnerTime.y == -1.0f)
+					{
+						trap.trapData.spawnTime = data.trap.spawnerTime.x;
+					}
+					else
+					{
+						trap.trapData.spawnerTime = data.trap.spawnerTime;
+						uniform_real_distribution<float> distribution(data.trap.spawnerTime.x, data.trap.spawnerTime.y);
+						trap.trapData.spawnTime = distribution(randomEngine);
+					}
+
+				}
+				trap.number = num;
+				trap.object->Update();
+				traps.push_back(std::move(trap));
+				CollisionManager::GetInstance()->AddCollision(traps[num].object.get(), "trap" + to_string(num));
+				num++;
+			}
 		}
 		else
 		{
-			trap.reverse = false;
+			Log("指定したJsonは読み込まれていません : " + jsonName + "\n実行プログラム" + getFileName(__FILE__));
 		}
-		if (data.trap.reverse)
-		{
-			trap.trapData.runTime /= 2.0f;
-		}
-		if (data.trap.spawner)
-		{
-			if (data.trap.spawnerTime.y == -1.0f)
-			{
-				trap.trapData.spawnTime = data.trap.spawnerTime.x;
-			}
-			else
-			{
-				trap.trapData.spawnerTime = data.trap.spawnerTime;
-				uniform_real_distribution<float> distribution(data.trap.spawnerTime.x, data.trap.spawnerTime.y);
-				trap.trapData.spawnTime = distribution(randomEngine);
-			}
-
-		}
-		trap.number = num;
-		trap.object->Update();
-		traps.push_back(std::move(trap));
-		CollisionManager::GetInstance()->AddCollision(traps[num].object.get(), "trap" + to_string(num));
-		num++;
 	}
 }
 

@@ -1,22 +1,6 @@
 #include "kMath.h"
 #include <algorithm>
 
-const Vector3 operator*(const Vector3& v, const float f) {
-	Vector3 result;
-	result.x = v.x * f;
-	result.y = v.y * f;
-	result.z = v.z * f;
-	return result;
-}
-
-const Vector3 operator*(const Vector3& v1, const Vector3& v2) {
-	Vector3 result;
-	result.x = v1.x * v2.x;
-	result.y = v1.y * v2.y;
-	result.z = v1.z * v2.z;
-	return result;
-}
-
 Vector3& operator/=(Vector3& v1, const Vector3& v2) {
 	v1.x /= v2.x;
 	v1.y /= v2.y;
@@ -54,16 +38,6 @@ const Vector3 operator/(const Vector3& v1, const float f) {
 	result.y = v1.y / f;
 	result.z = v1.z / f;
 	return result;
-}
-
-//const Vector3 operator-(const Vector3& v1) {
-//	Vector3 v;
-//	v -= v1;
-//	return v;
-//}
-
-Vector3 Vector3::operator-(const Vector3& other) const {
-	return { x - other.x, y - other.y, z - other.z };
 }
 
 //単位行列の作成
