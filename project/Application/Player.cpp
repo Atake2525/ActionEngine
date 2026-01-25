@@ -156,22 +156,10 @@ void Player::HandleInput()
     {
     case Player::ControlMode::KeyboardMouse:
         // キー入力による移動
-        if (Input::GetInstance()->PushKey(DIK_W))
-        {
-            m_moveInput.y = -1.0f;
-        }
-        if (Input::GetInstance()->PushKey(DIK_S))
-        {
-            m_moveInput.y = 1.0f;
-        }
-        if (Input::GetInstance()->PushKey(DIK_A))
-        {
-            m_moveInput.x = -1.0f;
-        }
-        if (Input::GetInstance()->PushKey(DIK_D))
-        {
-            m_moveInput.x = 1.0f;
-        }
+        m_moveInput.y += -Input::GetInstance()->PushKeyInt(DIK_W);
+        m_moveInput.y += Input::GetInstance()->PushKeyInt(DIK_S);
+        m_moveInput.x += -Input::GetInstance()->PushKeyInt(DIK_A);
+        m_moveInput.x += Input::GetInstance()->PushKeyInt(DIK_D);
 
         break;
     case Player::ControlMode::Gamepad:
@@ -237,7 +225,7 @@ void Player::UpdateDebugUI() {
 
     // --- Movement ---
     if (ImGui::CollapsingHeader("Movement")) {
-        ImGui::Text("Move Input: (%.2f, %.2f)", m_moveInput.x, m_moveInput.y);
+        ImGui::Text("Move Input: (%f, %f)", m_moveInput.x, m_moveInput.y);
 
         ImGui::Text("Gravity: (%.2f, %.2f, %.2f)",
             m_gravity.x, m_gravity.y, m_gravity.z);
