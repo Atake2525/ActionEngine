@@ -177,6 +177,8 @@ private:
 
 	Capsule capsule;
 
+	Capsule capsulePre;
+
 	OBB obb;
 
 	std::vector<OBB> multiMeshOBB;

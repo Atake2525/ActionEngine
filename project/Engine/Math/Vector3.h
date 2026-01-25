@@ -8,9 +8,6 @@ struct Vector3
 	float y;
 	float z;
 
-	// 減算演算子のオーバーロード
-	Vector3 operator-(const Vector3& other) const;
-
 	static const Vector3 Zero;
 };
 
@@ -56,13 +53,10 @@ inline Vector3 operator+=(Vector3& v, const Vector3& n) {
 	return v;
 }
 
-inline Vector3 operator+(const Vector3& v1, const Vector3 v2) {
-	Vector3 result;
-	result.x = v1.x + v2.x;
-	result.y = v1.y + v2.y;
-	result.z = v1.z + v2.z;
-	return result;
-}
+inline const Vector3 operator-(const Vector3& a, const Vector3& b) { return { a.x - b.x, a.y - b.y, a.z - b.z }; }
+inline const Vector3 operator+(const Vector3& a, const Vector3& b) { return { a.x + b.x, a.y + b.y, a.z + b.z }; }
+inline const Vector3 operator*(const Vector3& a, const Vector3& b) { return { a.x * b.x, a.y * b.y, a.z * b.z }; }
+inline const Vector3 operator*(const Vector3& v, float f) { return { v.x * f, v.y * f, v.z * f }; }
 
 inline bool operator!=(const Vector3& v, const float f) {
 	if (v.x != f && v.y != f && v.z != f)

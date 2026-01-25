@@ -29,13 +29,18 @@ void CollisionManager::Update(const std::string& targetName) {
 	penetration_ = { 0.0f, 0.0f, 0.0f };
 	for (const auto& object : collisionObject) {
 		// ターゲット(プレイヤーなど)とオブジェクトの距離を全体のAABBから求めて離れていればcontinue
-		float dist = Distance(CenterAABB(collisionTarget[targetName]), CenterAABB(object.second->GetAABB()));
+		Vector3 centerA = CenterAABB(collisionTarget[targetName]);
+		Vector3 centerB = CenterAABB(object.second->GetAABB());
+		Vector3 d = centerA - centerB;
+		float targetDistance = Dot(d, d);
+
 		// オブジェクトの大きさを求める
 		AABB objectAABB = object.second->GetAABB();
 		// 最近接点とオブジェクトの中心座標の距離を取ってプレイヤーからオブジェクトまでの直線の距離を求める
-		float objectSize = Distance(objectAABB.min, objectAABB.max);
+		Vector3 objectD = objectAABB.min - objectAABB.max;
+		float objectSize = Dot(objectD, objectD);
 		// オブジェクトサイズよりも距離が近かったら処理をする(余裕をもって少しだけ広く)
-		if (dist < objectSize + 0.0f)
+		if (targetDistance < objectSize + 0.0f)
 		{
 			// オブジェクトのメッシュごとのAABBを取得する
 			const std::vector<AABB> terrains = object.second->GetAABBMultiMeshed();

@@ -201,10 +201,10 @@ void Player::Rotate() {
 
 void Player::Move() {
     // 移動処理の実装
-    if (m_moveInput.x != 0.0f && m_moveInput.y != 0.0f)
+    /*if (m_moveInput.x != 0.0f && m_moveInput.y != 0.0f)
     {
         m_moveInput = (m_moveInput) * (1.0f / sqrtf(2.0f));
-    }
+    }*/
 }
 
 void Player::UpdateCameraParent() {
