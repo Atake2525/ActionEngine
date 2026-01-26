@@ -677,23 +677,22 @@ float LengthSquared(const Vector3& v)
 	return v.x * v.x + v.y * v.y + v.z * v.z;
 }
 
+// -----------------------------
+// 3. ビット演算（完全分岐なし）
+// -----------------------------
 float Sign(float value)
 {
-	if (value == 0.0f)
-	{
-		return 0.0f;
-	}
-	if (value < 0.0f)
-	{
-		return -1.0f;
-	}
-	else
-	{
-		return 1.0f;
-	}
+	uint32_t bits = *(uint32_t*)&value;
+	float s = 1.0f - ((bits >> 31) << 1);
+	return s * (!!value);
 }
 
-Vector3 Sign(Vector3 value)
+Vector2 Sign(const Vector2& value)
+{
+	return { Sign(value.x), Sign(value.y) };
+}
+
+Vector3 Sign(const Vector3& value)
 {
 	return { Sign(value.x), Sign(value.y), Sign(value.z) };
 }

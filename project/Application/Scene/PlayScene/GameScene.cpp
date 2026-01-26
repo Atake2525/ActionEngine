@@ -16,7 +16,6 @@ void GameScene::Initialize() {
     TextureManager::GetInstance()->LoadTexture("Resources/rostock_laage_airport_4k.dds");
 
     camera = make_unique<Camera>();
-    camera->SetFarClipDistance(1.0f);
     camera->SetTranslate({ 0.0f, 1.8f, 0.0f });
 
     SkyBox::GetInstance()->SetCamera(camera.get());
@@ -40,7 +39,7 @@ void GameScene::Initialize() {
     stageObject->SetModel("Resources/Model/obj/Stage/TutorialStage", "TutorialStage.obj", true);
 
     player_ = make_unique<ActionPlayer>();
-    player_->Initialize(camera.get(), stage->GetJsonName(), true);
+    player_->Initialize(camera.get(), stage->GetJsonName());
 
     GameTime::GetInstance()->SetDeltaPoint();
     FadeManager::GetInstance()->FadeIn(1.0f);
@@ -56,7 +55,6 @@ void GameScene::Update() {
     stageObject->Update();
 
     player_->Update();
-    camera->Update();
 
     if (input->TriggerKey(DIK_ESCAPE))
     {
@@ -115,6 +113,9 @@ void GameScene::Update() {
         player_->Freeze(true);
         gameOver_->Update();
     }*/
+
+    camera->Update();
+
 }
 
 void GameScene::Draw() {

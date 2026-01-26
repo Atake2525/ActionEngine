@@ -4,16 +4,17 @@
 #include <string>
 
 class Camera;
+class Input;
 
 class Player
 {
 private:
-    enum class PlayerState {
-        Idle,
-        Walking,
-        Running,
-        Jumping,
-        Falling
+    enum class PlayerState : int {
+        Idle = 0,
+        Walking = 1,
+        Running = 2,
+        Jumping = 3,
+        Falling = 4
     };
 
     enum class ControlMode {
@@ -86,6 +87,7 @@ private: // プレイヤーモデル
 
     std::unique_ptr<Object3d> m_pModel;
     Camera* m_pCamera = nullptr;
+    Input* input;
 
     PlayerState m_state = PlayerState::Idle;
     PlayerState m_statePre = PlayerState::Idle;
@@ -106,6 +108,7 @@ private: // プレイヤーモデル
 
 #ifndef NDEBUG
     // デバッグ用の変数
+    bool m_debugMode = false;
     bool m_godMode = false;
 
 #endif // !NDEBUG

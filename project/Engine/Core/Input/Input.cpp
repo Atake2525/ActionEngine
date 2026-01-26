@@ -214,7 +214,7 @@ bool Input::PushKey(BYTE keyNumber) {
 	return false;
 }
 
-int Input::PushKeyInt(BYTE keyNumber)
+const int Input::PushKeyInt(BYTE keyNumber)
 {
 	return keys[keyNumber] >> 7;
 }
@@ -226,7 +226,7 @@ bool Input::TriggerKey(BYTE keyNumber) {
 	return false;
 }
 
-int Input::TriggerKeyInt(BYTE keyNumber)
+const int Input::TriggerKeyInt(BYTE keyNumber)
 {
 	return (keys[keyNumber] >> 7) * ( 1 - (keyPres[keyNumber] >> 7));
 } 
@@ -238,7 +238,7 @@ bool Input::ReturnKey(BYTE keyNumber) {
 	return false;
 }
 
-int Input::ReturnKeyInt(BYTE keyNumber)
+const int Input::ReturnKeyInt(BYTE keyNumber)
 {
 	return (1 - (keys[keyNumber] >> 7)) * (keyPres[keyNumber] >> 7);
 }
