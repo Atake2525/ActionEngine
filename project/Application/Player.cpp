@@ -3,8 +3,13 @@
 #include "Camera.h"
 #include "Input.h"
 #include "ImGuiManager.h"
+#include "kMath.h"
 
 using namespace std;
+
+
+// 斜め移動の速度補間
+constexpr float INV_SQRT2 = 0.70710678f; // 1 / sqrt(2)
 
 void Player::Initialize(Camera* camera, const std::string& jsonName)
 {
@@ -39,6 +44,8 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
         m_controlMode = ControlMode::KeyboardMouse;
     }
 
+    input = Input::GetInstance();
+
     // デバッグ用の初期設定
 #ifndef NDEBUG
     Input::GetInstance()->ShowMouseCursor(true);
@@ -52,8 +59,16 @@ void Player::Update()
 {
     m_transform = m_pModel->GetTransform();
 #ifndef NDEBUG
-    // デバッグUIの更新
-    UpdateDebugUI();
+
+    if (Input::GetInstance()->TriggerKey(DIK_F3))
+    {
+        m_debugMode = !m_debugMode;
+    }
+    if (m_debugMode)
+    {
+        // デバッグUIの更新
+        UpdateDebugUI();
+    }
 #endif // !NDEBUG
 
 #ifndef NDEBUG
@@ -92,7 +107,6 @@ void Player::Update()
     m_pModel->Update();
     //m_pCamera->SetTranslate(m_transform.translate);
     UpdateCameraParent();
-    m_pCamera->Update();
 
 }
 
@@ -106,30 +120,22 @@ void Player::UpdateState()
     // 前回の状態を保存
     m_statePre = m_state;
 
-    // 移動入力に基づく状態遷移
-    if (m_moveInput.x != 0.0f || m_moveInput.y != 0.0f)
-    {
-        m_state = PlayerState::Walking;
-    }
-    else // 移動入力なし
-    {
-        m_state = PlayerState::Idle;
-    }
+    float statePoint = (Sign(m_moveInput.x) * m_moveInput.x) + (Sign(m_moveInput.y) * m_moveInput.y);
+
+    m_state = static_cast<PlayerState>(statePoint);
+    // 入力確認用の変数
+    int state = 0;
 
     switch (m_controlMode)
     {
     case Player::ControlMode::KeyboardMouse:
-        // ダッシュ入力
-        if (Input::GetInstance()->PushKey(DIK_LSHIFT))
-        {
-            m_state = PlayerState::Running;
-        }
 
-        // ジャンプ入力
-        if (Input::GetInstance()->PushKey(DIK_SPACE))
-        {
-            m_state = PlayerState::Jumping;
-        }
+        // 入力の確認 orを使って値の大きいものを優先させる
+        state |= input->PushKeyInt(DIK_LSHIFT) * static_cast<int>(PlayerState::Running);
+        state |= input->PushKeyInt(DIK_SPACE) * static_cast<int>(PlayerState::Jumping);
+
+        m_state = static_cast<PlayerState>(state);
+
         break;
     case Player::ControlMode::Gamepad:
         // ダッシュ入力
@@ -208,10 +214,6 @@ void Player::UpdateDebugUI() {
         ImGui::End();
         return;
     }
-
-    ImGui::Text("Input Push: %d", Input::GetInstance()->PushKeyInt(DIK_0));
-    ImGui::Text("Input Trigger: %d", Input::GetInstance()->TriggerKeyInt(DIK_0));
-    ImGui::Text("Input Return: %d", Input::GetInstance()->ReturnKeyInt(DIK_0));
 
     // --- Control Mode ---
     ImGui::Text("Control Mode: %s",

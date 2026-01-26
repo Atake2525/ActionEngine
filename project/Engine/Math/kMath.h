@@ -157,4 +157,6 @@ float LengthSquared(const Vector3& v);
 
 float Sign(float value);
 
-Vector3 Sign(Vector3 value);
+Vector2 Sign(const Vector2& value);
+
+Vector3 Sign(const Vector3& value);

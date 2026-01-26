@@ -150,6 +150,8 @@ void TestScene::Update() {
 	input->ShowMouseCursor(cursorshow);
 
 	SkyBox::GetInstance()->Update();
+
+	camera->Update();
 }
 
 void TestScene::Draw() {
