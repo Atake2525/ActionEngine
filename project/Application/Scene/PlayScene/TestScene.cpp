@@ -53,6 +53,8 @@ void TestScene::Initialize() {
 	gameOverSprite = std::make_unique<GameOver>();
 	gameOverSprite->Initialize();
 
+	pause->Initialize();
+
 	//JsonLoader::GetInstance()->LoadJson("Resources/Json/test.json", "test", false);
 	JsonLoader::GetInstance()->LoadJson("Resources/Json/wp1.json", "wp1", false);
 
@@ -104,6 +106,8 @@ void TestScene::Update() {
 	//camera->Update();
 
 	stage->Update();
+
+	pause->Update();
 
 	ImGui::Begin("Box");
 	ImGui::DragFloat3("translate", &boxTransform.translate.x, 0.1f);
@@ -176,6 +180,7 @@ void TestScene::Draw() {
 
 	stage->DrawBackSprite();
 	gameOverSprite->Draw();
+	pause->Draw();
 
 	DebugLineBase::GetInstance()->ShaderDraw();
 

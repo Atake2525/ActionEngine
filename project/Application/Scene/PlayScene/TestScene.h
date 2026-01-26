@@ -25,6 +25,7 @@
 #include "BaseStage.h"
 #include "TutorialStage.h"
 #include "DebugLine.h"
+#include "Pause.h"
 
 #pragma once
 
@@ -78,6 +79,8 @@ private:
 	std::unique_ptr<Object3d> capsule;
 
 	std::unique_ptr<Object3d> aabbBox;
+
+	std::unique_ptr<Pause> pause;
 
 	bool start_ = false;
 };
