@@ -53,6 +53,7 @@ void TestScene::Initialize() {
 	gameOverSprite = std::make_unique<GameOver>();
 	gameOverSprite->Initialize();
 
+	pause = std::make_unique<Pause>();
 	pause->Initialize();
 
 	//JsonLoader::GetInstance()->LoadJson("Resources/Json/test.json", "test", false);
@@ -142,10 +143,10 @@ void TestScene::Update() {
 		Audio::GetInstance()->Play3D("bgm", { 0.0f, 0.0f, 0.0f }, false);
 	}
 
-	if (input->TriggerKey(DIK_ESCAPE))
+	/*if (input->TriggerKey(DIK_ESCAPE))
 	{
 		finished = true;
-	}
+	}*/
 
 	if (input->TriggerKey(DIK_F11))
 	{

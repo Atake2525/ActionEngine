@@ -21,11 +21,18 @@ public:
     /// </summary>
     void Draw();
 
-    const bool& GetPause()const { return pause; }
+    const bool& GetPause()const { return m_pause; }
 
 private:
-    //std::array<std::unique_ptr<Sprite>, 5> sprites;
 
-    bool pause = false;
+    std::array<std::unique_ptr<Sprite>, 5> sprites;
+
+    bool m_pause = false;
+
+    bool m_pauseAnim = false;
+
+    float m_animTimer = 0.0f;
+
+    float m_animTime = 1.0f;
 };
 
