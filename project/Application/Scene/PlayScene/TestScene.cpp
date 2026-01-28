@@ -84,11 +84,11 @@ void TestScene::Initialize() {
 Transform boxTransform = Transform::Default;
 void TestScene::Update() {
 
-	/*if (player->IsGameOver())
+	pause->Update();
+	if (pause->IsPause())
 	{
-		player->Freeze(true);
-		gameOverSprite->Update();
-	}*/
+		return;
+	}
 
 	if (!start_)
 	{
@@ -107,8 +107,6 @@ void TestScene::Update() {
 	//camera->Update();
 
 	stage->Update();
-
-	pause->Update();
 
 	ImGui::Begin("Box");
 	ImGui::DragFloat3("translate", &boxTransform.translate.x, 0.1f);
@@ -151,8 +149,8 @@ void TestScene::Update() {
 	if (input->TriggerKey(DIK_F11))
 	{
 		cursorshow = !cursorshow;
+		input->ShowMouseCursor(cursorshow);
 	}
-	input->ShowMouseCursor(cursorshow);
 
 	SkyBox::GetInstance()->Update();
 

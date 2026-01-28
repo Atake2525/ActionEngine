@@ -47,8 +47,8 @@ void SkyBox::Initialize() {
 	//  書き込むためのアドレスを取得
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
 
-	materialData->color = { 1.0f, 1.0f, 1.0f, 1.0f };
-	//materialData->color = { 0.0f, 0.0f, 0.0f, 1.0f };
+	//materialData->color = { 1.0f, 1.0f, 1.0f, 1.0f };
+	materialData->color = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 	// 頂点リソースの作成
 	vertexResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(VertexData) * 24);
