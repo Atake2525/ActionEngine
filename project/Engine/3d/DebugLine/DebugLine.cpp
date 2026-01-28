@@ -126,6 +126,7 @@ void DebugLine::AddCapsule(float height, float radius, const Vector4& color, int
 }
 
 void DebugLine::Update() {
+#ifndef NDEBUG
     ImGui::Begin("Debug Collision Visualizer");
 
     // --- Transform設定 ---
@@ -184,6 +185,7 @@ void DebugLine::Update() {
 
     ImGui::Text("Vertices: %d", (int)baseVertices.size());
     ImGui::End();
+#endif // !NDEBUG
 
     // --- Transform適用 ---
     // baseVerticesに対してワールド行列を適用してlineVerticesを生成

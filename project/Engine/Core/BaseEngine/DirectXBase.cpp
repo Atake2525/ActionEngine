@@ -27,6 +27,7 @@ DirectXBase* DirectXBase::GetInstance() {
 void DirectXBase::Finalize() {
     CloseHandle(fenceEvent);
 
+    OffScreenRendering::GetInstance()->Finalize();
     delete instance;
     instance = nullptr;
 }

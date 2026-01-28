@@ -82,6 +82,8 @@ private:
 
 	std::unique_ptr<Pause> pause;
 
+	std::unique_ptr<Sprite> pauseSprite;
+
 	bool start_ = false;
 };
 
