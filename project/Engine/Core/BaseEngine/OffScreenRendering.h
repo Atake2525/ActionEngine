@@ -43,7 +43,24 @@ struct Dissolve
 
 class OffScreenRendering
 {
+private:
+	static OffScreenRendering* instance;
+
+	OffScreenRendering() = default;
+	~OffScreenRendering() = default;
+	OffScreenRendering(OffScreenRendering&) = delete;
+	OffScreenRendering& operator=(OffScreenRendering&) = delete;
+
+
 public:
+
+	static OffScreenRendering* GetInstance();
+
+	/// <summary>
+	/// 終了処理
+	/// </summary>
+	void Finalize();
+
 	/// <summary>
 	/// 初期化
 	/// </summary>
@@ -60,6 +77,12 @@ public:
 	Microsoft::WRL::ComPtr<ID3D12Resource> GetRenderTextureResource() const { return renderTextureResource; }
 
 	const Vector4 GetRenderTargetClearValue() const { return renderTargetClearValue; }
+
+	/// ===== GrayScaleの設定 ===== ///
+
+	void SetGrayscaleIntensity(float value);
+	
+	/// ========================== ///
 
 private:
 
