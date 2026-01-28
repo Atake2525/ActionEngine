@@ -56,10 +56,6 @@ void TestScene::Initialize() {
 	pause = std::make_unique<Pause>();
 	pause->Initialize();
 
-	pauseSprite = make_unique<Sprite>();
-	pauseSprite->Initialize("Resources/Sprite/PauseSprite.png");
-	pauseSprite->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
-
 	//JsonLoader::GetInstance()->LoadJson("Resources/Json/test.json", "test", false);
 	JsonLoader::GetInstance()->LoadJson("Resources/Json/wp1.json", "wp1", false);
 
@@ -89,7 +85,6 @@ Transform boxTransform = Transform::Default;
 void TestScene::Update() {
 
 	pause->Update();
-	pauseSprite->Update();
 	if (pause->IsPause())
 	{
 		return;
@@ -185,7 +180,6 @@ void TestScene::Draw() {
 	stage->DrawBackSprite();
 	gameOverSprite->Draw();
 	pause->Draw();
-	pauseSprite->Draw();
 
 	DebugLineBase::GetInstance()->ShaderDraw();
 

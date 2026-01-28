@@ -4,6 +4,14 @@
 #include <string>
 #pragma once
 
+enum class PauseSelect : uint8_t {
+    back = 0,
+    restart = 1,
+    stageSelect = 2,
+    setting = 3,
+    title = 4,
+};
+
 class Pause
 {
 public:
@@ -32,14 +40,7 @@ private:
         std::unique_ptr<Sprite> sprite;
         Vector2 position;
         Vector2 targetPosition[2];
-    };
-
-    enum class PauseSelect : uint8_t {
-        back = 0,
-        restart = 1,
-        stageSelect = 2,
-        setting = 3,
-        title = 4,
+        Vector2 
     };
 
     std::array<PauseSprite, 5> pauseUIs;
@@ -54,8 +55,13 @@ private:
 
     float m_animTimer = 0.0f;
 
-    float m_animTime = 1.0f;
+    float m_animTime = 0.8f;
 
     Vector2 m_outSize = { 0.0f };
+
+    // 選択されているときの移動値
+    Vector2 m_selectingPos = { 0.0f, 10.0f };
+    // 選択されているときのサイズの倍率
+    float m_selectingScale = 1.2f;
 
 };

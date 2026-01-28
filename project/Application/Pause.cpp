@@ -5,6 +5,7 @@
 #include "GameTime.h"
 #include "OffScreenRendering.h"
 #include "ImGuiManager.h"
+#include "SceneManager.h"
 
 using namespace std;
 
@@ -22,19 +23,19 @@ void Pause::Initialize() {
         string str;
         switch (select)
         {
-        case Pause::PauseSelect::back:
+        case PauseSelect::back:
             str = "back";
             break;
-        case Pause::PauseSelect::restart:
+        case PauseSelect::restart:
             str = "restart";
             break;
-        case Pause::PauseSelect::stageSelect:
+        case PauseSelect::stageSelect:
             str = "stageSelect";
             break;
-        case Pause::PauseSelect::setting:
+        case PauseSelect::setting:
             str = "setting";
             break;
-        case Pause::PauseSelect::title:
+        case PauseSelect::title:
             str = "title";
             break;
         default:
@@ -62,6 +63,7 @@ void Pause::Update() {
     if (Input::GetInstance()->TriggerKeyInt(DIK_ESCAPE) && !m_pauseAnim)
     {
         m_pauseAnim = !m_pauseAnim;
+        m_animTimer = 0.0f;
         if (m_pause)
         {
             Input::GetInstance()->ShowMouseCursor(false);
@@ -81,15 +83,18 @@ void Pause::Update() {
         for (int i = 0; i < pauseUIs.size(); i++)
         {
             // ポーズ状態へとプレイ画面へ戻るの2種類のタイプでeasingを行う
+            Vector4 color = pauseUIs[i].sprite->GetColor();
             if (!m_pause)
             {
                 pauseUIs[i].position = EaseOutQuint(m_animTimer, pauseUIs[i].targetPosition[0], pauseUIs[i].targetPosition[1]);
                 OffScreenRendering::GetInstance()->SetGrayscaleIntensity(min(m_animTimer * 1.2f, 0.4f));
+                pauseUIs[i].sprite->SetColor({ color.x, color.y, color.z, m_animTimer });
             }
             else
             {
                 pauseUIs[i].position = EaseOutQuint(m_animTimer, pauseUIs[i].targetPosition[1], pauseUIs[i].targetPosition[0]);
                 OffScreenRendering::GetInstance()->SetGrayscaleIntensity(min(1.0f - m_animTimer * 1.2f, 0.4f));
+                //pauseUIs[i].sprite->SetColor({ 1.0f, color.y, color.z, max(1.0f - m_animTimer * 2.0f, 0.0f) });
             }
 
             pauseUIs[i].sprite->SetPosition(pauseUIs[i].position);
@@ -108,6 +113,7 @@ void Pause::Update() {
     // ポーズ中の処理
     if (m_pause)
     {
+
         int num = static_cast<int>(m_pauseSelect);
         num += (Input::GetInstance()->TriggerKeyInt(DIK_S) | Input::GetInstance()->TriggerKeyInt(DIK_DOWN));
         num -= (Input::GetInstance()->TriggerKeyInt(DIK_W) | Input::GetInstance()->TriggerKeyInt(DIK_UP));
@@ -121,11 +127,14 @@ void Pause::Update() {
         }
         m_pauseSelect = static_cast<PauseSelect>(num);
 
+        m_animTimer += GameTime::GetInstance()->GetDeltaTime() / m_animTime;
+
         for (int i = 0; i < pauseUIs.size(); i++)
         {
             if (static_cast<int>(m_pauseSelect) == i)
             {
                 pauseUIs[i].sprite->SetColor({0.0f, 1.0f, 0.0f, 1.0f});
+                pauseUIs[i].sprite
             }
             else
             {
