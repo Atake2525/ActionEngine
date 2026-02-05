@@ -8,6 +8,15 @@ struct Transform {
 	Vector3 scale;
 	Vector3 rotate;
 	Vector3 translate;
+
+	// デフォルト値
+    static const Transform Default;
+};
+
+inline const Transform Transform::Default = {
+	Vector3{1.0f, 1.0f, 1.0f}, // scale
+	Vector3{0.0f, 0.0f, 0.0f}, // rotate
+	Vector3{0.0f, 0.0f, 0.0f}  // translate
 };
 
 struct QuaternionTransform

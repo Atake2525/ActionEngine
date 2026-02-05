@@ -13,7 +13,6 @@
 #include "externals/DirectXTex/d3dx12.h"
 #include "Vector4.h"
 #include "Vector3.h"
-#include "OffScreenRendering.h"
 #include <memory>
 
 class DirectXBase {
@@ -269,8 +268,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPilelineState = nullptr;
 
 	uint32_t textureIndex;
-
-	std::unique_ptr<OffScreenRendering> offscreen = nullptr;
 
 	float clearColor[4];
 
