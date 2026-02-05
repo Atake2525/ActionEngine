@@ -1,6 +1,8 @@
 #include "BaseStage.h"
 #include "Object3d.h"
 #include "Sprite.h"
+#include "Trap.h"
+#include "Goal.h"
 
 #pragma once
 class TutorialStage : public BaseStage
@@ -36,7 +38,10 @@ public:
     void Finalize() override;
 
 private:
+    // ステージに必要なものの宣言
     std::unique_ptr<Object3d> stageObject;
+    std::unique_ptr<Trap> trap;
+    std::unique_ptr<Goal> goal;
 
     std::array< std::unique_ptr<Sprite>, 4> tutorialSprites;
 

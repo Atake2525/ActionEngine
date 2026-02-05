@@ -101,7 +101,7 @@ void TitleScene::Initialize() {
 
 	Audio::GetInstance()->Play("bgm", true);
 
-	Audio::GetInstance()->SetMasterVolume(0.0f);
+	//Audio::GetInstance()->SetMasterVolume(0.0f);
 	FadeManager::GetInstance()->FadeIn(1.0f);
 }
 

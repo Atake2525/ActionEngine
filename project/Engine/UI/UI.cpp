@@ -2,13 +2,11 @@
 #include "SpriteBase.h"
 #include "TextureManager.h"
 #include "WinApp.h"
+#include "ImGuiManager.h"
 
-#include "externals/imgui/imgui.h"
-#include "externals/imgui/imgui_impl_dx12.h"
-#include "externals/imgui/imgui_impl_win32.h"
+using namespace std;
 
 UI::~UI() {
-	delete sprite;
 }
 
 void UI::SetSprite(const std::string& filename) {
@@ -30,7 +28,7 @@ void UI::CreateButton(const Vector2& spritePosition, const Origin& origin, const
 
 	TextureManager::GetInstance()->LoadTexture(filename);
 
-	sprite = new Sprite();
+	sprite = make_unique<Sprite>();
 	sprite->Initialize(filename);
 	sprite->SetPosition(spritePosition);
 
@@ -114,9 +112,6 @@ bool UI::TriggerOnButton() {
 		onButton_ = !onButton_;
 		return true;
 	}
-	/*ImGui::Begin("Button");
-	ImGui::DragFloat2("mousePos", &mousePosAABB.min.x, 0.1f);
-	ImGui::End();*/
 
 	return false;
 }

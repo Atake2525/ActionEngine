@@ -187,6 +187,10 @@ void Object3d::Update() {
 	cullingTemplateData->drawHeight = data.drawHeight;
 
 
+	// カプセルの更新
+	capsule.start = capsulePre.start + transform.translate;
+	capsule.end = capsulePre.end + transform.translate;
+
 }
 
 void Object3d::UpdateSkinCluster(std::vector<SkinCluster>& skinCluster, const Skeleton& skeleton)
@@ -390,10 +394,11 @@ void Object3d::SetShininess(const float& shininess) {
 void Object3d::CreateCapsule(){
 	Vector3 center = CenterAABB(first);
 	float dist = Distance(center, Vector3{ center.x, center.y, first.min.z });
-	capsule.start = { center.x, first.min.y + dist, center.z };
-	capsule.end = { center.x, first.max.y - dist, center.z };
+	capsulePre.start = { center.x, first.min.y + dist, center.z };
+	capsulePre.end = { center.x, first.max.y - dist, center.z };
 
-	capsule.radius = dist;
+	capsulePre.radius = dist;
+	capsule = capsulePre;
 
 }
 

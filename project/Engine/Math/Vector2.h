@@ -8,6 +8,8 @@ struct Vector2
 
 	static const Vector2 Clamp(Vector2 target, Vector2 min, Vector2 max);
 	static const Vector2 Clamp(Vector2 target, float min, float max);
+
+    static const Vector2 Zero;
 };
 
 inline Vector2 Normalize(const Vector2& v) {
@@ -34,4 +36,8 @@ inline Vector2 operator-(Vector2 v1, Vector2 v2) {
 	return v1;
 }
 
+inline Vector2 operator*(const Vector2& v, float f) {
+	return { v.x * f, v.y * f };
+}
 
+inline const Vector2 Vector2::Zero = Vector2{ 0.0f, 0.0f };
