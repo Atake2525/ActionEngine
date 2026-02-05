@@ -49,9 +49,6 @@ public:
 	/// </summary>
 	void Update(const std::string& targetName);
 
-	// 対象(Capsule)と障害物(AABB)の衝突量を求める
-	//void UpdateCupsulCollision(const std::string& targetName);
-
 	/// <summary>
 	/// 終了処理
 	/// </summary>
@@ -68,13 +65,7 @@ public:
 	// 対象と地面との最大距離を求める
 	const float GetGroundMAXDistance(const std::string& targetName) const;
 
-	// 当たり判定の追加
-	//const bool& CheckCollision(const AABB& a, const AABB& b);
-	//const bool& CheckCollision(const AABB& a, const Sphere& b);
-
 	const Vector3 CheckPenetrationAmount(const AABB& aabb);
-
-	//const bool& CheckCollision(const AABB& a, const OBB& b);
 
 	// 当たり判定として計算するオブジェクトの追加
 	void AddCollision(Object3d* object3d, const std::string key);
