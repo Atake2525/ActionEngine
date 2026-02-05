@@ -6,6 +6,8 @@
 #include "OffScreenRendering.h"
 #include "ImGuiManager.h"
 #include "SceneManager.h"
+#include "Audio.h"
+#include "FadeManager.h"
 
 using namespace std;
 
@@ -57,9 +59,12 @@ void Pause::Initialize() {
         float targetPosY = max(((m_windowSize.y - m_outSize.y * 2.0f) / float(pauseUIs.size())) * i + m_outSize.y, pauseUIs[i].sprite->GetScale().y * i);
         pauseUIs[i].targetPosition[1] = { m_windowSize.x * 0.5f, targetPosY };
     }
+
+    Audio::GetInstance()->LoadMP3("Resources/sound/pause_select.mp3", "pause_select");
 }
 
 void Pause::Update() {
+
     if (Input::GetInstance()->TriggerKeyInt(DIK_ESCAPE) && !m_pauseAnim)
     {
         m_pauseAnim = !m_pauseAnim;
@@ -84,17 +89,17 @@ void Pause::Update() {
         {
             // ポーズ状態へとプレイ画面へ戻るの2種類のタイプでeasingを行う
             Vector4 color = pauseUIs[i].sprite->GetColor();
-            if (!m_pause)
+            if (!m_pause) // ポーズ状態へ入るとき
             {
                 pauseUIs[i].position = EaseOutQuint(m_animTimer, pauseUIs[i].targetPosition[0], pauseUIs[i].targetPosition[1]);
                 OffScreenRendering::GetInstance()->SetGrayscaleIntensity(min(m_animTimer * 1.2f, 0.4f));
                 pauseUIs[i].sprite->SetColor({ color.x, color.y, color.z, m_animTimer });
             }
-            else
+            else // ポーズ状態から出る時
             {
                 pauseUIs[i].position = EaseOutQuint(m_animTimer, pauseUIs[i].targetPosition[1], pauseUIs[i].targetPosition[0]);
                 OffScreenRendering::GetInstance()->SetGrayscaleIntensity(min(1.0f - m_animTimer * 1.2f, 0.4f));
-                //pauseUIs[i].sprite->SetColor({ 1.0f, color.y, color.z, max(1.0f - m_animTimer * 2.0f, 0.0f) });
+                pauseUIs[i].sprite->SetColor({ color.x, color.y, color.z, EaseOutQuint(m_animTimer, 1.0f, 0.0f)});
             }
 
             pauseUIs[i].sprite->SetPosition(pauseUIs[i].position);
@@ -111,9 +116,9 @@ void Pause::Update() {
     }
 
     // ポーズ中の処理
-    if (m_pause)
+    if (m_pause && !m_pauseAnim)
     {
-
+        // キー入力処理
         int num = static_cast<int>(m_pauseSelect);
         num += (Input::GetInstance()->TriggerKeyInt(DIK_S) | Input::GetInstance()->TriggerKeyInt(DIK_DOWN));
         num -= (Input::GetInstance()->TriggerKeyInt(DIK_W) | Input::GetInstance()->TriggerKeyInt(DIK_UP));
@@ -125,25 +130,49 @@ void Pause::Update() {
         {
             num = 0;
         }
-        m_pauseSelect = static_cast<PauseSelect>(num);
 
-        m_animTimer += GameTime::GetInstance()->GetDeltaTime() / m_animTime;
-
-        for (int i = 0; i < pauseUIs.size(); i++)
+        if (num != static_cast<int>(m_pauseSelect))
         {
-            if (static_cast<int>(m_pauseSelect) == i)
+            m_selectNumberPre = static_cast<int>(m_pauseSelect);
+            Audio::GetInstance()->Play("pause_select");
+            m_changeSelectAnim = true;
+            m_animTimer = 0.0f;
+        }
+
+        // 入力による処理
+        if (m_changeSelectAnim)
+        {
+            m_pauseSelect = static_cast<PauseSelect>(num);
+            // タイマーを進める
+            m_animTimer += GameTime::GetInstance()->GetDeltaTime() / m_animTime / 0.4f;
+
+            // 選択されているUIに対して処理を行う
+            Vector3 color = {
+                       0.0f,
+                       1.0f,
+                       EaseOutQuint(m_animTimer, 1.0f, 0.0f)
+            };
+            pauseUIs[static_cast<int>(m_pauseSelect)].sprite->SetColor({ color.x, color.y, color.z, 1.0f });
+            pauseUIs[static_cast<int>(m_pauseSelect)].sprite->Update();
+            
+            pauseUIs[static_cast<int>(m_selectNumberPre)].sprite->SetColor({0.0f, 1.0f, 1.0f, 1.0f });
+            pauseUIs[static_cast<int>(m_selectNumberPre)].sprite->Update();
+
+            if (m_animTimer >= 1.0f)
             {
-                pauseUIs[i].sprite->SetColor({0.0f, 1.0f, 0.0f, 1.0f});
-                pauseUIs[i].sprite
+                m_changeSelectAnim = false;
             }
-            else
+        }
+        else
+        {
+            if (Input::GetInstance()->TriggerKeyInt(DIK_RETURN) || Input::GetInstance()->TriggerMouse(0))
             {
-                pauseUIs[i].sprite->SetColor({ 0.0f, 1.0f, 1.0f, 1.0f });
+                Enter(static_cast<int>(m_pauseSelect));
             }
-            pauseUIs[i].sprite->Update();
         }
     }
-    int num = static_cast<int>(m_pauseSelect);
+    m_selectNumber = static_cast<int>(m_pauseSelect);
+
 }
 
 void Pause::Draw() {
@@ -153,5 +182,33 @@ void Pause::Draw() {
         {
             pauseUIs[i].sprite->Draw();
         }
+    }
+}
+
+void Pause::Enter(int selectNumber) {
+    switch (m_pauseSelect)
+    {
+    case PauseSelect::back:
+        m_pauseAnim = !m_pauseAnim;
+        m_animTimer = 0.0f;
+        if (m_pause)
+        {
+            Input::GetInstance()->ShowMouseCursor(false);
+        }
+        else
+        {
+            Input::GetInstance()->ShowMouseCursor(true);
+        }
+        break;
+    case PauseSelect::restart:
+        SceneManager::GetInstance()->SetNextScene(SceneManager::GetInstance()->GetSceneName());
+        break;
+    case PauseSelect::stageSelect:
+        break;
+    case PauseSelect::setting:
+        break;
+    case PauseSelect::title:
+        SceneManager::GetInstance()->SetNextScene("TITLE");
+        break;
     }
 }
