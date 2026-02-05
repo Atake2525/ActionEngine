@@ -201,6 +201,7 @@ void Pause::Enter(int selectNumber) {
         }
         break;
     case PauseSelect::restart:
+        OffScreenRendering::GetInstance()->SetGrayscaleIntensity(0.0f);
         SceneManager::GetInstance()->SetNextScene(SceneManager::GetInstance()->GetSceneName());
         break;
     case PauseSelect::stageSelect:
