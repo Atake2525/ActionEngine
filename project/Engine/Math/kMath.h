@@ -124,6 +124,8 @@ float SwapRadian(float degree);
 
 float Length(const Vector3& v);
 
+float Length(const Vector2& v);
+
 float Distance(const Vector3& v1, const Vector3& v2);
 
 // AABBから中心座標を計算
