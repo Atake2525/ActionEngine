@@ -101,7 +101,6 @@ void TestScene::Update() {
 
 	player->Update();
 	//actionPlayer->Update();
-	//camera->Update();
 
 	stage->Update();
 
@@ -112,6 +111,11 @@ void TestScene::Update() {
 	ImGui::End();
 
 	aabbBox->SetTransform(boxTransform);
+
+	aabbBox->UpdateAABB();
+	aabbBox->UpdateCapsule();
+    aabbBox->UpdateOBB();
+
 	aabbBox->Update();
 
 	capsule->Update();
@@ -166,7 +170,7 @@ void TestScene::Draw() {
 	capsule->Draw();
 	aabbBox->Draw();
 	//goal->Draw();
-	//player->Draw();
+	player->Draw();
 
 	SkinningObject3dBase::GetInstance()->ShaderDraw();
 

@@ -543,6 +543,12 @@ float Length(const Vector3& v) {
 	return result;
 }
 
+float Length(const Vector2& v)
+{
+	float result = sqrtf((v.x * v.x) + (v.y * v.y));
+    return result;
+}
+
 float Distance(const Vector3& v1, const Vector3& v2) {
 	Vector3 dist = { v1.x - v2.x, v1.y - v2.y, v1.z - v2.z };
 	float result = Length(dist);
