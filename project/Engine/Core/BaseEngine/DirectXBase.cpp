@@ -5,6 +5,7 @@
 #include <cassert>
 #include "TextureManager.h"
 #include "SrvManager.h"
+#include "OffScreenRendering.h"
 
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -26,6 +27,7 @@ DirectXBase* DirectXBase::GetInstance() {
 void DirectXBase::Finalize() {
     CloseHandle(fenceEvent);
 
+    OffScreenRendering::GetInstance()->Finalize();
     delete instance;
     instance = nullptr;
 }
@@ -209,10 +211,9 @@ void DirectXBase::Initialize() {
 }
 
 void DirectXBase::InitializePosteffect() {
-    offscreen = std::make_unique<OffScreenRendering>();
-    offscreen->Initialize();
+    OffScreenRendering::GetInstance()->Initialize();
 
-    Vector4 col = offscreen->GetRenderTargetClearValue();
+    Vector4 col = OffScreenRendering::GetInstance()->GetRenderTargetClearValue();
     // 指定した色で画面全体をクリアする
     clearColor[0] = col.x;
     clearColor[1] = col.y;
@@ -256,7 +257,7 @@ void DirectXBase::PreDraw() {
     commandList->RSSetViewports(1, &viewPort);       // Viewportを設定
     commandList->RSSetScissorRects(1, &scissorRect); // Scirssorを設定
 
-    offscreen->Draw();
+    OffScreenRendering::GetInstance()->Draw();
 
 }
 
@@ -307,7 +308,7 @@ void DirectXBase::PostDraw() {
 }
 
 void DirectXBase::PreDrawRenderTexture() {
-    device->CreateRenderTargetView(offscreen->GetRenderTextureResource().Get(), &rtvDesc, GetCPUDescriptorHandle(rtvDescriptorHeap, device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV), 2));
+    device->CreateRenderTargetView(OffScreenRendering::GetInstance()->GetRenderTextureResource().Get(), &rtvDesc, GetCPUDescriptorHandle(rtvDescriptorHeap, device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV), 2));
     rtvTextureHandle = GetCPUDescriptorHandle(rtvDescriptorHeap, device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV), 2);
 
     // TransitionのBarrierの設定
@@ -316,7 +317,7 @@ void DirectXBase::PreDrawRenderTexture() {
     // Noneにしておく
     barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
     // バリアを張る対象のリソース。現在のバックバッファに対して行う
-    barrier.Transition.pResource = offscreen->GetRenderTextureResource().Get();
+    barrier.Transition.pResource = OffScreenRendering::GetInstance()->GetRenderTextureResource().Get();
     // 遷移前(現在)のRecourceState
     barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
     // 遷移後のResourceState
@@ -351,7 +352,7 @@ void DirectXBase::PreDrawRenderTexture() {
 
 void DirectXBase::Update() {
 
-    offscreen->Update();
+    OffScreenRendering::GetInstance()->Update();
 }
 
 void DirectXBase::PostDrawRenderTexture() {

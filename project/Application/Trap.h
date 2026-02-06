@@ -31,7 +31,7 @@ public:
     /// 初期化
     /// </summary>
     /// <param name="jsonName">JsonLoaderに登録した名前</param>
-    void Initialize(std::string jsonName = "normal");
+    void Initialize(std::string jsonName);
 
     /// <summary>
     /// 更新

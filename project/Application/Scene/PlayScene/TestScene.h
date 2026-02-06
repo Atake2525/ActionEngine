@@ -16,14 +16,16 @@
 #include "SkyBox.h"
 #include <wrl.h>
 #include <memory>
-#include "Player.h"
 #include "ActionPlayer.h"
+#include "Player.h"
 #include "JsonLoader.h"
 #include "GameOver.h"
 #include "Trap.h"
 #include "Goal.h"
 #include "BaseStage.h"
 #include "TutorialStage.h"
+#include "DebugLine.h"
+#include "Pause.h"
 
 #pragma once
 
@@ -64,14 +66,21 @@ private:
 
 	std::unique_ptr<GameOver> gameOverSprite;
 
-	std::unique_ptr<Player> player;
 	std::unique_ptr<ActionPlayer> actionPlayer;
-
-	std::unique_ptr<Trap> trap;
 
 	std::unique_ptr<Goal> goal;
 
 	std::unique_ptr<BaseStage> stage;
+
+    std::unique_ptr<Player> player;
+
+	std::unique_ptr<DebugLine> debugLine;
+
+	std::unique_ptr<Object3d> capsule;
+
+	std::unique_ptr<Object3d> aabbBox;
+
+	std::unique_ptr<Pause> pause;
 
 	bool start_ = false;
 };

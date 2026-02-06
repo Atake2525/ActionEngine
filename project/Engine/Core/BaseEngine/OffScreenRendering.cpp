@@ -5,13 +5,29 @@
 #include "DirectXBase.h"
 #include "SrvManager.h"
 #include "TextureManager.h"
-
-#include "externals/imgui/imgui_impl_dx12.h"
-#include "externals/imgui/imgui_impl_win32.h"
+#include <algorithm>
+#include "ImGuiManager.h"
 
 using namespace Microsoft::WRL;
 using namespace Logger;
+using namespace std;
 
+OffScreenRendering* OffScreenRendering::instance = nullptr;
+
+OffScreenRendering* OffScreenRendering::GetInstance()
+{
+	if (instance == nullptr)
+	{
+		instance = new OffScreenRendering;
+	}
+	return instance;
+}
+
+void OffScreenRendering::Finalize()
+{
+	delete instance;
+	instance = nullptr;
+}
 
 void OffScreenRendering::Initialize() {
 	CreateGraphicsPipeLineState();
@@ -260,4 +276,10 @@ void OffScreenRendering::Draw() {
 	//directxBase_->GetCommandList()->SetGraphicsRootDescriptorTable(1, srvGPUHandle);
 	// Draw call
 	DirectXBase::GetInstance()->GetCommandList()->DrawInstanced(3, 1, 0, 0);
+}
+
+void OffScreenRendering::SetGrayscaleIntensity(float value)
+{
+	float val = clamp(value, 0.0f, 1.0f);
+	grayscale->grayscaleIntensity = val;
 }

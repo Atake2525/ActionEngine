@@ -4,6 +4,7 @@
 #include <string>
 #include "AABB.h"
 #include <functional>
+#include <memory>
 
 
 #pragma once
@@ -85,7 +86,7 @@ public:
 private:
 	bool CollisionAABB(const AABB& a, const AABB& b) const;
 
-	Sprite* sprite = nullptr;
+	std::unique_ptr<Sprite> sprite = nullptr;
 	Input* input = nullptr;
 
 	bool onButton_ = false;

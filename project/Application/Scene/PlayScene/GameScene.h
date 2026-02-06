@@ -13,15 +13,13 @@
 #include "ParticleManager.h"
 #include "Audio.h"
 #include "SceneManager.h"
-#include "Player.h"
 #include "SkyBox.h"
 #include "CollisionManager.h"
-#include "Goal.h"
 #include <memory>
-#include "Trap.h"
 #include "GameOver.h"
 #include "GameClearScene.h"
 #include "ActionPlayer.h"
+#include "BaseStage.h"
 
 #pragma once
 
@@ -57,9 +55,6 @@ private:
 
 	bool sneak = false;
 
-	std::unique_ptr<Object3d> land = nullptr;
-	std::unique_ptr<Object3d> floor = nullptr;
-
 	std::unique_ptr<Camera> camera = nullptr;
 
 	bool finished = false;
@@ -89,9 +84,6 @@ private:
 
 	bool back = false;
 
-	std::unique_ptr<Trap> trap_;
-	std::unique_ptr<Goal> goal_;
-
 	std::unique_ptr<GameOver> gameOver_ = nullptr;
 	std::unique_ptr<GameClearScene> gameClear_ = nullptr;
 
@@ -103,6 +95,9 @@ private:
 		Vector4 color = { 0.0f, 0.0f, 0.0f, 1.0f };
 	};
 
-    std::array<Tutorial, 4> tutorial;
+	std::unique_ptr<BaseStage> stage;
+
+	std::unique_ptr<Object3d> stageObject;
+
 };
 
