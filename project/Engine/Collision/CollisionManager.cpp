@@ -30,12 +30,12 @@ void CollisionManager::Update(const std::string& targetName) {
 	for (const auto& object : collisionObject) {
 		// ターゲット(プレイヤーなど)とオブジェクトの距離を全体のAABBから求めて離れていればcontinue
 		Vector3 centerA = CenterAABB(collisionTarget[targetName]);
-		Vector3 centerB = CenterAABB(object.second->GetAABB());
+		Vector3 centerB = CenterAABB(object->GetAABB());
 		Vector3 d = centerA - centerB;
 		float targetDistance = Dot(d, d);
 
 		// オブジェクトの大きさを求める
-		AABB objectAABB = object.second->GetAABB();
+		AABB objectAABB = object->GetAABB();
 		// 最近接点とオブジェクトの中心座標の距離を取ってプレイヤーからオブジェクトまでの直線の距離を求める
 		Vector3 objectD = objectAABB.min - objectAABB.max;
 		float objectSize = Dot(objectD, objectD);
@@ -43,7 +43,7 @@ void CollisionManager::Update(const std::string& targetName) {
 		if (targetDistance < objectSize + 0.0f)
 		{
 			// オブジェクトのメッシュごとのAABBを取得する
-			const std::vector<AABB> terrains = object.second->GetAABBMultiMeshed();
+			const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
 			for (AABB terrainAABB : terrains)
 			{
 				terrainAABB = AddSize(terrainAABB, 0.1f);
@@ -109,6 +109,39 @@ void CollisionManager::Update(const std::string& targetName) {
 	}
 }
 
+//Vector3 CollisionManager::GetPenetrationForCapsule(const Capsule& capsule)
+//{
+//	Vector3 result = { 0.0f, 0.0f, 0.0f };
+//	Vector3 penetration = { 0.0f, 0.0f, 0.0f };
+//	// CollisionObjectの中身を確認して、capsuleとの貫通量を計算する
+//	for (const auto object : collisionObject)
+//	{
+//		// オブジェクトとの距離を計算して、近ければ処理を行う
+//		AABB objectAABB = object->GetAABB();
+//		float aabbSize = Distance(objectAABB.min, objectAABB.max);
+//		if (capsule.radius + aabbSize > Distance(capsule.end - capsule.start, CenterAABB(objectAABB)))
+//		{
+//			// オブジェクトのメッシュごとのAABBを取得する
+//			const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
+//			// 各メッシュごとに貫通量を計算する
+//			for (AABB terrainAABB : terrains)
+//			{
+//				terrainAABB = AddSize(terrainAABB, 0.1f);
+//				// カプセルとAABBの貫通判定
+//				if (CollisionCapsuleAABB(capsule, terrainAABB))
+//				{
+//					// 貫通量を計算
+//					penetration = PenetrationCapsuleAABB(capsule, terrainAABB);
+//					result.x = max(result.x, penetration.x);
+//					result.y = max(result.y, penetration.y);
+//					result.z = max(result.z, penetration.z);
+//				}
+//			}
+//		}
+//	}
+//	return result;
+//}
+
 void CollisionManager::Finalize() {
 	collisionObject.clear();
 	delete instance;
@@ -128,10 +161,10 @@ const float CollisionManager::GetGroundDistance(const std::string& targetName) c
 	float distance = 100.0f;
 	for (const auto& object : collisionObject) {
 		// オブジェクトのメッシュごとのAABBを取得する
-		float serchDistance = Distance(object.second->GetAABB().max, target->second.min);
+		float serchDistance = Distance(object->GetAABB().max, target->second.min);
 		//if (serchDistance <= distance)
 		//{
-		const std::vector<AABB> terrains = object.second->GetAABBMultiMeshed();
+		const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
 		for (AABB terrainAABB : terrains)
 		{
 			terrainAABB = AddSize(terrainAABB, 0.1f);
@@ -171,10 +204,10 @@ const float CollisionManager::GetGroundMAXDistance(const std::string& targetName
 	float maxDistance = -100.0f;
 	for (const auto& object : collisionObject) {
 		// オブジェクトのメッシュごとのAABBを取得する
-		float serchDistance = Distance(object.second->GetAABB().max, target->second.min);
+		float serchDistance = Distance(object->GetAABB().max, target->second.min);
 		//if (serchDistance <= distance)
 		//{
-		const std::vector<AABB> terrains = object.second->GetAABBMultiMeshed();
+		const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
 		for (AABB terrainAABB : terrains)
 		{
 			terrainAABB = AddSize(terrainAABB, 0.1f);
@@ -206,16 +239,16 @@ const Vector3 CollisionManager::CheckPenetrationAmount(const AABB& aabb)
 	Vector3 result = { 0.0f, 0.0f, 0.0f };
 	for (const auto& object : collisionObject) {
 		// ターゲット(プレイヤーなど)とオブジェクトの距離を全体のAABBから求めて離れていればcontinue
-		float dist = Distance(CenterAABB(aabb), CenterAABB(object.second->GetAABB()));
+		float dist = Distance(CenterAABB(aabb), CenterAABB(object->GetAABB()));
 		// オブジェクトの大きさを求める
-		AABB objectAABB = object.second->GetAABB();
+		AABB objectAABB = object->GetAABB();
 		// 最近接点とオブジェクトの中心座標の距離を取ってプレイヤーからオブジェクトまでの直線の距離を求める
 		float objectSize = Distance(objectAABB.min, objectAABB.max);
 		// オブジェクトサイズよりも距離が近かったら処理をする(余裕をもって少しだけ広く)
 		if (dist < objectSize + 0.0f)
 		{
 			// オブジェクトのメッシュごとのAABBを取得する
-			const std::vector<AABB> terrains = object.second->GetAABBMultiMeshed();
+			const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
 			for (AABB terrainAABB : terrains)
 			{
 				terrainAABB = AddSize(terrainAABB, 0.1f);
@@ -280,10 +313,10 @@ const Vector3 CollisionManager::CheckPenetrationAmount(const AABB& aabb)
 }
 
 // 障害物の追加
-void CollisionManager::AddCollision(Object3d* object3d, const std::string key) {
-	if (!collisionObject.contains(key))
+void CollisionManager::AddCollision(Object3d* object3d) {
+	if (std::find(collisionObject.begin(), collisionObject.end(), object3d) == collisionObject.end())
 	{
-		collisionObject[key] = object3d;
+		collisionObject.push_back(object3d);
 	}
 	else
 	{
@@ -316,13 +349,13 @@ void CollisionManager::UpdateCollisionTarget(AABB aabb, const std::string key)
 	}
 }
 
-void CollisionManager::DeleteCollision(const std::string key)
+void CollisionManager::DeleteCollision(Object3d* object3d)
 {
-	if (!collisionObject.contains(key))
+	if (std::find(collisionObject.begin(), collisionObject.end(), object3d) == collisionObject.end())
 	{
-		Log("指定されたキーは現在登録されていません\n実行 : DeleteCollision コード : CollisionManager.cpp\n		");
+		Log("指定されたキーは現在登録されていません\n実行 : DeleteCollision コード : CollisionManager.cpp\n");
 	}
-	collisionObject.erase(key);
+	collisionObject.erase(std::remove(collisionObject.begin(), collisionObject.end(), object3d), collisionObject.end());
 }
 
 void CollisionManager::DeleteCollisionTarget(const std::string key)
