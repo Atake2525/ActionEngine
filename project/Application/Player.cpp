@@ -108,7 +108,7 @@ void Player::Update()
 
 
     // 最終的な変更をTransformに反映
-    CollisionManager::GetInstance()->
+    //CollisionManager::GetInstance()->
     m_transform.translate += m_velocity.translate;
     m_transform.rotate += m_velocity.rotate;
     m_pModel->SetTransform(m_transform);

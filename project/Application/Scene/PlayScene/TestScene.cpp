@@ -76,6 +76,11 @@ void TestScene::Initialize() {
 
 	Audio::GetInstance()->LoadMP3("Resources/sekiranun.mp3", "bgm", 1.0f);
 
+    testBox = make_unique<Object3d>();
+    testBox->Initialize();
+	testBox->SetModel("Resources/Debug", "TestBox.obj", true);
+    testBox->SetTranslate({ 0.0f,35.0f,0.0f });
+
 }
 
 Transform boxTransform = Transform::Default;
@@ -134,6 +139,7 @@ void TestScene::Update() {
 
 	//goal->Update(player->GetAABB());
 
+    testBox->Update();
 
 	bool flag = false;
 
@@ -171,6 +177,7 @@ void TestScene::Draw() {
 	aabbBox->Draw();
 	//goal->Draw();
 	player->Draw();
+    testBox->Draw();
 
 	SkinningObject3dBase::GetInstance()->ShaderDraw();
 

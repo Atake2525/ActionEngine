@@ -234,6 +234,7 @@ Vector3 CollisionManager::GetPenetrationForAABB(const AABB& aabb)
 			continue;
 		}
 	}
+	return result;
 }
 
 const float CollisionManager::GetGroundDistance(const std::string& targetName) const {
