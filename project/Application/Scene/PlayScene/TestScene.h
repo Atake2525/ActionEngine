@@ -79,8 +79,6 @@ private:
 
 	std::unique_ptr<Object3d> aabbBox;
 
-	std::unique_ptr<Object3d> testBox;
-
 	bool start_ = false;
 };
 

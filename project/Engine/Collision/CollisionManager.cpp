@@ -96,8 +96,10 @@ void CollisionManager::Update(const std::string& targetName) {
 					if (penetration_.z <= -penetrationPre_.z && penetration_.z != 0.0f) {
 						penetration.z = 0.0f; }
 
-					// 押し出しの量を格納する
-					penetration_ += penetration;
+                    // 押し出しの量を格納する。最終的に最も大きい押し出し量が残るようにする
+					penetration_.x = max(penetration_.x, penetration.x);
+					penetration_.y = max(penetration_.y, penetration.y);
+					penetration_.z = max(penetration_.z, penetration.z);
 				}
 			}
 		}
@@ -223,7 +225,6 @@ Vector3 CollisionManager::GetPenetrationForAABB(const AABB& aabb)
 						penetration.z = 0.0f;
 					}
 
-					// 押し出しの量を格納する
 					penetration_ += penetration;
 				}
 			}

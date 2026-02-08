@@ -36,6 +36,8 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
     m_pModel->SetModel("Resources/Model/obj/Player", "PlayerCollision.obj", true);
     m_pModel->SetTransform(m_transform);
     m_playerAABB = m_pModel->GetAABB();
+    m_playerAABB += m_transform.translate;
+    CollisionManager::GetInstance()->AddCollisionTarget(m_playerAABB, "Player");
 
     // コントロールモードの初期設定
     if (Input::GetInstance()->IsConnectedController())
@@ -61,6 +63,7 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
 void Player::Update()
 {
     m_transform = m_pModel->GetTransform();
+    m_playerAABB = m_pModel->GetAABB();
 #ifndef NDEBUG
 
     if (Input::GetInstance()->TriggerKey(DIK_F3))
@@ -107,9 +110,9 @@ void Player::Update()
 #endif // !NDEBUG
 
 
-    // 最終的な変更をTransformに反映
-    //CollisionManager::GetInstance()->
-    m_transform.translate += m_velocity.translate;
+    ApplyCollision();
+    //m_transform.translate += m_velocity.translate;
+ 
     m_transform.rotate += m_velocity.rotate;
     m_pModel->SetTransform(m_transform);
     m_pModel->Update();
@@ -136,35 +139,35 @@ void Player::UpdateState()
     // 入力確認用の変数
     int state = 0;
 
+    // 空中判定
+    if (CollisionManager::GetInstance()->GetGroundMAXDistance("Player") < 0.2f)
+    {
+        m_state = PlayerState::Falling;
+    }
+
+    // コントロールモードに応じた入力処理
     switch (m_controlMode)
     {
-    case Player::ControlMode::KeyboardMouse:
+    case Player::ControlMode::KeyboardMouse: // キーボード・マウス
 
         // 入力の確認 orを使って値の大きいものを優先させる
         state |= input->PushKeyInt(DIK_LSHIFT) * static_cast<int>(PlayerWalkState::Run);
-        //state |= input->PushKeyInt(DIK_SPACE) * static_cast<int>(PlayerWalkState::Jumping); // ジャンプ処理
         state |= input->PushKeyInt(DIK_LCONTROL) * static_cast<int>(PlayerWalkState::Crounch);
 
         m_walkState = static_cast<PlayerWalkState>(state);
 
         break;
-    case Player::ControlMode::Gamepad:
+    case Player::ControlMode::Gamepad: // ゲームパッド
         // ダッシュ入力
         if (Input::GetInstance()->TriggerButton(Controller::LeftStick))
         {
             m_walkState = PlayerWalkState::Run;
         }
 
-        // ジャンプ入力
-        /*if (Input::GetInstance()->TriggerButton(Controller::A))
-        {
-            m_state = PlayerState::Jumping;
-        }*/
-
         // しゃがみ入力
         if (Input::GetInstance()->TriggerButton(Controller::RightStick))
         {
-
+            m_walkState = PlayerWalkState::Crounch;
         }
 
         break;
@@ -201,9 +204,18 @@ void Player::HandleInput()
 }
 
 void Player::Rotate() {
+    Vector3 rotate = Vector3::Zero;
     // カメラ処理の実装
     // マウスの移動量に基づいてカメラの回転を更新    演出実装時に加速度を付けるなどの調整を行う予定
-    Vector3 rotate = Input::GetInstance()->GetMouseVel3() * 0.001f;
+    switch (m_controlMode)
+    {
+    case Player::ControlMode::KeyboardMouse:
+        rotate = Input::GetInstance()->GetMouseVel3() * 0.001f;
+        break;
+    case Player::ControlMode::Gamepad:
+        rotate = Input::GetInstance()->GetRightJoyStickPos3(0.0f) * 0.05f;
+        break;
+    }
     /*m_transform.rotate.x += rotate.y;
     m_transform.rotate.y += rotate.x;*/
 
@@ -305,6 +317,19 @@ void Player::Move() {
     m_velocity.translate = moveDir * delta;
 }
 
+void Player::ApplyCollision()
+{
+    m_playerAABB += m_velocity.translate;
+    CollisionManager::GetInstance()->UpdateCollisionTarget(m_playerAABB, "Player");
+    CollisionManager::GetInstance()->Update("Player");
+    m_transform.translate += m_velocity.translate;
+    m_transform.translate -= CollisionManager::GetInstance()->GetPenetration();
+}
+
+void Player::ApplyGravity()
+{
+}
+
 void Player::UpdateCameraParent() {
     // カメラのParent設定処理の実装
     //m_pCamera->SetRotateParent(m_pModel->GetWorldMatrix());
@@ -354,6 +379,11 @@ void Player::UpdateDebugUI() {
         ImGui::Text("Gravity: (%.2f, %.2f, %.2f)",
             m_gravity.x, m_gravity.y, m_gravity.z);
         ImGui::DragFloat("Move Speed", &m_moveSpeed, 0.1f, 0.0f, 100.0f);
+
+        // 貫通量
+        Vector3 penetration = CollisionManager::GetInstance()->GetPenetration();
+        ImGui::Text("Penetration: (%.2f, %.2f, %.2f)",
+            penetration.x, penetration.y, penetration.z);
 
         // Transform
         if (ImGui::TreeNode("Transform")) {
