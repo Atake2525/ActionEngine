@@ -70,6 +70,11 @@ private: // プレイヤーステート管理
     void Move();
 
     /// <summary>
+    /// 衝突判定の適用
+    /// </summary>
+    void ApplyCollision();
+
+    /// <summary>
     /// 重力の適用
     /// </summary>
     void ApplyGravity();
