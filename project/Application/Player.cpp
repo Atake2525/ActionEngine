@@ -5,6 +5,7 @@
 #include "ImGuiManager.h"
 #include "kMath.h"
 #include "GameTime.h"
+#include "CollisionManager.h"
 
 using namespace std;
 
@@ -34,6 +35,7 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
     m_pModel->Initialize();
     m_pModel->SetModel("Resources/Model/obj/Player", "PlayerCollision.obj", true);
     m_pModel->SetTransform(m_transform);
+    m_playerAABB = m_pModel->GetAABB();
 
     // コントロールモードの初期設定
     if (Input::GetInstance()->IsConnectedController())
@@ -104,7 +106,9 @@ void Player::Update()
     Move();
 #endif // !NDEBUG
 
+
     // 最終的な変更をTransformに反映
+    CollisionManager::GetInstance()->
     m_transform.translate += m_velocity.translate;
     m_transform.rotate += m_velocity.rotate;
     m_pModel->SetTransform(m_transform);

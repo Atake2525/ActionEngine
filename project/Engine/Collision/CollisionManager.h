@@ -62,6 +62,8 @@ public:
 	/// </summary>
 	const Vector3& GetPenetration() const { return penetration_; }
 
+    Vector3 GetPenetrationForAABB(const AABB& aabb);
+
 	// 対象と地面との距離を求める
 	const float GetGroundDistance(const std::string& targetName) const;
 

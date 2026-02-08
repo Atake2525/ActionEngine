@@ -113,6 +113,7 @@ private: // プレイヤーモデル
     PlayerWalkState m_walkStatePre = PlayerWalkState::Walk;
 
 
+    AABB m_playerAABB;                      // プレイヤーのAABB当たり判定
     //==================================================
     // プレイヤー移動関連
     //==================================================
