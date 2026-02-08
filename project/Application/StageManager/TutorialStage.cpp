@@ -13,7 +13,7 @@ void TutorialStage::Initialize()
     stageObject = make_unique<Object3d>();
     stageObject->Initialize();
     stageObject->SetModel("Resources/Model/obj/Stage/TutorialStage", "TutorialStage.obj", true);
-    CollisionManager::GetInstance()->AddCollision(stageObject.get(), "stageObject");
+    CollisionManager::GetInstance()->AddCollision(stageObject.get());
 
     // トラップの初期化
     trap = make_unique<Trap>();
@@ -119,6 +119,6 @@ void TutorialStage::DrawBackSprite()
 
 void TutorialStage::Finalize()
 {
-    CollisionManager::GetInstance()->DeleteCollision("stageObject");
+    CollisionManager::GetInstance()->DeleteCollision(stageObject.get());
     JsonLoader::GetInstance()->DeleteJson("TutorialStage");
 }

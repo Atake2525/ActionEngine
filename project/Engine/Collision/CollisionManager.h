@@ -77,7 +77,7 @@ public:
 	//const bool& CheckCollision(const AABB& a, const OBB& b);
 
 	// 当たり判定として計算するオブジェクトの追加
-	void AddCollision(Object3d* object3d, const std::string key);
+	void AddCollision(Object3d* object3d);
 
 	// 当たり判定を計算する対象の追加(念のため複数指定できるようにしておく)
 	void AddCollisionTarget(AABB aabb, const std::string key);
@@ -85,7 +85,7 @@ public:
 	void UpdateCollisionTarget(AABB aabb, const std::string key);
 
 	// 判定対象オブジェクトの削除
-	void DeleteCollision(const std::string key);
+	void DeleteCollision(Object3d* object3d);
 
 	// 判定対象の削除
 	void DeleteCollisionTarget(const std::string key);
@@ -99,7 +99,7 @@ public:
 
 private:
 
-	std::map<std::string, Object3d*> collisionObject;
+	std::vector<Object3d*> collisionObject;
 
 	std::map<std::string, AABB> collisionTarget;
 
