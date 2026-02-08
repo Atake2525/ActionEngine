@@ -163,6 +163,8 @@ void Object3d::Update() {
 	CullingTemplate data = Object3dBase::GetInstance()->GetCullingTemplate() + privateCullingData;
 	cullingTemplateData->drawHeight = data.drawHeight;
 
+	UpdateAABB();
+
 }
 
 void Object3d::UpdateSkinCluster(std::vector<SkinCluster>& skinCluster, const Skeleton& skeleton)
