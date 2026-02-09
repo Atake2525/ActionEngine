@@ -327,7 +327,11 @@ Vector2 Input::GetLeftJoyStickPos2(const float deadZone) {
 	// スティックの無効範囲とデッドゾーンを考慮してresultと返す
 	Vector2 result = { 0.0f, 0.0f };
 
-	if (gamePadState.lY < -unresponsiveRange - deadZone || gamePadState.lY > unresponsiveRange + deadZone)
+	if (gamePadState.lY < -unresponsiveRange - deadZone || gamePadState.lY > unresponsiveRange - deadZone)
+	{
+		result.x = static_cast<float>(gamePadState.lX);
+	}
+	else
 	{
 		if (gamePadState.lX < -unresponsiveRange - deadZone)
 		{
@@ -340,6 +344,10 @@ Vector2 Input::GetLeftJoyStickPos2(const float deadZone) {
 	}
 
 	if (gamePadState.lX < -unresponsiveRange - deadZone || gamePadState.lX > unresponsiveRange + deadZone)
+	{
+		result.y = static_cast<float>(gamePadState.lY);
+	}
+	else
 	{
 		if (gamePadState.lY < -unresponsiveRange - deadZone)
 		{
@@ -480,43 +488,27 @@ float Input::GetJoyStickDirection3(const Vector3 joyStickPos)
 	return std::atan2(result.x, result.y);
 }
 
-Vector2 Input::GetJoyStickVelocity(const Vector2 joyStickPos, const Vector3 velocity, const bool acceleration)
+Vector2 Input::GetJoyStickVelocity()
 {
-    // スティックの絶対値を取得
-	Vector2 joy = { std::fabs(joyStickPos.x), std::fabs(joyStickPos.y)};
-	// スティックの傾きの合計が1000以上(上限速度)なら合計を1000になるようにする
-	if (acceleration)
-	{
-		float stick = joy.x + joy.y;
-		float overAmount;
-		if (stick > 1000.0f)
-		{
-			overAmount = stick - 1000.0f;
-			joy.x -= overAmount / 2.0f;
-			joy.y -= overAmount / 2.0f;
-		}
-	}
-	// 角度を求める
-	float rot = GetJoyStickDirection2(joyStickPos);
+	constexpr float STICK_MAX = 1000.0f;
 
-    // 回転行列を作成してvelocityに適用
-	Matrix4x4 rotateMatrix = Multiply(Multiply(MakeRotateXMatrix(0.0f), MakeRotateYMatrix(rot)), MakeRotateZMatrix(0.0f));
-	Vector3 vel = TransformNormal(velocity, rotateMatrix);
-	if (acceleration)
-	{
-		// xとyを絶対値に変換した状態で足す
-		float len = std::fabs(joy.x) + std::fabs(joy.y);
-		if (len > 1000.0f)
-		{
-			len = 1000.0f;
-		}
-		// lenを1000(ジョイスティックの最大値)で割る
-		len = len / 1000.0f;
-		// lenをvelocityに掛ける
-		vel = vel * len;
-	}
-	Vector2 velo = { vel.y, vel.z };
-	return velo;
+	float rawX = static_cast<float>(gamePadState.lX);
+	float rawY = static_cast<float>(gamePadState.lY);
+
+	// -1.0 ～ +1.0 に正規化
+	float normX = rawX / STICK_MAX;
+	float normY = rawY / STICK_MAX;
+
+	// デッドゾーン処理
+	constexpr float DEAD_ZONE = 0.15f;
+	auto applyDeadZone = [&](float v) {
+		return (std::fabs(v) < DEAD_ZONE) ? 0.0f : v;
+		};
+
+	normX = applyDeadZone(normX);
+	normY = applyDeadZone(normY);
+
+    return { normX, normY };
 }
 
 Vector3 Input::GetJoyStickVelocity(const Vector3 joyStickPos, const Vector3 velocity, const bool acceleration)

@@ -84,6 +84,11 @@ private: // プレイヤーステート管理
     /// </summary>
     void UpdateCameraParent();
 
+    /// <summary>
+    /// カメラ効果の適用
+    /// </summary>
+    void ApplyCameraEffect();
+
     // デバッグUIの更新
 #ifndef NDEBUG
     void UpdateDebugUI();
@@ -95,10 +100,16 @@ private: // プレイヤーステート管理
 private: // プレイヤーモデル
 
     //==================================================
-   // タイマー関連
-   //==================================================
-    float m_timer[5] = { 0.0f };
-
+    // タイマー関連
+    //==================================================
+    float m_moveSpeedTimer = 0.0f;    // 移動速度系タイマー
+    float m_speedDecelTime = 0.2f;     // 減速時間
+    float m_maxSpeedTime = 0.3f;                    // 加速時間
+    // 減速フラグ
+    bool m_isSpeedDecel = false;
+    float m_speedBefore = 0.0f; // 減速前の速度
+    float m_speedAfter = 0.0f;  // 減速後の速度
+    float m_delta;
 
     //==================================================
     // モデル・カメラ・入力
@@ -126,19 +137,20 @@ private: // プレイヤーモデル
     Transform m_velocity = Transform::Default;      // 現在の速度
     Vector3 m_gravity = { 0.0f, -9.8f, 0.0f };      // 重力
     Vector2 m_moveInput = Vector2::Zero;            // 入力方向
-    float m_maxSpeedTime = 0.3f;                    // 最高速度に到達するまでの時間
     float m_decelTime = 0.2f;                       // 減速時間
     Vector2 m_moveAmount = Vector2::Zero;           // 入力中の移動量
     Vector3 m_moveDirection = Vector3::Zero;        // 移動方向
     float m_turnControlFactor = 1.8f;               // 地上での移動制御係数
     float m_airControlFactor = 5.0f;                // 空中での移動制御係数
 
+
     // 移動速度
     float m_moveSpeed = 1.0f;
-    const float m_walkSpeed = 5.0f;
-    const float m_runSpeed = 10.0f;
-    const float m_crounchSpeed = 3.0f;
-
+    float m_moveSpeedPre = 1.0f;
+    float m_walkSpeed = 8.0f;
+    float m_runSpeed = 14.0f;
+    float m_crounchSpeed = 5.0f;
+    float m_playerSpeed = 0.0f; // 現在の速度
 
     //==================================================
     // カメラ関連
@@ -146,10 +158,16 @@ private: // プレイヤーモデル
     Transform m_cameraTransform = Transform::Default;
     Transform m_cameraVelocity = Transform::Default;
 
-    float m_fovY = 60.0f;       // 現在のFOV
-    float m_afterFovY = 60.0f;  // 変更後のFOV
-    float m_fovTimer = 0.0f;    // FOV補間用タイマー
-    float m_fovTime = 0.3f;     // FOV補間時間
+    // Fov補間用タイマー
+    bool m_isFovChange = false;
+    float m_fovBefore = 0.0f;
+    float m_fovAfter = 0.0f;
+    float m_fov = 0.0f;
+    float m_fovPre = 0.0f;
+    float m_fovChangeTimer = 0.0f;    // FOV補間用タイマー
+    float m_fovChangeTime = 0.1f;     // FOV補間時間
+    float m_fovDefault = 1.0f; // デフォルトFOV
+    float m_fovRun = 1.3f;    // ダッシュ時FOV
 
 
     //==================================================

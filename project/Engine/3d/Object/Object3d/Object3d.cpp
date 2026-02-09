@@ -207,6 +207,7 @@ void Object3d::SetModel(const std::string& filePath) {
 	// モデルを検索してセットする
 	model_ = ModelManager::GetInstance()->FindModel(filePath);
 	first = model_->GetMeshAABB();
+	aabb = first;
 	auto multimeshAABBData = model_->GetMultiMeshAABB();
 	multiMeshAABB.resize(model_->GetMultiMeshAABB().size());
 	for (const auto data : multimeshAABBData)
@@ -254,6 +255,7 @@ void Object3d::SetModel(const std::string& directoryPath, const std::string& fil
 	// モデルを検索してセットする
 	model_ = ModelManager::GetInstance()->FindModel(filename);
 	first = model_->GetMeshAABB();
+    aabb = first;
 	auto multimeshAABBData = model_->GetMultiMeshAABB();
 	multiMeshAABB.resize(model_->GetMultiMeshAABB().size());
 	for (const auto data : multimeshAABBData)

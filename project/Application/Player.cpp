@@ -6,6 +6,8 @@
 #include "kMath.h"
 #include "GameTime.h"
 #include "CollisionManager.h"
+#include <algorithm>
+#include "EasingUtility.h"
 
 using namespace std;
 
@@ -17,6 +19,9 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
 {
     // カメラのセット
     m_pCamera = camera;
+    // カメラの初期設定
+    m_pCamera->SetFovY(m_fovDefault);
+    m_fov = m_fovDefault;
 
     // JsonDataからステージ情報を取得してプレイヤーの初期位置とゴールの位置を設定する処理
     if (JsonLoader::GetInstance()->CheckJsonLoaded(jsonName))
@@ -38,6 +43,9 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
     m_playerAABB = m_pModel->GetAABB();
     m_playerAABB += m_transform.translate;
     CollisionManager::GetInstance()->AddCollisionTarget(m_playerAABB, "Player");
+
+    // カメラの高さをモデルの高さに合わせて調整 (ちょっとだけ低くする)
+    m_cameraTransform.translate.y = m_playerAABB.max.y - m_transform.translate.y - 0.05f;
 
     // コントロールモードの初期設定
     if (Input::GetInstance()->IsConnectedController())
@@ -64,6 +72,11 @@ void Player::Update()
 {
     m_transform = m_pModel->GetTransform();
     m_playerAABB = m_pModel->GetAABB();
+
+    m_delta = GameTime::GetInstance()->GetDeltaTime();
+
+    m_fov = m_pCamera->GetfovY();
+
 #ifndef NDEBUG
 
     if (Input::GetInstance()->TriggerKey(DIK_F3))
@@ -112,12 +125,13 @@ void Player::Update()
 
     ApplyCollision();
     //m_transform.translate += m_velocity.translate;
- 
+
     m_transform.rotate += m_velocity.rotate;
     m_pModel->SetTransform(m_transform);
     m_pModel->Update();
     //m_pCamera->SetTranslate(m_transform.translate);
-    m_pCamera->SetTransform(m_cameraTransform); 
+    m_pCamera->SetTransform(m_cameraTransform);
+    ApplyCameraEffect();
     UpdateCameraParent();
 
 }
@@ -135,6 +149,7 @@ void Player::UpdateState()
 
     float statePoint = Sign((Sign(m_moveInput.x) * m_moveInput.x) + (Sign(m_moveInput.y) * m_moveInput.y));
 
+    m_walkState = PlayerWalkState::Walk;
     m_state = static_cast<PlayerState>(statePoint);
     // 入力確認用の変数
     int state = 0;
@@ -159,13 +174,13 @@ void Player::UpdateState()
         break;
     case Player::ControlMode::Gamepad: // ゲームパッド
         // ダッシュ入力
-        if (Input::GetInstance()->TriggerButton(Controller::LeftStick))
+        if (Input::GetInstance()->PushButton(Controller::LeftStick))
         {
             m_walkState = PlayerWalkState::Run;
         }
 
         // しゃがみ入力
-        if (Input::GetInstance()->TriggerButton(Controller::RightStick))
+        if (Input::GetInstance()->PushButton(Controller::RightStick))
         {
             m_walkState = PlayerWalkState::Crounch;
         }
@@ -191,11 +206,7 @@ void Player::HandleInput()
         break;
     case Player::ControlMode::Gamepad:
         // ジョイスティック入力による移動
-        m_moveInput = Input::GetInstance()->GetJoyStickVelocity(
-            Input::GetInstance()->GetLeftJoyStickPos2(0.2f),
-            Vector3{ 1.0f, 1.0f, 1.0f },
-            true
-        );
+        m_moveInput = input->GetJoyStickVelocity();
 
         break;
     }
@@ -213,7 +224,7 @@ void Player::Rotate() {
         rotate = Input::GetInstance()->GetMouseVel3() * 0.001f;
         break;
     case Player::ControlMode::Gamepad:
-        rotate = Input::GetInstance()->GetRightJoyStickPos3(0.0f) * 0.05f;
+        rotate = Input::GetInstance()->GetRightJoyStickPos3(0.0f) * 0.00005f;
         break;
     }
     /*m_transform.rotate.x += rotate.y;
@@ -227,57 +238,88 @@ void Player::Rotate() {
 
 void Player::Move() {
 
-    float delta = GameTime::GetInstance()->GetDeltaTime();
-
     // m_moveInput(入力)に基づいてプレイヤーの移動方向を決定
-    m_moveAmount.x += Sign(m_moveInput.x) * (delta / m_maxSpeedTime * m_walkSpeed);
-    m_moveAmount.y += Sign(m_moveInput.y) * (delta / m_maxSpeedTime * m_walkSpeed);
+    m_moveAmount.x += Sign(m_moveInput.x) * (m_delta / m_maxSpeedTime * m_walkSpeed);
+    m_moveAmount.y += Sign(m_moveInput.y) * (m_delta / m_maxSpeedTime * m_walkSpeed);
+
+    m_moveSpeedPre = m_moveSpeed;
+
+    float speed = 0.0f;
 
     // プレイヤーの歩行状態に応じて移動速度を設定
     switch (m_walkState)
     {
     case Player::PlayerWalkState::Walk:
-        m_moveSpeed = m_walkSpeed;
+        speed = m_walkSpeed;
         break;
     case Player::PlayerWalkState::Run:
-        m_moveSpeed = m_runSpeed;
+        speed = m_runSpeed;
         break;
     case Player::PlayerWalkState::Crounch:
-        m_moveSpeed = m_crounchSpeed;
+        speed = m_crounchSpeed;
         break;
     }
 
+    // 移動速度の補間(速度が上がる時には即座に反映、速度が下がる時には時間をかけて反映)
+    if (speed < m_moveSpeedPre && !m_isSpeedDecel)
+    {
+        m_speedBefore = m_moveSpeedPre;
+        m_speedAfter = speed;
+        m_isSpeedDecel = true;
+    }
+    if (m_moveSpeed < speed)
+    {
+        m_moveSpeed = speed;
+        m_isSpeedDecel = false;
+        m_moveSpeedTimer = 0.0f;
+    }
+
+    // 移動速度減速中のタイマー処理
+    if (m_isSpeedDecel)
+    {
+        m_moveSpeedTimer += m_delta / m_speedDecelTime;
+        float t = clamp(m_moveSpeedTimer, 0.0f, 1.0f);
+        m_moveSpeed = Lerp(m_speedBefore, m_speedAfter, t);
+    }
+    // 減速が完了したらフラグとタイマーをリセット
+    if (m_moveSpeedTimer >= 1.0f)
+    {
+        m_isSpeedDecel = false;
+        m_moveSpeedTimer = 0.0f;
+    }
+
     // 移動量のクランプ
-    m_moveAmount = Vector2::Clamp(m_moveAmount, -m_moveSpeed, m_moveSpeed);
+    m_moveAmount.x = clamp(m_moveAmount.x, -m_moveSpeed * fabs(m_moveInput.x), m_moveSpeed * fabs(m_moveInput.x));
+    m_moveAmount.y = clamp(m_moveAmount.y, -m_moveSpeed * fabs(m_moveInput.y), m_moveSpeed * fabs(m_moveInput.y));
 
     // 入力が無かったら一定速度で減速して0.0fにする
     // 減速は加速よりも早くする
     if (m_moveInput.x == 0.0f) {
-        m_moveAmount.x -= Sign(m_moveAmount.x) * (delta / m_decelTime * m_walkSpeed);
+        m_moveAmount.x -= Sign(m_moveAmount.x) * (m_delta / m_decelTime * m_walkSpeed);
         // オーバーシュート防止
-        if (Sign(m_moveAmount.x) != Sign(m_moveAmount.x - Sign(m_moveAmount.x) * (delta / m_decelTime * m_walkSpeed))) {
+        if (Sign(m_moveAmount.x) != Sign(m_moveAmount.x - Sign(m_moveAmount.x) * (m_delta / m_decelTime * m_walkSpeed))) {
             m_moveAmount.x = 0.0f;
         }
     }
     if (m_moveInput.y == 0.0f) {
-        m_moveAmount.y -= Sign(m_moveAmount.y) * (delta / m_decelTime * m_walkSpeed);
+        m_moveAmount.y -= Sign(m_moveAmount.y) * (m_delta / m_decelTime * m_walkSpeed);
         // オーバーシュート防止
-        if (Sign(m_moveAmount.y) != Sign(m_moveAmount.y - Sign(m_moveAmount.y) * (delta / m_decelTime * m_walkSpeed))) {
+        if (Sign(m_moveAmount.y) != Sign(m_moveAmount.y - Sign(m_moveAmount.y) * (m_delta / m_decelTime * m_walkSpeed))) {
             m_moveAmount.y = 0.0f;
         }
     }
     // 反対入力があったら減速速度を上げる
     if (Sign(m_moveInput.x) != Sign(m_moveAmount.x) && m_moveInput.x != 0.0f) {
-        m_moveAmount.x -= Sign(m_moveAmount.x) * (delta / (m_decelTime / 2.0f) * m_walkSpeed);
+        m_moveAmount.x -= Sign(m_moveAmount.x) * (m_delta / (m_decelTime / 2.0f) * m_walkSpeed);
         // オーバーシュート防止
-        if (Sign(m_moveAmount.x) != Sign(m_moveAmount.x - Sign(m_moveAmount.x) * (delta / (m_decelTime / 2.0f) * m_walkSpeed))) {
+        if (Sign(m_moveAmount.x) != Sign(m_moveAmount.x - Sign(m_moveAmount.x) * (m_delta / (m_decelTime / 2.0f) * m_walkSpeed))) {
             m_moveAmount.x = 0.0f;
         }
     }
     if (Sign(m_moveInput.y) != Sign(m_moveAmount.y) && m_moveInput.y != 0.0f) {
-        m_moveAmount.y -= Sign(m_moveAmount.y) * (delta / (m_decelTime / 2.0f) * m_walkSpeed);
+        m_moveAmount.y -= Sign(m_moveAmount.y) * (m_delta / (m_decelTime / 2.0f) * m_walkSpeed);
         // オーバーシュート防止
-        if (Sign(m_moveAmount.y) != Sign(m_moveAmount.y - Sign(m_moveAmount.y) * (delta / (m_decelTime / 2.0f) * m_walkSpeed))) {
+        if (Sign(m_moveAmount.y) != Sign(m_moveAmount.y - Sign(m_moveAmount.y) * (m_delta / (m_decelTime / 2.0f) * m_walkSpeed))) {
             m_moveAmount.y = 0.0f;
         }
     }
@@ -299,7 +341,7 @@ void Player::Move() {
             turnFactor = m_airControlFactor;
         }
         // 角度の差分を-180度から180度の範囲に収める
-        float adjust = Sign(diff) * m_moveSpeed * (delta / turnFactor);
+        float adjust = Sign(diff) * m_moveSpeed * (m_delta / turnFactor);
         // 差分が調整量より小さい場合は直接合わせる
         if (abs(diff) < abs(adjust)) { // 調整量より差分が小さい場合
             m_moveDirection.y = m_cameraTransform.rotate.y;
@@ -309,12 +351,14 @@ void Player::Move() {
         }
     }
 
+    // 現在の速度を計算
+    m_playerSpeed = max(fabs(m_moveAmount.x), fabs(m_moveAmount.y));
     // 移動方向の計算
     Transform dir = Transform::Default;
     dir.rotate.y = m_moveDirection.y;
     Vector3 moveDir = TransformNormal({ m_moveAmount.x, 0.0f, -m_moveAmount.y }, MakeAffineMatrix(dir));
 
-    m_velocity.translate = moveDir * delta;
+    m_velocity.translate = moveDir * m_delta;
 }
 
 void Player::ApplyCollision()
@@ -338,6 +382,35 @@ void Player::UpdateCameraParent() {
 }
 
 #ifndef NDEBUG
+void Player::ApplyCameraEffect()
+{
+    // Fov変更処理の実装
+    m_fovPre = m_fov;
+    // 移動速度がダッシュ速度ならFovを広げる
+
+    if (m_playerSpeed == m_runSpeed)
+    {
+        m_fovChangeTimer = 0.0f;
+        m_fovBefore = m_fov;
+        m_fovAfter = m_fovRun;
+    }
+    else
+    {
+        m_fovChangeTimer = 0.0f;
+        m_fovBefore = m_fov;
+        m_fovAfter = m_fovDefault;
+    }
+
+    m_fovChangeTimer += GameTime::GetInstance()->GetDeltaTime() / m_fovChangeTime;
+    m_fovChangeTimer = clamp(m_fovChangeTimer, 0.0f, 1.0f);
+    m_fov = Lerp(m_fovBefore, m_fovAfter, m_fovChangeTimer);
+    // 計算結果をカメラにセット
+    m_pCamera->SetFovY(m_fov);
+
+   
+
+
+}
 void Player::UpdateDebugUI() {
 
     if (!ImGui::Begin("Player Debug")) {
@@ -353,6 +426,18 @@ void Player::UpdateDebugUI() {
     // --- Control Mode ---
     ImGui::Text("Control Mode: %s",
         m_controlMode == ControlMode::KeyboardMouse ? "Keyboard & Mouse" : "Gamepad");
+    // Control Mode 切り替え
+    if (ImGui::Button("Toggle Control Mode"))
+    {
+        if (m_controlMode == ControlMode::KeyboardMouse)
+        {
+            m_controlMode = ControlMode::Gamepad;
+        }
+        else
+        {
+            m_controlMode = ControlMode::KeyboardMouse;
+        }
+    }
 
     // --- Player State ---
     ImGui::Text("State: %d", static_cast<int>(m_state));
@@ -408,6 +493,32 @@ void Player::UpdateDebugUI() {
             ImGui::DragFloat3("##Vel Rotate", &m_velocity.rotate.x, 0.1f);
             ImGui::TreePop();
         }
+
+        if (ImGui::TreeNode("Speed")) {
+            // プレイヤーの速度
+            ImGui::Text("Speed : %f", m_playerSpeed);
+            // 歩行速度
+            ImGui::DragFloat("Walk Speed", &m_walkSpeed, 0.1f);
+            ImGui::DragFloat("Run Speed", &m_runSpeed, 0.1f);
+            ImGui::DragFloat("Crounch Speed", &m_crounchSpeed, 0.1f);
+            // 加速時間
+            ImGui::DragFloat("Max Speed Time", &m_maxSpeedTime, 0.01f);
+            // 減速時間
+            ImGui::DragFloat("Decel Time", &m_decelTime, 0.01f);
+            ImGui::TreePop();
+        }
+
+        if (ImGui::CollapsingHeader("GamePad")) {
+            // 左スティック入力
+            Vector2 leftStick = Input::GetInstance()->GetLeftJoyStickPos2(0.0f) / 1000.0f;
+            ImGui::Text("Left Stick: (%.2f, %.2f)",
+                leftStick.x, leftStick.y);
+            // 右スティック入力
+            Vector3 rightStick = Input::GetInstance()->GetRightJoyStickPos3(0.0f);
+            ImGui::Text("Right Stick: (%.2f, %.2f, %.2f)",
+                rightStick.x, rightStick.y, rightStick.z);
+
+        }
     }
 
     ImGui::Separator();
@@ -431,9 +542,9 @@ void Player::UpdateDebugUI() {
             ImGui::TreePop();
         }
 
-        ImGui::SliderFloat("FOV", &m_fovY, 30.0f, 120.0f);
-        ImGui::Text("After FOV: %.2f", m_afterFovY);
-        ImGui::Text("FOV Timer: %.2f / %.2f", m_fovTimer, m_fovTime);
+        ImGui::SliderFloat("FOV", &m_fov, 30.0f, 120.0f);
+        //ImGui::Text("After FOV: %.2f", m_afterFovY);
+        //ImGui::Text("FOV Timer: %.2f / %.2f", m_fovTimer, m_fovTime);
     }
 
     ImGui::End();
