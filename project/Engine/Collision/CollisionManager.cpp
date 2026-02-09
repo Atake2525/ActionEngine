@@ -96,10 +96,19 @@ void CollisionManager::Update(const std::string& targetName) {
 					if (penetration_.z <= -penetrationPre_.z && penetration_.z != 0.0f) {
 						penetration.z = 0.0f; }
 
-                    // 押し出しの量を格納する。最終的に最も大きい押し出し量が残るようにする
-					penetration_.x = max(penetration_.x, penetration.x);
-					penetration_.y = max(penetration_.y, penetration.y);
-					penetration_.z = max(penetration_.z, penetration.z);
+                    // 最大の押し出し量を保存する
+					if (fabs(penetration.x) > fabs(penetration_.x))
+					{
+                        penetration_.x = penetration.x;
+					}
+					if (fabs(penetration.y) > fabs(penetration_.y))
+					{
+						penetration_.y = penetration.y;
+                    }
+					if (fabs(penetration.z) > fabs(penetration_.z))
+					{
+						penetration_.z = penetration.z;
+					}
 				}
 			}
 		}

@@ -161,7 +161,7 @@ public:
 	float GetJoyStickDirection3(const Vector3 joyStickPos);
 
 	// ジョイスティックの移動移動量を計算
-	Vector2 GetJoyStickVelocity(const Vector2 joyStickPos, const Vector3 velocity, const bool acceleration = true);
+	Vector2 GetJoyStickVelocity();
 
 	// ジョイスティックの移動移動量を計算
 	Vector3 GetJoyStickVelocity(const Vector3 joyStickPos, const Vector3 velocity, const bool acceleration = true);
