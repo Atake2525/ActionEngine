@@ -26,9 +26,27 @@ inline AABB operator+=(AABB& aabb, const Vector3& value) {
 	return aabb;
 }
 
-inline AABB AddSize(AABB& aabb, const float& value) {
+inline AABB operator-=(AABB& aabb, const float& value) {
 	aabb.min -= value;
-	aabb.max += value;
+	aabb.max -= value;
+	return aabb;
+}
+
+inline AABB operator-=(AABB& aabb1, const AABB& aabb2) {
+	aabb1.min -= aabb2.min;
+	aabb1.max -= aabb2.max;
+	return aabb1;
+}
+
+inline AABB operator-=(AABB& aabb, const Vector3& value) {
+	aabb.min -= value;
+	aabb.max -= value;
+	return aabb;
+}
+
+inline AABB AddSize(AABB& aabb, const float& value) {
+	/*aabb.min -= value;
+	aabb.max += value;*/
 	return aabb;
 }
 

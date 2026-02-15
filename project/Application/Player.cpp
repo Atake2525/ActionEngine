@@ -32,6 +32,7 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
         if (!data.empty())
         {
             m_transform = data[0].transform;
+            m_firstTransform = data[0].transform;
         }
     }
 
@@ -107,6 +108,8 @@ void Player::Update()
         Rotate();
         // 移動処理
         Move();
+        // 重力の適用
+        ApplyGravity();
     }
 
 #else
@@ -120,6 +123,8 @@ void Player::Update()
     Rotate();
     // 移動処理
     Move();
+    // 重力の適用
+    ApplyGravity();
 #endif // !NDEBUG
 
 
@@ -128,6 +133,12 @@ void Player::Update()
 
     m_transform.rotate += m_velocity.rotate;
     m_pModel->SetTransform(m_transform);
+
+    if (!m_isFirstInput)
+    {
+        m_pModel->SetTransform(m_firstTransform);
+    }
+
     m_pModel->Update();
     //m_pCamera->SetTranslate(m_transform.translate);
     m_pCamera->SetTransform(m_cameraTransform);
@@ -147,16 +158,27 @@ void Player::UpdateState()
     m_statePre = m_state;
     m_walkStatePre = m_walkState;
 
-    float statePoint = Sign((Sign(m_moveInput.x) * m_moveInput.x) + (Sign(m_moveInput.y) * m_moveInput.y));
-
+    // 入力が入ったら最初の入力フラグを立てる
+    if (m_moveInput.x != 0.0f || m_moveInput.y != 0.0f)
+    {
+        m_isFirstInput = true;
+    }
+    
+    if (m_onGround)
+    {
+        int statePoint = Sign((Sign(m_moveInput.x) * m_moveInput.x) + (Sign(m_moveInput.y) * m_moveInput.y));
+        m_state = static_cast<PlayerState>(statePoint);
+    }
+    
     m_walkState = PlayerWalkState::Walk;
-    m_state = static_cast<PlayerState>(statePoint);
     // 入力確認用の変数
     int state = 0;
 
-    // 空中判定
-    if (CollisionManager::GetInstance()->GetGroundMAXDistance("Player") < 0.2f)
+    // 空中判定(地面からの距離が一定以上離れているか)
+    float groundDistance = CollisionManager::GetInstance()->GetMaxGroundDistanceForAABB(m_playerAABB);
+    if (groundDistance > 0.2f)
     {
+        m_onGround = false;
         m_state = PlayerState::Falling;
     }
 
@@ -193,6 +215,7 @@ void Player::HandleInput()
 {
     // 移動入力のリセット
     m_moveInput = Vector2::Zero;
+    m_jumpInput = 0.0f;
 
     switch (m_controlMode)
     {
@@ -202,11 +225,13 @@ void Player::HandleInput()
         m_moveInput.y += Input::GetInstance()->PushKeyInt(DIK_S);
         m_moveInput.x += -Input::GetInstance()->PushKeyInt(DIK_A);
         m_moveInput.x += Input::GetInstance()->PushKeyInt(DIK_D);
+        m_jumpInput += Input::GetInstance()->PushKeyInt(DIK_SPACE);
 
         break;
     case Player::ControlMode::Gamepad:
         // ジョイスティック入力による移動
         m_moveInput = input->GetJoyStickVelocity();
+        m_jumpInput += Input::GetInstance()->PushButton(Controller::A);
 
         break;
     }
@@ -238,6 +263,7 @@ void Player::Rotate() {
 
 void Player::Move() {
 
+#pragma region 移動(歩行)
     // m_moveInput(入力)に基づいてプレイヤーの移動方向を決定
     m_moveAmount.x += Sign(m_moveInput.x) * (m_delta / m_maxSpeedTime * m_walkSpeed);
     m_moveAmount.y += Sign(m_moveInput.y) * (m_delta / m_maxSpeedTime * m_walkSpeed);
@@ -329,6 +355,19 @@ void Player::Move() {
     if (len > 1.0f) {
         m_moveAmount /= len;
     }
+#pragma endregion
+
+#pragma region 移動(ジャンプ)
+
+    // ジャンプ入力があったらジャンプ処理
+    if (m_jumpInput > 0.0f && m_state != PlayerState::Falling)
+    {
+        // ジャンプ量(現在のY座標+m_jumpForce)の値を到達地点として設定
+        m_velocity.translate.y = (m_jumpForce * m_jumpForce) / (2.0f * -m_gravity.y);
+    }
+
+#pragma endregion
+
 
     // MoveDirectionをm_cameraTransform.rotateの向きに等速で合わせる
     if (m_moveDirection.y != m_cameraTransform.rotate.y) {
@@ -351,27 +390,85 @@ void Player::Move() {
         }
     }
 
+   
+
+
     // 現在の速度を計算
     m_playerSpeed = max(fabs(m_moveAmount.x), fabs(m_moveAmount.y));
-    // 移動方向の計算
+    //// 移動方向の計算
     Transform dir = Transform::Default;
     dir.rotate.y = m_moveDirection.y;
-    Vector3 moveDir = TransformNormal({ m_moveAmount.x, 0.0f, -m_moveAmount.y }, MakeAffineMatrix(dir));
+    //dir.rotate.y = m_cameraTransform.rotate.y;
+    Matrix4x4 rotMat = MakeAffineMatrix(dir);
+    Vector3 moveDir = TransformNormal({ m_moveAmount.x, 0.0f, -m_moveAmount.y }, rotMat);
 
-    m_velocity.translate = moveDir * m_delta;
+    m_velocity.translate = { moveDir.x * m_delta, m_velocity.translate.y, moveDir.z * m_delta };
+    m_playerAABB += m_velocity.translate;
+
+    //// 現在の移動方向（地上処理で作った moveDir）
+    //Vector3 v = { moveDir.x, 0.0f, moveDir.z };
+    //float sp = Length(v);
+
+    //if (sp > 0.0001f)
+    //    v = v / sp; // 正規化
+    //else
+    //    v = { 0,0,0 };
+
+    //// 入力方向（カメラ基準）
+    //Vector3 desiredDir = TransformNormal(
+    //    { m_moveInput.x, 0.0f, -m_moveInput.y }, rotMat
+    //);
+    //desiredDir = Normalize(desiredDir);
+
+    //// 補間係数（0〜1）
+    //float t = m_airControlFactor; // 例：0.05〜0.2
+
+    //// 方向だけ補間
+    //Vector3 newDir = Normalize(v * (1.0f - t) + desiredDir * t);
+
+    //// 速度の大きさは維持
+    //Vector3 newVelocity = newDir * sp;
+
+    //// 実際の速度に反映
+    //m_velocity.translate.x = newVelocity.x * m_delta;
+    //m_velocity.translate.z = newVelocity.z * m_delta;
 }
 
 void Player::ApplyCollision()
 {
-    m_playerAABB += m_velocity.translate;
     CollisionManager::GetInstance()->UpdateCollisionTarget(m_playerAABB, "Player");
     CollisionManager::GetInstance()->Update("Player");
     m_transform.translate += m_velocity.translate;
-    m_transform.translate -= CollisionManager::GetInstance()->GetPenetration();
+    Vector3 penetration = CollisionManager::GetInstance()->GetPenetration();
+    m_transform.translate -= penetration;
+    m_playerAABB -= penetration;
 }
 
 void Player::ApplyGravity()
 {
+    // 重力の適用処理の実装
+    if (m_state == PlayerState::Falling)
+    {
+        m_fallVelocity += m_gravity.y * m_delta;
+        m_velocity.translate.y += m_fallVelocity;
+        // 落下速度の上限
+        m_velocity.translate.y = max(m_velocity.translate.y, max(-CollisionManager::GetInstance()->GetMaxGroundDistanceForAABB(m_playerAABB), m_gravity.y * m_delta));
+        float penetrationY = fabs(CollisionManager::GetInstance()->GetPenetrationForAABB(m_playerAABB).y);
+        if (penetrationY > 0.0f)
+        {
+            m_onGround = true;
+            m_fallVelocity = 0.0f;
+            m_velocity.translate.y = 0.0f;
+        }
+    }
+    if (m_onGround)
+    {
+        float groundDist = CollisionManager::GetInstance()->GetMaxGroundDistanceForAABB(m_playerAABB);
+        if (groundDist < 0.2f)
+        {
+            m_transform.translate.y -= groundDist;
+        }
+    }
 }
 
 void Player::UpdateCameraParent() {
@@ -407,7 +504,7 @@ void Player::ApplyCameraEffect()
     // 計算結果をカメラにセット
     m_pCamera->SetFovY(m_fov);
 
-   
+
 
 
 }
@@ -464,6 +561,9 @@ void Player::UpdateDebugUI() {
         ImGui::Text("Gravity: (%.2f, %.2f, %.2f)",
             m_gravity.x, m_gravity.y, m_gravity.z);
         ImGui::DragFloat("Move Speed", &m_moveSpeed, 0.1f, 0.0f, 100.0f);
+
+        float groundDist = CollisionManager::GetInstance()->GetMaxGroundDistanceForAABB(m_playerAABB);
+        ImGui::Text("Ground Distance: %.2f", groundDist);
 
         // 貫通量
         Vector3 penetration = CollisionManager::GetInstance()->GetPenetration();
@@ -543,8 +643,6 @@ void Player::UpdateDebugUI() {
         }
 
         ImGui::SliderFloat("FOV", &m_fov, 30.0f, 120.0f);
-        //ImGui::Text("After FOV: %.2f", m_afterFovY);
-        //ImGui::Text("FOV Timer: %.2f / %.2f", m_fovTimer, m_fovTime);
     }
 
     ImGui::End();

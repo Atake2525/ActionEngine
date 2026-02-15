@@ -126,7 +126,7 @@ void TestScene::Draw() {
 
 	stage->DrawObject3d();
 	//goal->Draw();
-	player->Draw();
+	//player->Draw();
 
 	SkinningObject3dBase::GetInstance()->ShaderDraw();
 

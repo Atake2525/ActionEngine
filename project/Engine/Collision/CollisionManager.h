@@ -70,6 +70,9 @@ public:
 	// 対象と地面との最大距離を求める
 	const float GetGroundMAXDistance(const std::string& targetName) const;
 
+    // 指定した座標と地面との最大距離を求める
+    const float GetMaxGroundDistanceForAABB(const AABB& aabb) const;
+
 	// 当たり判定の追加
 	//const bool& CheckCollision(const AABB& a, const AABB& b);
 	//const bool& CheckCollision(const AABB& a, const Sphere& b);
