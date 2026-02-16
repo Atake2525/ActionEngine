@@ -18,9 +18,10 @@ private:
 
     // プレイヤーの歩行状態
     enum class PlayerWalkState : int {
-        Walk    = 0,
-        Run     = 1,
-        Crounch = 2
+        Walk     = 0,
+        Run      = 1,
+        Crounch  = 2,
+        WallDash = 3,
     };
 
     // コントロールモード
@@ -125,12 +126,13 @@ private: // プレイヤーモデル
     
     bool m_isFirstInput = false;
     bool m_onGround = false;
+    bool m_wallDash = false;
+    bool m_enableWallDash = false;
     PlayerState m_state = PlayerState::Idle;
     PlayerState m_statePre = PlayerState::Idle;
 
     PlayerWalkState m_walkState = PlayerWalkState::Walk;
     PlayerWalkState m_walkStatePre = PlayerWalkState::Walk;
-
 
     AABB m_playerAABB;                      // プレイヤーのAABB当たり判定
     //==================================================
@@ -139,17 +141,18 @@ private: // プレイヤーモデル
     Transform m_firstTransform = Transform::Default;    // 初期位置・回転・スケール
     Transform m_transform = Transform::Default;     // 現在の位置・回転・スケール
     Transform m_velocity = Transform::Default;      // 現在の速度
+    Vector3 m_gravity = { 0.0f, -1.5f, 0.0f };      // 重力
+    float m_wallDashGravity = -0.3f;
+    Vector3 m_moveDirection = Vector3::Zero;        // 移動方向
     Vector2 m_moveInput = Vector2::Zero;            // 入力方向
+    Vector2 m_moveAmount = Vector2::Zero;           // 入力中の移動量
     float m_jumpInput = 0.0f;                          // ジャンプ入力
     float m_fallVelocity = 0.0f;                    // 落下速度
-    Vector3 m_gravity = { 0.0f, -9.8f, 0.0f };      // 重力
     float m_fallVelocityMax = -1.6f;                // 落下速度上限
     float m_decelTime = 0.2f;                       // 減速時間
-    Vector2 m_moveAmount = Vector2::Zero;           // 入力中の移動量
-    Vector3 m_moveDirection = Vector3::Zero;        // 移動方向
     float m_turnControlFactor = 1.8f;               // 地上での移動制御係数
     //float m_airControlFactor = 5.0f;                // 空中での移動制御係数
-    float m_airControlFactor = 0.05f;                // 空中での移動制御係数
+    float m_airControlFactor = 1.8f;                // 空中での移動制御係数
 
 
     // 移動速度
@@ -159,7 +162,7 @@ private: // プレイヤーモデル
     float m_runSpeed = 14.0f;
     float m_crounchSpeed = 5.0f;
     float m_playerSpeed = 0.0f; // 現在の速度
-    float m_jumpForce = 5.0f; // ジャンプ力
+    float m_jumpForce = 0.08f; // ジャンプ力
 
     //==================================================
     // カメラ関連

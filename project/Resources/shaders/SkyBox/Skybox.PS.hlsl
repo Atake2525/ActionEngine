@@ -14,6 +14,14 @@ struct Material
 };
 ConstantBuffer<Material> gMaterial : register(b0);
 
+struct Sun
+{
+    float3 sunDirection;
+    float3 topColor;
+    float3 bottomColor;
+};
+ConstantBuffer<Sun> gSun : register(b1);
+
 PixelShaderOutput main(VertexShaderOutput input)
 {
     PixelShaderOutput output;
@@ -26,22 +34,22 @@ PixelShaderOutput main(VertexShaderOutput input)
     // --- Sky gradient ---
     float t = saturate(viewDir.y * 0.5f + 0.5f);
 
-    float3 topColor = float3(0.45, 0.65, 1.0); // ‹óF
-    float3 bottomColor = float3(0.02, 0.05, 0.15); // —•F
+    float3 topColor = gSun.topColor; // ç©ºè‰²
+    float3 bottomColor = gSun.bottomColor; // è—è‰²
 
     float3 skyColor = lerp(bottomColor, topColor, t);
 
-    // --- Sun direction (CPU ‚©‚ç“n‚·‚×‚«) ---
-    float3 sunDir = normalize(float3(0.0, 0.7, 0.7)); // ¡‚ÍŒÅ’è
+    // --- Sun direction (CPU ã‹ã‚‰æ¸¡ã™ã¹ã) ---
+    float3 sunDir = normalize(gSun.sunDirection); // ä»Šã¯å›ºå®š
 
-    // viewDir ‚ª‘¾—z•ûŒü‚É‹ß‚¢‚Ù‚Ç’l‚ª‘å‚«‚­‚È‚é
+    // viewDir ãŒå¤ªé™½æ–¹å‘ã«è¿‘ã„ã»ã©å€¤ãŒå¤§ãããªã‚‹
     float sunInfluence = saturate(dot(viewDir, sunDir));
 
-    // ‘¾—z‚Ì‰e‹¿‚ğ_‚ç‚©‚­‚·‚é
+    // å¤ªé™½ã®å½±éŸ¿ã‚’æŸ”ã‚‰ã‹ãã™ã‚‹
     sunInfluence = pow(sunInfluence, 2.0);
 
-    // ‘¾—z•ûŒü‚ÉŒü‚©‚¤‚Ù‚Ç‹ó‚ğ–¾‚é‚­‚·‚é
-    float3 horizonBright = float3(0.25, 0.25, 0.20); // –¾‚é‚³‚ÌF–¡
+    // å¤ªé™½æ–¹å‘ã«å‘ã‹ã†ã»ã©ç©ºã‚’æ˜ã‚‹ãã™ã‚‹
+    float3 horizonBright = float3(0.25, 0.25, 0.20); // æ˜ã‚‹ã•ã®è‰²å‘³
     skyColor += horizonBright * sunInfluence;
 
     // --- Sun disk ---
