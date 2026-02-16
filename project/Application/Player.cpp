@@ -185,11 +185,6 @@ void Player::UpdateState()
         m_state = PlayerState::Falling;
     }
 
-    if (m_wallDash)
-    {
-        m_walkState = PlayerWalkState::WallDash;
-    }
-
     // コントロールモードに応じた入力処理
     switch (m_controlMode)
     {
@@ -234,6 +229,8 @@ void Player::HandleInput()
         m_moveInput.x += -Input::GetInstance()->PushKeyInt(DIK_A);
         m_moveInput.x += Input::GetInstance()->PushKeyInt(DIK_D);
         m_jumpInput += Input::GetInstance()->PushKeyInt(DIK_SPACE);
+
+        m_wallDash = Input::GetInstance()->PressMouse(1);
 
         break;
     case Player::ControlMode::Gamepad:
@@ -464,12 +461,12 @@ void Player::ApplyGravity()
         // 落下速度の上限
         //m_velocity.translate.y = m_velocity.translate.y + m_fallVelocity * m_delta;
         m_velocity.translate.y += m_gravity.y * m_delta;
-        // 壁走り中には落下速度を固定する
-        if (m_walkState == PlayerWalkState::WallDash)
-        {
-
-        }
         m_velocity.translate.y = max(m_fallVelocity, -groundDist);
+        // 壁走り中には落下速度を固定する
+        if (m_wallDash)
+        {
+            m_velocity.translate.y = m_wallDashGravity;
+        }
         if (groundDist <= 0.01f)
         {
             m_onGround = true;
