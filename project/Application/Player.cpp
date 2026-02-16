@@ -108,6 +108,8 @@ void Player::Update()
         Rotate();
         // 移動処理
         Move();
+        //
+        ApplyCollision();
         // 重力の適用
         ApplyGravity();
     }
@@ -123,12 +125,13 @@ void Player::Update()
     Rotate();
     // 移動処理
     Move();
+    // 
+    ApplyCollision();
     // 重力の適用
     ApplyGravity();
 #endif // !NDEBUG
 
 
-    ApplyCollision();
     //m_transform.translate += m_velocity.translate;
 
     m_transform.rotate += m_velocity.rotate;
@@ -180,6 +183,11 @@ void Player::UpdateState()
     {
         m_onGround = false;
         m_state = PlayerState::Falling;
+    }
+
+    if (m_wallDash)
+    {
+        m_walkState = PlayerWalkState::WallDash;
     }
 
     // コントロールモードに応じた入力処理
@@ -363,7 +371,9 @@ void Player::Move() {
     if (m_jumpInput > 0.0f && m_state != PlayerState::Falling)
     {
         // ジャンプ量(現在のY座標+m_jumpForce)の値を到達地点として設定
-        m_velocity.translate.y = (m_jumpForce * m_jumpForce) / (2.0f * -m_gravity.y);
+        m_velocity.translate.y = sqrtf(2.0f * -m_gravity.y * m_jumpForce);
+
+        //m_velocity.translate.y = (m_jumpForce * m_jumpForce) / (2.0f * -m_gravity.y);
     }
 
 #pragma endregion
@@ -449,23 +459,23 @@ void Player::ApplyGravity()
     // 重力の適用処理の実装
     if (m_state == PlayerState::Falling)
     {
-        m_fallVelocity += m_gravity.y * m_delta;
-        m_velocity.translate.y += m_fallVelocity;
+        m_fallVelocity = m_velocity.translate.y + m_gravity.y * m_delta;
+        float groundDist = CollisionManager::GetInstance()->GetMaxGroundDistanceForAABB(m_playerAABB);
         // 落下速度の上限
-        m_velocity.translate.y = max(m_velocity.translate.y, max(-CollisionManager::GetInstance()->GetMaxGroundDistanceForAABB(m_playerAABB), m_gravity.y * m_delta));
-        float penetrationY = fabs(CollisionManager::GetInstance()->GetPenetrationForAABB(m_playerAABB).y);
-        if (penetrationY > 0.0f)
+        //m_velocity.translate.y = m_velocity.translate.y + m_fallVelocity * m_delta;
+        m_velocity.translate.y += m_gravity.y * m_delta;
+        // 壁走り中には落下速度を固定する
+        if (m_walkState == PlayerWalkState::WallDash)
+        {
+
+        }
+        m_velocity.translate.y = max(m_fallVelocity, -groundDist);
+        if (groundDist <= 0.01f)
         {
             m_onGround = true;
             m_fallVelocity = 0.0f;
             m_velocity.translate.y = 0.0f;
-        }
-    }
-    if (m_onGround)
-    {
-        float groundDist = CollisionManager::GetInstance()->GetMaxGroundDistanceForAABB(m_playerAABB);
-        if (groundDist < 0.2f)
-        {
+            // 
             m_transform.translate.y -= groundDist;
         }
     }
@@ -562,6 +572,10 @@ void Player::UpdateDebugUI() {
             m_gravity.x, m_gravity.y, m_gravity.z);
         ImGui::DragFloat("Move Speed", &m_moveSpeed, 0.1f, 0.0f, 100.0f);
 
+        // ジャンプ力
+        ImGui::DragFloat("Jump Force", &m_jumpForce, 0.1f);
+        ImGui::DragFloat3("Gravity", &m_gravity.x, 0.1f);
+
         float groundDist = CollisionManager::GetInstance()->GetMaxGroundDistanceForAABB(m_playerAABB);
         ImGui::Text("Ground Distance: %.2f", groundDist);
 
@@ -572,11 +586,7 @@ void Player::UpdateDebugUI() {
 
         // Transform
         if (ImGui::TreeNode("Transform")) {
-            //ImGui::Text("Pos:  (%.2f, %.2f, %.2f)",
-                //m_transform.translate.x, m_transform.translate.y, m_transform.translate.z);
             ImGui::DragFloat3("##Translate", &m_transform.translate.x, 0.1f);
-            /*ImGui::Text("Rot:  (%.2f, %.2f, %.2f)",
-                m_transform.rotate.x, m_transform.rotate.y, m_transform.rotate.z);*/
             ImGui::DragFloat3("##Rotate", &m_transform.rotate.x, 0.1f);
             ImGui::Text("Scale:(%.2f, %.2f, %.2f)",
                 m_transform.scale.x, m_transform.scale.y, m_transform.scale.z);
@@ -585,10 +595,6 @@ void Player::UpdateDebugUI() {
 
         // Velocity
         if (ImGui::TreeNode("Velocity")) {
-            /*ImGui::Text("Vel Translate: (%.2f, %.2f, %.2f)",
-                m_velocity.translate.x, m_velocity.translate.y, m_velocity.translate.z);
-            ImGui::Text("Vel Rotate: (%.2f, %.2f, %.2f)",
-                m_velocity.rotate.x, m_velocity.rotate.y, m_velocity.rotate.z);*/
             ImGui::DragFloat3("##Vel Translate", &m_velocity.translate.x, 0.1f);
             ImGui::DragFloat3("##Vel Rotate", &m_velocity.rotate.x, 0.1f);
             ImGui::TreePop();

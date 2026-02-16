@@ -47,7 +47,7 @@ public:
 	/// <summary>
 	/// 更新
 	/// </summary>
-	void Update(const std::string& targetName);
+	void Update(const std::string& targetName, bool wallDashCollision = false);
 
 	// 対象(Capsule)と障害物(AABB)の衝突量を求める
 	//void UpdateCupsulCollision(const std::string& targetName);
@@ -62,16 +62,16 @@ public:
 	/// </summary>
 	const Vector3& GetPenetration() const { return penetration_; }
 
-    Vector3 GetPenetrationForAABB(const AABB& aabb);
+    Vector3 GetPenetrationForAABB(const AABB& aabb, bool wallDashCollision = false);
 
 	// 対象と地面との距離を求める
-	const float GetGroundDistance(const std::string& targetName) const;
+	const float GetGroundDistance(const std::string& targetName, bool wallDashCollision = false) const;
 
 	// 対象と地面との最大距離を求める
-	const float GetGroundMAXDistance(const std::string& targetName) const;
+	const float GetGroundMAXDistance(const std::string& targetName, bool wallDashCollision = false) const;
 
     // 指定した座標と地面との最大距離を求める
-    const float GetMaxGroundDistanceForAABB(const AABB& aabb) const;
+    const float GetMaxGroundDistanceForAABB(const AABB& aabb, bool wallDashCollision = false) const;
 
 	// 当たり判定の追加
 	//const bool& CheckCollision(const AABB& a, const AABB& b);
@@ -84,6 +84,8 @@ public:
 	// 当たり判定として計算するオブジェクトの追加
 	void AddCollision(Object3d* object3d);
 
+	void AddWallDashColliison(Object3d* object3d);
+
 	// 当たり判定を計算する対象の追加(念のため複数指定できるようにしておく)
 	void AddCollisionTarget(AABB aabb, const std::string key);
 
@@ -91,6 +93,9 @@ public:
 
 	// 判定対象オブジェクトの削除
 	void DeleteCollision(Object3d* object3d);
+
+	// 判定対象オブジェクトの削除
+	void DeleteWallDashCollision(Object3d* object3d);
 
 	// 判定対象の削除
 	void DeleteCollisionTarget(const std::string key);
@@ -105,6 +110,8 @@ public:
 private:
 
 	std::vector<Object3d*> collisionObject;
+
+	std::vector<Object3d*> wallDashCollisionObject;
 
 	std::map<std::string, AABB> collisionTarget;
 

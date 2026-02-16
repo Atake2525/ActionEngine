@@ -75,7 +75,7 @@ private:
 	// Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
 	// Resource作る度に配列を増やしす
-	D3D12_ROOT_PARAMETER rootParameters[3] = {};
+	D3D12_ROOT_PARAMETER rootParameters[4] = {};
 	// シリアライズしてバイナリにする
 	Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob = nullptr;
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
@@ -126,6 +126,19 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource;
 	// マテリアルバッファリソース内のデータを指すポインタ
 	Material* materialData = nullptr;
+
+	struct Sun
+	{
+		Vector3 sunDirection;
+		float pad;
+		Vector3 topColor;
+		float pad1;
+		Vector3 bottomColo;
+		float pad2;
+	};
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> sunResource;
+	Sun* sunData = nullptr;
 
 	Camera* camera_ = nullptr;
 
