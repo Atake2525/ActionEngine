@@ -22,6 +22,7 @@ private:
         Run      = 1,
         Crounch  = 2,
         WallDash = 3,
+        Sliding  = 4,
     };
 
     // コントロールモード
@@ -56,9 +57,9 @@ private: // プレイヤーステート管理
     void UpdateState();
 
     /// <summary>
-    /// 壁走りができるかどうかの確認
+    /// パルクール処理の更新(ステート)
     /// </summary>
-    void CheckWallDash();
+    void UpdateParkourState();
 
     /// <summary>
     /// 入力の処理
@@ -132,21 +133,25 @@ private: // プレイヤーモデル
     //==================================================
     // プレイヤー状態管理
     //==================================================
-    
     bool m_isFirstInput = false;
-    bool m_onGround = false;
-    bool m_wallDash = false;
-    bool m_enableWallDash = false;
     PlayerState m_state = PlayerState::Idle;
     PlayerState m_statePre = PlayerState::Idle;
 
     PlayerWalkState m_walkState = PlayerWalkState::Walk;
     PlayerWalkState m_walkStatePre = PlayerWalkState::Walk;
 
-    AABB m_playerAABB;                      // プレイヤーのAABB当たり判定
+    //==================================================
+    // プレイヤー状態管理(パルクール)
+    //==================================================
+    bool m_onGround = false;
+    bool m_wallDash = false;
+    bool m_enableWallDash = false;
+    bool m_enableParkour = false;
+
     //==================================================
     // プレイヤー移動関連
     //==================================================
+    AABB m_playerAABB;                      // プレイヤーのAABB当たり判定
     Transform m_firstTransform = Transform::Default;    // 初期位置・回転・スケール
     Transform m_transform = Transform::Default;     // 現在の位置・回転・スケール
     Transform m_velocity = Transform::Default;      // 現在の速度

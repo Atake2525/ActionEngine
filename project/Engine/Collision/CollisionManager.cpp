@@ -166,7 +166,7 @@ void CollisionManager::Finalize() {
 	instance = nullptr;
 }
 
-Vector3 CollisionManager::GetPenetrationForAABB(const AABB& aabb, bool wallDashCollision)
+const Vector3 CollisionManager::GetPenetrationForAABB(const AABB& aabb, bool wallDashCollision)
 {
 	Vector3 result = Vector3::Zero;
 	std::vector<Object3d*> colObj = collisionObject;
@@ -398,6 +398,38 @@ const float CollisionManager::GetMaxGroundDistanceForAABB(const AABB& aabb, bool
 		maxDistance = 10.0f;
 	}
 	return maxDistance;
+}
+
+const bool CollisionManager::IsCollisionObjectForAABB(const AABB& aabb)
+{
+	for (const auto& object : collisionObject) {
+		// ターゲット(プレイヤーなど)とオブジェクトの距離を全体のAABBから求めて離れていればcontinue
+		Vector3 centerA = CenterAABB(aabb);
+		Vector3 centerB = CenterAABB(object->GetAABB());
+		Vector3 d = centerA - centerB;
+		float targetDistance = Dot(d, d);
+
+		// オブジェクトの大きさを求める
+		AABB objectAABB = object->GetAABB();
+		// 最近接点とオブジェクトの中心座標の距離を取ってプレイヤーからオブジェクトまでの直線の距離を求める
+		Vector3 objectD = objectAABB.min - objectAABB.max;
+		float objectSize = Dot(objectD, objectD);
+		// オブジェクトサイズよりも距離が近かったら処理をする(余裕をもって少しだけ広く)
+		if (targetDistance < objectSize + 0.0f)
+		{
+			// オブジェクトのメッシュごとのAABBを取得する
+			const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
+			for (AABB terrainAABB : terrains)
+			{
+				// ターゲットとオブジェクトが貫通していたら実行
+				if (CollisionAABB(aabb, terrainAABB))
+				{
+					return true;
+				}
+			}
+		}
+	}
+	return false;
 }
 
 const Vector3 CollisionManager::CheckPenetrationAmount(const AABB& aabb)
