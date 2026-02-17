@@ -174,8 +174,6 @@ void Player::UpdateState()
     }
     
     m_walkState = PlayerWalkState::Walk;
-    // 入力確認用の変数
-    int state = 0;
 
     // 空中判定(地面からの距離が一定以上離れているか)
     float groundDistance = CollisionManager::GetInstance()->GetMaxGroundDistanceForAABB(m_playerAABB);
@@ -185,18 +183,20 @@ void Player::UpdateState()
         m_state = PlayerState::Falling;
     }
 
-    CheckWallDash();
-
     // コントロールモードに応じた入力処理
     switch (m_controlMode)
     {
     case Player::ControlMode::KeyboardMouse: // キーボード・マウス
-
-        // 入力の確認 orを使って値の大きいものを優先させる
-        state |= input->PushKeyInt(DIK_LSHIFT) * static_cast<int>(PlayerWalkState::Run);
-        state |= input->PushKeyInt(DIK_LCONTROL) * static_cast<int>(PlayerWalkState::Crounch);
-
-        m_walkState = static_cast<PlayerWalkState>(state);
+        // ダッシュ入力
+        if (input->PushKeyInt(DIK_LSHIFT))
+        {
+            m_walkState = PlayerWalkState::Run;
+        }
+        // しゃがみ入力
+        if (input->PushKeyInt(DIK_LCONTROL))
+        {
+            m_walkState = PlayerWalkState::Crounch;
+        }
 
         break;
     case Player::ControlMode::Gamepad: // ゲームパッド
@@ -214,14 +214,39 @@ void Player::UpdateState()
 
         break;
     }
+
+    UpdateParkourState();
 }
 
-void Player::CheckWallDash()
+void Player::UpdateParkourState()
 {
     // 壁走りが可能かを調べる
-    if (m_state == PlayerState::Falling && m_enableWallDash)
+    if (m_enableParkour)
     {
+        switch (m_state)
+        {
+        case Player::PlayerState::Idle:
+            break;
+        case Player::PlayerState::Move:
+            // 地上移動中のしゃがみ入力によるスライディング
+            if (m_walkState == PlayerWalkState::Crounch) {
+                // パルクールが有効で移動量が一定以上の場合
+                float moveSpeed = Length({ m_velocity.translate.x, 0.0f, m_velocity.translate.z }) / m_delta;
+                if (m_enableParkour && moveSpeed > m_walkSpeed)
+                {
+                    // スライディング入力
+                    m_walkState = PlayerWalkState::Sliding;
+                }
+            }
+            break;
+        case Player::PlayerState::Falling:
+            // 落下中かつ一定以上のサイズのオブジェクトに衝突している時に壁走り
+            if (CollisionManager::GetInstance()->IsCollisionObjectForAABB(m_playerAABB) && m_velocity.translate.y < 0.0f)
+            {
 
+            }
+            break;
+        }
     }
 }
 
@@ -241,7 +266,7 @@ void Player::HandleInput()
         m_moveInput.x += Input::GetInstance()->PushKeyInt(DIK_D);
         m_jumpInput += Input::GetInstance()->PushKeyInt(DIK_SPACE);
 
-        m_enableWallDash = Input::GetInstance()->PressMouse(1);
+        m_enableParkour = Input::GetInstance()->PressMouse(1);
 
         break;
     case Player::ControlMode::Gamepad:
@@ -579,7 +604,7 @@ void Player::UpdateDebugUI() {
 
     ImGui::Text("PlayerState: %s", stateItems[stateIndex]);
 
-    static const char* walkItems[] = { "Walk", "Run", "Crounch" };
+    static const char* walkItems[] = { "Walk", "Run", "Crounch", "WallDash", "Sliding" };
     int walkIndex = static_cast<int>(m_walkState);
 
     ImGui::Text("WalkState: %s", walkItems[walkIndex]);
@@ -621,6 +646,8 @@ void Player::UpdateDebugUI() {
         if (ImGui::TreeNode("Velocity")) {
             ImGui::DragFloat3("##Vel Translate", &m_velocity.translate.x, 0.1f);
             ImGui::DragFloat3("##Vel Rotate", &m_velocity.rotate.x, 0.1f);
+            float moveSpeed = Length({ m_velocity.translate.x, 0.0f, m_velocity.translate.z });
+            ImGui::Text("Speed : %f", moveSpeed);
             ImGui::TreePop();
         }
 

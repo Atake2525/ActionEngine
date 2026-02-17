@@ -62,7 +62,7 @@ public:
 	/// </summary>
 	const Vector3& GetPenetration() const { return m_penetration; }
 
-    Vector3 GetPenetrationForAABB(const AABB& aabb, bool wallDashCollision = false);
+    const Vector3 GetPenetrationForAABB(const AABB& aabb, bool wallDashCollision = false);
 
 	// 対象と地面との距離を求める
 	const float GetGroundDistance(const std::string& targetName, bool wallDashCollision = false) const;
@@ -73,9 +73,8 @@ public:
     // 指定した座標と地面との最大距離を求める
     const float GetMaxGroundDistanceForAABB(const AABB& aabb, bool wallDashCollision = false) const;
 
-	// 当たり判定の追加
-	//const bool& CheckCollision(const AABB& a, const AABB& b);
-	//const bool& CheckCollision(const AABB& a, const Sphere& b);
+	// 対象がオブジェクトに衝突しているか
+	const bool IsCollisionObjectForAABB(const AABB& aabb);
 
 	const Vector3 CheckPenetrationAmount(const AABB& aabb);
 
