@@ -56,6 +56,11 @@ private: // プレイヤーステート管理
     void UpdateState();
 
     /// <summary>
+    /// 壁走りができるかどうかの確認
+    /// </summary>
+    void CheckWallDash();
+
+    /// <summary>
     /// 入力の処理
     /// </summary>
     void HandleInput();
@@ -69,6 +74,10 @@ private: // プレイヤーステート管理
     /// 移動処理
     /// </summary>
     void Move();
+
+    void Walk();
+
+    void Jump();
 
     /// <summary>
     /// 衝突判定の適用
@@ -157,6 +166,7 @@ private: // プレイヤーモデル
 
     // 移動速度
     float m_moveSpeed = 1.0f;
+    float m_decelMoveSpeed = 1.0f;
     float m_moveSpeedPre = 1.0f;
     float m_walkSpeed = 8.0f;
     float m_runSpeed = 14.0f;

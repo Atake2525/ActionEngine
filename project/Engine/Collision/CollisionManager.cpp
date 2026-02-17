@@ -18,15 +18,16 @@ CollisionManager* CollisionManager::GetInstance() {
 }
 
 void CollisionManager::Initialize() {
-	penetration_ = { 0.0f, 0.0f, 0.0f };
+	m_penetration = { 0.0f, 0.0f, 0.0f };
 	collisionTarget.clear();
 	collisionObject.clear();
 }
 
 void CollisionManager::Update(const std::string& targetName, bool wallDashCollision) {
 
-	penetrationPre_ = penetration_;
-	penetration_ = { 0.0f, 0.0f, 0.0f };
+	m_collisionObjectAABB.clear();
+	m_penetrationPre = m_penetration;
+	m_penetration = { 0.0f, 0.0f, 0.0f };
 	std::vector<Object3d*> colObj = collisionObject;
 	if (wallDashCollision)
 	{
@@ -60,6 +61,7 @@ void CollisionManager::Update(const std::string& targetName, bool wallDashCollis
 				// ターゲットとオブジェクトが貫通していたら実行
 				if (CollisionAABB(target, terrainAABB))
 				{
+					m_collisionObjectAABB.push_back(terrainAABB);
 					Vector3 penetration = GetPenetrationDepth(target, terrainAABB);
 					float minDepth = std::min(penetration.x, std::min(penetration.z, penetration.y));
 					if (minDepth == penetration.x)
@@ -94,25 +96,25 @@ void CollisionManager::Update(const std::string& targetName, bool wallDashCollis
 					}
 
 					// 既に累積された押し出し量と逆向きの成分は無視する（隣接オブジェクト同士で打ち消し合うのを防ぐ）
-					if (penetration_.x <= -penetrationPre_.x && penetration_.x != 0.0f) {
+					if (m_penetration.x <= -m_penetrationPre.x && m_penetration.x != 0.0f) {
 						penetration.x = 0.0f; }
-					if (penetration_.y <= -penetrationPre_.y && penetration_.y != 0.0f) { 
+					if (m_penetration.y <= -m_penetrationPre.y && m_penetration.y != 0.0f) {
 						penetration.y = 0.0f; }
-					if (penetration_.z <= -penetrationPre_.z && penetration_.z != 0.0f) {
+					if (m_penetration.z <= -m_penetrationPre.z && m_penetration.z != 0.0f) {
 						penetration.z = 0.0f; }
 
                     // 最大の押し出し量を保存する
-					if (fabs(penetration.x) > fabs(penetration_.x))
+					if (fabs(penetration.x) > fabs(m_penetration.x))
 					{
-                        penetration_.x = penetration.x;
+						m_penetration.x = penetration.x;
 					}
-					if (fabs(penetration.y) > fabs(penetration_.y))
+					if (fabs(penetration.y) > fabs(m_penetration.y))
 					{
-						penetration_.y = penetration.y;
+						m_penetration.y = penetration.y;
                     }
-					if (fabs(penetration.z) > fabs(penetration_.z))
+					if (fabs(penetration.z) > fabs(m_penetration.z))
 					{
-						penetration_.z = penetration.z;
+						m_penetration.z = penetration.z;
 					}
 				}
 			}
@@ -234,13 +236,13 @@ Vector3 CollisionManager::GetPenetrationForAABB(const AABB& aabb, bool wallDashC
 					}
 
 					// 既に累積された押し出し量と逆向きの成分は無視する（隣接オブジェクト同士で打ち消し合うのを防ぐ）
-					if (result.x <= -penetrationPre_.x && result.x != 0.0f) {
+					if (result.x <= -m_penetrationPre.x && result.x != 0.0f) {
 						penetration.x = 0.0f;
 					}
-					if (result.y <= -penetrationPre_.y && result.y != 0.0f) {
+					if (result.y <= -m_penetrationPre.y && result.y != 0.0f) {
 						penetration.y = 0.0f;
 					}
-					if (result.z <= -penetrationPre_.z && result.z != 0.0f) {
+					if (result.z <= -m_penetrationPre.z && result.z != 0.0f) {
 						penetration.z = 0.0f;
 					}
 

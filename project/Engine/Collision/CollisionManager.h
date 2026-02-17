@@ -60,7 +60,7 @@ public:
 	/// <summary>
 	/// 貫通量を取得
 	/// </summary>
-	const Vector3& GetPenetration() const { return penetration_; }
+	const Vector3& GetPenetration() const { return m_penetration; }
 
     Vector3 GetPenetrationForAABB(const AABB& aabb, bool wallDashCollision = false);
 
@@ -116,6 +116,10 @@ private:
 	std::map<std::string, AABB> collisionTarget;
 
 	// 貫通量を示す変数
-	Vector3 penetration_;
-	Vector3 penetrationPre_;
+	Vector3 m_penetration;
+	Vector3 m_penetrationPre;
+
+	// 衝突しているオブジェクトのAABB
+	std::vector<AABB> m_collisionObjectAABB;
+
 };
