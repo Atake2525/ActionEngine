@@ -185,6 +185,8 @@ void Player::UpdateState()
         m_state = PlayerState::Falling;
     }
 
+    CheckWallDash();
+
     // コントロールモードに応じた入力処理
     switch (m_controlMode)
     {
@@ -214,6 +216,15 @@ void Player::UpdateState()
     }
 }
 
+void Player::CheckWallDash()
+{
+    // 壁走りが可能かを調べる
+    if (m_state == PlayerState::Falling && m_enableWallDash)
+    {
+
+    }
+}
+
 void Player::HandleInput()
 {
     // 移動入力のリセット
@@ -230,7 +241,7 @@ void Player::HandleInput()
         m_moveInput.x += Input::GetInstance()->PushKeyInt(DIK_D);
         m_jumpInput += Input::GetInstance()->PushKeyInt(DIK_SPACE);
 
-        m_wallDash = Input::GetInstance()->PressMouse(1);
+        m_enableWallDash = Input::GetInstance()->PressMouse(1);
 
         break;
     case Player::ControlMode::Gamepad:
@@ -268,10 +279,81 @@ void Player::Rotate() {
 
 void Player::Move() {
 
+    Walk();
+    Jump();
+
+    // MoveDirectionをm_cameraTransform.rotateの向きに等速で合わせる
+    if (m_moveDirection.y != m_cameraTransform.rotate.y) {
+        // Y軸回転の差分を計算
+        float diff = m_cameraTransform.rotate.y - m_moveDirection.y;
+        // 地上と空中で回転速度を変える
+        float turnFactor = m_turnControlFactor;
+        if (m_state == PlayerState::Falling)
+        {
+            turnFactor = m_airControlFactor;
+        }
+        // 角度の差分を-180度から180度の範囲に収める
+        float adjust = Sign(diff) * m_moveSpeed * (m_delta / turnFactor);
+        // 差分が調整量より小さい場合は直接合わせる
+        if (abs(diff) < abs(adjust)) { // 調整量より差分が小さい場合
+            m_moveDirection.y = m_cameraTransform.rotate.y;
+        }
+        else { // 調整量分だけ移動方向を回転させる
+            m_moveDirection.y += adjust;
+        }
+    }
+
+    // 現在の速度を計算
+    m_playerSpeed = max(fabs(m_moveAmount.x), fabs(m_moveAmount.y));
+    //// 移動方向の計算
+    Transform dir = Transform::Default;
+    dir.rotate.y = m_moveDirection.y;
+    //dir.rotate.y = m_cameraTransform.rotate.y;
+    Matrix4x4 rotMat = MakeAffineMatrix(dir);
+    Vector3 moveDir = TransformNormal({ m_moveAmount.x, 0.0f, -m_moveAmount.y }, rotMat);
+
+    m_velocity.translate = { moveDir.x * m_delta, m_velocity.translate.y, moveDir.z * m_delta };
+    m_playerAABB += m_velocity.translate;
+
+    //// 現在の移動方向（地上処理で作った moveDir）
+    //Vector3 v = { moveDir.x, 0.0f, moveDir.z };
+    //float sp = Length(v);
+
+    //if (sp > 0.0001f)
+    //    v = v / sp; // 正規化
+    //else
+    //    v = { 0,0,0 };
+
+    //// 入力方向（カメラ基準）
+    //Vector3 desiredDir = TransformNormal(
+    //    { m_moveInput.x, 0.0f, -m_moveInput.y }, rotMat
+    //);
+    //desiredDir = Normalize(desiredDir);
+
+    //// 補間係数（0〜1）
+    //float t = m_airControlFactor; // 例：0.05〜0.2
+
+    //// 方向だけ補間
+    //Vector3 newDir = Normalize(v * (1.0f - t) + desiredDir * t);
+
+    //// 速度の大きさは維持
+    //Vector3 newVelocity = newDir * sp;
+
+    //// 実際の速度に反映
+    //m_velocity.translate.x = newVelocity.x * m_delta;
+    //m_velocity.translate.z = newVelocity.z * m_delta;
+}
+
+void Player::Walk()
+{
 #pragma region 移動(歩行)
     // m_moveInput(入力)に基づいてプレイヤーの移動方向を決定
-    m_moveAmount.x += Sign(m_moveInput.x) * (m_delta / m_maxSpeedTime * m_walkSpeed);
-    m_moveAmount.y += Sign(m_moveInput.y) * (m_delta / m_maxSpeedTime * m_walkSpeed);
+    if (m_moveInput.x != 0.0f || m_moveInput.y != 0.0f)
+    {
+        // 入力中は移動量を上げる
+        m_moveAmount.x += Sign(m_moveInput.x) * (m_delta / m_maxSpeedTime * m_walkSpeed);
+        m_moveAmount.y += Sign(m_moveInput.y) * (m_delta / m_maxSpeedTime * m_walkSpeed);
+    }
 
     m_moveSpeedPre = m_moveSpeed;
 
@@ -319,23 +401,34 @@ void Player::Move() {
         m_moveSpeedTimer = 0.0f;
     }
 
+    Vector2 fabsMoveInput = { fabs(m_moveInput.x), fabs(m_moveInput.y) };
+
+    if (m_moveInput.x == 0.0f)
+    {
+        fabsMoveInput.x = 1.0f;
+    }
+    if (fabsMoveInput.y == 0.0f)
+    {
+        fabsMoveInput.y = 1.0f;
+    }
+
     // 移動量のクランプ
-    m_moveAmount.x = clamp(m_moveAmount.x, -m_moveSpeed * fabs(m_moveInput.x), m_moveSpeed * fabs(m_moveInput.x));
-    m_moveAmount.y = clamp(m_moveAmount.y, -m_moveSpeed * fabs(m_moveInput.y), m_moveSpeed * fabs(m_moveInput.y));
+    m_moveAmount.x = clamp(m_moveAmount.x, -m_moveSpeed * fabsMoveInput.x, m_moveSpeed * fabsMoveInput.x);
+    m_moveAmount.y = clamp(m_moveAmount.y, -m_moveSpeed * fabsMoveInput.y, m_moveSpeed * fabsMoveInput.y);
 
     // 入力が無かったら一定速度で減速して0.0fにする
     // 減速は加速よりも早くする
     if (m_moveInput.x == 0.0f) {
-        m_moveAmount.x -= Sign(m_moveAmount.x) * (m_delta / m_decelTime * m_walkSpeed);
+        m_moveAmount.x -= Sign(m_moveAmount.x) * (m_delta / m_decelTime * m_decelMoveSpeed);
         // オーバーシュート防止
-        if (Sign(m_moveAmount.x) != Sign(m_moveAmount.x - Sign(m_moveAmount.x) * (m_delta / m_decelTime * m_walkSpeed))) {
+        if (Sign(m_moveAmount.x) != Sign(m_moveAmount.x - Sign(m_moveAmount.x) * (m_delta / m_decelTime * m_decelMoveSpeed))) {
             m_moveAmount.x = 0.0f;
         }
     }
     if (m_moveInput.y == 0.0f) {
-        m_moveAmount.y -= Sign(m_moveAmount.y) * (m_delta / m_decelTime * m_walkSpeed);
+        m_moveAmount.y -= Sign(m_moveAmount.y) * (m_delta / m_decelTime * m_decelMoveSpeed);
         // オーバーシュート防止
-        if (Sign(m_moveAmount.y) != Sign(m_moveAmount.y - Sign(m_moveAmount.y) * (m_delta / m_decelTime * m_walkSpeed))) {
+        if (Sign(m_moveAmount.y) != Sign(m_moveAmount.y - Sign(m_moveAmount.y) * (m_delta / m_decelTime * m_decelMoveSpeed))) {
             m_moveAmount.y = 0.0f;
         }
     }
@@ -361,9 +454,10 @@ void Player::Move() {
         m_moveAmount /= len;
     }
 #pragma endregion
+}
 
-#pragma region 移動(ジャンプ)
-
+void Player::Jump()
+{
     // ジャンプ入力があったらジャンプ処理
     if (m_jumpInput > 0.0f && m_state != PlayerState::Falling)
     {
@@ -372,73 +466,6 @@ void Player::Move() {
 
         //m_velocity.translate.y = (m_jumpForce * m_jumpForce) / (2.0f * -m_gravity.y);
     }
-
-#pragma endregion
-
-
-    // MoveDirectionをm_cameraTransform.rotateの向きに等速で合わせる
-    if (m_moveDirection.y != m_cameraTransform.rotate.y) {
-        // Y軸回転の差分を計算
-        float diff = m_cameraTransform.rotate.y - m_moveDirection.y;
-        // 地上と空中で回転速度を変える
-        float turnFactor = m_turnControlFactor;
-        if (m_state == PlayerState::Falling)
-        {
-            turnFactor = m_airControlFactor;
-        }
-        // 角度の差分を-180度から180度の範囲に収める
-        float adjust = Sign(diff) * m_moveSpeed * (m_delta / turnFactor);
-        // 差分が調整量より小さい場合は直接合わせる
-        if (abs(diff) < abs(adjust)) { // 調整量より差分が小さい場合
-            m_moveDirection.y = m_cameraTransform.rotate.y;
-        }
-        else { // 調整量分だけ移動方向を回転させる
-            m_moveDirection.y += adjust;
-        }
-    }
-
-   
-
-
-    // 現在の速度を計算
-    m_playerSpeed = max(fabs(m_moveAmount.x), fabs(m_moveAmount.y));
-    //// 移動方向の計算
-    Transform dir = Transform::Default;
-    dir.rotate.y = m_moveDirection.y;
-    //dir.rotate.y = m_cameraTransform.rotate.y;
-    Matrix4x4 rotMat = MakeAffineMatrix(dir);
-    Vector3 moveDir = TransformNormal({ m_moveAmount.x, 0.0f, -m_moveAmount.y }, rotMat);
-
-    m_velocity.translate = { moveDir.x * m_delta, m_velocity.translate.y, moveDir.z * m_delta };
-    m_playerAABB += m_velocity.translate;
-
-    //// 現在の移動方向（地上処理で作った moveDir）
-    //Vector3 v = { moveDir.x, 0.0f, moveDir.z };
-    //float sp = Length(v);
-
-    //if (sp > 0.0001f)
-    //    v = v / sp; // 正規化
-    //else
-    //    v = { 0,0,0 };
-
-    //// 入力方向（カメラ基準）
-    //Vector3 desiredDir = TransformNormal(
-    //    { m_moveInput.x, 0.0f, -m_moveInput.y }, rotMat
-    //);
-    //desiredDir = Normalize(desiredDir);
-
-    //// 補間係数（0〜1）
-    //float t = m_airControlFactor; // 例：0.05〜0.2
-
-    //// 方向だけ補間
-    //Vector3 newDir = Normalize(v * (1.0f - t) + desiredDir * t);
-
-    //// 速度の大きさは維持
-    //Vector3 newVelocity = newDir * sp;
-
-    //// 実際の速度に反映
-    //m_velocity.translate.x = newVelocity.x * m_delta;
-    //m_velocity.translate.z = newVelocity.z * m_delta;
 }
 
 void Player::ApplyCollision()
@@ -463,7 +490,7 @@ void Player::ApplyGravity()
         m_velocity.translate.y += m_gravity.y * m_delta;
         m_velocity.translate.y = max(m_fallVelocity, -groundDist);
         // 壁走り中には落下速度を固定する
-        if (m_wallDash)
+        if (m_wallDash && m_velocity.translate.y < 0.0f)
         {
             m_velocity.translate.y = m_wallDashGravity;
         }

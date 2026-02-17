@@ -6,6 +6,8 @@ struct AABB final
 {
 	Vector3 min;
 	Vector3 max;
+
+	static const Vector3 GetSize(const AABB& aabb);
 };
 
 inline AABB operator+=(AABB& aabb, const float& value) {
@@ -63,3 +65,7 @@ inline AABB operator+(const AABB& aabb, const Vector3 value) {
 //	result.max = aabb.max * value;
 //	return result;
 //}
+
+inline const Vector3 AABB::GetSize(const AABB& aabb) {
+	return { aabb.max - aabb.min };
+}
