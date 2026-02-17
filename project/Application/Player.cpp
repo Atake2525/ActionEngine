@@ -108,8 +108,8 @@ void Player::Update()
         Rotate();
         // 移動処理
         Move();
-        //
         ApplyCollision();
+
         // 重力の適用
         ApplyGravity();
     }
@@ -125,12 +125,11 @@ void Player::Update()
     Rotate();
     // 移動処理
     Move();
-    // 
     ApplyCollision();
+
     // 重力の適用
     ApplyGravity();
 #endif // !NDEBUG
-
 
     //m_transform.translate += m_velocity.translate;
 
@@ -169,7 +168,7 @@ void Player::UpdateState()
     
     if (m_onGround)
     {
-        int statePoint = Sign((Sign(m_moveInput.x) * m_moveInput.x) + (Sign(m_moveInput.y) * m_moveInput.y));
+        int statePoint = static_cast<int>(Sign((Sign(m_moveInput.x) * m_moveInput.x) + (Sign(m_moveInput.y) * m_moveInput.y)));
         m_state = static_cast<PlayerState>(statePoint);
     }
     
@@ -240,10 +239,13 @@ void Player::UpdateParkourState()
             }
             break;
         case Player::PlayerState::Falling:
-            // 落下中かつ一定以上のサイズのオブジェクトに衝突している時に壁走り
-            if (CollisionManager::GetInstance()->IsCollisionObjectForAABB(m_playerAABB) && m_velocity.translate.y < 0.0f)
+            AABB pAABB = m_playerAABB;
+            pAABB += m_velocity.translate;
+            // 落下中かつ壁走り用のオブジェクトに衝突している時に壁走り
+            if (CollisionManager::GetInstance()->IsCollisionObjectForAABB(pAABB, true) && m_velocity.translate.y < 0.0f)
             {
-
+                m_wallDash = true;
+                m_walkState = PlayerWalkState::WallDash;
             }
             break;
         }
@@ -264,7 +266,7 @@ void Player::HandleInput()
         m_moveInput.y += Input::GetInstance()->PushKeyInt(DIK_S);
         m_moveInput.x += -Input::GetInstance()->PushKeyInt(DIK_A);
         m_moveInput.x += Input::GetInstance()->PushKeyInt(DIK_D);
-        m_jumpInput += Input::GetInstance()->PushKeyInt(DIK_SPACE);
+        m_jumpInput += Input::GetInstance()->TriggerKeyInt(DIK_SPACE);
 
         m_enableParkour = Input::GetInstance()->PressMouse(1);
 
@@ -339,34 +341,6 @@ void Player::Move() {
 
     m_velocity.translate = { moveDir.x * m_delta, m_velocity.translate.y, moveDir.z * m_delta };
     m_playerAABB += m_velocity.translate;
-
-    //// 現在の移動方向（地上処理で作った moveDir）
-    //Vector3 v = { moveDir.x, 0.0f, moveDir.z };
-    //float sp = Length(v);
-
-    //if (sp > 0.0001f)
-    //    v = v / sp; // 正規化
-    //else
-    //    v = { 0,0,0 };
-
-    //// 入力方向（カメラ基準）
-    //Vector3 desiredDir = TransformNormal(
-    //    { m_moveInput.x, 0.0f, -m_moveInput.y }, rotMat
-    //);
-    //desiredDir = Normalize(desiredDir);
-
-    //// 補間係数（0〜1）
-    //float t = m_airControlFactor; // 例：0.05〜0.2
-
-    //// 方向だけ補間
-    //Vector3 newDir = Normalize(v * (1.0f - t) + desiredDir * t);
-
-    //// 速度の大きさは維持
-    //Vector3 newVelocity = newDir * sp;
-
-    //// 実際の速度に反映
-    //m_velocity.translate.x = newVelocity.x * m_delta;
-    //m_velocity.translate.z = newVelocity.z * m_delta;
 }
 
 void Player::Walk()
@@ -515,10 +489,11 @@ void Player::ApplyGravity()
         m_velocity.translate.y += m_gravity.y * m_delta;
         m_velocity.translate.y = max(m_fallVelocity, -groundDist);
         // 壁走り中には落下速度を固定する
-        if (m_wallDash && m_velocity.translate.y < 0.0f)
+        if (m_walkState == PlayerWalkState::WallDash && m_velocity.translate.y < 0.0f)
         {
-            m_velocity.translate.y = m_wallDashGravity;
+            m_velocity.translate.y = m_wallDashGravity * m_delta;
         }
+        // 地面空の高さがほぼ0になっていれば地上判定を行う
         if (groundDist <= 0.01f)
         {
             m_onGround = true;

@@ -15,6 +15,12 @@ void TutorialStage::Initialize()
     stageObject->SetModel("Resources/Model/obj/Stage/TutorialStage", "TutorialStage.obj", true);
     CollisionManager::GetInstance()->AddCollision(stageObject.get());
 
+    wallDashObject = make_unique<Object3d>();
+    wallDashObject->Initialize();
+    wallDashObject->SetModel("Resources/Model/obj/Stage/TutorialStage", "TutorialStageWallDashObject.obj", true);
+    CollisionManager::GetInstance()->AddCollision(wallDashObject.get());
+    CollisionManager::GetInstance()->AddWallDashColliison(wallDashObject.get());
+
     // トラップの初期化
     trap = make_unique<Trap>();
     trap->Initialize("t");
@@ -43,6 +49,8 @@ std::string TutorialStage::GetJsonName()
 void TutorialStage::Update()
 {
     stageObject->Update();
+
+    wallDashObject->Update();
 
     trap->Update();
 
@@ -99,6 +107,7 @@ void TutorialStage::Update()
 void TutorialStage::DrawObject3d()
 {
     stageObject->Draw();
+    wallDashObject->Draw();
     trap->Draw();
     goal->Draw();
     for (int i = 0; i < 4; i++)
