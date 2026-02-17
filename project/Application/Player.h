@@ -76,8 +76,19 @@ private: // プレイヤーステート管理
     /// </summary>
     void Move();
 
+    /// <summary>
+    /// 歩行処理
+    /// </summary>
     void Walk();
 
+    /// <summary>
+    /// ウォールラン処理
+    /// </summary>
+    void WallRun();
+
+    /// <summary>
+    /// ジャンプ処理
+    /// </summary>
     void Jump();
 
     /// <summary>
@@ -113,6 +124,8 @@ private: // プレイヤーモデル
     //==================================================
     // タイマー関連
     //==================================================
+    float m_delta;
+
     float m_moveSpeedTimer = 0.0f;    // 移動速度系タイマー
     float m_speedDecelTime = 0.2f;     // 減速時間
     float m_maxSpeedTime = 0.3f;                    // 加速時間
@@ -120,7 +133,6 @@ private: // プレイヤーモデル
     bool m_isSpeedDecel = false;
     float m_speedBefore = 0.0f; // 減速前の速度
     float m_speedAfter = 0.0f;  // 減速後の速度
-    float m_delta;
 
     //==================================================
     // モデル・カメラ・入力
@@ -144,9 +156,6 @@ private: // プレイヤーモデル
     // プレイヤー状態管理(パルクール)
     //==================================================
     bool m_onGround = false;
-    bool m_wallDash = false;
-    bool m_enableWallDash = false;
-    bool m_enableParkour = false;
 
     //==================================================
     // プレイヤー移動関連
@@ -155,8 +164,7 @@ private: // プレイヤーモデル
     Transform m_firstTransform = Transform::Default;    // 初期位置・回転・スケール
     Transform m_transform = Transform::Default;     // 現在の位置・回転・スケール
     Transform m_velocity = Transform::Default;      // 現在の速度
-    Vector3 m_gravity = { 0.0f, -1.5f, 0.0f };      // 重力
-    float m_wallDashGravity = -0.3f;
+    Vector3 m_gravity = { 0.0f, -1.0f, 0.0f };      // 重力
     Vector3 m_moveDirection = Vector3::Zero;        // 移動方向
     Vector2 m_moveInput = Vector2::Zero;            // 入力方向
     Vector2 m_moveAmount = Vector2::Zero;           // 入力中の移動量
@@ -168,6 +176,18 @@ private: // プレイヤーモデル
     //float m_airControlFactor = 5.0f;                // 空中での移動制御係数
     float m_airControlFactor = 1.8f;                // 空中での移動制御係数
 
+    //================
+    // ウォールラン関連
+    //================
+    bool m_wallRunning = false;
+    float m_wallRunGravity = -0.3f;
+    Vector2 m_wallRunStartInput = Vector2::Zero;
+    Vector3 m_wallRunStartRotate = Vector3::Zero;
+    Vector3 m_wallRunDirection = Vector3::Zero;
+    Vector3 m_wallPenetration = Vector3::Zero;
+    bool m_isStartWallRun = false;
+    float m_wallRunTimer = 0.0f;
+    float m_wallRunTime = 0.2f;
 
     // 移動速度
     float m_moveSpeed = 1.0f;
@@ -177,7 +197,7 @@ private: // プレイヤーモデル
     float m_runSpeed = 14.0f;
     float m_crounchSpeed = 5.0f;
     float m_playerSpeed = 0.0f; // 現在の速度
-    float m_jumpForce = 0.08f; // ジャンプ力
+    float m_jumpForce = 0.045f; // ジャンプ力
 
     //==================================================
     // カメラ関連

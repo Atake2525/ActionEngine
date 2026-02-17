@@ -21,6 +21,8 @@ void TutorialStage::Initialize()
     CollisionManager::GetInstance()->AddCollision(wallDashObject.get());
     CollisionManager::GetInstance()->AddWallDashColliison(wallDashObject.get());
 
+    wallDashObject->SetColor({ 1.0f, 0.5f, 0.5f, 1.0f });
+
     // トラップの初期化
     trap = make_unique<Trap>();
     trap->Initialize("t");
