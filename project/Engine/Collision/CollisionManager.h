@@ -74,7 +74,7 @@ public:
     const float GetMaxGroundDistanceForAABB(const AABB& aabb, bool wallDashCollision = false) const;
 
 	// 対象がオブジェクトに衝突しているか
-	const bool IsCollisionObjectForAABB(const AABB& aabb);
+	const bool IsCollisionObjectForAABB(const AABB& aabb, bool wallDashCollision = false) const;
 
 	const Vector3 CheckPenetrationAmount(const AABB& aabb);
 

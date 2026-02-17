@@ -400,9 +400,14 @@ const float CollisionManager::GetMaxGroundDistanceForAABB(const AABB& aabb, bool
 	return maxDistance;
 }
 
-const bool CollisionManager::IsCollisionObjectForAABB(const AABB& aabb)
+const bool CollisionManager::IsCollisionObjectForAABB(const AABB& aabb, bool wallDashCollision) const
 {
-	for (const auto& object : collisionObject) {
+	std::vector<Object3d*> colObj = collisionObject;
+	if (wallDashCollision)
+	{
+		colObj = wallDashCollisionObject;
+	}
+	for (const auto& object : colObj) {
 		// ターゲット(プレイヤーなど)とオブジェクトの距離を全体のAABBから求めて離れていればcontinue
 		Vector3 centerA = CenterAABB(aabb);
 		Vector3 centerB = CenterAABB(object->GetAABB());
