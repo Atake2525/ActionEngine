@@ -224,23 +224,18 @@ void Player::UpdateState()
 
 void Player::UpdateParkourState()
 {
-    switch (m_state)
-    {
-    case Player::PlayerState::Idle:
-        break;
-    case Player::PlayerState::Move:
-        // 地上移動中のしゃがみ入力によるスライディング
-        if (m_walkState == PlayerWalkState::Crounch) {
-            // パルクールが有効で移動量が一定以上の場合
-            float moveSpeed = Length({ m_velocity.translate.x, 0.0f, m_velocity.translate.z }) / m_delta;
-            if (moveSpeed > m_walkSpeed)
-            {
-                // スライディング入力
-                m_walkState = PlayerWalkState::Sliding;
-            }
+
+    // 前方への移動量が一定以上の場合にしゃがみ入力でスライディング
+    if (m_walkState == PlayerWalkState::Crounch) {
+        // パルクールが有効で移動量が一定以上の場合
+        float moveSpeed = Length({ m_velocity.translate.x, 0.0f, m_velocity.translate.z }) / m_delta;
+        if (moveSpeed > m_walkSpeed)
+        {
+            // スライディング入力
+            m_walkState = PlayerWalkState::Sliding;
         }
-        break;
     }
+
     if (!m_onGround)
     {
         AABB pAABB = m_playerAABB;
@@ -258,7 +253,7 @@ void Player::UpdateParkourState()
         pAABB += m_wallPenetration;
         // 現在の位置(AABB)からウォールラン中の壁の方向に移動させ衝突しているかを判定する
         // 判定していなければウォールランを終了する
-        if (m_wallRunning && !CollisionManager::GetInstance()->IsCollisionObjectForAABB(pAABB, true))
+        if (m_wallRunning && (!CollisionManager::GetInstance()->IsCollisionObjectForAABB(pAABB, true) || m_jumpInput == 1.0f))
         {
             m_wallRunning = false;
             m_isStartWallRun = false;
@@ -534,12 +529,25 @@ void Player::WallRun()
 void Player::Jump()
 {
     // ジャンプ入力があったらジャンプ処理
-    if (m_jumpInput > 0.0f && m_onGround)
+    if (m_jumpInput > 0.0f)
     {
-        // ジャンプ量(現在のY座標+m_jumpForce)の値を到達地点として設定
-        m_velocity.translate.y = sqrtf(2.0f * -m_gravity.y * m_jumpForce);
+        switch (m_walkState)
+        {
+        case Player::PlayerWalkState::WallRun:
+            // ジャンプ量(現在のY座標+m_jumpForce)の値を到達地点として設定
+            m_velocity.translate.y = sqrtf(2.0f * -m_gravity.y * m_jumpForce);
+            break;
+        case Player::PlayerWalkState::Sliding:
+            break;
+        default:
+            if (m_onGround) // 設置状態のジャンプ処理
+            {
+                // ジャンプ量(現在のY座標+m_jumpForce)の値を到達地点として設定
+                m_velocity.translate.y = sqrtf(2.0f * -m_gravity.y * m_jumpForce);
+            }
+            break;
+        }
 
-        //m_velocity.translate.y = (m_jumpForce * m_jumpForce) / (2.0f * -m_gravity.y);
     }
 }
 
@@ -627,11 +635,11 @@ void Player::ApplyCameraEffect()
                 wallRunPenetration = -1.0f;
             }
             // 回転後角度を代入 回転後の角度は移動方向、壁がプレイヤーから左右どちらにあるかによって変わるのでそれも考慮する
-            m_wallRunRotateAfter = m_wallRunRotateAngle* Sign(signWallRunDirection.z)* Sign(signWallRunDirection.x)* Sign(wallRunPenetration);
+            m_wallRunRotateAfter = m_wallRunRotateAngle * Sign(signWallRunDirection.z) * Sign(signWallRunDirection.x) * Sign(wallRunPenetration);
 
 
         }
-        
+
         m_wallRunTimer += m_delta / m_wallRunTime;
     }
     else
