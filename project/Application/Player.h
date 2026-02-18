@@ -181,17 +181,15 @@ private: // プレイヤーモデル
     //================
     bool m_wallRunning = false;
     float m_wallRunGravity = -0.3f;
-    Vector2 m_wallRunStartInput = Vector2::Zero;
     Vector3 m_wallRunDirection = Vector3::Zero;
     Vector3 m_wallPenetration = Vector3::Zero;
     bool m_isStartWallRun = false;
     bool m_completeRotate = false;
     bool m_completeGetRotateInfo = false;
     float m_wallRunRotateAfter = 0.0f;
-    float m_wallRunRotateBefore = 0.0f;
-    float m_wallRunRotateAngle = SwapRadian(25.0f);
+    float m_wallRunRotateAngle = SwapRadian(15.0f);
     float m_wallRunTimer = 0.0f;
-    float m_wallRunTime = 0.2f;
+    float m_wallRunTime = 0.14f;
 
     // 移動速度
     float m_moveSpeed = 1.0f;

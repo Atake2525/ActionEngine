@@ -143,8 +143,8 @@ void Player::Update()
 
     m_pModel->Update();
     //m_pCamera->SetTranslate(m_transform.translate);
-    m_pCamera->SetTransform(m_cameraTransform);
     ApplyCameraEffect();
+    m_pCamera->SetTransform(m_cameraTransform);
     UpdateCameraParent();
 
 }
@@ -493,8 +493,6 @@ void Player::WallRun()
         pAABB += Vector3{ m_velocity.translate.x, 0.0f, m_velocity.translate.z };
         m_wallPenetration = CollisionManager::GetInstance()->GetPenetrationForAABB(pAABB, true);
 
-        m_wallRunRotateBefore = m_cameraTransform.rotate.y;
-
         // 現状ウォールランの移動量が斜めになることは無いので貫通量と視点方向から移動方向を算出
         Transform affine = Transform::Default;
         affine.rotate.y = m_cameraTransform.rotate.y;
@@ -614,12 +612,36 @@ void Player::ApplyCameraEffect()
         if (!m_completeGetRotateInfo)
         {
             m_completeGetRotateInfo = true;
+            Vector3 signWallRunDirection = { 1.0f, 1.0f, 1.0f };
+            if (m_wallRunDirection.x < 0.0f)
+            {
+                signWallRunDirection.x = -1.0f;
+            }
+            if (m_wallRunDirection.z < 0.0f)
+            {
+                signWallRunDirection.z = -1.0f;
+            }
+            float wallRunPenetration = 1.0f;
+            if (m_wallPenetration.z < 0.0f)
+            {
+                wallRunPenetration = -1.0f;
+            }
             // 回転後角度を代入 回転後の角度は移動方向、壁がプレイヤーから左右どちらにあるかによって変わるのでそれも考慮する
-            m_wallRunRotateAfter = m_wallRunRotateAngle * Sign(m_wallRunDirection.z) * Sign(m_wallPenetration.x) * -Sign(m_wallPenetration.z);
+            m_wallRunRotateAfter = m_wallRunRotateAngle* Sign(signWallRunDirection.z)* Sign(signWallRunDirection.x)* Sign(wallRunPenetration);
 
 
         }
+        
+        m_wallRunTimer += m_delta / m_wallRunTime;
     }
+    else
+    {
+        m_completeGetRotateInfo = false;
+        m_wallRunTimer -= m_delta / m_wallRunTime;
+    }
+    m_wallRunTimer = clamp(m_wallRunTimer, 0.0f, 1.0f);
+
+    m_cameraTransform.rotate.z = Lerp(0.0f, m_wallRunRotateAfter, m_wallRunTimer);
 
 }
 #ifndef NDEBUG
