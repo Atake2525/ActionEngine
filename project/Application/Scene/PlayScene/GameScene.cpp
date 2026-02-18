@@ -38,8 +38,11 @@ void GameScene::Initialize() {
     stageObject->Initialize();
     stageObject->SetModel("Resources/Model/obj/Stage/TutorialStage", "TutorialStage.obj", true);
 
-    player_ = make_unique<ActionPlayer>();
-    player_->Initialize(camera.get(), stage->GetJsonName());
+    /*player_ = make_unique<ActionPlayer>();
+    player_->Initialize(camera.get(), stage->GetJsonName());*/
+
+    m_pPlayer = make_unique<Player>();
+    m_pPlayer->Initialize(camera.get(), stage->GetJsonName());
 
     GameTime::GetInstance()->SetDeltaPoint();
     FadeManager::GetInstance()->FadeIn(1.0f);
@@ -54,7 +57,8 @@ void GameScene::Update() {
 
     stageObject->Update();
 
-    player_->Update();
+    //player_->Update();
+    m_pPlayer->Update();
 
     if (input->TriggerKey(DIK_ESCAPE))
     {
@@ -140,4 +144,5 @@ void GameScene::Draw() {
 }
 
 void GameScene::Finalize() {
+    stage->Finalize();
 }

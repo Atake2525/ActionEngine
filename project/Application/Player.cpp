@@ -244,7 +244,7 @@ void Player::UpdateParkourState()
     if (!m_onGround)
     {
         AABB pAABB = m_playerAABB;
-        pAABB += m_velocity.translate;
+        pAABB += Vector3{ m_velocity.translate.x, 0.0f, m_velocity.translate.z };
         // 落下中かつ壁走り用のオブジェクトに衝突している時に壁走り
         if (!m_wallRunning && CollisionManager::GetInstance()->IsCollisionObjectForAABB(pAABB, true) && m_velocity.translate.y < 0.0f)
         {
@@ -255,7 +255,7 @@ void Player::UpdateParkourState()
             m_walkState = PlayerWalkState::WallRun;
         }
         // ウォールランの終了を確認する
-        pAABB = m_playerAABB + m_wallPenetration;
+        pAABB += m_wallPenetration;
         // 現在の位置(AABB)からウォールラン中の壁の方向に移動させ衝突しているかを判定する
         // 判定していなければウォールランを終了する
         if (m_wallRunning && !CollisionManager::GetInstance()->IsCollisionObjectForAABB(pAABB, true))
@@ -342,7 +342,7 @@ void Player::Move() {
     }
     else
     {
-        m_velocity.translate = { m_moveAmount.x * m_delta, m_velocity.translate.y, m_moveAmount.y * m_delta };
+        m_velocity.translate = { m_wallRunDirection.x * m_delta, m_velocity.translate.y, m_wallRunDirection.z * m_delta };
         m_playerAABB += m_velocity.translate;
     }
 }
@@ -490,9 +490,10 @@ void Player::WallRun()
         // ウォールランの開始フレームの情報から移動方向を決める
         // ウォールラン用のオブジェクトとの貫通量を取得
         AABB pAABB = m_playerAABB;
-        pAABB += m_velocity.translate;
+        pAABB += Vector3{ m_velocity.translate.x, 0.0f, m_velocity.translate.z };
         m_wallPenetration = CollisionManager::GetInstance()->GetPenetrationForAABB(pAABB, true);
 
+        m_wallRunRotateBefore = m_cameraTransform.rotate.y;
 
         // 現状ウォールランの移動量が斜めになることは無いので貫通量と視点方向から移動方向を算出
         Transform affine = Transform::Default;
@@ -521,12 +522,11 @@ void Player::WallRun()
             m_wallRunDirection.x = Sign(wallpenetration.z) * Sign(walkDirection.z);
             m_wallRunDirection.z = Sign(wallpenetration.x) * Sign(walkDirection.x);
         }
-
+        m_wallRunDirection *= m_runSpeed;
         m_isStartWallRun = true;
     }
 
-    m_moveAmount = { m_wallRunDirection.x, m_wallRunDirection.z };
-    m_moveAmount = m_moveAmount * m_runSpeed;
+    m_moveAmount = { fabs(m_wallRunDirection.x), fabs(m_wallRunDirection.z) };;
 
 
     // 現在の速度を計算
@@ -581,7 +581,6 @@ void Player::UpdateCameraParent() {
     //m_pModel->SetParent(m_pCamera->GetWorldMatrix());
 }
 
-#ifndef NDEBUG
 void Player::ApplyCameraEffect()
 {
     // Fov変更処理の実装
@@ -615,15 +614,15 @@ void Player::ApplyCameraEffect()
         if (!m_completeGetRotateInfo)
         {
             m_completeGetRotateInfo = true;
-            // 回転かい
             // 回転後角度を代入 回転後の角度は移動方向、壁がプレイヤーから左右どちらにあるかによって変わるのでそれも考慮する
-            m_wallRunRotateBefore = m_wallRunRotateAngle * Sign(m_wallRunDirection.z) * Sign(m_wallPenetration.x) * -Sign(m_wallPenetration.z);
+            m_wallRunRotateAfter = m_wallRunRotateAngle * Sign(m_wallRunDirection.z) * Sign(m_wallPenetration.x) * -Sign(m_wallPenetration.z);
 
 
         }
     }
 
 }
+#ifndef NDEBUG
 void Player::UpdateDebugUI() {
 
     if (!ImGui::Begin("Player Debug")) {
@@ -693,6 +692,10 @@ void Player::UpdateDebugUI() {
         Vector3 penetration = CollisionManager::GetInstance()->GetPenetration();
         ImGui::Text("Penetration: (%.2f, %.2f, %.2f)",
             penetration.x, penetration.y, penetration.z);
+
+        AABB aabb = m_playerAABB + Vector3{ m_velocity.translate.x, 0.0f, m_velocity.translate.z };
+        penetration = CollisionManager::GetInstance()->GetPenetrationForAABB(aabb, true);
+        ImGui::Text("WallRun Penetration: (%.2f, %.2f, %.2f)", penetration.x, penetration.y, penetration.z);
 
         // Transform
         if (ImGui::TreeNode("Transform")) {
