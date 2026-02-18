@@ -249,7 +249,10 @@ void Player::UpdateParkourState()
         if (!m_wallRunning && CollisionManager::GetInstance()->IsCollisionObjectForAABB(pAABB, true) && m_velocity.translate.y < 0.0f)
         {
             m_wallRunning = true;
-            //m_walkState = PlayerWalkState::WallDash;
+        }
+        if (m_wallRunning)
+        {
+            m_walkState = PlayerWalkState::WallRun;
         }
         // ウォールランの終了を確認する
         pAABB = m_playerAABB + m_wallPenetration;
@@ -273,8 +276,8 @@ void Player::HandleInput()
     {
     case Player::ControlMode::KeyboardMouse:
         // キー入力による移動
-        m_moveInput.y += -Input::GetInstance()->PushKeyInt(DIK_W);
-        m_moveInput.y += Input::GetInstance()->PushKeyInt(DIK_S);
+        m_moveInput.y += Input::GetInstance()->PushKeyInt(DIK_W);
+        m_moveInput.y += -Input::GetInstance()->PushKeyInt(DIK_S);
         m_moveInput.x += -Input::GetInstance()->PushKeyInt(DIK_A);
         m_moveInput.x += Input::GetInstance()->PushKeyInt(DIK_D);
         m_jumpInput += Input::GetInstance()->TriggerKeyInt(DIK_SPACE);
@@ -293,6 +296,7 @@ void Player::HandleInput()
 
 void Player::Rotate() {
     Vector3 rotate = Vector3::Zero;
+    m_cameraTransform.rotate = m_pCamera->GetTransform().rotate;
     // カメラ処理の実装
     // マウスの移動量に基づいてカメラの回転を更新    演出実装時に加速度を付けるなどの調整を行う予定
     switch (m_controlMode)
@@ -332,7 +336,7 @@ void Player::Move() {
         Transform dir = Transform::Default;
         dir.rotate.y = m_moveDirection.y;
         Matrix4x4 rotMat = MakeAffineMatrix(dir);
-        Vector3 moveDir = TransformNormal({ m_moveAmount.x, 0.0f, -m_moveAmount.y }, rotMat);
+        Vector3 moveDir = TransformNormal({ m_moveAmount.x, 0.0f, m_moveAmount.y }, rotMat);
         m_velocity.translate = { moveDir.x * m_delta, m_velocity.translate.y, moveDir.z * m_delta };
         m_playerAABB += m_velocity.translate;
     }
@@ -484,8 +488,6 @@ void Player::WallRun()
     if (!m_isStartWallRun)
     {
         // ウォールランの開始フレームの情報から移動方向を決める
-        m_wallRunStartRotate = m_cameraTransform.rotate;
-
         // ウォールラン用のオブジェクトとの貫通量を取得
         AABB pAABB = m_playerAABB;
         pAABB += m_velocity.translate;
@@ -583,6 +585,7 @@ void Player::UpdateCameraParent() {
 void Player::ApplyCameraEffect()
 {
     // Fov変更処理の実装
+    m_fov = m_pCamera->GetfovY();
     m_fovPre = m_fov;
     // 移動速度がダッシュ速度ならFovを広げる
 
@@ -606,7 +609,19 @@ void Player::ApplyCameraEffect()
     m_pCamera->SetFovY(m_fov);
 
 
+    // ウォールダッシュをしたときのカメラの傾き
+    if (m_wallRunning)
+    {
+        if (!m_completeGetRotateInfo)
+        {
+            m_completeGetRotateInfo = true;
+            // 回転かい
+            // 回転後角度を代入 回転後の角度は移動方向、壁がプレイヤーから左右どちらにあるかによって変わるのでそれも考慮する
+            m_wallRunRotateBefore = m_wallRunRotateAngle * Sign(m_wallRunDirection.z) * Sign(m_wallPenetration.x) * -Sign(m_wallPenetration.z);
 
+
+        }
+    }
 
 }
 void Player::UpdateDebugUI() {
