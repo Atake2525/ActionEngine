@@ -131,5 +131,6 @@ void TutorialStage::DrawBackSprite()
 void TutorialStage::Finalize()
 {
     CollisionManager::GetInstance()->DeleteCollision(stageObject.get());
+    CollisionManager::GetInstance()->DeleteWallDashCollision(wallDashObject.get());
     JsonLoader::GetInstance()->DeleteJson("TutorialStage");
 }
