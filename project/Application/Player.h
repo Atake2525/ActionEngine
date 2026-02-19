@@ -33,6 +33,9 @@ private:
     ControlMode m_controlMode = ControlMode::KeyboardMouse;
 
 public:
+
+    ~Player();
+
     /// <summary>
     /// 初期化処理
     /// </summary>
@@ -207,6 +210,9 @@ private: // プレイヤーモデル
     Transform m_cameraTransform = Transform::Default;
     Transform m_cameraVelocity = Transform::Default;
 
+    // モデルの身長から目の位置までの割合
+    float m_eyeHeight = 0.09f;
+
     // Fov補間用タイマー
     bool m_isFovChange = false;
     float m_fovBefore = 0.0f;
@@ -215,8 +221,8 @@ private: // プレイヤーモデル
     float m_fovPre = 0.0f;
     float m_fovChangeTimer = 0.0f;    // FOV補間用タイマー
     float m_fovChangeTime = 0.1f;     // FOV補間時間
-    float m_fovDefault = 1.0f; // デフォルトFOV
-    float m_fovRun = 1.3f;    // ダッシュ時FOV
+    float m_fovDefault = 1.6f; // デフォルトFOV
+    float m_fovRun = 1.9f;    // ダッシュ時FOV
 
 
     //==================================================

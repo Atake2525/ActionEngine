@@ -15,6 +15,11 @@ using namespace std;
 // 斜め移動の速度補間
 constexpr float INV_SQRT2 = 0.70710678f; // 1 / sqrt(2)
 
+Player::~Player()
+{
+    CollisionManager::GetInstance()->DeleteCollisionTarget("Player");
+}
+
 void Player::Initialize(Camera* camera, const std::string& jsonName)
 {
     // カメラのセット
@@ -46,7 +51,7 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
     CollisionManager::GetInstance()->AddCollisionTarget(m_playerAABB, "Player");
 
     // カメラの高さをモデルの高さに合わせて調整 (ちょっとだけ低くする)
-    m_cameraTransform.translate.y = m_playerAABB.max.y - m_transform.translate.y - 0.05f;
+    m_cameraTransform.translate.y = m_playerAABB.max.y - m_transform.translate.y - AABB::GetSize(m_playerAABB).y * m_eyeHeight;
 
     // コントロールモードの初期設定
     if (Input::GetInstance()->IsConnectedController())
