@@ -422,6 +422,55 @@ const float CollisionManager::GetGroundDistanceForAABB(const AABB& aabb, bool wa
 	return distance;
 }
 
+const std::vector<AABB> CollisionManager::GetCollisionObjectAABBsForAABB(const AABB& aabb, bool wallRunCollision) const
+{
+	std::vector<AABB> result;
+	std::vector<Object3d*> colObj = collisionObject;
+	if (wallRunCollision)
+	{
+		colObj = wallDashCollisionObject;
+	}
+	for (const auto& object : colObj) {
+		// ターゲット(プレイヤーなど)とオブジェクトの距離を全体のAABBから求めて離れていればcontinue
+		Vector3 centerA = CenterAABB(aabb);
+		Vector3 centerB = CenterAABB(object->GetAABB());
+		Vector3 d = centerA - centerB;
+		float targetDistance = Dot(d, d);
+
+		// オブジェクトの大きさを求める
+		AABB objectAABB = object->GetAABB();
+		// 最近接点とオブジェクトの中心座標の距離を取ってプレイヤーからオブジェクトまでの直線の距離を求める
+		Vector3 objectD = objectAABB.min - objectAABB.max;
+		float objectSize = Dot(objectD, objectD);
+		// オブジェクトサイズよりも距離が近かったら処理をする(余裕をもって少しだけ広く)
+		if (targetDistance < objectSize + 0.0f)
+		{
+			// オブジェクトのメッシュごとのAABBを取得する
+			const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
+			for (AABB terrainAABB : terrains)
+			{
+				terrainAABB = AddSize(terrainAABB, 0.1f);
+				AABB target = aabb;
+				//Vector3 centerTarget = CenterAABB(target);
+				//target.min = { centerTarget.x /*- 0.5f*/, target.min.y, centerTarget.z /*- 0.5f*/ };
+				//target.max = { centerTarget.x /*+ 0.5f*/, target.max.y, centerTarget.z /*+ 0.5f*/ };
+
+				// ターゲットとオブジェクトが貫通していたら実行
+				if (CollisionAABB(target, terrainAABB))
+				{
+					result.push_back(terrainAABB);
+				}
+			}
+		}
+		else
+		{
+			// 離れていればcontinue
+			continue;
+		}
+	}
+	return result;
+}
+
 const float CollisionManager::GetGroundMAXDistance(const std::string& targetName, bool wallDashCollision) const
 {
 	auto target = collisionTarget.find(targetName);
@@ -517,7 +566,7 @@ const float CollisionManager::GetMaxGroundDistanceForAABB(const AABB& aabb, bool
 	return maxDistance;
 }
 
-const bool CollisionManager::IsCollisionObjectForAABB(const AABB& aabb, bool wallDashCollision) const
+const bool CollisionManager::IsCollisionObjectForAABB(const AABB& aabb, bool wallDashCollision, const AABB& noSearchAABB) const
 {
 	std::vector<Object3d*> colObj = collisionObject;
 	if (wallDashCollision)
@@ -544,7 +593,7 @@ const bool CollisionManager::IsCollisionObjectForAABB(const AABB& aabb, bool wal
 			for (AABB terrainAABB : terrains)
 			{
 				// ターゲットとオブジェクトが貫通していたら実行
-				if (CollisionAABB(aabb, terrainAABB))
+				if (CollisionAABB(aabb, terrainAABB) && (noSearchAABB.min != terrainAABB.min && noSearchAABB.max != terrainAABB.max))
 				{
 					return true;
 				}

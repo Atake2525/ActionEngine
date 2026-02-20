@@ -2,6 +2,7 @@
 #include <memory>
 #pragma once
 #include <string>
+#include "Capsule.h"
 
 class Camera;
 class Input;
@@ -36,6 +37,8 @@ public:
 
     ~Player();
 
+    const Capsule GetCapsule() { return m_pModel->GetCapsule(); }
+
     /// <summary>
     /// 初期化処理
     /// </summary>
@@ -68,6 +71,12 @@ private: // プレイヤーステート管理
     /// しゃがみ状態を解除できるかどうかを確認する(ステート)
     /// </summary>
     void CanUncrouch();
+
+    /// <summary>
+    /// よじ登りができるかを確認する
+    /// </summary>
+    /// <returns></returns>
+    const bool CanClimbing();
 
     /// <summary>
     /// 入力の処理
@@ -195,6 +204,7 @@ private: // プレイヤーモデル
     //================
     // ウォールラン関連
     //================
+    AABB m_wallRunningObjectAABB = AABB::Zero;
     bool m_wallRunning = false;
     float m_wallRunGravity = -0.3f;
     Vector3 m_wallRunDirection = Vector3::Zero;
@@ -220,13 +230,18 @@ private: // プレイヤーモデル
     //================
     bool m_sliding = false;
 
+    //================
+    // よじ登り関連
+    //================
+    bool m_climbing = false;
+
     // 移動速度
     float m_moveSpeed = 1.0f;
     float m_decelMoveSpeed = 1.0f;
     float m_moveSpeedPre = 1.0f;
-    float m_walkSpeed = 8.0f;
-    float m_runSpeed = 14.0f;
-    float m_crounchSpeed = 5.0f;
+    float m_walkSpeed = 6.0f;
+    float m_runSpeed = 9.0f;
+    float m_crounchSpeed = 4.0f;
     float m_playerSpeed = 0.0f; // 現在の速度
     float m_jumpForce = 0.045f; // ジャンプ力
 

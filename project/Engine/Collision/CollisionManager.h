@@ -74,6 +74,9 @@ public:
 
 	const float GetGroundDistanceForAABB(const AABB& aabb, bool wallDashCollision = false) const;
 
+	// 衝突しているオブジェクトのAABBを変えす(複数のオブジェクトに衝突している可能性を考えてvectorで)
+	const std::vector<AABB> GetCollisionObjectAABBsForAABB(const AABB& aabb, bool wallRunCollision = false) const;
+
 	// 対象と地面との最大距離を求める
 	const float GetGroundMAXDistance(const std::string& targetName, bool wallDashCollision = false) const;
 
@@ -81,7 +84,7 @@ public:
     const float GetMaxGroundDistanceForAABB(const AABB& aabb, bool wallDashCollision = false) const;
 
 	// 対象がオブジェクトに衝突しているか
-	const bool IsCollisionObjectForAABB(const AABB& aabb, bool wallDashCollision = false) const;
+	const bool IsCollisionObjectForAABB(const AABB& aabb, bool wallDashCollision = false, const AABB& noSearchAABB = AABB::Zero) const;
 
 	const Vector3 CheckPenetrationAmount(const AABB& aabb);
 

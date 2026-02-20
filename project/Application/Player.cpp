@@ -46,6 +46,7 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
     m_pModel->Initialize();
     m_pModel->SetModel("Resources/Model/obj/Player", "PlayerCollision.obj", false);
     m_pModel->SetTransform(m_transform);
+    m_pModel->CreateCapsule();
     m_playerAABB = m_pModel->GetAABB();
     m_playerAABB += m_transform.translate;
     m_playerHeight = AABB::GetSize(m_playerAABB).y;
@@ -192,6 +193,7 @@ void Player::UpdateState()
     if (!m_onGround && m_velocity.translate.y <= 0.0f && groundDistance <= 0.01f)
     {
         m_onGround = true;
+        m_wallRunningObjectAABB = AABB::Zero;
     }
 
     // コントロールモードに応じた入力処理
@@ -259,8 +261,12 @@ void Player::UpdateParkourState()
         AABB pAABB = m_playerAABB;
         pAABB += Vector3{ m_velocity.translate.x, 0.0f, m_velocity.translate.z };
         // 落下中かつ壁走り用のオブジェクトに衝突している時に壁走り
-        if (!m_wallRunning && CollisionManager::GetInstance()->IsCollisionObjectForAABB(pAABB, true) && m_velocity.translate.y < 0.0f)
+        if (!m_wallRunning && CollisionManager::GetInstance()->IsCollisionObjectForAABB(pAABB, true, m_wallRunningObjectAABB) && m_velocity.translate.y < 0.0f)
         {
+            if (CollisionManager::GetInstance()->GetCollisionObjectAABBsForAABB(pAABB, true).size() != 0)
+            {
+                m_wallRunningObjectAABB = CollisionManager::GetInstance()->GetCollisionObjectAABBsForAABB(pAABB, true)[0];
+            }
             m_wallRunning = true;
         }
         if (m_wallRunning)
@@ -289,6 +295,11 @@ void Player::CanUncrouch()
     {
         m_walkState = PlayerWalkState::Crounch;
     }
+}
+
+const bool Player::CanClimbing()
+{
+    return false;
 }
 
 void Player::HandleInput()
@@ -334,8 +345,6 @@ void Player::Rotate() {
         rotate = Input::GetInstance()->GetRightJoyStickPos3(0.0f) * 0.00005f;
         break;
     }
-    /*m_transform.rotate.x += rotate.y;
-    m_transform.rotate.y += rotate.x;*/
 
     m_cameraTransform.rotate.x += rotate.y;
     m_cameraTransform.rotate.y += rotate.x;
@@ -777,7 +786,7 @@ void Player::ApplyCameraEffect()
                 wallRunPenetration = -1.0f;
             }
             // 回転後角度を代入 回転後の角度は移動方向、壁がプレイヤーから左右どちらにあるかによって変わるのでそれも考慮する
-            m_wallRunRotateAfter = m_wallRunRotateAngle * Sign(signWallRunDirection.z) * Sign(signWallRunDirection.x) * Sign(wallRunPenetration);
+            m_wallRunRotateAfter = m_wallRunRotateAngle * Sign(-signWallRunDirection.z) * Sign(-signWallRunDirection.x) * -1.0f;
 
 
         }
