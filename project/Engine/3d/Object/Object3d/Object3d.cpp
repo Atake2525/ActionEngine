@@ -164,6 +164,7 @@ void Object3d::Update() {
 	cullingTemplateData->drawHeight = data.drawHeight;
 
 	UpdateAABB();
+	UpdateCapsule();
 
 }
 

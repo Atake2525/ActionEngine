@@ -67,7 +67,7 @@ private:
 
 	std::unique_ptr<ActionPlayer> actionPlayer;
 
-	std::unique_ptr<Goal> goal;
+	std::unique_ptr<Object3d> box;
 
 	std::unique_ptr<BaseStage> stage;
 

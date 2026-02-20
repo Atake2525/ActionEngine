@@ -56,7 +56,11 @@ inline Vector3 operator+=(Vector3& v, const Vector3& n) {
 inline const Vector3 operator-(const Vector3& a, const Vector3& b) { return { a.x - b.x, a.y - b.y, a.z - b.z }; }
 inline const Vector3 operator+(const Vector3& a, const Vector3& b) { return { a.x + b.x, a.y + b.y, a.z + b.z }; }
 inline const Vector3 operator*(const Vector3& a, const Vector3& b) { return { a.x * b.x, a.y * b.y, a.z * b.z }; }
+inline const Vector3 operator+(const Vector3& v, float f) { return { v.x + f, v.y + f, v.z + f }; }
+inline const Vector3 operator-(const Vector3& v, float f) { return { v.x - f, v.y - f, v.z - f }; }
 inline const Vector3 operator*(const Vector3& v, float f) { return { v.x * f, v.y * f, v.z * f }; }
+inline const Vector3 operator-(float f, const Vector3& v) { return { f - v.x, f - v.y, f - v.z }; }
+
 
 inline bool operator!=(const Vector3& v, const float f) {
 	if (v.x != f && v.y != f && v.z != f)
@@ -76,6 +80,14 @@ inline bool operator!=(const Vector3& v1, const Vector3& v2) {
 
 inline bool operator==(const Vector3& v, const float f) {
 	if (v.x == f && v.y == f && v.z == f)
+	{
+		return true;
+	}
+	return false;
+}
+
+inline bool operator==(const Vector3& v1, const Vector3& v2) {
+	if (v1.x == v2.x && v1.y == v2.y && v1.z == v2.z)
 	{
 		return true;
 	}

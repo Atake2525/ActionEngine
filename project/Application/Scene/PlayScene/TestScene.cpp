@@ -8,6 +8,7 @@
 #include "GameTime.h"
 #include "StageCount.h"
 #include "DebugLineBase.h"
+#include "Collision.h"
 
 using namespace Logger;
 using namespace std;
@@ -56,8 +57,10 @@ void TestScene::Initialize() {
 	//JsonLoader::GetInstance()->LoadJson("Resources/Json/test.json", "test", false);
 	JsonLoader::GetInstance()->LoadJson("Resources/Json/wp1.json", "wp1", false);
 
-	goal = make_unique<Goal>();
-	goal->Initialize("t");
+	box = make_unique<Object3d>();
+	box->Initialize();
+	box->SetModel("Resources/Debug/obj", "box.obj");
+	box->SetTranslate({ 0.0f, 35.0f, 10.0f });
 
 	Audio::GetInstance()->LoadMP3("Resources/sekiranun.mp3", "bgm", 1.0f);
 
@@ -90,8 +93,25 @@ void TestScene::Update() {
 	stage->Update();
 
 
+	Vector3 penetration = Vector3::Zero;
+	if (CollisionCapsuleAABB(player->GetCapsule(), box->GetAABB()))
+	{
+		box->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
+		penetration = CapsuleAABBPenetration(player->GetCapsule(), box->GetAABB());
+		Vector3 transalte = box->GetTranslate();
+		transalte += penetration;
+		//box->SetTranslate(transalte);
+	}
+	else
+	{
+		box->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+	}
+	box->Update();
 	//goal->Update(player->GetAABB());
 
+	ImGui::Begin("capsule");
+	ImGui::DragFloat3("penetration", &penetration.x, 0.1f);
+	ImGui::End();
 
 	bool flag = false;
 
@@ -125,7 +145,7 @@ void TestScene::Draw() {
 	Object3dBase::GetInstance()->ShaderDraw();
 
 	stage->DrawObject3d();
-	//goal->Draw();
+	box->Draw();
 	//player->Draw();
 
 	SkinningObject3dBase::GetInstance()->ShaderDraw();

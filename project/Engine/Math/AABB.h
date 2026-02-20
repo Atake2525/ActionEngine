@@ -7,6 +7,7 @@ struct AABB final
 	Vector3 min;
 	Vector3 max;
 
+	static const AABB Zero;
 	static const Vector3 GetSize(const AABB& aabb);
 	static const AABB MakeAABB(const Vector3& center, const Vector3& size);
 };
@@ -77,3 +78,5 @@ inline const AABB AABB::MakeAABB(const Vector3& center, const Vector3& size) {
 		.max{center.x + size.x * 0.5f, center.y + size.y * 0.5f, center.z + size.z * 0.5f}
 	};
 }
+
+inline const AABB AABB::Zero = AABB{ Vector3::Zero, Vector3::Zero };

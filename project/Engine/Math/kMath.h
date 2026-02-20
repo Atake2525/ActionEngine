@@ -17,10 +17,6 @@ Vector3& operator/=(Vector3& v1, const Vector3& v2);
 
 const Vector3 operator/(const Vector3& v1, const Vector3 v2);
 
-const Vector3 operator+(const Vector3& v1, const float f);
-
-const Vector3 operator-(const Vector3& v1, const float f);
-
 const Vector3 operator/(const Vector3& v1, const float f);
 
 //単位行列の作成
