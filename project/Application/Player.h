@@ -18,11 +18,11 @@ private:
 
     // プレイヤーの歩行状態
     enum class PlayerWalkState : int {
-        Walk     = 0,
-        Run      = 1,
-        Crounch  = 2,
+        Walk = 0,
+        Run = 1,
+        Crounch = 2,
         WallRun = 3,
-        Sliding  = 4,
+        Sliding = 4,
     };
 
     // コントロールモード
@@ -65,6 +65,11 @@ private: // プレイヤーステート管理
     void UpdateParkourState();
 
     /// <summary>
+    /// しゃがみ状態を解除できるかどうかを確認する(ステート)
+    /// </summary>
+    void CanUncrouch();
+
+    /// <summary>
     /// 入力の処理
     /// </summary>
     void HandleInput();
@@ -88,6 +93,11 @@ private: // プレイヤーステート管理
     /// ウォールラン処理
     /// </summary>
     void WallRun();
+
+    /// <summary>
+    /// スライディング処理
+    /// </summary>
+    void Sliding();
 
     /// <summary>
     /// ジャンプ処理
@@ -136,6 +146,9 @@ private: // プレイヤーモデル
     bool m_isSpeedDecel = false;
     float m_speedBefore = 0.0f; // 減速前の速度
     float m_speedAfter = 0.0f;  // 減速後の速度
+
+    float m_crouchTimer = 0.0f;
+    float m_crouchTime = 0.08f;
 
     //==================================================
     // モデル・カメラ・入力
@@ -193,6 +206,19 @@ private: // プレイヤーモデル
     float m_wallRunRotateAngle = SwapRadian(15.0f);
     float m_wallRunTimer = 0.0f;
     float m_wallRunTime = 0.14f;
+
+    //================
+    // しゃがみ関連
+    //================
+    float m_playerHeight = 0.0f;
+    float m_cameraHeight = 0.0f;
+    float m_crouchHeight = 0.0f;
+    float m_crouchHeightOffset = -0.8f;
+
+    //================
+    // スライディング関連
+    //================
+    bool m_sliding = false;
 
     // 移動速度
     float m_moveSpeed = 1.0f;

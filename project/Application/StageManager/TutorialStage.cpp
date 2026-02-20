@@ -15,13 +15,13 @@ void TutorialStage::Initialize()
     stageObject->SetModel("Resources/Model/obj/Stage/TutorialStage", "TutorialStage.obj", true);
     CollisionManager::GetInstance()->AddCollision(stageObject.get());
 
-    wallDashObject = make_unique<Object3d>();
-    wallDashObject->Initialize();
-    wallDashObject->SetModel("Resources/Model/obj/Stage/TutorialStage", "TutorialStageWallDashObject.obj", true);
-    CollisionManager::GetInstance()->AddCollision(wallDashObject.get());
-    CollisionManager::GetInstance()->AddWallDashColliison(wallDashObject.get());
+    wallRunObject = make_unique<Object3d>();
+    wallRunObject->Initialize();
+    wallRunObject->SetModel("Resources/Model/obj/Stage/TutorialStage", "TutorialStageWallDashObject.obj", true);
+    CollisionManager::GetInstance()->AddCollision(wallRunObject.get());
+    CollisionManager::GetInstance()->AddWallDashColliison(wallRunObject.get());
 
-    wallDashObject->SetColor({ 1.0f, 0.5f, 0.5f, 1.0f });
+    wallRunObject->SetColor({ 1.0f, 0.5f, 0.5f, 1.0f });
 
     // トラップの初期化
     trap = make_unique<Trap>();
@@ -52,7 +52,7 @@ void TutorialStage::Update()
 {
     stageObject->Update();
 
-    wallDashObject->Update();
+    wallRunObject->Update();
 
     trap->Update();
 
@@ -109,7 +109,7 @@ void TutorialStage::Update()
 void TutorialStage::DrawObject3d()
 {
     stageObject->Draw();
-    wallDashObject->Draw();
+    wallRunObject->Draw();
     trap->Draw();
     goal->Draw();
     for (int i = 0; i < 4; i++)
@@ -131,6 +131,7 @@ void TutorialStage::DrawBackSprite()
 void TutorialStage::Finalize()
 {
     CollisionManager::GetInstance()->DeleteCollision(stageObject.get());
-    CollisionManager::GetInstance()->DeleteWallDashCollision(wallDashObject.get());
+    CollisionManager::GetInstance()->DeleteCollision(wallRunObject.get());
+    CollisionManager::GetInstance()->DeleteWallDashCollision(wallRunObject.get());
     JsonLoader::GetInstance()->DeleteJson("TutorialStage");
 }
