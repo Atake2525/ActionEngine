@@ -64,8 +64,15 @@ public:
 
     const Vector3 GetPenetrationForAABB(const AABB& aabb, bool wallDashCollision = false);
 
+	/// <summary>
+	/// ３方向全ての貫通量をreturn
+	/// </summary>
+	const Vector3 GetAllPenetrationForAABB(const AABB& aabb, bool wallDashCollision = false);
+
 	// 対象と地面との距離を求める
 	const float GetGroundDistance(const std::string& targetName, bool wallDashCollision = false) const;
+
+	const float GetGroundDistanceForAABB(const AABB& aabb, bool wallDashCollision = false) const;
 
 	// 対象と地面との最大距離を求める
 	const float GetGroundMAXDistance(const std::string& targetName, bool wallDashCollision = false) const;

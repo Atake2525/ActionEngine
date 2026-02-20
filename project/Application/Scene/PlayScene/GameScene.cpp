@@ -60,6 +60,7 @@ void GameScene::Update() {
     //player_->Update();
     m_pPlayer->Update();
 
+#ifndef NDEBUG
     if (input->TriggerKey(DIK_ESCAPE))
     {
         finished = true;
@@ -69,6 +70,11 @@ void GameScene::Update() {
     {
         cursorshow = !cursorshow;
     }
+#else
+
+#endif // !NDEBUG
+
+    
     input->ShowMouseCursor(cursorshow);
 
     if (input->TriggerKey(DIK_1))

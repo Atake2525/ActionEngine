@@ -903,6 +903,11 @@ bool Input::TriggerButton(Controller button) {
 			result = Controller::RightStick;
 			break;
 		}
+
+		if (result == button)
+		{
+			break;
+		}
 	}
 
 	for (int i = 0; i < 10; i++)
@@ -943,6 +948,11 @@ bool Input::TriggerButton(Controller button) {
 			break;
 		case 9:
 			resultPre = Controller::RightStick;
+			break;
+		}
+
+		if (resultPre == button)
+		{
 			break;
 		}
 	}
@@ -1025,6 +1035,11 @@ bool Input::ReturnButton(Controller button) {
 			result = Controller::RightStick;
 			break;
 		}
+
+		if (result == button)
+		{
+			break;
+		}
 	}
 
 	for (int i = 0; i < 10; i++)
@@ -1065,6 +1080,11 @@ bool Input::ReturnButton(Controller button) {
 			break;
 		case 9:
 			resultPre = Controller::RightStick;
+			break;
+		}
+
+		if (resultPre == button)
+		{
 			break;
 		}
 	}

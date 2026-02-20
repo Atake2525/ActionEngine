@@ -40,7 +40,7 @@ public:
 private:
     // ステージに必要なものの宣言
     std::unique_ptr<Object3d> stageObject;
-    std::unique_ptr<Object3d> wallDashObject;
+    std::unique_ptr<Object3d> wallRunObject;
     std::unique_ptr<Trap> trap;
     std::unique_ptr<Goal> goal;
 

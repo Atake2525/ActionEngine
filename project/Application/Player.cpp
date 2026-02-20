@@ -44,14 +44,16 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
     // プレイヤーモデルの初期化
     m_pModel = make_unique<Object3d>();
     m_pModel->Initialize();
-    m_pModel->SetModel("Resources/Model/obj/Player", "PlayerCollision.obj", true);
+    m_pModel->SetModel("Resources/Model/obj/Player", "PlayerCollision.obj", false);
     m_pModel->SetTransform(m_transform);
     m_playerAABB = m_pModel->GetAABB();
     m_playerAABB += m_transform.translate;
+    m_playerHeight = AABB::GetSize(m_playerAABB).y;
     CollisionManager::GetInstance()->AddCollisionTarget(m_playerAABB, "Player");
 
     // カメラの高さをモデルの高さに合わせて調整 (ちょっとだけ低くする)
     m_cameraTransform.translate.y = m_playerAABB.max.y - m_transform.translate.y - AABB::GetSize(m_playerAABB).y * m_eyeHeight;
+    m_cameraHeight = m_cameraTransform.translate.y;
 
     // コントロールモードの初期設定
     if (Input::GetInstance()->IsConnectedController())
@@ -224,6 +226,12 @@ void Player::UpdateState()
         break;
     }
 
+    // crouchを解除しようとしたときに可能かを確認する
+    if (m_walkStatePre == PlayerWalkState::Crounch)
+    {
+        CanUncrouch();
+    }
+
     UpdateParkourState();
 }
 
@@ -231,15 +239,20 @@ void Player::UpdateParkourState()
 {
 
     // 前方への移動量が一定以上の場合にしゃがみ入力でスライディング
-    if (m_walkState == PlayerWalkState::Crounch) {
-        // パルクールが有効で移動量が一定以上の場合
-        float moveSpeed = Length({ m_velocity.translate.x, 0.0f, m_velocity.translate.z }) / m_delta;
-        if (moveSpeed > m_walkSpeed)
-        {
-            // スライディング入力
-            m_walkState = PlayerWalkState::Sliding;
-        }
-    }
+    //if (m_walkState == PlayerWalkState::Crounch) {
+    //    // パルクールが有効で移動量が一定以上の場合
+    //    float moveSpeed = Length({ m_velocity.translate.x, 0.0f, m_velocity.translate.z }) / m_delta;
+    //    if (moveSpeed > m_runSpeed)
+    //    {
+    //        // スライディング入力
+    //        m_walkState = PlayerWalkState::Sliding;
+    //        m_sliding = true;
+    //    }
+    //    else
+    //    {
+    //        m_sliding = false;
+    //    }
+    //}
 
     if (!m_onGround)
     {
@@ -266,6 +279,18 @@ void Player::UpdateParkourState()
     }
 }
 
+void Player::CanUncrouch()
+{
+    AABB pAABB = m_playerAABB;
+    pAABB.max.y = pAABB.min.y + m_playerHeight;
+    // オブジェクトと上方向に貫通していたらcrouchを続けるようにする
+    float penetration = CollisionManager::GetInstance()->GetAllPenetrationForAABB(pAABB).y;
+    if (penetration != 0.0f)
+    {
+        m_walkState = PlayerWalkState::Crounch;
+    }
+}
+
 void Player::HandleInput()
 {
     // 移動入力のリセット
@@ -286,7 +311,8 @@ void Player::HandleInput()
     case Player::ControlMode::Gamepad:
         // ジョイスティック入力による移動
         m_moveInput = input->GetJoyStickVelocity();
-        m_jumpInput += Input::GetInstance()->PushButton(Controller::A);
+        m_moveInput.y *= -1.0f;
+        m_jumpInput += Input::GetInstance()->TriggerButton(Controller::A);
 
         break;
     }
@@ -345,16 +371,18 @@ void Player::Move() {
         m_velocity.translate = { m_wallRunDirection.x * m_delta, m_velocity.translate.y, m_wallRunDirection.z * m_delta };
         m_playerAABB += m_velocity.translate;
     }
+    m_playerAABB.max.y = m_playerAABB.min.y + m_playerHeight + m_crouchHeight;
 }
 
 void Player::Walk()
 {
+    m_crouchHeight = 0.0f;
     // m_moveInput(入力)に基づいてプレイヤーの移動方向を決定
     if (m_moveInput.x != 0.0f || m_moveInput.y != 0.0f)
     {
         // 入力中は移動量を上げる
-        m_moveAmount.x += Sign(m_moveInput.x) * (m_delta / m_maxSpeedTime * m_walkSpeed);
-        m_moveAmount.y += Sign(m_moveInput.y) * (m_delta / m_maxSpeedTime * m_walkSpeed);
+        m_moveAmount.x += Sign(m_moveInput.x) * (m_delta / m_maxSpeedTime * m_runSpeed);
+        m_moveAmount.y += Sign(m_moveInput.y) * (m_delta / m_maxSpeedTime * m_runSpeed);
     }
 
     m_moveSpeedPre = m_moveSpeed;
@@ -372,8 +400,17 @@ void Player::Walk()
         break;
     case Player::PlayerWalkState::Crounch:
         speed = m_crounchSpeed;
+        m_crouchTimer += m_delta / m_crouchTime;
+
         break;
     }
+    if (m_crouchTimer != 0.0f && m_walkState != PlayerWalkState::Crounch)
+    {
+        m_crouchTimer -= m_delta / m_crouchTime;
+    }
+
+    m_crouchTimer = clamp(m_crouchTimer, 0.0f, 1.0f);
+    m_crouchHeight = Lerp(0.0f, m_crouchHeightOffset, m_crouchTimer);
 
     // 移動速度の補間(速度が上がる時には即座に反映、速度が下がる時には時間をかけて反映)
     if (speed < m_moveSpeedPre && !m_isSpeedDecel)
@@ -531,6 +568,102 @@ void Player::WallRun()
     m_playerSpeed = max(fabs(m_moveAmount.x), fabs(m_moveAmount.y));
 }
 
+void Player::Sliding()
+{
+    m_moveSpeedPre = m_moveSpeed;
+
+    float speed = m_crounchSpeed;
+
+    // プレイヤーの歩行状態に応じて移動速度を設定
+
+    // 移動速度の補間(速度が上がる時には即座に反映、速度が下がる時には時間をかけて反映)
+    if (speed < m_moveSpeedPre && !m_isSpeedDecel)
+    {
+        m_speedBefore = m_moveSpeedPre;
+        m_speedAfter = speed;
+        m_isSpeedDecel = true;
+    }
+    if (m_moveSpeed < speed)
+    {
+        m_moveSpeed = speed;
+        m_isSpeedDecel = false;
+        m_moveSpeedTimer = 0.0f;
+    }
+
+    // 移動速度減速中のタイマー処理
+    if (m_isSpeedDecel)
+    {
+        m_moveSpeedTimer += m_delta / m_speedDecelTime;
+        float t = clamp(m_moveSpeedTimer, 0.0f, 1.0f);
+        m_moveSpeed = Lerp(m_speedBefore, m_speedAfter, t);
+    }
+    // 減速が完了したらフラグとタイマーをリセット
+    if (m_moveSpeedTimer >= 1.0f)
+    {
+        m_isSpeedDecel = false;
+        m_moveSpeedTimer = 0.0f;
+    }
+
+    Vector2 fabsMoveInput = { fabs(m_moveInput.x), fabs(m_moveInput.y) };
+
+    if (m_moveInput.x == 0.0f)
+    {
+        fabsMoveInput.x = 1.0f;
+    }
+    if (fabsMoveInput.y == 0.0f)
+    {
+        fabsMoveInput.y = 1.0f;
+    }
+
+    // 移動量のクランプ
+    m_moveAmount.x = clamp(m_moveAmount.x, -m_moveSpeed * fabsMoveInput.x, m_moveSpeed * fabsMoveInput.x);
+    m_moveAmount.y = clamp(m_moveAmount.y, -m_moveSpeed * fabsMoveInput.y, m_moveSpeed * fabsMoveInput.y);
+
+    m_decelMoveSpeed = m_walkSpeed;
+
+    // 一定速度で減速して0.0fにする
+    m_moveAmount.x -= Sign(m_moveAmount.x) * (m_delta / m_decelTime * m_decelMoveSpeed);
+    // オーバーシュート防止
+    if (Sign(m_moveAmount.x) != Sign(m_moveAmount.x - Sign(m_moveAmount.x) * (m_delta / m_decelTime * m_decelMoveSpeed))) {
+        m_moveAmount.x = 0.0f;
+    }
+    m_moveAmount.y -= Sign(m_moveAmount.y) * (m_delta / m_decelTime * m_decelMoveSpeed);
+    // オーバーシュート防止
+    if (Sign(m_moveAmount.y) != Sign(m_moveAmount.y - Sign(m_moveAmount.y) * (m_delta / m_decelTime * m_decelMoveSpeed))) {
+        m_moveAmount.y = 0.0f;
+    }
+
+    // 斜め移動補正（正規化）
+    float len = Length(m_moveAmount);
+    if (len > 1.0f) {
+        m_moveAmount /= len;
+    }
+
+    // MoveDirectionをm_cameraTransform.rotateの向きに等速で合わせる
+    if (m_moveDirection.y != m_cameraTransform.rotate.y) {
+        // Y軸回転の差分を計算
+        float diff = m_cameraTransform.rotate.y - m_moveDirection.y;
+        // 地上と空中で回転速度を変える
+        float turnFactor = m_turnControlFactor;
+        if (!m_onGround)
+        {
+            turnFactor = m_airControlFactor;
+        }
+        // 角度の差分を-180度から180度の範囲に収める
+        float adjust = Sign(diff) * m_moveSpeed * (m_delta / turnFactor);
+        // 差分が調整量より小さい場合は直接合わせる
+        if (abs(diff) < abs(adjust)) { // 調整量より差分が小さい場合
+            m_moveDirection.y = m_cameraTransform.rotate.y;
+        }
+        else { // 調整量分だけ移動方向を回転させる
+            m_moveDirection.y += adjust;
+        }
+    }
+
+    // 現在の速度を計算
+    m_playerSpeed = max(fabs(m_moveAmount.x), fabs(m_moveAmount.y));
+}
+
 void Player::Jump()
 {
     // ジャンプ入力があったらジャンプ処理
@@ -597,6 +730,10 @@ void Player::ApplyCameraEffect()
     // Fov変更処理の実装
     m_fov = m_pCamera->GetfovY();
     m_fovPre = m_fov;
+
+    // しゃがみ用にカメラを下げる
+    m_cameraTransform.translate.y = m_cameraHeight + m_crouchHeight;
+
     // 移動速度がダッシュ速度ならFovを広げる
 
     if (m_playerSpeed == m_runSpeed)
@@ -704,6 +841,8 @@ void Player::UpdateDebugUI() {
 
     ImGui::Checkbox("WallRun", &m_wallRunning);
 
+    ImGui::DragFloat("CrouchHeihgt", &m_crouchHeight, 0.0f);
+    ImGui::DragFloat("CrouchHeightOffset", &m_crouchHeightOffset, 0.01f);
 
     ImGui::Separator();
 
@@ -723,6 +862,9 @@ void Player::UpdateDebugUI() {
         float groundDist = CollisionManager::GetInstance()->GetMaxGroundDistanceForAABB(m_playerAABB);
         ImGui::Text("Ground Distance: %.2f", groundDist);
 
+        AABB pAABB = m_playerAABB + m_velocity.translate;
+        groundDist = CollisionManager::GetInstance()->GetGroundDistanceForAABB(pAABB);
+        ImGui::Text("Ground Object Distance: %.2f", groundDist);
         // 貫通量
         Vector3 penetration = CollisionManager::GetInstance()->GetPenetration();
         ImGui::Text("Penetration: (%.2f, %.2f, %.2f)",
@@ -752,7 +894,8 @@ void Player::UpdateDebugUI() {
 
         if (ImGui::TreeNode("Speed")) {
             // プレイヤーの速度
-            ImGui::Text("Speed : %f", m_playerSpeed);
+            float speed = m_playerSpeed / m_delta;
+            ImGui::Text("Speed : %f", speed);
             // 歩行速度
             ImGui::DragFloat("Walk Speed", &m_walkSpeed, 0.1f);
             ImGui::DragFloat("Run Speed", &m_runSpeed, 0.1f);
