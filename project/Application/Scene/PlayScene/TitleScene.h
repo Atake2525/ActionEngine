@@ -54,9 +54,9 @@ private:
 
 	bool start = false;
 
-	std::unique_ptr<Object3d> stageModel = nullptr;
+	std::unique_ptr<Object3d> bootScreen = nullptr;
 
-	std::unique_ptr<Object3d> playerModel = nullptr;
+	std::unique_ptr<Object3d> charModel = nullptr;
 
 	enum class Select {
 		Play = 0,
@@ -69,41 +69,9 @@ private:
 	Select select = Select::Play;
 	Select selectPre = Select::Play;
 
-	std::unique_ptr<Object3d> title = nullptr;
-
-	std::unique_ptr<UI> startUI = nullptr;
-
-	std::unique_ptr<UI> playUI = nullptr;
-
-	std::unique_ptr<UI> exitUI = nullptr;
-
-	std::unique_ptr<UI> settingUI = nullptr;
-
-	std::unique_ptr<UI> creditUI = nullptr;
-
-	std::unique_ptr<Sprite> uiFrame = nullptr;
-
 	std::unique_ptr<Sprite> gamePad = nullptr;
 
-	std::unique_ptr<Sprite> gamePadOnFrame = nullptr;
-
 	std::unique_ptr<Sprite> credit_sound = nullptr;
-
-	Vector3 uiFrameStartPoint = { 0.0f, 0.0f, 0.0f };
-
-	Vector3 uiFrameEndPoint = { 0.0f, 0.0f, 0.0f };
-
-	float uiFrameMoveTimer = 0.0f;
-
-	float uiFrameMoveLImitTime = 0.6f;
-
-	bool isUIFrameMove = false;
-
-	bool showCredit = false;
-
-	bool titleUp = false;
-
-	float easeTime = 0.0f;
 
 	bool start_ = false;
 
