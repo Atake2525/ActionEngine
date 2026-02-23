@@ -80,6 +80,7 @@ public:
     // 指定した座標と地面との最大距離を求める
     const float GetMaxGroundDistanceForAABB(const AABB& aabb, bool wallDashCollision = false) const;
 
+	const bool IsCollisionObjectForAABB(const AABB& aabb, bool wallDashCollision = false, const AABB& noSearchAABB = AABB::Zero) const;
 
 	const Vector3 CheckPenetrationAmount(const AABB& aabb);
 
