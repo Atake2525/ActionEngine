@@ -191,6 +191,7 @@ void Input::Update() {
 		result = mouse->Poll();
 		// 全ボタンの入力情報を取得する
 		result = mouse->GetDeviceState(sizeof(DIMOUSESTATE), &mouseState);
+
 	}
 
 	if (isControllerConnected)

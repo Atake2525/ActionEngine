@@ -25,6 +25,8 @@ public:
     // 次シーン予約
     void SetNextScene(const std::string& sceneName);
 
+    const std::string& GetSceneName() const { return m_sceneName; }
+
     void Update();
 
     void Draw();
@@ -36,9 +38,11 @@ public:
 private:
     bool drawStart = false;
     // 実行中のシーン
-    std::unique_ptr<BaseScene> scene_ = nullptr;
+    std::unique_ptr<BaseScene> m_scene = nullptr;
     // 次のシーン
-    std::unique_ptr<BaseScene> nextScene_ = nullptr;
+    std::unique_ptr<BaseScene> m_nextScene = nullptr;
+
+    std::string m_sceneName = "0";
 
     bool loopOut_ = false;
 };

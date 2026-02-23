@@ -147,6 +147,7 @@
     <ClCompile Include="Engine\3d\Model\Model\DebugModel.cpp" />
     <ClCompile Include="Engine\3d\Object\Object3dBase\DebugObject3d.cpp" />
     <ClCompile Include="Engine\Collision\PhysicsCorrection.cpp" />
+    <ClCompile Include="Application\Pause.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Math\EasingUtility.h" />
@@ -340,6 +341,7 @@
     <ClInclude Include="Engine\3d\Model\Model\DebugModel.h" />
     <ClInclude Include="Engine\3d\Object\Object3dBase\DebugObject3d.h" />
     <ClInclude Include="Engine\Collision\PhysicsCorrection.h" />
+    <ClInclude Include="Application\Pause.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\PostEffect\BoxFilter.PS.hlsl" />
