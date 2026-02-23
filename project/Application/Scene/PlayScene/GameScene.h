@@ -19,6 +19,7 @@
 #include "GameOver.h"
 #include "GameClearScene.h"
 #include "ActionPlayer.h"
+#include "Player.h"
 #include "BaseStage.h"
 
 #pragma once
@@ -74,6 +75,8 @@ private:
 	Transform transformSprite;
 
 	std::unique_ptr<ActionPlayer> player_ = nullptr;
+
+	std::unique_ptr<Player> m_pPlayer = nullptr;
 
 	bool start_ = false;
 

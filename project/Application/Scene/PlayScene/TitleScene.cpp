@@ -97,9 +97,9 @@ void TitleScene::Initialize() {
 
 	Audio::GetInstance()->LoadMP3("Resources/sound/select.mp3", "select", 1.0f);
 	Audio::GetInstance()->LoadMP3("Resources/sound/enter.mp3", "enter", 1.0f);
-	Audio::GetInstance()->LoadMP3("Resources/sound/Experimenta_Model_short.mp3", "bgm", 0.2f);
+	//Audio::GetInstance()->LoadMP3("Resources/sound/Experimenta_Model_short.mp3", "bgm", 0.2f);
 
-	Audio::GetInstance()->Play("bgm", true);
+	//Audio::GetInstance()->Play("bgm", true);
 
 	//Audio::GetInstance()->SetMasterVolume(0.0f);
 	FadeManager::GetInstance()->FadeIn(1.0f);

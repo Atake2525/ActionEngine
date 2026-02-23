@@ -22,7 +22,7 @@ Trap::Trap() {
 Trap::~Trap() {
 	for (int i = 0; i < traps.size(); i++)
 	{
-		CollisionManager::GetInstance()->DeleteCollision("trap" + to_string(traps[i].number));
+		CollisionManager::GetInstance()->DeleteCollision(traps[i].object.get());
 	}
 }
 
@@ -85,7 +85,7 @@ void Trap::Initialize(std::string jsonName) {
 				trap.number = num;
 				trap.object->Update();
 				traps.push_back(std::move(trap));
-				CollisionManager::GetInstance()->AddCollision(traps[num].object.get(), "trap" + to_string(num));
+				CollisionManager::GetInstance()->AddCollision(traps[num].object.get());
 				num++;
 			}
 		}
@@ -116,7 +116,7 @@ void Trap::Update() {
 	{
 		for (int i = 0; i < traps.size(); i++)
 		{
-			CollisionManager::GetInstance()->DeleteCollision("trap" + to_string(traps[i].number));
+			CollisionManager::GetInstance()->DeleteCollision(traps[i].object.get());
 		}
 		Initialize(jsonName_);
 	}
@@ -143,7 +143,7 @@ void Trap::Update() {
 		{
 			if (!traps[i].trapData.loop && traps[i].reverse)
 			{
-				CollisionManager::GetInstance()->DeleteCollision("trap" + to_string(traps[i].number));
+				CollisionManager::GetInstance()->DeleteCollision(traps[i].object.get());
 				traps.erase(traps.cbegin() + i);
 				continue;
 			}
@@ -217,6 +217,6 @@ void Trap::MakeTrap(Traps& data) {
 	trap.number = num;
 	trap.object->Update();
 	traps.push_back(std::move(trap));
-	CollisionManager::GetInstance()->AddCollision(traps[int(traps.size() - 1)].object.get(), "trap" + to_string(num));
+	CollisionManager::GetInstance()->AddCollision(traps[int(traps.size() - 1)].object.get());
 	num++;
 }
