@@ -8,6 +8,7 @@
 #include "GameTime.h"
 #include "StageCount.h"
 #include "DebugLineBase.h"
+#include "Collision.h"
 
 using namespace Logger;
 using namespace std;
@@ -59,23 +60,10 @@ void TestScene::Initialize() {
 	//JsonLoader::GetInstance()->LoadJson("Resources/Json/test.json", "test", false);
 	JsonLoader::GetInstance()->LoadJson("Resources/Json/wp1.json", "wp1", false);
 
-	goal = make_unique<Goal>();
-	goal->Initialize("t");
-
-	capsule = make_unique<Object3d>();
-	capsule->Initialize();
-	capsule->SetModel("Resources/Model/obj/Player", "PlayerCollision.obj", true);
-	capsule->CreateCapsule();
-	Capsule capsuleCol = capsule->GetCapsule();
-	capsule->SetTranslate({ 5.0f, 35.0f, 0.0f });
-
-	aabbBox = make_unique<Object3d>();
-	aabbBox->Initialize();
-	aabbBox->SetModel("Resources/Debug/obj", "box.obj", true);
-
-	debugLine = make_unique<DebugLine>();
-	debugLine->Initialize();
-	debugLine->AddCapsule(Length(capsuleCol.end - capsuleCol.start), capsuleCol.radius, Vector4{ 0.0f, 1.0f, 1.0f, 1.0f });
+	box = make_unique<Object3d>();
+	box->Initialize();
+	box->SetModel("Resources/Debug/obj", "box.obj");
+	box->SetTranslate({ 0.0f, 35.0f, 10.0f });
 
 	Audio::GetInstance()->LoadMP3("Resources/sekiranun.mp3", "bgm", 1.0f);
 
@@ -104,35 +92,30 @@ void TestScene::Update() {
 
 	player->Update();
 	//actionPlayer->Update();
-	//camera->Update();
 
 	stage->Update();
 
-	/*ImGui::Begin("Box");
-	ImGui::DragFloat3("translate", &boxTransform.translate.x, 0.1f);
-	ImGui::DragFloat3("rotate", &boxTransform.rotate.x, 0.1f);
-	ImGui::DragFloat3("scale", &boxTransform.scale.x, 0.1f);
-	ImGui::End();*/
 
-	aabbBox->SetTransform(boxTransform);
-	aabbBox->Update();
 
-	capsule->Update();
-
-	debugLine->SetTransform(capsule->GetTransform());
-	debugLine->Update();
-
-	if (capsule->CheckCollisionCapsule(aabbBox.get()))
+	Vector3 penetration = Vector3::Zero;
+	if (CollisionCapsuleAABB(player->GetCapsule(), box->GetAABB()))
 	{
-		capsule->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
+		box->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
+		penetration = CapsuleAABBPenetration(player->GetCapsule(), box->GetAABB());
+		Vector3 transalte = box->GetTranslate();
+		transalte += penetration;
+		//box->SetTranslate(transalte);
 	}
 	else
 	{
-		capsule->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+		box->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
 	}
-
+	box->Update();
 	//goal->Update(player->GetAABB());
 
+	ImGui::Begin("capsule");
+	ImGui::DragFloat3("penetration", &penetration.x, 0.1f);
+	ImGui::End();
 
 	bool flag = false;
 
@@ -166,9 +149,7 @@ void TestScene::Draw() {
 	Object3dBase::GetInstance()->ShaderDraw();
 
 	stage->DrawObject3d();
-	capsule->Draw();
-	aabbBox->Draw();
-	//goal->Draw();
+	box->Draw();
 	//player->Draw();
 
 	SkinningObject3dBase::GetInstance()->ShaderDraw();
@@ -182,8 +163,6 @@ void TestScene::Draw() {
 	pause->Draw();
 
 	DebugLineBase::GetInstance()->ShaderDraw();
-
-	debugLine->Draw();
 
 }
 

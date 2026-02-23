@@ -16,22 +16,6 @@ const Vector3 operator/(const Vector3& v1, const Vector3 v2) {
 	return result;
 }
 
-const Vector3 operator+(const Vector3& v1, const float f) {
-	Vector3 result;
-	result.x = v1.x / f;
-	result.y = v1.y / f;
-	result.z = v1.z / f;
-	return result;
-}
-
-const Vector3 operator-(const Vector3& v1, const float f) {
-	Vector3 result;
-	result.x = v1.x / f;
-	result.y = v1.y / f;
-	result.z = v1.z / f;
-	return result;
-}
-
 const Vector3 operator/(const Vector3& v1, const float f) {
 	Vector3 result;
 	result.x = v1.x / f;
@@ -541,6 +525,12 @@ float SwapRadian(float degree) {
 float Length(const Vector3& v) {
 	float result = sqrtf((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
 	return result;
+}
+
+float Length(const Vector2& v)
+{
+	float result = sqrtf((v.x * v.x) + (v.y * v.y));
+    return result;
 }
 
 float Distance(const Vector3& v1, const Vector3& v2) {

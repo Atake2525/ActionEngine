@@ -159,37 +159,12 @@ void Object3d::Update() {
 		transformationMatrix->WorldInverseTranspose = Inverse(worldMatrix);
 	}
 
-	aabbPre = aabb;
-	multiMeshAABBPre = multiMeshAABB;
-
-	Vector3 worldPos = { worldMatrix.m[3][0], worldMatrix.m[3][1], worldMatrix.m[3][2] };
-
-	aabb.min = (first.min * transform.scale) + worldPos;
-	aabb.max = (first.max * transform.scale) + worldPos;
-
-	Vector3 halfSize = { (aabb.max.x - aabb.min.x) / 2.0f, (aabb.max.y - aabb.min.y) / 2.0f, (aabb.max.z - aabb.min.z) / 2.0f };
-
-	obb = CreateOBB(worldMatrix, halfSize);
-
-	multiMeshOBB.clear();
-	for (size_t index = 0; index < multiMeshAABB.size(); index++)
-	{
-		multiMeshAABB[index].min = (firstMultiMeshAABB[index].min * transform.scale) + worldPos;
-		multiMeshAABB[index].max = (firstMultiMeshAABB[index].max * transform.scale) + worldPos;
-
-		Vector3 multiHalfSize = { (multiMeshAABB[index].max.x - multiMeshAABB[index].min.x) / 2.0f, (multiMeshAABB[index].max.y - multiMeshAABB[index].min.y) / 2.0f, (multiMeshAABB[index].max.z - multiMeshAABB[index].min.z) / 2.0f };
-
-		multiMeshOBB.push_back(CreateOBB(worldMatrix, multiHalfSize, CenterAABB(multiMeshAABB[index])));
-	}
-
 	// Culling用データの更新
 	CullingTemplate data = Object3dBase::GetInstance()->GetCullingTemplate() + privateCullingData;
 	cullingTemplateData->drawHeight = data.drawHeight;
 
-
-	// カプセルの更新
-	capsule.start = capsulePre.start + transform.translate;
-	capsule.end = capsulePre.end + transform.translate;
+	UpdateAABB();
+	UpdateCapsule();
 
 }
 
@@ -233,6 +208,7 @@ void Object3d::SetModel(const std::string& filePath) {
 	// モデルを検索してセットする
 	model_ = ModelManager::GetInstance()->FindModel(filePath);
 	first = model_->GetMeshAABB();
+	aabb = first;
 	auto multimeshAABBData = model_->GetMultiMeshAABB();
 	multiMeshAABB.resize(model_->GetMultiMeshAABB().size());
 	for (const auto data : multimeshAABBData)
@@ -280,6 +256,7 @@ void Object3d::SetModel(const std::string& directoryPath, const std::string& fil
 	// モデルを検索してセットする
 	model_ = ModelManager::GetInstance()->FindModel(filename);
 	first = model_->GetMeshAABB();
+    aabb = first;
 	auto multimeshAABBData = model_->GetMultiMeshAABB();
 	multiMeshAABB.resize(model_->GetMultiMeshAABB().size());
 	for (const auto data : multimeshAABBData)
@@ -564,6 +541,22 @@ const bool Object3d::CheckCollisionAABB(Object3d* object) const {
 	return CollisionAABB(aabb, object->GetAABB());
 }
 
+void Object3d::UpdateOBB()
+{
+	Vector3 halfSize = { (aabb.max.x - aabb.min.x) / 2.0f, (aabb.max.y - aabb.min.y) / 2.0f, (aabb.max.z - aabb.min.z) / 2.0f };
+
+	obb = CreateOBB(worldMatrix, halfSize);
+
+	multiMeshOBB.clear();
+
+	for (size_t index = 0; index < multiMeshAABB.size(); index++)
+	{
+		Vector3 multiHalfSize = { (multiMeshAABB[index].max.x - multiMeshAABB[index].min.x) / 2.0f, (multiMeshAABB[index].max.y - multiMeshAABB[index].min.y) / 2.0f, (multiMeshAABB[index].max.z - multiMeshAABB[index].min.z) / 2.0f };
+
+		multiMeshOBB.push_back(CreateOBB(worldMatrix, multiHalfSize, CenterAABB(multiMeshAABB[index])));
+	}
+}
+
 const std::vector<AABB> Object3d::GetAABBMultiMeshed()
 {
 	return multiMeshAABB;
@@ -618,6 +611,32 @@ const bool Object3d::CheckCollisionOBBs(const OBB& obb) const
 		}
 	}
 	return false;
+}
+
+void Object3d::UpdateAABB()
+{
+	aabbPre = aabb;
+	multiMeshAABBPre = multiMeshAABB;
+
+	Vector3 worldPos = { worldMatrix.m[3][0], worldMatrix.m[3][1], worldMatrix.m[3][2] };
+
+
+	aabb.min = (first.min * transform.scale) + worldPos;
+	aabb.max = (first.max * transform.scale) + worldPos;
+
+	for (size_t index = 0; index < multiMeshAABB.size(); index++)
+	{
+		multiMeshAABB[index].min = (firstMultiMeshAABB[index].min * transform.scale) + worldPos;
+		multiMeshAABB[index].max = (firstMultiMeshAABB[index].max * transform.scale) + worldPos;
+	}
+
+}
+
+void Object3d::UpdateCapsule()
+{
+	// カプセルの更新
+	capsule.start = capsulePre.start + transform.translate;
+	capsule.end = capsulePre.end + transform.translate;
 }
 
 const Skeleton Object3d::CreateSkelton(const Node& rootNode)

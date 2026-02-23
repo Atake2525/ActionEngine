@@ -68,19 +68,12 @@ private:
 
 	std::unique_ptr<ActionPlayer> actionPlayer;
 
-	std::unique_ptr<Goal> goal;
+	std::unique_ptr<Object3d> box;
 
 	std::unique_ptr<BaseStage> stage;
 
     std::unique_ptr<Player> player;
 
-	std::unique_ptr<DebugLine> debugLine;
-
-	std::unique_ptr<Object3d> capsule;
-
-	std::unique_ptr<Object3d> aabbBox;
-
-	std::unique_ptr<Pause> pause;
 
 	bool start_ = false;
 };
