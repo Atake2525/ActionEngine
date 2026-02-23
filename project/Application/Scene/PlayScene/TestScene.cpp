@@ -54,6 +54,9 @@ void TestScene::Initialize() {
 	gameOverSprite = std::make_unique<GameOver>();
 	gameOverSprite->Initialize();
 
+	pause = std::make_unique<Pause>();
+	pause->Initialize();
+
 	//JsonLoader::GetInstance()->LoadJson("Resources/Json/test.json", "test", false);
 	JsonLoader::GetInstance()->LoadJson("Resources/Json/wp1.json", "wp1", false);
 
@@ -69,11 +72,11 @@ void TestScene::Initialize() {
 Transform boxTransform = Transform::Default;
 void TestScene::Update() {
 
-	/*if (player->IsGameOver())
+	pause->Update();
+	if (pause->IsPause())
 	{
-		player->Freeze(true);
-		gameOverSprite->Update();
-	}*/
+		return;
+	}
 
 	if (!start_)
 	{
@@ -91,6 +94,7 @@ void TestScene::Update() {
 	//actionPlayer->Update();
 
 	stage->Update();
+
 
 
 	Vector3 penetration = Vector3::Zero;
@@ -120,16 +124,16 @@ void TestScene::Update() {
 		Audio::GetInstance()->Play3D("bgm", { 0.0f, 0.0f, 0.0f }, false);
 	}
 
-	if (input->TriggerKey(DIK_ESCAPE))
+	/*if (input->TriggerKey(DIK_ESCAPE))
 	{
 		finished = true;
-	}
+	}*/
 
 	if (input->TriggerKey(DIK_F11))
 	{
 		cursorshow = !cursorshow;
+		input->ShowMouseCursor(cursorshow);
 	}
-	input->ShowMouseCursor(cursorshow);
 
 	SkyBox::GetInstance()->Update();
 
@@ -156,6 +160,7 @@ void TestScene::Draw() {
 
 	stage->DrawBackSprite();
 	gameOverSprite->Draw();
+	pause->Draw();
 
 	DebugLineBase::GetInstance()->ShaderDraw();
 
