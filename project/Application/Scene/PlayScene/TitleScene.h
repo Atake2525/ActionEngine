@@ -49,21 +49,61 @@ public:
 private:
 	bool finished = false;
 
-	std::unique_ptr<Camera> camera;
-	Input* input = nullptr;
-
-	bool start = false;
-
-	std::unique_ptr<Object3d> bootScreen = nullptr;
-
-	std::unique_ptr<Object3d> charModel = nullptr;
-
+	enum class TitleSceneScreen : int {
+		BootScreen = 0,
+		TitleScreen = 1
+	};
+	TitleSceneScreen m_sceneScreen = TitleSceneScreen::BootScreen;
 	enum class Select {
 		Play = 0,
 		Setting = 1,
 		Exit = 2,
 		Credit = 3,
 	};
+
+	bool m_screenChange = false;
+	float m_screenChangeTimer = 0.0f;
+	float m_screenChangeTime = 1.0f;
+	int m_changeNum = 0;
+
+	Transform m_screenChangeTransformPre = Transform::Default;
+	Transform m_screenChangeTransform[2] = {
+		{
+			{1.0f, 1.0f, 1.0f},
+			{0.0f, SwapRadian(1.5f), 0.0f},
+			{0.1f, 2.0f, 0.0f}
+		},
+		{
+			{1.0f, 1.0f, 1.0f},
+			{0.0f, SwapRadian(1.5f), 0.0f},
+			{0.1f, 2.0f, 3.0f}
+		}
+	};
+
+	std::unique_ptr<Camera> camera;
+	Input* input = nullptr;
+
+	// BootScreen
+
+	std::unique_ptr<Object3d> m_bootScreen = nullptr;
+
+	std::unique_ptr<Object3d> m_charModel = nullptr;
+
+	std::unique_ptr<Sprite> m_whiteOutSprite = nullptr;
+
+	std::unique_ptr<Sprite> m_pressAnyKey = nullptr;
+
+	//
+
+	// TitleScreen 
+
+	std::unique_ptr<Object3d> m_titleScreen = nullptr;
+
+	std::unique_ptr<Sprite> m_startUi = nullptr;
+	std::unique_ptr<Sprite> m_exitUi = nullptr;
+
+	//
+
 	int maxSelectNum = 3;
 
 	Select select = Select::Play;
