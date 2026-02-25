@@ -408,6 +408,18 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\bullet3-master\bullet3\build_cmake\ALL_BUILD.vcxproj">
+      <Project>{cde5efbb-5375-3393-85c7-1472fc335601}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\bullet3-master\bullet3\build_cmake\INSTALL.vcxproj">
+      <Project>{7b76f13b-b0f6-3456-b3cc-fa9a1058d5ee}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\bullet3-master\bullet3\build_cmake\RUN_TESTS.vcxproj">
+      <Project>{e55c0893-0a9c-3a85-aa4a-b2fdc4da9871}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\bullet3-master\bullet3\build_cmake\ZERO_CHECK.vcxproj">
+      <Project>{9e4dea99-918c-3354-a15f-64bee1b2408d}</Project>
+    </ProjectReference>
     <ProjectReference Include="externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">
       <Project>{371b9fa9-4c90-4ac6-a123-aced756d6c77}</Project>
     </ProjectReference>
