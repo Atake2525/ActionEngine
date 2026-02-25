@@ -54,9 +54,6 @@ void TestScene::Initialize() {
 	gameOverSprite = std::make_unique<GameOver>();
 	gameOverSprite->Initialize();
 
-	pause = std::make_unique<Pause>();
-	pause->Initialize();
-
 	//JsonLoader::GetInstance()->LoadJson("Resources/Json/test.json", "test", false);
 	JsonLoader::GetInstance()->LoadJson("Resources/Json/wp1.json", "wp1", false);
 
@@ -72,10 +69,9 @@ void TestScene::Initialize() {
 Transform boxTransform = Transform::Default;
 void TestScene::Update() {
 
-	pause->Update();
-	if (pause->IsPause())
+	if (input->TriggerKey(DIK_ESCAPE))
 	{
-		return;
+		finished = true;
 	}
 
 	if (!start_)
@@ -160,7 +156,6 @@ void TestScene::Draw() {
 
 	stage->DrawBackSprite();
 	gameOverSprite->Draw();
-	pause->Draw();
 
 	DebugLineBase::GetInstance()->ShaderDraw();
 
