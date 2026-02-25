@@ -3,6 +3,7 @@
 #include "TextureManager.h"
 #include "WinApp.h"
 #include "ImGuiManager.h"
+#include "Collision.h"
 
 using namespace std;
 
@@ -158,7 +159,7 @@ const bool UI::InCursor() const {
 		};
 	}
 
-	if (CollisionAABB(spriteAABB, mousePosAABB) == true)
+	if (UI::CollisionAABB(spriteAABB, mousePosAABB) == true)
 	{
 		return true;
 	}
@@ -186,5 +187,60 @@ bool UI::CollisionAABB(const AABB& a, const AABB& b) const {
 		(a.min.z <= b.max.z && a.max.z >= b.min.z)) {
 		return true;
 	}
+	return false;
+}
+
+const bool InCursor(Sprite* sprite) {
+	sprite->Update();
+	Vector2 spriteOrigin = sprite->GetAnchorPoint();
+	Vector2 spriteSize = sprite->GetScale();
+	Vector2 spritePos = sprite->GetPosition();
+	Vector3 mousePos = Input::GetInstance()->GetMousePos3();
+	AABB spriteAABB = {
+		{spritePos.x - (spriteSize.x * spriteOrigin.x), spritePos.y - (spriteSize.y * spriteOrigin.y), 0.0f},
+		{spritePos.x + (spriteSize.x * spriteOrigin.x), spritePos.y + (spriteSize.y * spriteOrigin.y), 0.0f},
+	};
+	if (spriteOrigin.x == 0.0f)
+	{
+		spriteAABB = {
+			{spritePos.x - (spriteSize.x), spritePos.y - (spriteSize.y * spriteOrigin.y), 0.0f},
+			{spritePos.x + (spriteSize.x), spritePos.y + (spriteSize.y * spriteOrigin.y), 0.0f},
+		};
+	}
+	if (spriteOrigin.y == 0.0f)
+	{
+		spriteAABB = {
+			{spritePos.x - (spriteSize.x * spriteOrigin.x), spritePos.y - (spriteSize.y), 0.0f},
+			{spritePos.x + (spriteSize.x * spriteOrigin.x), spritePos.y + (spriteSize.y), 0.0f},
+		};
+	}
+	AABB windowAABB = WinApp::GetInstance()->GetWindowAABB();
+	AABB mousePosAABB;
+	// ウィンドウモードに応じて値を少しいじる(ウィンドウの部分を計算に入れる)
+	if (WinApp::GetInstance()->GetWindowMode() == WindowMode::Window)
+	{
+		mousePosAABB = {
+			{mousePos.x - windowAABB.min.x - 8.0f, mousePos.y - windowAABB.min.y - 30.0f},
+			{mousePos.x - windowAABB.min.x - 8.0f, mousePos.y - windowAABB.min.y - 30.0f},
+		};
+	}
+	else if (WinApp::GetInstance()->GetWindowMode() == WindowMode::FullScreen)
+	{
+		mousePosAABB = {
+			{mousePos.x - windowAABB.min.x, mousePos.y - windowAABB.min.y},
+			{mousePos.x - windowAABB.min.x, mousePos.y - windowAABB.min.y},
+		};
+	}
+
+	if ((spriteAABB.min.x <= mousePosAABB.max.x && spriteAABB.max.x >= mousePosAABB.min.x) &&
+		(spriteAABB.min.y <= mousePosAABB.max.y && spriteAABB.max.y >= mousePosAABB.min.y) &&
+		(spriteAABB.min.z <= mousePosAABB.max.z && spriteAABB.max.z >= mousePosAABB.min.z) )
+	{
+		return true;
+	}
+	/*ImGui::Begin("Button");
+	ImGui::DragFloat2("mousePos", &mousePosAABB.min.x, 0.1f);
+	ImGui::End();*/
+
 	return false;
 }

@@ -74,6 +74,7 @@ private:
 
     std::unique_ptr<Player> player;
 
+	std::unique_ptr<Pause> pause;
 
 	bool start_ = false;
 };
