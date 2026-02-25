@@ -91,7 +91,6 @@ inline const Vector3 CapsuleAABBPenetration(const Capsule& capsule, const AABB& 
 	q.y = std::clamp(p.y, aabb.min.y, aabb.max.y);
 	q.z = std::clamp(p.z, aabb.min.z, aabb.max.z);
 
-
 	Vector3 d = q - capsule.start;
 	Vector3 ba = capsule.end - capsule.start;
 	float t = Dot(d, ba) / Dot(ba, ba);
@@ -110,15 +109,10 @@ inline const Vector3 CapsuleAABBPenetration(const Capsule& capsule, const AABB& 
 
 	// 5. カプセル線分最近接点 f と AABB 最近接点の距離
 	Vector3 dist = closestOnAABB - f;
-	float distance = Dot(d, d);
 	
+	return dist;
 
-	if (distance < capsule.radius * capsule.radius)
-	{
-		Vector3 dir = closestOnAABB - capsule.start;
-		return (1.0f - dist) * capsule.radius;
 
-	}
-	return { 0.0f, 0.0f, 0.0f };
+	
 }
 

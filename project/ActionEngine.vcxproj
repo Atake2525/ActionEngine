@@ -119,6 +119,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Application\StageManager\TutorialStage.cpp" />
+    <ClCompile Include="Engine\Collision\BulletPhysicsManager.cpp" />
     <ClCompile Include="Engine\3d\Object\Object3dBase\DebugObject3d.cpp" />
     <ClCompile Include="Engine\3d\Model\Model\DebugModel.cpp" />
     <ClCompile Include="Engine\3d\DebugLine\DebugLine.cpp" />
@@ -197,6 +198,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="Engine\Collision\BulletPhysicsManager.h" />
     <ClInclude Include="Engine\3d\Object\Object3dBase\DebugObject3d.h" />
     <ClInclude Include="Engine\3d\Model\Model\DebugModel.h" />
     <ClInclude Include="Engine\3d\DebugLine\DebugLine.h" />
@@ -408,16 +410,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\bullet3-master\bullet3\build_cmake\ALL_BUILD.vcxproj">
+    <ProjectReference Include="externals\BulletPhysics\ALL_BUILD.vcxproj">
       <Project>{cde5efbb-5375-3393-85c7-1472fc335601}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\bullet3-master\bullet3\build_cmake\INSTALL.vcxproj">
-      <Project>{7b76f13b-b0f6-3456-b3cc-fa9a1058d5ee}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\bullet3-master\bullet3\build_cmake\RUN_TESTS.vcxproj">
-      <Project>{e55c0893-0a9c-3a85-aa4a-b2fdc4da9871}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\bullet3-master\bullet3\build_cmake\ZERO_CHECK.vcxproj">
+    <ProjectReference Include="externals\BulletPhysics\ZERO_CHECK.vcxproj">
       <Project>{9e4dea99-918c-3354-a15f-64bee1b2408d}</Project>
     </ProjectReference>
     <ProjectReference Include="externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">
