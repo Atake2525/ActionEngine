@@ -68,7 +68,8 @@ void TitleScene::Initialize() {
     size = m_pressAnyKey->GetTextureSize();
     m_pressAnyKey->SetScale({ size.x * 0.3f, size.y * 0.3f });
     m_pressAnyKey->SetAnchorPoint({ 0.5f, 1.0f });
-    m_pressAnyKey->SetPosition({ windowSize.x * 0.5f, windowSize.y });
+    m_pressAnyKey->SetPosition({ windowSize.x * 0.6f, windowSize.y * 1.014f });
+    m_pressAnyKey->SetRotatioin(-SwapRadian(1.0f));
 
     m_whiteOutSprite = make_unique<Sprite>();
     m_whiteOutSprite->Initialize("Resources/Sprite/white1x1.png");
@@ -135,7 +136,7 @@ void TitleScene::Update() {
         if (InCursor(m_startUi.get()))
         {
             m_startUi->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
-            if (GetAsyncKeyState(VK_LBUTTON) & 0x0001 && GetAsyncKeyState(VK_LBUTTON) == -32768)
+            if (/*GetAsyncKeyState(VK_LBUTTON) & 0x0001 &&*/ GetAsyncKeyState(VK_LBUTTON) == -32768)
             {
                 m_screenChange = true;
             }
