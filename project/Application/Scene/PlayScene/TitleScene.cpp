@@ -33,7 +33,7 @@ void TitleScene::Initialize() {
     m_charModel = make_unique<Object3d>();
     m_charModel->Initialize();
     m_charModel->SetModel("Resources/Model/gltf", "TitleSceneChar.gltf", true, true);
-    m_charModel->AddAnimation("Resources/Model/gltf/char", "Idle.gltf", "TitleScreen");
+    m_charModel->AddAnimation("Resources/Model/gltf", "sceneChange_Animation.gltf", "TitleScreen");
     m_charModel->ToggleStartAnimation();
     m_charModel->SetRotate({ 0.0f, SwapRadian(180.0f), 0.0f});
 
@@ -102,6 +102,8 @@ void TitleScene::Initialize() {
 
     Light::GetInstance()->SetDirectionDirectionalLight({ 0.174f, -0.35f, 1.0f });
     Light::GetInstance()->SetIntensityDirectionalLight(0.5f);
+
+    m_sceneScreen = TitleSceneScreen::TitleScreen;
 }
 
 void TitleScene::Update() {
@@ -139,6 +141,8 @@ void TitleScene::Update() {
             if (/*GetAsyncKeyState(VK_LBUTTON) & 0x0001 &&*/ GetAsyncKeyState(VK_LBUTTON) == -32768)
             {
                 m_screenChange = true;
+                m_charModel->ChangePlayAnimation("TitleScreen");
+                m_charModel->ResetAnimationTime();
             }
         }
         else
@@ -174,14 +178,14 @@ void TitleScene::Update() {
 
         if (m_screenChange)
         {
-            m_screenChangeTimer += GameTime::GetInstance()->GetDeltaTime() / m_screenChangeTime;
+            m_screenChangeTimer += GameTime::GetInstance()->GetDeltaTime() / m_screenChangeTime[m_changeNum];
             m_screenChangeTimer = std::clamp(m_screenChangeTimer, 0.0f, 1.0f);
             Transform cameraT = Transform::Default;
             cameraT.rotate = Lerp(m_screenChangeTransformPre.rotate, m_screenChangeTransform[m_changeNum].rotate, m_screenChangeTimer);
             cameraT.translate = Lerp(m_screenChangeTransformPre.translate, m_screenChangeTransform[m_changeNum].translate, m_screenChangeTimer);
             camera->SetTransform(cameraT);
 
-            if (m_screenChangeTimer > 0.8f && m_changeNum == 0)
+            if (m_screenChangeTimer == 1.0f && m_changeNum == 0)
             {
                 m_screenChangeTimer = 0.0f;
                 m_screenChangeTransformPre = cameraT;
@@ -193,9 +197,10 @@ void TitleScene::Update() {
                 m_whiteOutSprite->Update();
             }
 
-            if (m_screenChangeTimer == 1.0f)
+            if (m_screenChangeTimer == 1.0f && m_changeNum == 1)
             {
                 SceneManager::GetInstance()->SetNextScene("TITLE");
+                m_screenChange = false;
                 /*camera->SetTranslate({ 0.0f, 0.2f, -4.5f });
                 camera->SetRotate({ SwapRadian(-9.5f), 0.0f, 0.0f });
                 m_screenChangeTimer = 0.0f;*/
@@ -210,6 +215,8 @@ void TitleScene::Update() {
 
         break;
     }
+
+    //camera->SetParent(m_charModel->GetJointMatrix("Head"));
 
     m_bootScreen->Update();
 
