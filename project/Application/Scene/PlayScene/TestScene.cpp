@@ -92,23 +92,25 @@ void TestScene::Update() {
 	stage->Update();
 
 
+	
 
 	Vector3 penetration = Vector3::Zero;
 	if (CollisionCapsuleAABB(player->GetCapsule(), box->GetAABB()))
 	{
 		box->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
-		penetration = CapsuleAABBPenetration(player->GetCapsule(), box->GetAABB());
+		//penetration = CapsuleAABBPenetration(player->GetCapsule(), box->GetAABB());
 		Vector3 transalte = box->GetTranslate();
 		transalte += penetration;
-		//box->SetTranslate(transalte);
+		box->SetTranslate(transalte);
 	}
 	else
 	{
 		box->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
 	}
+
 	box->Update();
 	//goal->Update(player->GetAABB());
-
+	penetration = ColCapAABB(player->GetCapsule(), box->GetAABB());
 	ImGui::Begin("capsule");
 	ImGui::DragFloat3("penetration", &penetration.x, 0.1f);
 	ImGui::End();
