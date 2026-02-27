@@ -240,7 +240,7 @@ private: // プレイヤーモデル
     float m_decelMoveSpeed = 1.0f;
     float m_moveSpeedPre = 1.0f;
     float m_walkSpeed = 6.0f;
-    float m_runSpeed = 9.0f;
+    float m_runSpeed = 15.0f;
     float m_crounchSpeed = 4.0f;
     float m_playerSpeed = 0.0f; // 現在の速度
     float m_jumpForce = 0.045f; // ジャンプ力
