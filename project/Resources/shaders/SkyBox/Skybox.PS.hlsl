@@ -40,7 +40,9 @@ PixelShaderOutput main(VertexShaderOutput input)
     float3 skyColor = lerp(bottomColor, topColor, t);
 
     // --- Sun direction (CPU から渡すべき) ---
-    float3 sunDir = normalize(gSun.sunDirection); // 今は固定
+    float3 dirSun = gSun.sunDirection;
+    dirSun.z *= -1.0f;
+    float3 sunDir = normalize(dirSun); // 今は固定
 
     // viewDir が太陽方向に近いほど値が大きくなる
     float sunInfluence = saturate(dot(viewDir, sunDir));

@@ -37,6 +37,12 @@ public:
 
 	void OpenWindow();
 
+	/// <summary>
+	/// ウィンドウが選択中かどうかを調べる
+	/// </summary>
+	/// <returns>選択されていればtrue</returns>
+	const bool IsWindowActive();
+
 	// 終了
 	void Finalize();
 

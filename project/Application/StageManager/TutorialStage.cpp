@@ -2,6 +2,7 @@
 #include "JsonLoader.h"
 #include "WinApp.h"
 #include "CollisionManager.h"
+#include "Light.h"
 
 using namespace std;
 
@@ -41,6 +42,8 @@ void TutorialStage::Initialize()
         tutorialSprites[i]->SetScale({ 300.0f, 50.0f });
         tutorialSprites[i]->Update();
     }
+
+    //Light::GetInstance()->SetDirectionDirectionalLight({ 0.175f, -0.5f, -0.87f });
 }
 
 std::string TutorialStage::GetJsonName()
@@ -122,10 +125,10 @@ void TutorialStage::DrawFrontSprite() {}
 
 void TutorialStage::DrawBackSprite()
 {
-    for (int i = 0; i < 4; i++)
+    /*for (int i = 0; i < 4; i++)
     {
         tutorialSprites[i]->Draw();
-    }
+    }*/
 }
 
 void TutorialStage::Finalize()

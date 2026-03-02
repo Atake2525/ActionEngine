@@ -555,7 +555,7 @@ void Player::WallRun()
         {
             wallpenetration.z = 1.0f;
         }
-        m_wallRunDirection.x = Sign(wallpenetration.z) * Sign(cameraDirection.z);
+        m_wallRunDirection.x = Sign(wallpenetration.z) * Sign(cameraDirection.x);
         m_wallRunDirection.z = Sign(wallpenetration.x) * Sign(cameraDirection.z);
 
         // ウォールラン用のオブジェクトとほぼ垂直の視点の場合直前の入力を使って移動方向を算出する
@@ -781,12 +781,12 @@ void Player::ApplyCameraEffect()
                 signWallRunDirection.z = -1.0f;
             }
             float wallRunPenetration = 1.0f;
-            if (m_wallPenetration.z < 0.0f)
+            if (m_wallPenetration.z < 0.0f || m_wallPenetration.x)
             {
                 wallRunPenetration = -1.0f;
             }
             // 回転後角度を代入 回転後の角度は移動方向、壁がプレイヤーから左右どちらにあるかによって変わるのでそれも考慮する
-            m_wallRunRotateAfter = m_wallRunRotateAngle * Sign(-signWallRunDirection.z) * Sign(-signWallRunDirection.x) * -1.0f;
+            m_wallRunRotateAfter = m_wallRunRotateAngle * Sign(-signWallRunDirection.z) * Sign(-signWallRunDirection.x);
 
 
         }

@@ -129,6 +129,11 @@ void WinApp::Update() {
 		ShowWindow(hwnd, SW_MAXIMIZE);
 }
 
+const bool WinApp::IsWindowActive()
+{
+	return GetForegroundWindow() == hwnd;
+}
+
 // 終了
 void WinApp::Finalize() { 
 	CloseWindow(hwnd);
