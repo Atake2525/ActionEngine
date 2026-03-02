@@ -85,7 +85,10 @@ void MyGame::Update() {
 
 	DirectXBase::GetInstance()->Update();
 	Light::GetInstance()->Update();
-	SceneManager::GetInstance()->Update();
+	if (WinApp::GetInstance()->IsWindowActive())
+	{
+		SceneManager::GetInstance()->Update();
+	}
 	ParticleManager::GetInstance()->Update();
 	Audio::GetInstance()->Update();
 	FadeManager::GetInstance()->Update();

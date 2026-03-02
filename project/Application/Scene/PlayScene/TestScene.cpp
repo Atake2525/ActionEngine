@@ -109,9 +109,6 @@ void TestScene::Update() {
 	box->Update();
 	//goal->Update(player->GetAABB());
 
-	ImGui::Begin("capsule");
-	ImGui::DragFloat3("penetration", &penetration.x, 0.1f);
-	ImGui::End();
 
 	bool flag = false;
 
