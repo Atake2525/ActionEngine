@@ -24,96 +24,96 @@
 class TitleScene : public BaseScene
 {
 public:
-	/// <summary>
-	/// 初期化
-	/// </summary>
-	void Initialize() override;
+    /// <summary>
+    /// 初期化
+    /// </summary>
+    void Initialize() override;
 
-	/// <summary>
-	/// 終了処理
-	/// </summary>
-	void Finalize() override;
+    /// <summary>
+    /// 終了処理
+    /// </summary>
+    void Finalize() override;
 
-	/// <summary>
-	/// 更新
-	/// </summary>
-	void Update() override;
+    /// <summary>
+    /// 更新
+    /// </summary>
+    void Update() override;
 
-	/// <summary>
-	/// 描画
-	/// </summary>
-	void Draw() override;
+    /// <summary>
+    /// 描画
+    /// </summary>
+    void Draw() override;
 
-	const bool& EndRequest() override { return finished; }
+    const bool& EndRequest() override { return finished; }
 
 private:
-	bool finished = false;
+    bool finished = false;
 
-	enum class TitleSceneScreen : int {
-		BootScreen = 0,
-		TitleScreen = 1
-	};
-	TitleSceneScreen m_sceneScreen = TitleSceneScreen::BootScreen;
-	enum class Select {
-		Play = 0,
-		Setting = 1,
-		Exit = 2,
-		Credit = 3,
-	};
+    enum class TitleSceneScreen : int {
+        BootScreen = 0,
+        TitleScreen = 1
+    };
+    TitleSceneScreen m_sceneScreen = TitleSceneScreen::BootScreen;
+    enum class Select {
+        Play = 0,
+        Setting = 1,
+        Exit = 2,
+        Credit = 3,
+    };
 
-	bool m_screenChange = false;
-	float m_screenChangeTimer = 0.0f;
-	float m_screenChangeTime = 1.0f;
-	int m_changeNum = 0;
+    bool m_screenChange = false;
+    float m_screenChangeTimer = 0.0f;
+    float m_screenChangeTime[2] = {1.3f, 1.0f };
+    int m_changeNum = 0;
 
-	Transform m_screenChangeTransformPre = Transform::Default;
-	Transform m_screenChangeTransform[2] = {
-		{
-			{1.0f, 1.0f, 1.0f},
-			{0.0f, SwapRadian(1.5f), 0.0f},
-			{0.1f, 2.0f, 0.0f}
-		},
-		{
-			{1.0f, 1.0f, 1.0f},
-			{0.0f, SwapRadian(1.5f), 0.0f},
-			{0.1f, 2.0f, 3.0f}
-		}
-	};
+    Transform m_screenChangeTransformPre = Transform::Default;
+    Transform m_screenChangeTransform[2] = {
+        {
+            {1.0f, 1.0f, 1.0f},
+            {SwapRadian(11.5f), SwapRadian(1.5f), 0.0f},
+            {0.0f, 2.1f, 1.6f},
+        },
+        {
+            {1.0f, 1.0f, 1.0f},
+            {SwapRadian(11.5f), SwapRadian(1.5f), 0.0f},
+            {0.0f, 2.1f, 3.1f},
+        }
+    };
 
-	std::unique_ptr<Camera> camera;
-	Input* input = nullptr;
+    std::unique_ptr<Camera> camera;
+    Input* input = nullptr;
 
-	// BootScreen
+    // BootScreen
 
-	std::unique_ptr<Object3d> m_bootScreen = nullptr;
+    std::unique_ptr<Object3d> m_bootScreen = nullptr;
 
-	std::unique_ptr<Object3d> m_charModel = nullptr;
+    std::unique_ptr<Object3d> m_charModel = nullptr;
 
-	std::unique_ptr<Sprite> m_whiteOutSprite = nullptr;
+    std::unique_ptr<Sprite> m_whiteOutSprite = nullptr;
 
-	std::unique_ptr<Sprite> m_pressAnyKey = nullptr;
+    std::unique_ptr<Sprite> m_pressAnyKey = nullptr;
 
-	//
+    //
 
-	// TitleScreen 
+    // TitleScreen 
 
-	std::unique_ptr<Object3d> m_titleScreen = nullptr;
+    std::unique_ptr<Object3d> m_titleScreen = nullptr;
 
-	std::unique_ptr<Sprite> m_startUi = nullptr;
-	std::unique_ptr<Sprite> m_exitUi = nullptr;
+    std::unique_ptr<Sprite> m_startUi = nullptr;
+    std::unique_ptr<Sprite> m_exitUi = nullptr;
 
-	//
+    //
 
-	int maxSelectNum = 3;
+    int maxSelectNum = 3;
 
-	Select select = Select::Play;
-	Select selectPre = Select::Play;
+    Select select = Select::Play;
+    Select selectPre = Select::Play;
 
-	std::unique_ptr<Sprite> gamePad = nullptr;
+    std::unique_ptr<Sprite> gamePad = nullptr;
 
-	std::unique_ptr<Sprite> credit_sound = nullptr;
+    std::unique_ptr<Sprite> credit_sound = nullptr;
 
-	bool start_ = false;
+    bool start_ = false;
 
 };
 
