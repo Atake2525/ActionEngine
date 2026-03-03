@@ -76,6 +76,8 @@ private:
 
 	std::unique_ptr<Pause> pause;
 
+	std::unique_ptr<Sprite> sprite;
+
 	bool start_ = false;
 };
 

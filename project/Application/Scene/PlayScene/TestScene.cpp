@@ -9,6 +9,7 @@
 #include "StageCount.h"
 #include "DebugLineBase.h"
 #include "Collision.h"
+#include "FadeManager.h"
 
 using namespace Logger;
 using namespace std;
@@ -47,6 +48,7 @@ void TestScene::Initialize() {
 	
 	player = std::make_unique<Player>();
 	player->Initialize(camera.get(), stage->GetJsonName());
+	camera->Update();
 
 	actionPlayer = std::make_unique<ActionPlayer>();
 	actionPlayer->Initialize(camera.get(), stage->GetJsonName(), false);
@@ -56,6 +58,9 @@ void TestScene::Initialize() {
 
 	pause = std::make_unique<Pause>();
 	pause->Initialize();
+
+	sprite = std::make_unique<Sprite>();
+	sprite->Initialize("Resources/Sprite/R.png");
 
 	//JsonLoader::GetInstance()->LoadJson("Resources/Json/test.json", "test", false);
 	JsonLoader::GetInstance()->LoadJson("Resources/Json/wp1.json", "wp1", false);
@@ -67,6 +72,7 @@ void TestScene::Initialize() {
 
 	Audio::GetInstance()->LoadMP3("Resources/sekiranun.mp3", "bgm", 1.0f);
 
+	FadeManager::GetInstance()->FadeIn(2.4f);
 }
 
 Transform boxTransform = Transform::Default;
@@ -78,7 +84,7 @@ void TestScene::Update() {
 		return;
 	}
 
-	if (!start_)
+	/*if (!start_)
 	{
 		if (FadeManager::GetInstance()->CompleteFade() || !FadeManager::GetInstance()->IsFade())
 		{
@@ -88,7 +94,7 @@ void TestScene::Update() {
 		{
 			return;
 		}
-	}
+	}*/
 
 	player->Update();
 	//actionPlayer->Update();
@@ -113,15 +119,25 @@ void TestScene::Update() {
 	box->Update();
 	//goal->Update(player->GetAABB());
 
-	ImGui::Begin("capsule");
+	/*ImGui::Begin("capsule");
 	ImGui::DragFloat3("penetration", &penetration.x, 0.1f);
-	ImGui::End();
+	ImGui::End();*/
 
 	bool flag = false;
 
 	if (input->TriggerKey(DIK_1))
 	{
 		Audio::GetInstance()->Play3D("bgm", { 0.0f, 0.0f, 0.0f }, false);
+	}
+
+	if (input->TriggerKey(DIK_R))
+	{
+		FadeManager::GetInstance()->FadeOut(0.4f);
+		start_ = true;
+	}
+	if (FadeManager::GetInstance()->CompleteFade() && start_)
+	{
+		SceneManager::GetInstance()->SetNextScene("TITLE");
 	}
 
 	/*if (input->TriggerKey(DIK_ESCAPE))
@@ -138,6 +154,8 @@ void TestScene::Update() {
 	SkyBox::GetInstance()->Update();
 
 	camera->Update();
+
+	sprite->Update();
 }
 
 void TestScene::Draw() {
@@ -161,6 +179,7 @@ void TestScene::Draw() {
 	stage->DrawBackSprite();
 	gameOverSprite->Draw();
 	pause->Draw();
+	sprite->Draw();
 
 	DebugLineBase::GetInstance()->ShaderDraw();
 

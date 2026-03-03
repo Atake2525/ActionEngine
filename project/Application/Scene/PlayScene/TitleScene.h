@@ -89,15 +89,11 @@ private:
 
     std::unique_ptr<Object3d> m_charModel = nullptr;
 
-    std::unique_ptr<Sprite> m_whiteOutSprite = nullptr;
-
     std::unique_ptr<Sprite> m_pressAnyKey = nullptr;
 
     //
 
     // TitleScreen 
-
-    std::unique_ptr<Object3d> m_titleScreen = nullptr;
 
     std::unique_ptr<Sprite> m_startUi = nullptr;
     std::unique_ptr<Sprite> m_exitUi = nullptr;
