@@ -82,6 +82,8 @@ public:
 
 	const bool IsCollisionObjectForAABB(const AABB& aabb, bool wallDashCollision, const AABB& noSearchAABB = AABB::Zero) const;
 
+	const float GetHeightToTopForAABB(const AABB& aabb, bool wallDashCollision = false);
+
 	const Vector3 CheckPenetrationAmount(const AABB& aabb);
 
 	// 当たり判定として計算するオブジェクトの追加

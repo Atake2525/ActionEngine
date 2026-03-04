@@ -124,6 +124,11 @@ private: // プレイヤーステート管理
     void ApplyGravity();
 
     /// <summary>
+    /// 移動量の更新
+    /// </summary>
+    void UpdateVelocity();
+
+    /// <summary>
     /// カメラのParent設定処理
     /// </summary>
     void UpdateCameraParent();
@@ -233,7 +238,8 @@ private: // プレイヤーモデル
     //================
     // よじ登り関連
     //================
-    bool m_climbing = false;
+    bool m_canClimbing = false;
+    float m_climbingHeight = -4.0f; // よじ登りができるまでの高さ
 
     // 移動速度
     float m_moveSpeed = 1.0f;
