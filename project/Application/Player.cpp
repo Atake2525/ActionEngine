@@ -179,6 +179,8 @@ void Player::UpdateState()
         int statePoint = static_cast<int>(Sign((Sign(m_moveInput.x) * m_moveInput.x) + (Sign(m_moveInput.y) * m_moveInput.y)));
         m_state = static_cast<PlayerState>(statePoint);
     }
+    // よじ登りができるかの確認
+    m_canClimbing = CanClimbing();
 
     m_walkState = PlayerWalkState::Walk;
 
@@ -299,6 +301,13 @@ void Player::CanUncrouch()
 
 const bool Player::CanClimbing()
 {
+    AABB pAABB = m_playerAABB;
+    pAABB += m_velocity.translate;
+    float groundObjectDist = CollisionManager::GetInstance()->GetHeightToTopForAABB(pAABB);
+    if (m_climbingHeight < groundObjectDist && 0.0f > groundObjectDist)
+    {
+         return true;
+    }
     return false;
 }
 
@@ -365,21 +374,9 @@ void Player::Move() {
     Jump();
 
 
-    if (!m_wallRunning)
-    {
-        // 移動方向の計算
-        Transform dir = Transform::Default;
-        dir.rotate.y = m_moveDirection.y;
-        Matrix4x4 rotMat = MakeAffineMatrix(dir);
-        Vector3 moveDir = TransformNormal({ m_moveAmount.x, 0.0f, m_moveAmount.y }, rotMat);
-        m_velocity.translate = { moveDir.x * m_delta, m_velocity.translate.y, moveDir.z * m_delta };
-        m_playerAABB += m_velocity.translate;
-    }
-    else
-    {
-        m_velocity.translate = { m_wallRunDirection.x * m_delta, m_velocity.translate.y, m_wallRunDirection.z * m_delta };
-        m_playerAABB += m_velocity.translate;
-    }
+    // 空中制御を適用
+    UpdateVelocity();
+
     m_playerAABB.max.y = m_playerAABB.min.y + m_playerHeight + m_crouchHeight;
 }
 
@@ -524,6 +521,8 @@ void Player::Walk()
             m_moveDirection.y += adjust;
         }
     }
+    m_moveDirection.y = m_cameraTransform.rotate.y;
+
 
     // 現在の速度を計算
     m_playerSpeed = max(fabs(m_moveAmount.x), fabs(m_moveAmount.y));
@@ -727,6 +726,27 @@ void Player::ApplyGravity()
     }
 }
 
+void Player::UpdateVelocity()
+{
+    if (!m_wallRunning)
+    {
+        // 移動方向の計算
+        Transform dir = Transform::Default;
+        dir.rotate.y = m_moveDirection.y;
+        Matrix4x4 rotMat = MakeAffineMatrix(dir);
+        Vector3 moveDir = TransformNormal({ m_moveAmount.x, 0.0f, m_moveAmount.y }, rotMat);
+        m_velocity.translate = { moveDir.x * m_delta, m_velocity.translate.y, moveDir.z * m_delta };
+        m_playerAABB += m_velocity.translate;
+    }
+    else
+    {
+        m_velocity.translate = { m_wallRunDirection.x * m_delta, m_velocity.translate.y, m_wallRunDirection.z * m_delta };
+        m_playerAABB += m_velocity.translate;
+    }
+
+
+}
+
 void Player::UpdateCameraParent() {
     // カメラのParent設定処理の実装
     //m_pCamera->SetRotateParent(m_pModel->GetWorldMatrix());
@@ -849,6 +869,8 @@ void Player::UpdateDebugUI() {
     ImGui::Checkbox("OnGround", &m_onGround);
 
     ImGui::Checkbox("WallRun", &m_wallRunning);
+
+    ImGui::Checkbox("CanClimbing", &m_canClimbing);
 
     ImGui::DragFloat("CrouchHeihgt", &m_crouchHeight, 0.0f);
     ImGui::DragFloat("CrouchHeightOffset", &m_crouchHeightOffset, 0.01f);
