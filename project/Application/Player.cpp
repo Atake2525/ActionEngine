@@ -210,7 +210,7 @@ void Player::UpdateState()
         // しゃがみ入力
         if (input->PushKeyInt(DIK_LCONTROL))
         {
-            m_walkState = PlayerWalkState::Crounch;
+            m_walkState = PlayerWalkState::Crouch;
         }
 
         break;
@@ -224,14 +224,14 @@ void Player::UpdateState()
         // しゃがみ入力
         if (Input::GetInstance()->PushButton(Controller::RightStick))
         {
-            m_walkState = PlayerWalkState::Crounch;
+            m_walkState = PlayerWalkState::Crouch;
         }
 
         break;
     }
 
     // crouchを解除しようとしたときに可能かを確認する
-    if (m_walkStatePre == PlayerWalkState::Crounch)
+    if (m_walkStatePre == PlayerWalkState::Crouch)
     {
         CanUncrouch();
     }
@@ -285,6 +285,10 @@ void Player::UpdateParkourState()
             m_isStartWallRun = false;
         }
     }
+    if ((input->PushKey(DIK_SPACE) || input->PushButton(Controller::A)) && m_canClimbing)
+    {
+        m_walkState = PlayerWalkState::Climbing;
+    }
 }
 
 void Player::CanUncrouch()
@@ -295,7 +299,7 @@ void Player::CanUncrouch()
     float penetration = CollisionManager::GetInstance()->GetAllPenetrationForAABB(pAABB).y;
     if (penetration != 0.0f)
     {
-        m_walkState = PlayerWalkState::Crounch;
+        m_walkState = PlayerWalkState::Crouch;
     }
 }
 
@@ -304,10 +308,17 @@ const bool Player::CanClimbing()
     AABB pAABB = m_playerAABB;
     pAABB += m_velocity.translate;
     float groundObjectDist = CollisionManager::GetInstance()->GetHeightToTopForAABB(pAABB);
+    Vector3 dir = CollisionManager::GetInstance()->GetCollisionObjectDirectionForAABB(pAABB);
+    ImGui::Begin("Dir");
+    ImGui::DragFloat3("dir", &dir.x);
+    ImGui::End();
+    // 壁の高さを見てm_climbingHeight以内だったらよじ登りできる
     if (m_climbingHeight < groundObjectDist && 0.0f > groundObjectDist)
     {
          return true;
     }
+    
+    
     return false;
 }
 
@@ -404,13 +415,13 @@ void Player::Walk()
     case Player::PlayerWalkState::Run:
         speed = m_runSpeed;
         break;
-    case Player::PlayerWalkState::Crounch:
+    case Player::PlayerWalkState::Crouch:
         speed = m_crounchSpeed;
         m_crouchTimer += m_delta / m_crouchTime;
 
         break;
     }
-    if (m_crouchTimer != 0.0f && m_walkState != PlayerWalkState::Crounch)
+    if (m_crouchTimer != 0.0f && m_walkState != PlayerWalkState::Crouch)
     {
         m_crouchTimer -= m_delta / m_crouchTime;
     }
@@ -670,6 +681,18 @@ void Player::Sliding()
 
     // 現在の速度を計算
     m_playerSpeed = max(fabs(m_moveAmount.x), fabs(m_moveAmount.y));
+}
+
+void Player::Climbing()
+{
+    // プレイヤーの身長を計算
+    float height = m_playerAABB.max.y - m_playerAABB.min.y;
+
+
+
+    ImGui::Begin("Climbing");
+    ImGui::DragFloat("身長", &height);
+    ImGui::End();
 }
 
 void Player::Jump()

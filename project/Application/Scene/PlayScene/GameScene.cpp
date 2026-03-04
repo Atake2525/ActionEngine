@@ -29,6 +29,7 @@ void GameScene::Initialize() {
     gameClear_->Initialize();
 
 
+
     Object3dBase::GetInstance()->SetDefaultCamera(camera.get());
 
     stage = make_unique<TutorialStage>();
@@ -82,47 +83,12 @@ void GameScene::Update() {
         Audio::GetInstance()->Play2D("bgm", { 0.0f, 0.0f }, false);
     }
 
-
     SkyBox::GetInstance()->Update();
-
-   /* if (!start_)
-    {
-        if (FadeManager::GetInstance()->CompleteFade())
-        {
-            start_ = true;
-            startMovie_ = true;
-            phase_ = 0;
-        }
-        else
-        {
-            return;
-        }
-    }*/
 
     if (input->TriggerKey(DIK_R))
     {
         SceneManager::GetInstance()->SetNextScene("GAMESCENE");
     }
-
-    /*if (input->PushKey(DIK_LSHIFT))
-    {
-        tutorial[1].timer += GameTime::GetInstance()->GetDeltaTime();
-        tutorial[1].color.x = 1.0f - (tutorial[1].timer / 2.0f);
-        tutorial[1].color.z = 1.0f - (tutorial[1].timer / 2.0f);
-        tutorial[1].sprite->SetColor(tutorial[1].color);
-        if (tutorial[1].timer >= 2.0f)
-        {
-            tutorial[1].isClear = true;
-        }
-        tutorial[1].sprite->Update();
-
-    }
-
-    if (player_->IsGameOver())
-    {
-        player_->Freeze(true);
-        gameOver_->Update();
-    }*/
 
     camera->Update();
 
