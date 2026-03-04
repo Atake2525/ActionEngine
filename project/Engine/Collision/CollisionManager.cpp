@@ -639,6 +639,44 @@ const float CollisionManager::GetHeightToTopForAABB(const AABB& aabb, bool wallD
 	return maxHeight;
 }
 
+const Vector3 CollisionManager::GetCollisionObjectDirectionForAABB(const AABB& aabb, bool wallDashCollision)
+{
+	Vector3 direction = Vector3::Zero;
+	std::vector<Object3d*> colObj = collisionObject;
+	if (wallDashCollision)
+	{
+		colObj = wallDashCollisionObject;
+	}
+	for (const auto& object : colObj) {
+		// オブジェクトのメッシュごとのAABBを取得する
+		float serchDistance = Distance(object->GetAABB().max, aabb.min);
+		//if (serchDistance <= distance)
+		//{
+		const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
+		for (AABB terrainAABB : terrains)
+		{
+			// 座標をAABBに変換
+			terrainAABB = AddSize(terrainAABB, 0.1f);
+			AABB target = aabb;
+
+			// ターゲットとオブジェクトが貫通していたら実行
+			if (CollisionAABBXZ(target, terrainAABB))
+			{
+				// オブジェクトとaabbの方向を求める
+				Vector3 pAABB = CenterAABB(terrainAABB);
+				pAABB.y = terrainAABB.max.y;
+				direction = pAABB - CenterAABB(aabb);
+				
+			}
+		}
+	}
+
+	return { direction.x > 0 - direction.x < 0,
+			 direction.y > 0 - direction.y < 0,
+			 direction.z > 0 - direction.z < 0
+	};
+}
+
 const Vector3 CollisionManager::CheckPenetrationAmount(const AABB& aabb)
 {
 	Vector3 result = { 0.0f, 0.0f, 0.0f };

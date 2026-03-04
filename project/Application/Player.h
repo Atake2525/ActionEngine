@@ -21,9 +21,10 @@ private:
     enum class PlayerWalkState : int {
         Walk = 0,
         Run = 1,
-        Crounch = 2,
+        Crouch = 2,
         WallRun = 3,
         Sliding = 4,
+        Climbing = 5,
     };
 
     // コントロールモード
@@ -107,6 +108,11 @@ private: // プレイヤーステート管理
     /// スライディング処理
     /// </summary>
     void Sliding();
+
+    /// <summary>
+    /// クライミング(よじ登り)処理
+    /// </summary>
+    void Climbing();
 
     /// <summary>
     /// ジャンプ処理
