@@ -733,11 +733,13 @@ void Player::Climbing()
         float wallPos = size.x - penetration.x;
         if (dir.x > 0.0f)
         {
-            rePairPosition.x = wallPos - m_playerAABB.min.x;
+            rePairPosition.x = m_transform.translate.x + m_canClimbingCheckSize - penetration.x;
+            rePairPosition.x = rePairPosition.x + AABB::GetSize(m_playerAABB).x;
         }
         if (dir.x < 0.0f)
         {
-            rePairPosition.x = wallPos - m_playerAABB.max.x;
+            rePairPosition.x = m_transform.translate.x - m_canClimbingCheckSize - penetration.x;
+            rePairPosition.x = rePairPosition.x - AABB::GetSize(m_playerAABB).x;
         }
     }
     if (dir.z != 0.0f)
@@ -745,16 +747,16 @@ void Player::Climbing()
         //pAABB = AddSize(pAABB, -penetration.z);
         //rePairPosition.z = AABB::GetSize(pAABB).z - CenterAABB(m_playerAABB + m_velocity.translate).z;
         //rePairPosition.z = penetration.z - (dir.z * m_canClimbingCheckSize + size.z);
-        float wallPos = size.z - penetration.z;
         if (dir.z > 0.0f)
         {
-            wallPos = wallPos - m_playerAABB.min.z;
-            rePairPosition.z = wallPos - m_playerAABB.min.z;
+            rePairPosition.z = m_transform.translate.z + m_canClimbingCheckSize - penetration.z;
+            rePairPosition.z = rePairPosition.z + AABB::GetSize(m_playerAABB).z;
         }
         if (dir.z < 0.0f)
         {
-            wallPos = wallPos - m_playerAABB.max.z;
-            rePairPosition.z = wallPos - m_playerAABB.max.z;
+            rePairPosition.z = AABB::GetSize(m_playerAABB).z + (m_canClimbingCheckSize / 2.0f * Sign(dir.z));
+            //AABB cAABB = m_playerAABB + 
+            rePairPosition.z = rePairPosition.z - AABB::GetSize(m_playerAABB).z;
         }
     }
     // Yはインプルに壁の高さを見て計算
