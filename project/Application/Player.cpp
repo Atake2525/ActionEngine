@@ -307,13 +307,36 @@ const bool Player::CanClimbing()
 {
     AABB pAABB = m_playerAABB;
     pAABB += m_velocity.translate;
+    // 壁に当たっていなくても良い様にプレイヤーのAABBを大きくして判定する
+    pAABB = AddSize(pAABB, m_canClimbingCheckSize);
+    pAABB.min.y = m_playerAABB.min.y + m_velocity.translate.y;
+    pAABB.max.y = m_playerAABB.max.y + m_velocity.translate.y;
+
     float groundObjectDist = CollisionManager::GetInstance()->GetHeightToTopForAABB(pAABB);
     Vector3 dir = CollisionManager::GetInstance()->GetCollisionObjectDirectionForAABB(pAABB);
-    ImGui::Begin("Dir");
-    ImGui::DragFloat3("dir", &dir.x);
-    ImGui::End();
+    Vector3 cameraDir = m_pCamera->GetDirection();
+
+    dir.x = fabs(dir.x);
+    dir.y = fabs(dir.y);
+    dir.z = fabs(dir.z);
+
+    cameraDir.x = fabs(cameraDir.x);
+    cameraDir.y = fabs(cameraDir.y);
+    cameraDir.z = fabs(cameraDir.z);
+
+    bool IsWatchingWall = false;    
+    // プレイヤーも壁の方向を向いているかを調べる
+    if (dir.x != 0.0f && cameraDir.x > cameraDir.z)
+    {
+        IsWatchingWall = true;
+    }
+    if (dir.z != 0.0f && cameraDir.z > cameraDir.x)
+    {
+        IsWatchingWall = true;
+    }
+    
     // 壁の高さを見てm_climbingHeight以内だったらよじ登りできる
-    if (m_climbingHeight < groundObjectDist && 0.0f > groundObjectDist)
+    if (m_climbingHeight < groundObjectDist && 0.0f > groundObjectDist && IsWatchingWall && m_state == PlayerState::Falling)
     {
          return true;
     }
@@ -384,6 +407,7 @@ void Player::Move() {
     }
     Jump();
 
+    Climbing();
 
     // 空中制御を適用
     UpdateVelocity();
@@ -688,10 +712,58 @@ void Player::Climbing()
     // プレイヤーの身長を計算
     float height = m_playerAABB.max.y - m_playerAABB.min.y;
 
+    // よじ登りが可能かをチェックした時に使ったAABBと同じものを使ってオブジェクトとの貫通量を計算
+    AABB pAABB = m_playerAABB + m_velocity.translate;
+    pAABB = AddSize(pAABB, m_canClimbingCheckSize);
+    pAABB.min.y = m_playerAABB.min.y;
+    pAABB.max.y = m_playerAABB.max.y;
+    
+    Vector3 penetration = CollisionManager::GetInstance()->GetAllPenetrationForAABB(pAABB, false);
+    // 貫通量とよじ登りの軸を見てプレイヤーの位置の修正量を算出する
+    // これは複数のオブジェクトと衝突しているときに違う壁によじ登りを行うことを防ぐため
+    Vector3 dir = CollisionManager::GetInstance()->GetCollisionObjectDirectionForAABB(pAABB);
 
+    Vector3 size = AABB::GetSize(pAABB);
+
+    Vector3 rePairPosition = Vector3::Zero;
+    if (dir.x != 0.0f)
+    {
+        /*pAABB = AddSize(pAABB, -penetration.x);
+        rePairPosition.x = CenterAABB(m_playerAABB + m_velocity.translate).x - AABB::GetSize(pAABB).x;*/
+        float wallPos = size.x - penetration.x;
+        if (dir.x > 0.0f)
+        {
+            rePairPosition.x = wallPos - m_playerAABB.min.x;
+        }
+        if (dir.x < 0.0f)
+        {
+            rePairPosition.x = wallPos - m_playerAABB.max.x;
+        }
+    }
+    if (dir.z != 0.0f)
+    {
+        //pAABB = AddSize(pAABB, -penetration.z);
+        //rePairPosition.z = AABB::GetSize(pAABB).z - CenterAABB(m_playerAABB + m_velocity.translate).z;
+        //rePairPosition.z = penetration.z - (dir.z * m_canClimbingCheckSize + size.z);
+        float wallPos = size.z - penetration.z;
+        if (dir.z > 0.0f)
+        {
+            wallPos = wallPos - m_playerAABB.min.z;
+            rePairPosition.z = wallPos - m_playerAABB.min.z;
+        }
+        if (dir.z < 0.0f)
+        {
+            wallPos = wallPos - m_playerAABB.max.z;
+            rePairPosition.z = wallPos - m_playerAABB.max.z;
+        }
+    }
+    // Yはインプルに壁の高さを見て計算
+    float groundObjectDist = CollisionManager::GetInstance()->GetHeightToTopForAABB(pAABB);
+    rePairPosition.y = groundObjectDist;
 
     ImGui::Begin("Climbing");
-    ImGui::DragFloat("身長", &height);
+    ImGui::DragFloat("身長", &height); 
+    ImGui::DragFloat3("RePairPosition", &rePairPosition.x);
     ImGui::End();
 }
 

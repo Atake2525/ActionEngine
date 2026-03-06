@@ -48,6 +48,9 @@ void TestScene::Initialize() {
 	player = std::make_unique<Player>();
 	player->Initialize(camera.get(), stage->GetJsonName());
 
+	playerUi = std::make_unique<PlayerUI>();
+	playerUi->Initialize(player.get());
+
 	actionPlayer = std::make_unique<ActionPlayer>();
 	actionPlayer->Initialize(camera.get(), stage->GetJsonName(), false);
 
@@ -88,6 +91,7 @@ void TestScene::Update() {
 
 	player->Update();
 	//actionPlayer->Update();
+	playerUi->Update();
 
 	stage->Update();
 
@@ -153,6 +157,7 @@ void TestScene::Draw() {
 
 	stage->DrawBackSprite();
 	gameOverSprite->Draw();
+	playerUi->Draw();
 
 	DebugLineBase::GetInstance()->ShaderDraw();
 

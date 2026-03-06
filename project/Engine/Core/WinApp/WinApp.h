@@ -2,6 +2,7 @@
 #include <cstdint>
 #include "AABB.h"
 #include <string>
+#include "Vector2.h"
 
 #pragma comment(lib, "winmm.lib")
 #pragma once
@@ -57,6 +58,8 @@ public:
 
 	const int32_t& GetkClientWidth() const { return kClientWidth; }
 	const int32_t& GetkClientHeight() const { return kClientHeight; }
+
+	const Vector2 GetWindowSize() const { return { float(kClientWidth), float(kClientHeight) }; }
 
 	const WindowMode& GetWindowMode() const { return windowMode; }
 

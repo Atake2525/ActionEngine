@@ -26,6 +26,7 @@
 #include "TutorialStage.h"
 #include "DebugLine.h"
 #include "Pause.h"
+#include "PlayerUI.h"
 
 #pragma once
 
@@ -74,6 +75,7 @@ private:
 
     std::unique_ptr<Player> player;
 
+	std::unique_ptr<PlayerUI> playerUi;
 
 	bool start_ = false;
 };
