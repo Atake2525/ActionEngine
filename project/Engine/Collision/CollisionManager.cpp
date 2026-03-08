@@ -671,6 +671,50 @@ const Vector3 CollisionManager::GetCollisionObjectDirectionForAABB(const AABB& a
 	return { Sign(direction) };
 }
 
+const AABB CollisionManager::GetObjectForCollisionDirection(const AABB& aabb, const Vector3& direction, bool wallDashCollision)
+{
+	Vector3 dir = Vector3::Zero;
+	std::vector<Object3d*> colObj = collisionObject;
+	if (wallDashCollision)
+	{
+		colObj = wallDashCollisionObject;
+	}
+	for (const auto& object : colObj) {
+		// オブジェクトのメッシュごとのAABBを取得する
+		float serchDistance = Distance(object->GetAABB().max, aabb.min);
+		//if (serchDistance <= distance)
+		//{
+		const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
+		for (AABB terrainAABB : terrains)
+		{
+			// 座標をAABBに変換
+			AABB target = aabb;
+
+			// ターゲットとオブジェクトが貫通していたら実行
+			if (CollisionAABBXZ(target, terrainAABB))
+			{
+				// オブジェクトとaabbの方向を求める
+				Vector3 a = CenterAABB(aabb);
+				a.y = aabb.min.y;
+				Vector3 b;
+				// aabbとの最近接点を求める
+				b.x = clamp(a.x, terrainAABB.min.x, terrainAABB.max.x);
+				b.y = clamp(a.y, terrainAABB.min.y, terrainAABB.max.y);
+				b.z = clamp(a.z, terrainAABB.min.z, terrainAABB.max.z);
+				// 計算した最近接点を使って方向を求める
+				dir = b - a;
+
+				if (Sign(dir) == direction)
+				{
+					return terrainAABB;
+				}
+			}
+		}
+	}
+	// 詳しい数値はいらないのでSign関数で(-1, 1 or 0)にする
+	return AABB::Zero;
+}
+
 const Vector3 CollisionManager::CheckPenetrationAmount(const AABB& aabb)
 {
 	Vector3 result = { 0.0f, 0.0f, 0.0f };
