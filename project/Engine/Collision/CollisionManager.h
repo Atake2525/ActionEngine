@@ -86,6 +86,8 @@ public:
 
 	const Vector3 GetCollisionObjectDirectionForAABB(const AABB& aabb, bool wallDashCollision = false);
 
+	const AABB GetObjectForCollisionDirection(const AABB& aabb, const Vector3& direction, bool wallDashCollision = false);
+
 	const Vector3 CheckPenetrationAmount(const AABB& aabb);
 
 	// 当たり判定として計算するオブジェクトの追加

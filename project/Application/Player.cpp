@@ -285,7 +285,7 @@ void Player::UpdateParkourState()
             m_isStartWallRun = false;
         }
     }
-    if ((input->PushKey(DIK_SPACE) || input->PushButton(Controller::A)) && m_canClimbing)
+    if ((input->TriggerKey(DIK_SPACE) || input->PushButton(Controller::A)) && m_canClimbing)
     {
         m_walkState = PlayerWalkState::Climbing;
     }
@@ -407,7 +407,10 @@ void Player::Move() {
     }
     Jump();
 
-    Climbing();
+    if (m_walkState == PlayerWalkState::Climbing)
+    {
+        Climbing();
+    }
 
     // 空中制御を適用
     UpdateVelocity();
@@ -719,27 +722,26 @@ void Player::Climbing()
     pAABB.max.y = m_playerAABB.max.y;
     
     Vector3 penetration = CollisionManager::GetInstance()->GetAllPenetrationForAABB(pAABB, false);
-    // 貫通量とよじ登りの軸を見てプレイヤーの位置の修正量を算出する
-    // これは複数のオブジェクトと衝突しているときに違う壁によじ登りを行うことを防ぐため
-    Vector3 dir = CollisionManager::GetInstance()->GetCollisionObjectDirectionForAABB(pAABB);
+    // よじ登りをするためのオブジェクトのAABBを取得する
+    Vector3 dir = CollisionManager::GetInstance()->GetCollisionObjectDirectionForAABB(pAABB, false);
+    AABB colObj = CollisionManager::GetInstance()->GetObjectForCollisionDirection(pAABB, dir);
+  
 
-    Vector3 size = AABB::GetSize(pAABB);
+    Vector3 halfSize = AABB::GetSize(pAABB) / 2.0f;
 
     Vector3 rePairPosition = Vector3::Zero;
     if (dir.x != 0.0f)
     {
         /*pAABB = AddSize(pAABB, -penetration.x);
         rePairPosition.x = CenterAABB(m_playerAABB + m_velocity.translate).x - AABB::GetSize(pAABB).x;*/
-        float wallPos = size.x - penetration.x;
+        //float wallPos = size.x - penetration.x;
         if (dir.x > 0.0f)
         {
-            rePairPosition.x = m_transform.translate.x + m_canClimbingCheckSize - penetration.x;
-            rePairPosition.x = rePairPosition.x + AABB::GetSize(m_playerAABB).x;
+            rePairPosition.x = m_transform.translate.x - colObj.min.x;
         }
         if (dir.x < 0.0f)
         {
-            rePairPosition.x = m_transform.translate.x - m_canClimbingCheckSize - penetration.x;
-            rePairPosition.x = rePairPosition.x - AABB::GetSize(m_playerAABB).x;
+            rePairPosition.x = m_transform.translate.x - colObj.max.x;
         }
     }
     if (dir.z != 0.0f)
@@ -749,19 +751,19 @@ void Player::Climbing()
         //rePairPosition.z = penetration.z - (dir.z * m_canClimbingCheckSize + size.z);
         if (dir.z > 0.0f)
         {
-            rePairPosition.z = m_transform.translate.z + m_canClimbingCheckSize - penetration.z;
-            rePairPosition.z = rePairPosition.z + AABB::GetSize(m_playerAABB).z;
+            rePairPosition.z = m_transform.translate.z - colObj.min.z;
         }
         if (dir.z < 0.0f)
         {
-            rePairPosition.z = AABB::GetSize(m_playerAABB).z + (m_canClimbingCheckSize / 2.0f * Sign(dir.z));
-            //AABB cAABB = m_playerAABB + 
-            rePairPosition.z = rePairPosition.z - AABB::GetSize(m_playerAABB).z;
+            rePairPosition.z = m_transform.translate.z - colObj.max.z;
         }
     }
     // Yはインプルに壁の高さを見て計算
     float groundObjectDist = CollisionManager::GetInstance()->GetHeightToTopForAABB(pAABB);
     rePairPosition.y = groundObjectDist;
+
+    m_velocity.translate.y = 0.0f;
+    m_transform.translate -= rePairPosition;
 
     ImGui::Begin("Climbing");
     ImGui::DragFloat("身長", &height); 

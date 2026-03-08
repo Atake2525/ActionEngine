@@ -247,7 +247,7 @@ private: // プレイヤーモデル
     //================
     // よじ登り関連
     //================
-    float m_canClimbingCheckSize = 5.0f; // よじ登り可能かのチェック範囲の増加量
+    float m_canClimbingCheckSize = 2.5f; // よじ登り可能かのチェック範囲の増加量
 
     bool m_canClimbing = false;
     float m_climbingHeight = -4.0f; // よじ登りができるまでの高さ
