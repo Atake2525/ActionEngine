@@ -118,7 +118,14 @@ void TestScene::Update() {
 	ImGui::DragFloat3("penetration", &penetration.x, 0.1f);
 	ImGui::End();
 
-	tim += GameTime::GetInstance()->GetDeltaTime() * 50.0f;
+	if (tim < 100.0f)
+	{
+		tim += GameTime::GetInstance()->GetDeltaTime() * 50.0f;
+	}
+	else
+	{
+		tim = 100.0f;
+	}
 
 	if (input->TriggerKey(DIK_R))
 	{

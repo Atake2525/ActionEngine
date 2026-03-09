@@ -221,5 +221,9 @@ public:
 	/// ↑----- Setter -----↑ ///
 
 	void SetRadius(const float& radius) const { scanData->radius = radius; }
+
+	const float& GetScanWidth() const { return scanData->width; }
+	const float& GetScanRadius() const { return scanData->radius; }
+	const Vector3& GetColor() const { return scanData->color; }
 };
 

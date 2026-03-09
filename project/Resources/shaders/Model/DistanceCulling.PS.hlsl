@@ -16,9 +16,9 @@ static float3 ScanEffect(float3 baseColor, float3 scanColor, float3 worldPos, fl
     float dist = length(worldPos - cameraPos);
 
     float edge = exp(-abs(dist - scanRadius) * 20.0);
-    
+
     float scan = smoothstep(scanRadius - scanWidth, scanRadius, dist) * (1 - smoothstep(scanRadius, scanRadius + scanWidth, dist));
-    
+
     float intensity = saturate(scan * 1.5 + edge * 2.0);
     
     float3 finalColor = baseColor + scanColor * intensity;
