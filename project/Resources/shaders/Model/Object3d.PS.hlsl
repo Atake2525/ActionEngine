@@ -281,6 +281,11 @@ PixelShaderOutput main(VertexShaderOutput input)
     
     output.color.rgb = ScanEffect(output.color.rgb, gScanParam.color, input.worldPosition, gCamera.worldPosition, gScanParam.width, gScanParam.radius);
     
+    float dist = length(input.worldPosition - gCamera.worldPosition);
+    float t = smoothstep(gScanParam.radius, gScanParam.radius * 0.999f, dist);
+    
+    output.color.rgb = lerp(float3(1.0f, 1.0f, 1.0f), output.color.rgb, t);
+    
     if (output.color.a < 0.2f)
     {
         discard;

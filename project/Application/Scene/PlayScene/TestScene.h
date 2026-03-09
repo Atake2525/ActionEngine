@@ -76,6 +76,8 @@ private:
 
 	std::unique_ptr<Pause> pause;
 
+	float tim = 0.0f;
+
 	bool start_ = false;
 };
 

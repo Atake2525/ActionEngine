@@ -118,6 +118,15 @@ void TestScene::Update() {
 	ImGui::DragFloat3("penetration", &penetration.x, 0.1f);
 	ImGui::End();
 
+	tim += GameTime::GetInstance()->GetDeltaTime() * 50.0f;
+
+	if (input->TriggerKey(DIK_R))
+	{
+		tim = 0.0f;
+	}
+
+	camera->SetFarClipDistance(tim);
+
 	bool flag = false;
 
 	if (input->TriggerKey(DIK_1))
@@ -139,7 +148,7 @@ void TestScene::Update() {
 	SkyBox::GetInstance()->Update();
 
 	camera->Update();
-	Light::GetInstance()->SetRadius(camera->GetFarClipDistance());
+	//Light::GetInstance()->SetRadius(camera->GetFarClipDistance());
 }
 
 void TestScene::Draw() {
