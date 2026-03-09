@@ -64,7 +64,7 @@ void Light::Initialize() {
 
 	scanData->color = { 0.2f, 0.8f, 1.0f };
 	scanData->width = 8.0f;
-	scanData->radius = 0.5f;
+	scanData->radius = 0.1f;
 
 }
 
