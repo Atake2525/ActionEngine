@@ -63,7 +63,7 @@ void Light::Initialize() {
 	scanResource->Map(0, nullptr, reinterpret_cast<void**>(&scanData));
 
 	scanData->color = { 0.2f, 0.8f, 1.0f };
-	scanData->width = 3.0f;
+	scanData->width = 8.0f;
 	scanData->radius = 0.5f;
 
 }
