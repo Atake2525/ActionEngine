@@ -129,8 +129,8 @@ private:
 
 	struct Sun
 	{
+		float power;
 		Vector3 sunDirection;
-		float pad;
 		Vector3 topColor;
 		float pad1;
 		Vector3 bottomColo;

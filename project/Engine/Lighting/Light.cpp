@@ -59,6 +59,13 @@ void Light::Initialize() {
 	spotLightData->cosFalloffStart = std::cos(std::numbers::pi_v<float> / 3.0f);
 	spotLightData->specularColor = { 1.0f, 1.0f, 1.0f };
 
+	scanResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(ScanParam));
+	scanResource->Map(0, nullptr, reinterpret_cast<void**>(&scanData));
+
+	scanData->color = { 0.2f, 0.8f, 1.0f };
+	scanData->width = 3.0f;
+	scanData->radius = 0.5f;
+
 }
 
 void Light::Update() {
@@ -93,6 +100,13 @@ void Light::Update() {
 		ImGui::DragFloat("CosAngle / 余弦", &spotLightData->cosAngle, 0.1f);
 		ImGui::DragFloat("cosFalloffStart / falloff開始の角度", &spotLightData->cosFalloffStart, 0.1f);
 		ImGui::ColorEdit3("SpecularColor / 反射色", &spotLightData->specularColor.x);
+		ImGui::TreePop();
+	}
+	if (ImGui::TreeNode("Scan / スキャン"))
+	{
+		ImGui::ColorEdit3("Color", &scanData->color.x);
+		ImGui::DragFloat("width", &scanData->width, 0.1f);
+		ImGui::DragFloat("radius", &scanData->radius, 0.1f);
 		ImGui::TreePop();
 	}
 	ImGui::End();

@@ -37,6 +37,14 @@ struct SpotLight {
 	float padding2;
 };
 
+struct ScanParam
+{
+	Vector3 color;
+	float width;
+	float radius;
+	float pad[3];
+};
+
 
 class Light {
 	// シングルトンパターンを適用
@@ -71,6 +79,8 @@ public:
 
 	const Microsoft::WRL::ComPtr<ID3D12Resource>& GetSpotLightResource() const { return spotLightResource; }
 
+	const Microsoft::WRL::ComPtr<ID3D12Resource>& GetScanResource() const { return scanResource; }
+
 private:
 	// ライトリソース宣言
 	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightResource;
@@ -86,6 +96,10 @@ private:
 	PointLight* pointLightData = nullptr;
 
 	SpotLight* spotLightData = nullptr;
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> scanResource;
+	ScanParam* scanData = nullptr;
+
 
 public:
 	/// ↓----- Getter -----↓ ///
@@ -205,5 +219,7 @@ public:
 	// ↑--SpotLight --↑
 
 	/// ↑----- Setter -----↑ ///
+
+	void SetRadius(const float& radius) const { scanData->radius = radius; }
 };
 
