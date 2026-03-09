@@ -8,10 +8,6 @@ Texture2D<float4> roughnessTexture : register(t4);
 TextureCube<float4> gEnvironmentTexture : register(t1);
 SamplerState gSampler : register(s0);
 
-/*struct PixelShaderOutput{
-    float32_t4 color : SV_TARGET0;
-};*/
-
 struct Material
 {
     float4 color;
@@ -98,6 +94,14 @@ struct CullingTemplate
 };
 ConstantBuffer<CullingTemplate> gCullingTemplate : register(b7);
 
+struct ScanParam
+{
+    float3 color;
+    float width;
+    float radius;
+};
+ConstantBuffer<ScanParam> gScanParam : register(b8);
+
 static PixelShaderOutput RoadMaterialTemplate(PixelShaderOutput output, VertexShaderOutput input)
 {
     // 環境マップ
@@ -171,13 +175,11 @@ PixelShaderOutput main(VertexShaderOutput input)
         // Phong Reflection Model
         // 計算式 R = reflect(L,N) specular = (V.R)n
         float3 toEye = normalize(gCamera.worldPosition - input.worldPosition);
-        //float32_t3 reflectLight = reflect(gDirectionalLight.direction, normalize(input.normal));
     
         // HalfVectorを求めて計算する
         float3 halfVector = normalize(-gDirectionalLight.direction + toEye);
         float NDotH = dot(normalize(input.normal), halfVector);
         
-        //float RdotE = dot(reflectLight, toEye);
         float specularPow = pow(saturate(NDotH), gMaterial.shininess); // 反射強度
         
         // pointLight
@@ -208,8 +210,6 @@ PixelShaderOutput main(VertexShaderOutput input)
         
         float specularPowSpotLight = pow(saturate(NDotHSpotLight), gMaterial.shininess);
         
-        //float32_t attenuationFactor = saturate((cosAngle - gSpotLight.distance) / (1.0f - gSpotLight.distance));
-        
         float spotLightdistance = length(gSpotLight.position - input.worldPosition); // ポイントライトへの距離
         float attenuationFactor = pow(saturate(-spotLightdistance / gSpotLight.distance + 1.0f), gSpotLight.dacay); // 逆に上による減衰係数
         
@@ -231,15 +231,11 @@ PixelShaderOutput main(VertexShaderOutput input)
         // 拡散反射
         float3 diffuseDirectionalLight = gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity;
         
-        //diffuseDirectionalLight = diffuseDirectionalLight * (1.0f - metallic); // 金属は拡散反射しない
-        
         float3 environmentColorDirectionalLight = (environmentColor.rgb * metallic) * diffuseDirectionalLight;
         
         // 鏡面反射                                                                                      ↓ 物体の鏡面反射の色。ここでは白にしている materialで設定できたりすると良い
-        //float3 specularDirectionalLight = gDirectionalLight.color.rgb * gDirectionalLight.intensity * specularPow * gDirectionalLight.specularColor;
         float3 specularDirectionalLight = TorranceSparrow(-gDirectionalLight.direction, toEye, normal, roughness, gDirectionalLight.specularColor) * gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity;
         
-        //float3 directionalLight = environmentColorDirectionalLight + (diffuseDirectionalLight * (1.0f - Flusnel(toEye, normalize(-gDirectionalLight.direction + toEye), gMaterial.specularColor))) + specularDirectionalLight;
         float3 directionalLight = environmentColorDirectionalLight + diffuseDirectionalLight + specularDirectionalLight;
         
         // PointLight
@@ -247,7 +243,6 @@ PixelShaderOutput main(VertexShaderOutput input)
         float3 diffusePointLight = gMaterial.color.rgb * textureColor.rgb * gPointLight.color.rgb * cos * gPointLight.intensity * factor;
         
         // 鏡面反射                                                                                      ↓ 物体の鏡面反射の色。ここでは白にしている materialで設定できたりすると良い
-        //float3 specularPointLight = gPointLight.color.rgb * gPointLight.intensity * factor * specularPowPointLight * gPointLight.specularColor.rgb;
         float3 specularPointLight = TorranceSparrow(-pointLightDirection, toEye, normal, roughness, gPointLight.specularColor) * gMaterial.color.rgb * textureColor.rgb * gPointLight.color.rgb * cosPointLight * gPointLight.intensity * factor;
         
         float3 environmentColorPointLight = (environmentColor.rgb * metallic) * diffusePointLight;
@@ -256,11 +251,9 @@ PixelShaderOutput main(VertexShaderOutput input)
         
         // SpotLight
          // 拡散反射
-        //float32_t3 diffuseSpotLight = gMaterial.color.rgb * textureColor.rgb * gSpotLight.color.rgb * cosSpotLight * gSpotLight.intensity * falloffFactor * attenuationFactor;
         float3 diffuseSpotLight = gMaterial.color.rgb * textureColor.rgb * gSpotLight.color.rgb * cosSpotLight * gSpotLight.intensity * falloffFactor * attenuationFactor;
         
         // 鏡面反射                                                                                      ↓ 物体の鏡面反射の色。ここでは白にしている materialで設定できたりすると良い
-        //float3 specularSpotLight = gSpotLight.color.rgb * gSpotLight.intensity * attenuationFactor * gMaterial.specularColor * gSpotLight.specularColor * specularPowSpotLight;
         float3 specularSpotLight = TorranceSparrow(-gSpotLight.direction, toEye, normal, roughness, gSpotLight.specularColor) * gMaterial.color.rgb * textureColor.rgb * gSpotLight.color.rgb * cosSpotLight * gSpotLight.intensity * falloffFactor * attenuationFactor;
         
         float3 environmentColorSpotLight = (environmentColor.rgb * metallic) * diffuseSpotLight;
@@ -285,6 +278,8 @@ PixelShaderOutput main(VertexShaderOutput input)
 
     output.color.a = HeightCulling(input.worldPosition, gCullingTemplate.drawHeight);
     output.color.a *= DistanceCulling(input.worldPosition, gCamera.worldPosition, gCamera.nearClipDistance, gCamera.farClipDistance);
+    
+    output.color.rgb = ScanEffect(output.color.rgb, gScanParam.color, input.worldPosition, gCamera.worldPosition, gScanParam.width, gScanParam.radius);
     
     if (output.color.a < 0.2f)
     {

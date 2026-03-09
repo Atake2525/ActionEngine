@@ -9,6 +9,7 @@
 #include "StageCount.h"
 #include "DebugLineBase.h"
 #include "Collision.h"
+#include "Light.h"
 
 using namespace Logger;
 using namespace std;
@@ -138,6 +139,7 @@ void TestScene::Update() {
 	SkyBox::GetInstance()->Update();
 
 	camera->Update();
+	Light::GetInstance()->SetRadius(camera->GetFarClipDistance());
 }
 
 void TestScene::Draw() {

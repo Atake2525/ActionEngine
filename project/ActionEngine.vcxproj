@@ -280,6 +280,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Player.h" />
     <ClInclude Include="Engine\Collision\PhysicsCorrection.h" />
     <ClInclude Include="Application\Pause.h" />
+    <ClInclude Include="Engine\Presentation\Cinematic\ScanEffect.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="externals\assimp\lib\Release\assimp-vc143-mtd.lib">

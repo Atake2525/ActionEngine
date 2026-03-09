@@ -59,6 +59,7 @@ void SkyBox::Initialize() {
 	sunResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(Sun));
 	sunResource->Map(0, nullptr, reinterpret_cast<void**>(&sunData));
 
+	sunData->power = 0.0f;
 	sunData->topColor = { 0.45f, 0.65f, 1.0f };
 	sunData->bottomColo = { 0.02f, 0.05f, 0.15f };
 	sunData->sunDirection = { 0.0f, 1.0f, 0.0f };
