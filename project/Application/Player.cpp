@@ -313,24 +313,41 @@ const bool Player::CanClimbing()
     pAABB.max.y = m_playerAABB.max.y + m_velocity.translate.y;
 
     float groundObjectDist = CollisionManager::GetInstance()->GetHeightToTopForAABB(pAABB);
+    // プレイヤーの身長よりもある程度高くないと処理しないようにする
+    float height = pAABB.max.y - pAABB.min.y;
+    if (height / 3.0f > -groundObjectDist)
+    {
+        return false;
+    }
+
     Vector3 dir = CollisionManager::GetInstance()->GetCollisionObjectDirectionForAABB(pAABB);
     Vector3 cameraDir = m_pCamera->GetDirection();
 
-    dir.x = fabs(dir.x);
+    /*dir.x = fabs(dir.x);
     dir.y = fabs(dir.y);
-    dir.z = fabs(dir.z);
+    dir.z = fabs(dir.z);*/
+    
+    Vector3 fsbsCameraDir;
 
-    cameraDir.x = fabs(cameraDir.x);
-    cameraDir.y = fabs(cameraDir.y);
-    cameraDir.z = fabs(cameraDir.z);
+    fsbsCameraDir.x = fabs(cameraDir.x);
+    fsbsCameraDir.y = fabs(cameraDir.y);
+    fsbsCameraDir.z = fabs(cameraDir.z);
 
     bool IsWatchingWall = false;    
     // プレイヤーも壁の方向を向いているかを調べる
-    if (dir.x != 0.0f && cameraDir.x > cameraDir.z)
+    if (dir.x < 0.0f && fsbsCameraDir.x * Sign(cameraDir.x) < -fsbsCameraDir.z)
     {
         IsWatchingWall = true;
     }
-    if (dir.z != 0.0f && cameraDir.z > cameraDir.x)
+    if (dir.x > 0.0f && cameraDir.x > fsbsCameraDir.z)
+    {
+        IsWatchingWall = true;
+    }
+    if (dir.z < 0.0f && fsbsCameraDir.z * Sign(cameraDir.z) < -fsbsCameraDir.x)
+    {
+         IsWatchingWall = true;
+    }
+    if (dir.z > 0.0f && cameraDir.z > fsbsCameraDir.x)
     {
         IsWatchingWall = true;
     }
@@ -723,37 +740,56 @@ void Player::Climbing()
     
     Vector3 penetration = CollisionManager::GetInstance()->GetAllPenetrationForAABB(pAABB, false);
     // よじ登りをするためのオブジェクトのAABBを取得する
-    Vector3 dir = CollisionManager::GetInstance()->GetCollisionObjectDirectionForAABB(pAABB, false);
-    AABB colObj = CollisionManager::GetInstance()->GetObjectForCollisionDirection(pAABB, dir);
+    //Vector3 dir = CollisionManager::GetInstance()->GetCollisionObjectDirectionForAABB(pAABB, false);
+    Vector3 cameraDir = m_pCamera->GetDirection();
+    
+    Vector3 fabsCameraDir = cameraDir;
+
+    fabsCameraDir.x = fabs(fabsCameraDir.x);
+    fabsCameraDir.y = fabs(fabsCameraDir.y);
+    fabsCameraDir.z = fabs(fabsCameraDir.z);
+
+    if (fabsCameraDir.x > fabsCameraDir.z)
+    {
+        cameraDir = { 1.0f * Sign(cameraDir.x), 0.0f, 0.0f};
+    }
+    if (fabsCameraDir.z > fabsCameraDir.x)
+    {
+        cameraDir = { 0.0f, 0.0f, 1.0f * Sign(cameraDir.z)};
+    }
+
+    AABB colObj = CollisionManager::GetInstance()->GetObjectForCollisionDirection(pAABB, cameraDir);
   
 
     Vector3 halfSize = AABB::GetSize(pAABB) / 2.0f;
 
+    cameraDir = Sign(cameraDir);
+
     Vector3 rePairPosition = Vector3::Zero;
-    if (dir.x != 0.0f)
+    if (cameraDir.x != 0.0f)
     {
         /*pAABB = AddSize(pAABB, -penetration.x);
         rePairPosition.x = CenterAABB(m_playerAABB + m_velocity.translate).x - AABB::GetSize(pAABB).x;*/
         //float wallPos = size.x - penetration.x;
-        if (dir.x > 0.0f)
+        if (cameraDir.x > 0.0f)
         {
             rePairPosition.x = m_transform.translate.x - colObj.min.x;
         }
-        if (dir.x < 0.0f)
+        if (cameraDir.x < 0.0f)
         {
             rePairPosition.x = m_transform.translate.x - colObj.max.x;
         }
     }
-    if (dir.z != 0.0f)
+    if (cameraDir.z != 0.0f)
     {
         //pAABB = AddSize(pAABB, -penetration.z);
         //rePairPosition.z = AABB::GetSize(pAABB).z - CenterAABB(m_playerAABB + m_velocity.translate).z;
         //rePairPosition.z = penetration.z - (dir.z * m_canClimbingCheckSize + size.z);
-        if (dir.z > 0.0f)
+        if (cameraDir.z > 0.0f)
         {
             rePairPosition.z = m_transform.translate.z - colObj.min.z;
         }
-        if (dir.z < 0.0f)
+        if (cameraDir.z < 0.0f)
         {
             rePairPosition.z = m_transform.translate.z - colObj.max.z;
         }

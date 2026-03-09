@@ -660,8 +660,30 @@ const Vector3 CollisionManager::GetCollisionObjectDirectionForAABB(const AABB& a
 				b.x = clamp(a.x, terrainAABB.min.x, terrainAABB.max.x);
 				b.y = clamp(a.y, terrainAABB.min.y, terrainAABB.max.y);
 				b.z = clamp(a.z, terrainAABB.min.z, terrainAABB.max.z);
+				
+				Vector3 dir = b - a;
+				if (dir.x != 0.0f && dir.z != 0.0f)
+				{
+					if (a.x >= terrainAABB.min.x && a.x <= terrainAABB.max.x)
+					{
+						dir.z = 0.0f;
+					}
+					else
+					{
+						dir.x = 0.0f;
+					}
+					if (a.z >= terrainAABB.min.z && a.z <= terrainAABB.max.z)
+					{
+						dir.x = 0.0f;
+					}
+					else
+					{
+						dir.z = 0.0f;
+					}
+				}
+
 				// 計算した最近接点を使って方向を求める
-				direction = b - a;
+				direction += dir;
 
 				
 			}
