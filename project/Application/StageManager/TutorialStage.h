@@ -44,6 +44,7 @@ private:
     std::unique_ptr<Trap> trap;
     std::unique_ptr<Goal> goal;
 
+
     std::array< std::unique_ptr<Sprite>, 4> tutorialSprites;
 
 };

@@ -24,6 +24,7 @@ void TitleScene::Initialize() {
 
     SkyBox::GetInstance()->SetCamera(camera.get());
     SkyBox::GetInstance()->SetTexture("Resources/rostock_laage_airport_4k.dds");
+    SkyBox::GetInstance()->SetSunPoewr(1.0f);
 
     input = Input::GetInstance();
     input->ShowMouseCursor(true);
@@ -100,6 +101,7 @@ void TitleScene::Initialize() {
 
     Light::GetInstance()->SetDirectionDirectionalLight({ 0.174f, -0.35f, 1.0f });
     Light::GetInstance()->SetIntensityDirectionalLight(0.5f);
+    Light::GetInstance()->SetRadius(camera->GetFarClipDistance());
 
     m_sceneScreen = TitleSceneScreen::BootScreen;
 
@@ -186,7 +188,7 @@ void TitleScene::Update() {
 
             if (m_screenChangeTimer == 1.0f && m_changeNum == 1)
             {
-                SceneManager::GetInstance()->SetNextScene("TEST");
+                SceneManager::GetInstance()->SetNextScene("GAMESCENE");
                 m_screenChange = false;
                 /*camera->SetTranslate({ 0.0f, 0.2f, -4.5f });
                 camera->SetRotate({ SwapRadian(-9.5f), 0.0f, 0.0f });

@@ -7,6 +7,8 @@
 #include "GameOver.h"
 #include "StageCount.h"
 #include "TutorialStage.h"
+#include "EasingUtility.h"
+#include "Light.h"
 
 using namespace std;
 using namespace ActionEngine::Stage;
@@ -17,9 +19,11 @@ void GameScene::Initialize() {
 
     camera = make_unique<Camera>();
     camera->SetTranslate({ 0.0f, 1.8f, 0.0f });
+    camera->SetFarClipDistance(0.0f);
 
     SkyBox::GetInstance()->SetCamera(camera.get());
     SkyBox::GetInstance()->SetTexture("Resources/rostock_laage_airport_4k.dds");
+    SkyBox::GetInstance()->SetSunPoewr(0.0f);
 
     input = Input::GetInstance();
 
@@ -38,27 +42,84 @@ void GameScene::Initialize() {
     stageObject->Initialize();
     stageObject->SetModel("Resources/Model/obj/Stage/TutorialStage", "TutorialStage.obj", true);
 
-    /*player_ = make_unique<ActionPlayer>();
-    player_->Initialize(camera.get(), stage->GetJsonName());*/
-
     m_pPlayer = make_unique<Player>();
     m_pPlayer->Initialize(camera.get(), stage->GetJsonName());
+    m_pPlayer->Update();
 
+    Light::GetInstance()->SetRadius(0.1f);
     GameTime::GetInstance()->SetDeltaPoint();
     FadeManager::GetInstance()->FadeIn(1.0f);
+    m_pause = make_unique<Pause>();
+    m_pause->Initialize();
+
+    m_scenePhase = ScenePhase::FadeIn;
 }
 
 void GameScene::Update() {
 
+    // ポーズはどのフェーズでも行えるようにする
+    m_pause->Update();
+    if (m_pause->IsPause())
+    {
+        return;
+    }
+
+    float farClipDist = 0.0f;
+    float radius = 0.0f;
+    // フェーズ管理
+    switch (m_scenePhase)
+    {
+    case ScenePhase::FadeIn: // シーン遷移演出フェーズ(入)
+        if (FadeManager::GetInstance()->CompleteFade() || !FadeManager::GetInstance()->IsFade())
+        {
+            m_scenePhase = ScenePhase::Ready;
+            m_finalScanRadius = m_finalFarClipDistance + Light::GetInstance()->GetScanWidth() * 3.0f;
+        }
+        break;
+    case ScenePhase::Ready: // スタート演出フェーズ
+        m_startTimer += GameTime::GetInstance()->GetDeltaTime() / m_startTime;
+        m_startTimer = clamp(m_startTimer, 0.0f, 1.0f);
+
+        
+        switch (m_readyNumber)
+        {
+        case 0:
+            farClipDist = EaseOutExpo(m_startTimer, 0.0f, m_finalFarClipDistance);
+            camera->SetFarClipDistance(farClipDist);
+            break;
+        case 1:
+            radius = EaseOutExpo(m_startTimer, 0.0f, m_finalScanRadius);
+            Light::GetInstance()->SetRadius(radius);
+
+            SkyBox::GetInstance()->SetSunPoewr(m_startTimer);
+            
+            break;
+        }
+
+        if (m_readyNumber == 1 && m_startTimer == 1.0f)
+        {
+            m_scenePhase = ScenePhase::Game;
+            m_readyNumber = 0;
+        }
+
+        if (m_startTimer == 1.0f)
+        {
+            m_readyNumber++;
+            m_startTimer = 0.0f;
+        }
+        break;
+    case ScenePhase::Game: // プレイフェーズ
+        m_pPlayer->Update();
+        break;
+    //case ScenePhase::FadeOut: // シーン遷移演出フェーズ(出)
+    //    break;
+    }
+
 
     stage->Update();
 
-    //input->Update();
 
     stageObject->Update();
-
-    //player_->Update();
-    m_pPlayer->Update();
 
 #ifndef NDEBUG
     if (input->TriggerKey(DIK_ESCAPE))
@@ -85,45 +146,13 @@ void GameScene::Update() {
 
     SkyBox::GetInstance()->Update();
 
-   /* if (!start_)
-    {
-        if (FadeManager::GetInstance()->CompleteFade())
-        {
-            start_ = true;
-            startMovie_ = true;
-            phase_ = 0;
-        }
-        else
-        {
-            return;
-        }
-    }*/
 
     if (input->TriggerKey(DIK_R))
     {
         SceneManager::GetInstance()->SetNextScene("GAMESCENE");
     }
 
-    /*if (input->PushKey(DIK_LSHIFT))
-    {
-        tutorial[1].timer += GameTime::GetInstance()->GetDeltaTime();
-        tutorial[1].color.x = 1.0f - (tutorial[1].timer / 2.0f);
-        tutorial[1].color.z = 1.0f - (tutorial[1].timer / 2.0f);
-        tutorial[1].sprite->SetColor(tutorial[1].color);
-        if (tutorial[1].timer >= 2.0f)
-        {
-            tutorial[1].isClear = true;
-        }
-        tutorial[1].sprite->Update();
-
-    }
-
-    if (player_->IsGameOver())
-    {
-        player_->Freeze(true);
-        gameOver_->Update();
-    }*/
-
+   
     camera->Update();
 
 }
@@ -140,11 +169,10 @@ void GameScene::Draw() {
 
     SkinningObject3dBase::GetInstance()->ShaderDraw();
 
-    //player_->Draw();
 
     SpriteBase::GetInstance()->ShaderDraw();
 
-    //stage->DrawBackSprite();
+    m_pause->Draw();
     gameOver_->Draw();
     gameClear_->Draw();
 }

@@ -10,6 +10,7 @@
 #include "DebugLineBase.h"
 #include "Collision.h"
 #include "FadeManager.h"
+#include "Light.h"
 
 using namespace Logger;
 using namespace std;
@@ -122,6 +123,22 @@ void TestScene::Update() {
 	/*ImGui::Begin("capsule");
 	ImGui::DragFloat3("penetration", &penetration.x, 0.1f);
 	ImGui::End();*/
+
+	if (tim < 100.0f)
+	{
+		tim += GameTime::GetInstance()->GetDeltaTime() * 50.0f;
+	}
+	else
+	{
+		tim = 100.0f;
+	}
+
+	if (input->TriggerKey(DIK_R))
+	{
+		tim = 0.0f;
+	}
+
+	camera->SetFarClipDistance(tim);
 
 	bool flag = false;
 
