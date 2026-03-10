@@ -6,6 +6,7 @@
 #include "GameTime.h"
 #include "EasingUtility.h"
 #include "Light.h"
+#include "FadeManager.h"
 
 using namespace std;
 
@@ -17,6 +18,7 @@ void TitleScene::Initialize() {
     camera->SetRotate(Vector3(SwapRadian(11.5f), SwapRadian(1.5f), 0.0f));
     camera->SetTranslate({ -1.0f, 1.6f, -3.4f });
     m_screenChangeTransformPre = camera->GetTransform();
+    camera->Update();
 
     TextureManager::GetInstance()->LoadTexture("Resources/rostock_laage_airport_4k.dds");
 
@@ -37,14 +39,12 @@ void TitleScene::Initialize() {
     m_charModel->AddAnimation("Resources/Model/gltf", "sceneChange_Animation.gltf", "TitleScreen");
     m_charModel->ToggleStartAnimation();
     m_charModel->SetRotate({ 0.0f, SwapRadian(180.0f), 0.0f});
+    m_charModel->Update();
 
     m_bootScreen = make_unique<Object3d>();
     m_bootScreen->Initialize();
     m_bootScreen->SetModel("Resources/Model/obj/Title", "TitleScene_01.obj", true);
-
-    m_titleScreen = make_unique<Object3d>();
-    m_titleScreen->Initialize();
-    m_titleScreen->SetModel("Resources/Model/obj/Title", "TitleScene_02.obj", true);
+    m_bootScreen->Update();
 
     Vector2 windowSize = { float(WinApp::GetInstance()->GetkClientWidth()), float(WinApp::GetInstance()->GetkClientHeight()) };
     m_startUi = make_unique<Sprite>();
@@ -54,6 +54,7 @@ void TitleScene::Initialize() {
     m_startUi->SetScale(size * 0.2f);
     m_startUi->SetAnchorPoint({ 0.5f, 0.5f });
     m_startUi->SetPosition({ windowSize.x * 0.5f, windowSize.y * 0.5f });
+    m_startUi->Update();
 
 
     m_exitUi = make_unique<Sprite>();
@@ -63,6 +64,7 @@ void TitleScene::Initialize() {
     m_exitUi->SetScale(size * 0.2f);
     m_exitUi->SetAnchorPoint({ 0.5f, 0.5f });
     m_exitUi->SetPosition({ windowSize.x * 0.5f, windowSize.y * 0.5f + (size.y * 0.3f) });
+    m_exitUi->Update();
 
     m_pressAnyKey = make_unique<Sprite>();
     m_pressAnyKey->Initialize("Resources/Sprite/UI/press_any_key.png");
@@ -71,11 +73,7 @@ void TitleScene::Initialize() {
     m_pressAnyKey->SetAnchorPoint({ 0.5f, 1.0f });
     m_pressAnyKey->SetPosition({ windowSize.x * 0.6f, windowSize.y * 1.014f });
     m_pressAnyKey->SetRotatioin(-SwapRadian(1.0f));
-
-    m_whiteOutSprite = make_unique<Sprite>();
-    m_whiteOutSprite->Initialize("Resources/Sprite/white1x1.png");
-    m_whiteOutSprite->SetScale(windowSize);
-    m_whiteOutSprite->SetColor({ 1.0f, 1.0f, 1.0f, 0.0f });
+    m_pressAnyKey->Update();
 
     gamePad = make_unique<Sprite>();
     gamePad->Initialize("Resources/Sprite/UI/gamepad.png");
@@ -105,10 +103,16 @@ void TitleScene::Initialize() {
     Light::GetInstance()->SetIntensityDirectionalLight(0.5f);
     Light::GetInstance()->SetRadius(camera->GetFarClipDistance());
 
-    m_sceneScreen = TitleSceneScreen::TitleScreen;
+    m_sceneScreen = TitleSceneScreen::BootScreen;
+
 }
 
 void TitleScene::Update() {
+
+    if (FadeManager::GetInstance()->IsFade())
+    {
+        return;
+    }
 
     if (input->TriggerKey(DIK_ESCAPE))
     {
@@ -121,14 +125,13 @@ void TitleScene::Update() {
 
         
 
-        if (input->PressAnyKey() || input->PressAnyButton())
+        if (input->PressAnyKey() || input->PressAnyButton() || GetAsyncKeyState(VK_LBUTTON) || GetAsyncKeyState(VK_RBUTTON))
         {
             m_sceneScreen = TitleSceneScreen::TitleScreen;
 
             m_startUi->Update();
             m_exitUi->Update();
 
-            m_titleScreen->Update();
         }
         // 何かしらキーを押したらBootScreenからTitleScreenに切り替える
         m_pressAnyKey->Update();
@@ -165,19 +168,6 @@ void TitleScene::Update() {
             m_exitUi->SetColor({ 0.0f, 0.0f, 0.0f,1.0f });
         }
 
-        /*if (m_screenChange)
-        {
-            m_screenChangeTimer += GameTime::GetInstance()->GetDeltaTime() / m_screenChangeTime;
-            m_screenChangeTimer = std::clamp(m_screenChangeTimer, 0.0f, 1.0f);
-            m_whiteOutSprite->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f - m_screenChangeTimer });
-            m_whiteOutSprite->Update();
-            if (m_screenChangeTimer == 1.0f)
-            {
-                m_screenChange = false;
-                m_screenChangeTimer = 0.0f;
-            }
-        }*/
-
         if (m_screenChange)
         {
             m_screenChangeTimer += GameTime::GetInstance()->GetDeltaTime() / m_screenChangeTime[m_changeNum];
@@ -192,11 +182,8 @@ void TitleScene::Update() {
                 m_screenChangeTimer = 0.0f;
                 m_screenChangeTransformPre = cameraT;
                 m_changeNum++;
-            }
-            if (m_changeNum == 1)
-            {
-                m_whiteOutSprite->SetColor({ 1.0f, 1.0f, 1.0f, m_screenChangeTimer });
-                m_whiteOutSprite->Update();
+                FadeManager::GetInstance()->FadeOut(0.4f);
+                FadeManager::GetInstance()->SetColor({ 1.0f, 1.0f, 1.0f });
             }
 
             if (m_screenChangeTimer == 1.0f && m_changeNum == 1)
@@ -212,8 +199,6 @@ void TitleScene::Update() {
 
         m_startUi->Update();
         m_exitUi->Update();
-
-        m_titleScreen->Update();
 
         break;
     }
@@ -273,7 +258,6 @@ void TitleScene::Draw() {
 
     SpriteBase::GetInstance()->ShaderDraw();
 
-    m_whiteOutSprite->Draw();
 
 }
 

@@ -76,6 +76,7 @@ private:
 
 	std::unique_ptr<Pause> pause;
 
+	std::unique_ptr<Sprite> sprite;
 	float tim = 0.0f;
 
 	bool start_ = false;

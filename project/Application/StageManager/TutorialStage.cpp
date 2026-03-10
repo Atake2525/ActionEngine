@@ -14,6 +14,7 @@ void TutorialStage::Initialize()
     stageObject->Initialize();
     stageObject->SetModel("Resources/Model/obj/Stage/TutorialStage", "TutorialStage.obj", true);
     CollisionManager::GetInstance()->AddCollision(stageObject.get());
+    stageObject->Update();
 
     wallRunObject = make_unique<Object3d>();
     wallRunObject->Initialize();
@@ -22,6 +23,7 @@ void TutorialStage::Initialize()
     CollisionManager::GetInstance()->AddWallDashColliison(wallRunObject.get());
 
     wallRunObject->SetColor({ 1.0f, 0.5f, 0.5f, 1.0f });
+    wallRunObject->Update();
 
     // トラップの初期化
     trap = make_unique<Trap>();

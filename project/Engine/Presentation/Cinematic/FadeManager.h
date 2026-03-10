@@ -29,10 +29,12 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(const Vector3 color = {1.0f, 1.0f, 1.0f});
+	void Initialize();
 
 	const bool CompleteFade();
 	const bool& IsFade() const { return fade_; }
+
+	void SetColor(const Vector3& color) { color_ = color; }
 
 	void Update();
 

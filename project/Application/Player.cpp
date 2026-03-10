@@ -75,7 +75,7 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
 #else
     Input::GetInstance()->ShowMouseCursor(false);
 #endif // !NDEBUG
-
+    Update();
 }
 
 void Player::Update()
