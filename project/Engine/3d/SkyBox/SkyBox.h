@@ -137,7 +137,7 @@ private:
 		Vector3 sunDirection;
 		Vector3 topColor;
 		float pad1;
-		Vector3 bottomColo;
+		Vector3 bottomColor;
 		float pad2;
 	};
 
