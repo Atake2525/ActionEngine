@@ -941,8 +941,16 @@ void Player::ApplyCameraEffect()
                 wallRunPenetration = -1.0f;
             }
             // 回転後角度を代入 回転後の角度は移動方向、壁がプレイヤーから左右どちらにあるかによって変わるのでそれも考慮する
-            m_wallRunRotateAfter = m_wallRunRotateAngle * Sign(-signWallRunDirection.z) * Sign(-signWallRunDirection.x);
-
+            // 移動方向に応じての回転を入れいる
+            Vector3 cameraDirection = m_pCamera->GetDirection();
+            if (signWallRunDirection.x != 0.0f)
+            {
+                m_wallRunRotateAfter = m_wallRunRotateAngle * -signWallRunDirection.x * Sign(cameraDirection.z);
+            }
+            if (signWallRunDirection.z != 0.0f)
+            {
+                m_wallRunRotateAfter = m_wallRunRotateAngle * -signWallRunDirection.z * Sign(cameraDirection.x);
+            }
 
         }
 
