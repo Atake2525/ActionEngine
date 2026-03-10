@@ -23,7 +23,7 @@ void Object3dBase::Finalize() {
 
 void Object3dBase::Initialize() {
 
-	cullingTemplateData.drawHeight = -1.0f; // -1.0fで無効化
+	cullingTemplateData.drawHeight = -1.0f; // -1.0fで
 
 	CreateGraphicsPipeLineState();
 }
@@ -121,6 +121,9 @@ void Object3dBase::CreateRootSignature() {
 	rootParameters[13].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;    // ConstantBufferView
 	rootParameters[13].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShader
 	rootParameters[13].Descriptor.ShaderRegister = 7;                    // b7
+	rootParameters[14].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;    // ConstantBufferView
+	rootParameters[14].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShader
+	rootParameters[14].Descriptor.ShaderRegister = 8;                    // b8
 	descriptionRootSignature.pParameters = rootParameters;              // ルートパラメータ配列へのポインタ
 	descriptionRootSignature.NumParameters = _countof(rootParameters);  // 配列の長さ
 
@@ -225,4 +228,6 @@ void Object3dBase::ShaderDraw() {
 	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(5, Light::GetInstance()->GetPointlLightResource()->GetGPUVirtualAddress());
 
 	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(6, Light::GetInstance()->GetSpotLightResource()->GetGPUVirtualAddress());
+
+	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(14, Light::GetInstance()->GetScanResource()->GetGPUVirtualAddress());
 }
