@@ -48,6 +48,10 @@ public:
 
 	void SetCamera(Camera* camera);
 
+	void SetColor(const Vector4& color) { materialData->color = color; }
+
+	void SetSunPoewr(const float& power) { sunData->power = power; }
+
 	const uint32_t& GetSrvIndex() const { return srvIndex; }
 
 	/// <summary>
@@ -129,11 +133,11 @@ private:
 
 	struct Sun
 	{
+		float power;
 		Vector3 sunDirection;
-		float pad;
 		Vector3 topColor;
 		float pad1;
-		Vector3 bottomColo;
+		Vector3 bottomColor;
 		float pad2;
 	};
 
