@@ -221,7 +221,7 @@ void TitleScene::Update() {
 		if (isUIFrameMove)
 		{
 			uiFrameMoveTimer += GameTime::GetInstance()->GetDeltaTime() / uiFrameMoveLImitTime;
-			position = EaseOutQuint(uiFrameMoveTimer, uiFrameStartPoint, uiFrameEndPoint);
+			position = EaseOutQuint(uiFrameStartPoint, uiFrameEndPoint, uiFrameMoveTimer);
 			uiFrame->SetPosition({ position.x, position.y });
 		}
 		
