@@ -1071,9 +1071,9 @@ void Player::UpdateDebugUI() {
             float speed = m_playerSpeed / m_delta;
             ImGui::Text("Speed : %f", speed);
             // 歩行速度
-            ImGui::DragFloat("Walk Speed", &m_walkSpeed, 0.1f);
-            ImGui::DragFloat("Run Speed", &m_runSpeed, 0.1f);
-            ImGui::DragFloat("Crounch Speed", &m_crounchSpeed, 0.1f);
+            ImGui::Text("Walk Speed : %f", &m_walkSpeed);
+            ImGui::Text("Run Speed : %f", &m_runSpeed);
+            ImGui::Text("Crounch Speed : %f", &m_crounchSpeed);
             // 加速時間
             ImGui::DragFloat("Max Speed Time", &m_maxSpeedTime, 0.01f);
             // 減速時間
