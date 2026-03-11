@@ -11,6 +11,14 @@ struct Vector3
 	static const Vector3 Zero;
 };
 
+// 追加するオペレータの概要（目的: CatmullRom式などで使われる演算を有効にする）
+// 1) 単項マイナス: -v をサポートする
+// 2) スカラーとベクトルの乗算: float * Vector3 をサポートする（既存の Vector3 * float は存在）
+// これにより式 (-P0 + P2) や (4.0f * P0) のような書き方がコンパイル通るようになる。
+
+inline const Vector3 operator-(const Vector3& v) { return { -v.x, -v.y, -v.z }; }
+inline const Vector3 operator*(float f, const Vector3& v) { return { v.x * f, v.y * f, v.z * f }; }
+
 inline Vector3 operator*=(Vector3& v, const float& n) {
 	v.x *= n;
 	v.y *= n;

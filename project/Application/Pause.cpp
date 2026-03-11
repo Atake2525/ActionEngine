@@ -91,13 +91,13 @@ void Pause::Update() {
             Vector4 color = pauseUIs[i].sprite->GetColor();
             if (!m_pause) // ポーズ状態へ入るとき
             {
-                pauseUIs[i].position = EaseOutQuint(m_animTimer, pauseUIs[i].targetPosition[0], pauseUIs[i].targetPosition[1]);
+                pauseUIs[i].position = EaseOutQuint(pauseUIs[i].targetPosition[0], pauseUIs[i].targetPosition[1], m_animTimer);
                 OffScreenRendering::GetInstance()->SetGrayscaleIntensity(min(m_animTimer * 1.2f, 0.4f));
                 pauseUIs[i].sprite->SetColor({ color.x, color.y, color.z, m_animTimer });
             }
             else // ポーズ状態から出る時
             {
-                pauseUIs[i].position = EaseOutQuint(m_animTimer, pauseUIs[i].targetPosition[1], pauseUIs[i].targetPosition[0]);
+                pauseUIs[i].position = EaseOutQuint(pauseUIs[i].targetPosition[1], pauseUIs[i].targetPosition[0], m_animTimer);
                 OffScreenRendering::GetInstance()->SetGrayscaleIntensity(min(1.0f - m_animTimer * 1.2f, 0.4f));
                 pauseUIs[i].sprite->SetColor({ color.x, color.y, color.z, EaseOutQuint(m_animTimer, 1.0f, 0.0f)});
             }
