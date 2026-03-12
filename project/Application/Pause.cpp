@@ -60,6 +60,8 @@ void Pause::Initialize() {
         pauseUIs[i].targetPosition[1] = { m_windowSize.x * 0.5f, targetPosY };
     }
 
+    pauseUIs[0].sprite->SetColor({ 0.0f, 1.0f, 0.0f, 1.0f });
+
     Audio::GetInstance()->LoadMP3("Resources/sound/pause_select.mp3", "pause_select");
 }
 
@@ -165,7 +167,7 @@ void Pause::Update() {
         }
         else
         {
-            if (Input::GetInstance()->TriggerKeyInt(DIK_RETURN) || Input::GetInstance()->TriggerMouse(0))
+            if (Input::GetInstance()->TriggerKeyInt(DIK_RETURN) || Input::GetInstance()->TriggerKeyInt(DIK_SPACE) || Input::GetInstance()->TriggerMouse(0))
             {
                 Enter(static_cast<int>(m_pauseSelect));
             }
@@ -210,6 +212,7 @@ void Pause::Enter(int selectNumber) {
         break;
     case PauseSelect::title:
         SceneManager::GetInstance()->SetNextScene("TITLE");
+        OffScreenRendering::GetInstance()->SetGrayscaleIntensity(0.0f);
         break;
     }
 }
