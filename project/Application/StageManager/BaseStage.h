@@ -1,6 +1,9 @@
 #include <memory>
 #include <string>
 
+class Player;
+class Camera;
+
 #pragma once
 class BaseStage
 {
@@ -11,7 +14,7 @@ public:
     /// <summary>
     /// 初期化
     /// </summary>
-    virtual void Initialize();
+    virtual void Initialize(Player* player, Camera* camera);
 
     /// <summary>
     /// JsonNameの取得
@@ -42,5 +45,9 @@ public:
     /// 終了処理
     /// </summary>
     virtual void Finalize();
+
+private:
+    Player* m_player = nullptr;
+    Camera* m_camera = nullptr;
 };
 
