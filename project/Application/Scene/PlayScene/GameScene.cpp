@@ -4,7 +4,6 @@
 #include "externals/imgui/imgui_impl_win32.h"
 #include "GameTime.h"
 #include "JsonLoader.h"
-#include "GameOver.h"
 #include "StageCount.h"
 #include "TutorialStage.h"
 #include "EasingUtility.h"
@@ -27,22 +26,11 @@ void GameScene::Initialize() {
 
     input = Input::GetInstance();
 
-    gameOver_ = make_unique<GameOver>();
-    gameOver_->Initialize();
-    gameClear_ = make_unique<GameClearScene>();
-    gameClear_->Initialize();
-
-
     Object3dBase::GetInstance()->SetDefaultCamera(camera.get());
 
-    stage = make_unique<TutorialStage>();
-    stage->Initialize();
-
-    stageObject = make_unique<Object3d>();
-    stageObject->Initialize();
-    stageObject->SetModel("Resources/Model/obj/Stage/TutorialStage", "TutorialStage.obj", true);
-
     m_pPlayer = make_unique<Player>();
+    stage = make_unique<TutorialStage>();
+    stage->Initialize(m_pPlayer.get(), camera.get());
     m_pPlayer->Initialize(camera.get(), stage->GetJsonName());
     m_pPlayer->Update();
 
@@ -53,6 +41,7 @@ void GameScene::Initialize() {
     m_pause->Initialize();
 
     m_scenePhase = ScenePhase::FadeIn;
+
 }
 
 void GameScene::Update() {
@@ -118,9 +107,6 @@ void GameScene::Update() {
 
     stage->Update();
 
-
-    stageObject->Update();
-
 #ifndef NDEBUG
     if (input->TriggerKey(DIK_ESCAPE))
     {
@@ -165,7 +151,6 @@ void GameScene::Draw() {
     Object3dBase::GetInstance()->ShaderDraw();
 
     stage->DrawObject3d();
-    stageObject->Draw();
 
     SkinningObject3dBase::GetInstance()->ShaderDraw();
 
@@ -173,8 +158,6 @@ void GameScene::Draw() {
     SpriteBase::GetInstance()->ShaderDraw();
 
     m_pause->Draw();
-    gameOver_->Draw();
-    gameClear_->Draw();
 }
 
 void GameScene::Finalize() {

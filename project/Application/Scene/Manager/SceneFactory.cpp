@@ -32,6 +32,7 @@ unique_ptr<BaseScene> SceneFactory::ChangeScene(const std::string& sceneName)
     {
         Log("タイトルシーンに切り替えます\n");
         newScene = make_unique<TitleScene>();
+        
     }
     else if (sceneName == "GAMESCENE")
     {
@@ -51,7 +52,6 @@ unique_ptr<BaseScene> SceneFactory::ChangeScene(const std::string& sceneName)
     {
         Log("指定されたシーン名は見つかりませんでした\n");
     }
-
 
     return newScene;
 }

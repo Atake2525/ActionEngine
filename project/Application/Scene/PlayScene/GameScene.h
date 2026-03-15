@@ -16,8 +16,6 @@
 #include "SkyBox.h"
 #include "CollisionManager.h"
 #include <memory>
-#include "GameOver.h"
-#include "GameClearScene.h"
 #include "ActionPlayer.h"
 #include "Player.h"
 #include "BaseStage.h"
@@ -88,8 +86,6 @@ private:
 
 	bool back = false;
 
-	std::unique_ptr<GameOver> gameOver_ = nullptr;
-	std::unique_ptr<GameClearScene> gameClear_ = nullptr;
 
 	struct Tutorial
 	{
@@ -100,8 +96,6 @@ private:
 	};
 
 	std::unique_ptr<BaseStage> stage;
-
-	std::unique_ptr<Object3d> stageObject;
 
 	std::unique_ptr<Pause> m_pause;
 
