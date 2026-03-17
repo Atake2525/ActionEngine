@@ -101,7 +101,7 @@ void Pause::Update() {
             {
                 pauseUIs[i].position = EaseOutQuint(pauseUIs[i].targetPosition[1], pauseUIs[i].targetPosition[0], m_animTimer);
                 OffScreenRendering::GetInstance()->SetGrayscaleIntensity(min(1.0f - m_animTimer * 1.2f, 0.4f));
-                pauseUIs[i].sprite->SetColor({ color.x, color.y, color.z, EaseOutQuint(1.0f, 0.0f, m_animTimer)});
+                pauseUIs[i].sprite->SetColor({ color.x, color.y, color.z, EaseOutQuint(1.0f, 0.0f, m_animTimer) });
             }
 
             pauseUIs[i].sprite->SetPosition(pauseUIs[i].position);
@@ -113,7 +113,7 @@ void Pause::Update() {
         {
             m_pause = !m_pause;
             m_pauseAnim = false;
-            m_animTimer = 0.0f;
+            //m_animTimer = 0.0f;
         }
     }
 
@@ -156,8 +156,8 @@ void Pause::Update() {
             };
             pauseUIs[static_cast<int>(m_pauseSelect)].sprite->SetColor({ color.x, color.y, color.z, 1.0f });
             pauseUIs[static_cast<int>(m_pauseSelect)].sprite->Update();
-            
-            pauseUIs[static_cast<int>(m_selectNumberPre)].sprite->SetColor({0.0f, 1.0f, 1.0f, 1.0f });
+
+            pauseUIs[static_cast<int>(m_selectNumberPre)].sprite->SetColor({ 0.0f, 1.0f, 1.0f, 1.0f });
             pauseUIs[static_cast<int>(m_selectNumberPre)].sprite->Update();
 
             if (m_animTimer >= 1.0f)
