@@ -9,6 +9,8 @@
 #include "StageCount.h"
 #include "DebugLineBase.h"
 #include "Collision.h"
+#include "FadeManager.h"
+#include "Light.h"
 
 using namespace Logger;
 using namespace std;
@@ -40,13 +42,13 @@ void TestScene::Initialize() {
 
 	ParticleManager::GetInstance()->SetCamera(camera.get());
 	ParticleManager::GetInstance()->CreateParticleGroup(ParticleType::plane, "Resources/Particle/circle2.png", "circle");
-
-	stage = std::make_unique<TutorialStage>();
-	stage->Initialize();
-
 	
 	player = std::make_unique<Player>();
+	stage = std::make_unique<TutorialStage>();
+	stage->Initialize(player.get(), camera.get());
 	player->Initialize(camera.get(), stage->GetJsonName());
+	camera->Update();
+
 
 	playerUi = std::make_unique<PlayerUI>();
 	playerUi->Initialize(player.get());
@@ -54,8 +56,12 @@ void TestScene::Initialize() {
 	actionPlayer = std::make_unique<ActionPlayer>();
 	actionPlayer->Initialize(camera.get(), stage->GetJsonName(), false);
 
-	gameOverSprite = std::make_unique<GameOver>();
-	gameOverSprite->Initialize();
+
+	pause = std::make_unique<Pause>();
+	pause->Initialize();
+
+	sprite = std::make_unique<Sprite>();
+	sprite->Initialize("Resources/Sprite/R.png");
 
 	//JsonLoader::GetInstance()->LoadJson("Resources/Json/test.json", "test", false);
 	JsonLoader::GetInstance()->LoadJson("Resources/Json/wp1.json", "wp1", false);
@@ -67,6 +73,66 @@ void TestScene::Initialize() {
 
 	Audio::GetInstance()->LoadMP3("Resources/sekiranun.mp3", "bgm", 1.0f);
 
+	FadeManager::GetInstance()->FadeIn(2.4f);
+
+	/*for (int i = 0; i < 100000; i++)
+	{
+		std::unique_ptr<Object3d> obj = std::make_unique<Object3d>();
+		obj->Initialize();
+		obj->SetModel("Resources/Debug/obj", "box.obj", true);
+		obj->SetTranslate({ i * 3.0f, 0.0f, 0.0f });
+		boxes.push_back(move(obj));
+	}*/
+	/*boxes.resize(100000);
+	std::function<void()> func1 = [&]() {
+		for (int i = 0; i < 30000; i++)
+		{
+			std::unique_ptr<Object3d> obj = std::make_unique<Object3d>();
+			obj->Initialize();
+			obj->SetModel("Resources/Debug/obj", "box.obj", true);
+			obj->SetTranslate({ i * 3.0f, 0.0f, 0.0f });
+			boxes[i] = move(obj);
+		}
+	};
+	std::function<void()> func2 = [&]() {
+		for (int i = 0; i < 30000; i++)
+		{
+			std::unique_ptr<Object3d> obj = std::make_unique<Object3d>();
+			obj->Initialize();
+			obj->SetModel("Resources/Debug/obj", "box.obj", true);
+			obj->SetTranslate({ i * 3.0f, 0.0f, 0.0f });
+			boxes[30000 + i] = move(obj);
+		}
+	};
+	std::function<void()> func3 = [&]() {
+		for (int i = 0; i < 30000; i++)
+		{
+			std::unique_ptr<Object3d> obj = std::make_unique<Object3d>();
+			obj->Initialize();
+			obj->SetModel("Resources/Debug/obj", "box.obj", true);
+			obj->SetTranslate({ i * 3.0f, 0.0f, 0.0f });
+			boxes[60000 + i] = move(obj);
+		}
+	};
+	std::function<void()> func4 = [&]() {
+		for (int i = 0; i < 10000; i++)
+		{
+			std::unique_ptr<Object3d> obj = std::make_unique<Object3d>();
+			obj->Initialize();
+			obj->SetModel("Resources/Debug/obj", "box.obj", true);
+			obj->SetTranslate({ i * 3.0f, 0.0f, 0.0f });
+			boxes[90000 + i] = move(obj);
+		}
+	};
+	std::thread th1(func1);
+	std::thread th2(func2);
+	std::thread th3(func3);
+	std::thread th4(func4);
+
+	th1.join();
+	th2.join();
+	th3.join();
+	th4.join();*/
 }
 
 Transform boxTransform = Transform::Default;
@@ -77,7 +143,7 @@ void TestScene::Update() {
 		finished = true;
 	}
 
-	if (!start_)
+	/*if (!start_)
 	{
 		if (FadeManager::GetInstance()->CompleteFade() || !FadeManager::GetInstance()->IsFade())
 		{
@@ -87,7 +153,7 @@ void TestScene::Update() {
 		{
 			return;
 		}
-	}
+	}*/
 
 	player->Update();
 	//actionPlayer->Update();
@@ -95,6 +161,13 @@ void TestScene::Update() {
 
 	stage->Update();
 
+	for (auto& obj : boxes)
+	{
+		Vector3 p = obj->GetTranslate();
+		p.y += 0.1f;
+		obj->SetTranslate(p);
+		obj->Update();
+	}
 
 
 	Vector3 penetration = Vector3::Zero;
@@ -114,11 +187,38 @@ void TestScene::Update() {
 	//goal->Update(player->GetAABB());
 
 
+
+	if (tim < 100.0f)
+	{
+		tim += GameTime::GetInstance()->GetDeltaTime() * 50.0f;
+	}
+	else
+	{
+		tim = 100.0f;
+	}
+
+	if (input->TriggerKey(DIK_R))
+	{
+		tim = 0.0f;
+	}
+
+	camera->SetFarClipDistance(tim);
+
 	bool flag = false;
 
 	if (input->TriggerKey(DIK_1))
 	{
 		Audio::GetInstance()->Play3D("bgm", { 0.0f, 0.0f, 0.0f }, false);
+	}
+
+	if (input->TriggerKey(DIK_R))
+	{
+		FadeManager::GetInstance()->FadeOut(0.4f);
+		start_ = true;
+	}
+	if (FadeManager::GetInstance()->CompleteFade() && start_)
+	{
+		SceneManager::GetInstance()->SetNextScene("TITLE");
 	}
 
 	/*if (input->TriggerKey(DIK_ESCAPE))
@@ -135,6 +235,8 @@ void TestScene::Update() {
 	SkyBox::GetInstance()->Update();
 
 	camera->Update();
+
+	sprite->Update();
 }
 
 void TestScene::Draw() {
@@ -147,6 +249,11 @@ void TestScene::Draw() {
 
 	stage->DrawObject3d();
 	box->Draw();
+	/*for (auto& obj : boxes)
+	{
+		obj->Draw();
+	}*/
+
 	//player->Draw();
 
 	SkinningObject3dBase::GetInstance()->ShaderDraw();
@@ -156,8 +263,9 @@ void TestScene::Draw() {
 	SpriteBase::GetInstance()->ShaderDraw();
 
 	stage->DrawBackSprite();
-	gameOverSprite->Draw();
 	playerUi->Draw();
+	pause->Draw();
+	sprite->Draw();
 
 	DebugLineBase::GetInstance()->ShaderDraw();
 

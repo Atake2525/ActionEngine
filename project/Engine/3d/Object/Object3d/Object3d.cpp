@@ -537,6 +537,39 @@ const Vector3 Object3d::GetJointNormal(const std::string jointName)
 	return { 0.0f, 0.0f, 0.0f };
 }
 
+const Matrix4x4 Object3d::GetJointMatrix(const std::string& jointName)
+{
+	size_t nameSize = jointName.size();
+	size_t hitSize = nameSize;
+	for (const Joint& joint : skeleton.joints)
+	{
+		for (size_t i = 0; i < joint.name.size(); i++)
+		{
+			char c = joint.name[i];
+			if (c == jointName[0 + hitSize])
+			{
+				++hitSize;
+			}
+			else
+			{
+				hitSize = 0;
+			}
+			if (hitSize == nameSize)
+			{
+				break;
+			}
+		}
+		if (hitSize == nameSize)
+		{
+			Log("目標が見つかりました\n");
+			Matrix4x4 jointMatrix = Multiply(joint.skeletonSpaceMatrix, worldMatrix);
+			return jointMatrix;
+		}
+	}
+	Log("目標が見つかりませんでした\n");
+	return { 0.0f, 0.0f, 0.0f };
+}
+
 const bool Object3d::CheckCollisionAABB(Object3d* object) const {
 	return CollisionAABB(aabb, object->GetAABB());
 }

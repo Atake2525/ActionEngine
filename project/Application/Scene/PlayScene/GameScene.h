@@ -16,11 +16,10 @@
 #include "SkyBox.h"
 #include "CollisionManager.h"
 #include <memory>
-#include "GameOver.h"
-#include "GameClearScene.h"
 #include "ActionPlayer.h"
 #include "Player.h"
 #include "BaseStage.h"
+#include "Pause.h"
 
 #pragma once
 
@@ -87,8 +86,6 @@ private:
 
 	bool back = false;
 
-	std::unique_ptr<GameOver> gameOver_ = nullptr;
-	std::unique_ptr<GameClearScene> gameClear_ = nullptr;
 
 	struct Tutorial
 	{
@@ -100,7 +97,27 @@ private:
 
 	std::unique_ptr<BaseStage> stage;
 
-	std::unique_ptr<Object3d> stageObject;
+	std::unique_ptr<Pause> m_pause;
+
+	/// <summary>
+	/// ここからスタート演出用系
+	/// </summary>
+
+	float m_startTimer = 0.0f;
+	float m_startTime = 1.5f;
+
+	float m_finalScanRadius = 0.0f;
+	float m_finalFarClipDistance = 100.0f;
+
+	int m_readyNumber = 0;
+
+	enum class ScenePhase : int {
+		FadeIn = 0,
+		Ready = 1,
+		Game = 2,
+		FadeOut = 3,
+	};
+	ScenePhase m_scenePhase = ScenePhase::FadeIn;
 
 };
 

@@ -7,6 +7,7 @@
 #include <stdint.h>
 #pragma once
 
+#define GRAYSCALE_SEPIA Vector3(1.0f, 73.0f / 107.0f, 43.0f / 107.0f)
 
 struct Grayscale
 {
@@ -81,6 +82,7 @@ public:
 	/// ===== GrayScaleの設定 ===== ///
 
 	void SetGrayscaleIntensity(float value);
+	void SetGrayscaleColor(const Vector3& color) { grayscale->toneColor = color; }
 	
 	/// ========================== ///
 

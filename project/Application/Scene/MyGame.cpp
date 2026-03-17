@@ -51,7 +51,7 @@ void MyGame::Initialize() {
 
 	Audio::GetInstance()->Initialize();
 
-	FadeManager::GetInstance()->Initialize({0.0f, 0.0f, 0.0f});
+	FadeManager::GetInstance()->Initialize();
 
 	//// ↓---- シーンの初期化 ----↓ ////
 
@@ -59,7 +59,7 @@ void MyGame::Initialize() {
 
 	SceneManager::GetInstance();
 	
-	SceneManager::GetInstance()->SetNextScene("TEST");
+	SceneManager::GetInstance()->SetNextScene("TITLE");
 
 	//gameScene->Initialize();
 

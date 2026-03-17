@@ -22,8 +22,8 @@ void FadeManager::Finalize() {
 	instance = nullptr;
 }
 
-void FadeManager::Initialize(const Vector3 color) {
-	color_ = color;
+void FadeManager::Initialize() {
+	color_ = Vector3::Zero;
 	sprite_ = new Sprite();
 	sprite_->Initialize("Resources/Sprite/white1x1.png");
 	sprite_->SetColor({ color_.x, color_.y, color_.z, alpha_ });

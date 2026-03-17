@@ -126,11 +126,9 @@
     <ClCompile Include="Engine\3d\Object\Skinning\SkinningObject3dBase.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Application\Scene\PlayScene\GameOver.cpp" />
     <ClCompile Include="Engine\UI\Text.cpp" />
     <ClCompile Include="Application\StageManager\StageCount.cpp" />
     <ClCompile Include="Application\StageManager\BaseStage.cpp" />
-    <ClCompile Include="Application\Scene\PlayScene\GameClearScene.cpp" />
     <ClCompile Include="Application\ActionPlayer.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp" />
     <ClCompile Include="externals\imgui\imgui_demo.cpp" />
@@ -315,13 +313,11 @@
       <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Math\Culling.h" />
-    <ClInclude Include="Application\Scene\PlayScene\GameOver.h" />
     <ClInclude Include="Engine\UI\Text.h" />
     <ClInclude Include="Engine\JsonLoader\JsonLoader.h" />
     <ClInclude Include="Engine\JsonLoader\json.hpp" />
     <ClInclude Include="Application\StageManager\StageCount.h" />
     <ClInclude Include="Application\StageManager\BaseStage.h" />
-    <ClInclude Include="Application\Scene\PlayScene\GameClearScene.h" />
     <ClInclude Include="Application\ActionPlayer.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />
     <ClInclude Include="externals\imgui\imgui.h" />
@@ -344,6 +340,7 @@
     <ClInclude Include="Engine\Collision\PhysicsCorrection.h" />
     <ClInclude Include="Application\Pause.h" />
     <ClInclude Include="Application\PlayerUI.h" />
+    <ClInclude Include="Engine\Presentation\Cinematic\ScanEffect.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\PostEffect\BoxFilter.PS.hlsl" />

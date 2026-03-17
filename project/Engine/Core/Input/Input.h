@@ -98,6 +98,11 @@ public:
 	const int ReturnKeyInt(BYTE keyNumber);
 
 	/// <summary>
+	/// 何かしらのキーが入力されたことを確認するボタン
+	/// </summary>
+	bool PressAnyKey();
+
+	/// <summary>
 	/// マウスの押下をチェック
 	/// </summary>
 	/// <param name="mouseNumer">0 = 左クリック</param>
@@ -203,6 +208,11 @@ public:
 	/// ボタン(コントローラー)のリターンをチェック
 	/// </summary>
 	bool ReturnButton(Controller button);
+
+	/// <summary>
+	/// 何かしらのボタンが入力されたことを確認するボタン
+	/// </summary>
+	bool PressAnyButton();
 
 private:
 

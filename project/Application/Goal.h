@@ -8,6 +8,8 @@
 #include <memory>
 #include "AABB.h"
 
+class Player;
+
 /// <summary>
 /// ゴール
 /// </summary>
@@ -20,34 +22,37 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(const std::string jsonName);
+	void Initialize(const std::string jsonName, Player* player);
 
 	/// <summary>
 	/// 更新
 	/// </summary>
 	/// <param name="aabb">処理の対象となるAABB</param>
-	void Update(AABB aabb);
+	const bool& ChceckIsGoal();
 
 	/// <summary>
-	/// 描画
+	/// ゴールオブジェクト描画
 	/// </summary>
-	void Draw();
+	void DrawGoalObject();
 
-	/// <summary>
-	/// 対象が触れてゴール判定になったかどうか
-	/// </summary>
-	/// <returns></returns>
-	const bool& IsGoal() const { return isGoal_; }
+
 
 private:
+	// 全体で使うメンバ変数
+	Input* m_input = nullptr;
+	Player* m_player = nullptr;
+	std::vector<JsonData> m_jsonDatas;
+	bool m_isGoal = false;
 
-	Input* input = nullptr;
+	// オブジェクト(ゴール)関係
+	std::vector<std::unique_ptr<Object3d>> m_goalObjects;
 
-	std::vector<JsonData> jsonDatas;
+	// スプライト(リザルト)関係
+	std::vector<std::unique_ptr<Sprite>> m_resultSprites;
 
-	std::vector<std::unique_ptr<Object3d>> goalObjects;
-
-	bool isGoal_ = false;
-
+	// 演出関係
+	bool m_goalEffectStart = false;
+	float m_goalEffectTimer = 0.0f;
+	float m_goalEffectTime = 1.0f;
 };
 

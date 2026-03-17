@@ -16,6 +16,7 @@ ConstantBuffer<Material> gMaterial : register(b0);
 
 struct Sun
 {
+    float power;
     float3 sunDirection;
     float3 topColor;
     float3 bottomColor;
@@ -60,8 +61,10 @@ PixelShaderOutput main(VertexShaderOutput input)
     float3 sunColor = float3(1.0, 0.95, 0.8);
 
     float3 finalColor = skyColor + sunColor * sunGlow;
+    
+    float3 color = lerp(float3(0.0f, 0.0f, 0.0f), finalColor, gSun.power);
 
-    output.color = float4(finalColor, 1.0);
+    output.color = float4(color, 1.0);
 
     
     return output;

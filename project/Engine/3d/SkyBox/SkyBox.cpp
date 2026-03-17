@@ -8,6 +8,11 @@
 #include "Camera.h"
 #include "Light.h"
 
+#ifndef NDEBUG
+#include "ImGuiManager.h"
+#endif // !NDEBUG
+
+
 using namespace Logger;
 
 SkyBox* SkyBox::instance = nullptr;
@@ -59,8 +64,9 @@ void SkyBox::Initialize() {
 	sunResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(Sun));
 	sunResource->Map(0, nullptr, reinterpret_cast<void**>(&sunData));
 
+	sunData->power = 0.0f;
 	sunData->topColor = { 0.45f, 0.65f, 1.0f };
-	sunData->bottomColo = { 0.02f, 0.05f, 0.15f };
+	sunData->bottomColor = { 0.02f, 0.05f, 0.15f };
 	sunData->sunDirection = { 0.0f, 1.0f, 0.0f };
 
 	// 頂点バッファビューを作成する
@@ -308,6 +314,32 @@ void SkyBox::Update() {
 
 	transformationMatrix->WVP = worldViewProjectionMatrix;
 	transformationMatrix->World = worldMatrix;
+
+#ifndef NDEBUG
+	ImGui::Begin("Sun Settings");
+
+	// Power
+	ImGui::SliderFloat("Power", &sunData->power, 0.0f, 1.0f);
+
+	// Direction
+	ImGui::Text("Sun Direction");
+	ImGui::DragFloat3("Direction", &sunData->sunDirection.x, 0.01f);
+	// 正規化したい場合
+	if (ImGui::Button("Normalize Direction"))
+	{
+		sunData->sunDirection = Normalize(sunData->sunDirection);
+	}
+
+	// Top Color
+	ImGui::ColorEdit3("Top Color", &sunData->topColor.x);
+
+	// Bottom Color
+	ImGui::ColorEdit3("Bottom Color", &sunData->bottomColor.x);
+
+	ImGui::End();
+#endif // !NDEBUG
+
+
 }
 
 void SkyBox::Draw() {
