@@ -26,6 +26,7 @@ void GameScene::Initialize() {
 
     input = Input::GetInstance();
 
+
     Object3dBase::GetInstance()->SetDefaultCamera(camera.get());
 
     m_pPlayer = make_unique<Player>();
@@ -129,7 +130,6 @@ void GameScene::Update() {
         Audio::GetInstance()->Play2D("bgm", { 0.0f, 0.0f }, false);
     }
 
-
     SkyBox::GetInstance()->Update();
 
 
@@ -138,7 +138,7 @@ void GameScene::Update() {
         SceneManager::GetInstance()->SetNextScene("GAMESCENE");
     }
 
-   
+
     camera->Update();
 
 }

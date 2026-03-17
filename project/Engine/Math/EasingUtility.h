@@ -10,7 +10,7 @@
 #pragma once
 
 // ease In-Out x1 : 開始点  x2 : 目標点
-inline float EaseInOut(float time, float x1, float x2) {
+inline float EaseInOut(float x1, float x2, float time) {
 	float T = time;
 	T = std::clamp(T, 0.0f, 1.0f);
 	float x;
@@ -22,8 +22,8 @@ inline float EaseInOut(float time, float x1, float x2) {
 };
 
 // ease In-Out x1 : 開始点  x2 : 目標点
-inline int EaseInOut(float t, int x1, int x2) {
-	float T = t;
+inline int EaseInOut(int x1, int x2, float time) {
+	float T = time;
 	T = std::clamp(T, 0.0f, 1.0f);
 	int x;
 	// easeOut
@@ -34,8 +34,8 @@ inline int EaseInOut(float t, int x1, int x2) {
 };
 
 // easeOutQuint
-inline float EaseOutQuint(float t, float x1, float x2) {
-	float T = t;
+inline float EaseOutQuint(float x1, float x2, float time) {
+	float T = time;
 	T = std::clamp(T, 0.0f, 1.0f);
 	float x;
 	// easeOut
@@ -46,8 +46,8 @@ inline float EaseOutQuint(float t, float x1, float x2) {
 };
 
 // easeInBack
-inline float EaseInBack(float t, float x1, float x2) {
-	float T = t;
+inline float EaseInBack(float x1, float x2, float time) {
+	float T = time;
 	T = std::clamp(T, 0.0f, 1.0f);
 	float x;
 	const float c1 = 1.70158f;
@@ -60,7 +60,7 @@ inline float EaseInBack(float t, float x1, float x2) {
 };
 
 // ease In-Out x1 : 開始点  x2 : 目標点
-inline Vector3 EaseInOut(float time, Vector3 x1, Vector3 x2) {
+inline Vector3 EaseInOut(Vector3 x1, Vector3 x2, float time) {
 
 	Vector3 result;
 
@@ -72,40 +72,40 @@ inline Vector3 EaseInOut(float time, Vector3 x1, Vector3 x2) {
 };
 
 // easeOutQuint
-inline Vector2 EaseOutQuint(float t, Vector2 x1, Vector2 x2) {
+inline Vector2 EaseOutQuint(Vector2 x1, Vector2 x2, float time) {
 
 	Vector2 result;
 
-	result.x = EaseOutQuint(t, x1.x, x2.x);
-	result.y = EaseOutQuint(t, x1.y, x2.y);
+	result.x = EaseOutQuint(time, x1.x, x2.x);
+	result.y = EaseOutQuint(time, x1.y, x2.y);
 
 	return result;;
 };
 
 // easeOutQuint
-inline Vector3 EaseOutQuint(float t, Vector3 x1, Vector3 x2) {
+inline Vector3 EaseOutQuint(Vector3 x1, Vector3 x2, float time) {
 
 	Vector3 result;
 
-	result.x = EaseOutQuint(t, x1.x, x2.x);
-	result.y = EaseOutQuint(t, x1.y, x2.y);
-	result.z = EaseOutQuint(t, x1.z, x2.z);
+	result.x = EaseOutQuint(time, x1.x, x2.x);
+	result.y = EaseOutQuint(time, x1.y, x2.y);
+	result.z = EaseOutQuint(time, x1.z, x2.z);
 
 	return result;;
 };
 
 // easeInBack
-inline Vector3 EaseInBack(float t, Vector3 x1, Vector3 x2) {
+inline Vector3 EaseInBack(Vector3 x1, Vector3 x2, float time) {
 	Vector3 result;
 
-	result.x = EaseInBack(t, x1.x, x2.x);
-	result.y = EaseInBack(t, x1.y, x2.y);
-	result.z = EaseInBack(t, x1.z, x2.z);
+	result.x = EaseInBack(time, x1.x, x2.x);
+	result.y = EaseInBack(time, x1.y, x2.y);
+	result.z = EaseInBack(time, x1.z, x2.z);
 
 	return result;;
 };
 
-inline float EaseOutExpo(float time, float start, float end) {
+inline float EaseOutExpo(float start, float end, float time) {
 	float result;
 	float timer = std::clamp(time, 0.0f, 1.0f);
 	if (timer == 1.0f) {
@@ -118,7 +118,7 @@ inline float EaseOutExpo(float time, float start, float end) {
 	return result;
 }
 
-inline Vector2 EaseInExpo(float time, Vector2 start, Vector2 end) {
+inline Vector2 EaseInExpo(Vector2 start, Vector2 end, float time) {
 	Vector2 result;
 
 	result.x = EaseInBack(time, start.x, end.x);
@@ -127,7 +127,7 @@ inline Vector2 EaseInExpo(float time, Vector2 start, Vector2 end) {
 	return result;
 }
 
-inline Vector3 EaseOutExpo(float time, Vector3 start, Vector3 end) {
+inline Vector3 EaseOutExpo(Vector3 start, Vector3 end, float time) {
 	Vector3 result;
 
 	result.x = EaseOutExpo(time, start.x, end.x);
@@ -137,7 +137,7 @@ inline Vector3 EaseOutExpo(float time, Vector3 start, Vector3 end) {
 	return result;
 }
 
-inline float EaseOutElastic(float time, float start, float end) {
+inline float EaseOutElastic(float start, float end, float time) {
 	float t = std::clamp(time, 0.0f, 1.0f);
 	float result;
 
@@ -155,7 +155,7 @@ inline float EaseOutElastic(float time, float start, float end) {
 	return result;
 }
 
-inline Vector2 EaseOutElastic(float time, Vector2 start, Vector2 end) {
+inline Vector2 EaseOutElastic(Vector2 start, Vector2 end, float time) {
 	Vector2 result;
 
 	result.x = EaseOutElastic(time, start.x, end.x);
@@ -164,7 +164,7 @@ inline Vector2 EaseOutElastic(float time, Vector2 start, Vector2 end) {
 	return result;
 }
 
-inline Vector3 EaseOutElastic(float time, Vector3 start, Vector3 end) {
+inline Vector3 EaseOutElastic(Vector3 start, Vector3 end, float time) {
 	Vector3 result;
 
 	result.x = EaseOutElastic(time, start.x, end.x);
@@ -172,4 +172,15 @@ inline Vector3 EaseOutElastic(float time, Vector3 start, Vector3 end) {
 	result.z = EaseOutElastic(time, start.z, end.z);
 
 	return result;
+}
+
+inline Vector3 CatmullRomTangent(const Vector3& P0, const Vector3& P1, const Vector3& P2, const Vector3& P3, float t)
+{
+	float t2 = t * t;
+
+	return 0.5f * (
+		(-P0 + P2) +
+		(4.0f * P0 - 10.0f * P1 + 8.0f * P2 - 2.0f * P3) * t +
+		(-3.0f * P0 + 9.0f * P1 - 9.0f * P2 + 3.0f * P3) * t2
+		);
 }
