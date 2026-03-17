@@ -42,20 +42,16 @@ void TestScene::Initialize() {
 
 	ParticleManager::GetInstance()->SetCamera(camera.get());
 	ParticleManager::GetInstance()->CreateParticleGroup(ParticleType::plane, "Resources/Particle/circle2.png", "circle");
-
-	stage = std::make_unique<TutorialStage>();
-	stage->Initialize();
-
 	
 	player = std::make_unique<Player>();
+	stage = std::make_unique<TutorialStage>();
+	stage->Initialize(player.get(), camera.get());
 	player->Initialize(camera.get(), stage->GetJsonName());
 	camera->Update();
 
+
 	actionPlayer = std::make_unique<ActionPlayer>();
 	actionPlayer->Initialize(camera.get(), stage->GetJsonName(), false);
-
-	gameOverSprite = std::make_unique<GameOver>();
-	gameOverSprite->Initialize();
 
 	pause = std::make_unique<Pause>();
 	pause->Initialize();
@@ -74,6 +70,65 @@ void TestScene::Initialize() {
 	Audio::GetInstance()->LoadMP3("Resources/sekiranun.mp3", "bgm", 1.0f);
 
 	FadeManager::GetInstance()->FadeIn(2.4f);
+
+	/*for (int i = 0; i < 100000; i++)
+	{
+		std::unique_ptr<Object3d> obj = std::make_unique<Object3d>();
+		obj->Initialize();
+		obj->SetModel("Resources/Debug/obj", "box.obj", true);
+		obj->SetTranslate({ i * 3.0f, 0.0f, 0.0f });
+		boxes.push_back(move(obj));
+	}*/
+	/*boxes.resize(100000);
+	std::function<void()> func1 = [&]() {
+		for (int i = 0; i < 30000; i++)
+		{
+			std::unique_ptr<Object3d> obj = std::make_unique<Object3d>();
+			obj->Initialize();
+			obj->SetModel("Resources/Debug/obj", "box.obj", true);
+			obj->SetTranslate({ i * 3.0f, 0.0f, 0.0f });
+			boxes[i] = move(obj);
+		}
+	};
+	std::function<void()> func2 = [&]() {
+		for (int i = 0; i < 30000; i++)
+		{
+			std::unique_ptr<Object3d> obj = std::make_unique<Object3d>();
+			obj->Initialize();
+			obj->SetModel("Resources/Debug/obj", "box.obj", true);
+			obj->SetTranslate({ i * 3.0f, 0.0f, 0.0f });
+			boxes[30000 + i] = move(obj);
+		}
+	};
+	std::function<void()> func3 = [&]() {
+		for (int i = 0; i < 30000; i++)
+		{
+			std::unique_ptr<Object3d> obj = std::make_unique<Object3d>();
+			obj->Initialize();
+			obj->SetModel("Resources/Debug/obj", "box.obj", true);
+			obj->SetTranslate({ i * 3.0f, 0.0f, 0.0f });
+			boxes[60000 + i] = move(obj);
+		}
+	};
+	std::function<void()> func4 = [&]() {
+		for (int i = 0; i < 10000; i++)
+		{
+			std::unique_ptr<Object3d> obj = std::make_unique<Object3d>();
+			obj->Initialize();
+			obj->SetModel("Resources/Debug/obj", "box.obj", true);
+			obj->SetTranslate({ i * 3.0f, 0.0f, 0.0f });
+			boxes[90000 + i] = move(obj);
+		}
+	};
+	std::thread th1(func1);
+	std::thread th2(func2);
+	std::thread th3(func3);
+	std::thread th4(func4);
+
+	th1.join();
+	th2.join();
+	th3.join();
+	th4.join();*/
 }
 
 Transform boxTransform = Transform::Default;
@@ -102,6 +157,13 @@ void TestScene::Update() {
 
 	stage->Update();
 
+	for (auto& obj : boxes)
+	{
+		Vector3 p = obj->GetTranslate();
+		p.y += 0.1f;
+		obj->SetTranslate(p);
+		obj->Update();
+	}
 
 
 	Vector3 penetration = Vector3::Zero;
@@ -185,6 +247,11 @@ void TestScene::Draw() {
 
 	stage->DrawObject3d();
 	box->Draw();
+	/*for (auto& obj : boxes)
+	{
+		obj->Draw();
+	}*/
+
 	//player->Draw();
 
 	SkinningObject3dBase::GetInstance()->ShaderDraw();
@@ -194,7 +261,6 @@ void TestScene::Draw() {
 	SpriteBase::GetInstance()->ShaderDraw();
 
 	stage->DrawBackSprite();
-	gameOverSprite->Draw();
 	pause->Draw();
 	sprite->Draw();
 

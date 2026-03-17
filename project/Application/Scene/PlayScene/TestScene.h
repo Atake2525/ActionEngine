@@ -19,13 +19,14 @@
 #include "ActionPlayer.h"
 #include "Player.h"
 #include "JsonLoader.h"
-#include "GameOver.h"
 #include "Trap.h"
 #include "Goal.h"
 #include "BaseStage.h"
 #include "TutorialStage.h"
 #include "DebugLine.h"
 #include "Pause.h"
+#include <thread>
+#include <functional>
 
 #pragma once
 
@@ -64,11 +65,10 @@ private:
 
 	bool cursorshow = true;
 
-	std::unique_ptr<GameOver> gameOverSprite;
-
 	std::unique_ptr<ActionPlayer> actionPlayer;
 
 	std::unique_ptr<Object3d> box;
+	std::vector<std::unique_ptr<Object3d>> boxes;
 
 	std::unique_ptr<BaseStage> stage;
 

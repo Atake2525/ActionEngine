@@ -5,6 +5,7 @@
 #include "Logger.h"
 #include "StageCount.h"
 #include "Collision.h"
+#include "Player.h"
 
 using namespace Logger;
 using namespace std;
@@ -15,10 +16,11 @@ Goal::~Goal() {
 
 }
 
-void Goal::Initialize(const std::string jsonName) {
+void Goal::Initialize(const std::string jsonName, Player* player) {
 
-	isGoal_ = false;
-	input = Input::GetInstance();
+	m_isGoal = false;
+	m_input = Input::GetInstance();
+	m_player = player;
 
 	if (JsonLoader::GetInstance()->CheckJsonLoaded(jsonName))
 	{
@@ -27,34 +29,45 @@ void Goal::Initialize(const std::string jsonName) {
 		// スタート地点が設定されていない又はjsonが読み込めなかった場合はデフォルト位置を使用
 		if (!data.empty())
 		{
-			for (int i = 0; i < jsonDatas.size(); i++)
+			for (int i = 0; i < m_jsonDatas.size(); i++)
 			{
 				unique_ptr<Object3d> goal;
 				goal = make_unique<Object3d>();
 				goal->Initialize();
 				goal->SetModel("Resources/Model/obj", "goal.obj");
-				goal->SetTransform(jsonDatas[i].transform);
+				goal->SetTransform(m_jsonDatas[i].transform);
 				goal->SetColor({ 0.0f, 1.0f, 0.2f, 0.4f });
-				goalObjects.push_back(move(goal));
+				m_goalObjects.push_back(move(goal));
 			}
 		}
 	}
+	unique_ptr<Object3d> goal;
+	goal = make_unique<Object3d>();
+	goal->Initialize();
+	goal->SetModel("Resources/Model/obj", "goal.obj");
+	Transform t = Transform::Default;
+	t.translate = { 0.0f, 0.0f, 10.0f };
+	goal->SetTransform(t);
+	goal->SetColor({ 0.0f, 1.0f, 0.2f, 0.4f });
+	m_goalObjects.push_back(move(goal));
 }
 
-void Goal::Update(AABB aabb) {
-	for (int i = 0; i < jsonDatas.size(); i++)
+const bool& Goal::ChceckIsGoal() {
+	AABB aabb = m_player->GetAABB();
+	for (int i = 0; i < m_goalObjects.size(); i++)
 	{
-		goalObjects[i]->Update();
-		if (CollisionAABB(goalObjects[i]->GetAABB(), aabb))
+		m_goalObjects[i]->Update();
+		if (CollisionAABB(m_goalObjects[i]->GetAABB(), aabb))
 		{
-			isGoal_ = true;
+			m_isGoal = true;
 		}
 	}
+	return m_isGoal;
 }
 
-void Goal::Draw() {
-	for (int i = 0; i < jsonDatas.size(); i++)
+void Goal::DrawGoalObject() {
+	for (int i = 0; i < m_goalObjects.size(); i++)
 	{
-		goalObjects[i]->Draw();
+		m_goalObjects[i]->Draw();
 	}
 }
