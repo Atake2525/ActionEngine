@@ -116,7 +116,7 @@ void FadeManager::FadeIn(const float time) {
 		fadeTimer_ = 0.0f;
 
 		function = [this]() {
-			alpha_ = EaseInBack(fadeTimer_, alphaPre_, goalAlpha_);
+			alpha_ = EaseInBack(alphaPre_, goalAlpha_, fadeTimer_);
 			};
 	}
 }

@@ -101,7 +101,7 @@ void Pause::Update() {
             {
                 pauseUIs[i].position = EaseOutQuint(pauseUIs[i].targetPosition[1], pauseUIs[i].targetPosition[0], m_animTimer);
                 OffScreenRendering::GetInstance()->SetGrayscaleIntensity(min(1.0f - m_animTimer * 1.2f, 0.4f));
-                pauseUIs[i].sprite->SetColor({ color.x, color.y, color.z, EaseOutQuint(m_animTimer, 1.0f, 0.0f)});
+                pauseUIs[i].sprite->SetColor({ color.x, color.y, color.z, EaseOutQuint(1.0f, 0.0f, m_animTimer)});
             }
 
             pauseUIs[i].sprite->SetPosition(pauseUIs[i].position);
@@ -152,7 +152,7 @@ void Pause::Update() {
             Vector3 color = {
                        0.0f,
                        1.0f,
-                       EaseOutQuint(m_animTimer, 1.0f, 0.0f)
+                       EaseOutQuint(1.0f, 0.0f, m_animTimer)
             };
             pauseUIs[static_cast<int>(m_pauseSelect)].sprite->SetColor({ color.x, color.y, color.z, 1.0f });
             pauseUIs[static_cast<int>(m_pauseSelect)].sprite->Update();
