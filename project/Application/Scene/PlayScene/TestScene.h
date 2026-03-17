@@ -25,6 +25,7 @@
 #include "TutorialStage.h"
 #include "DebugLine.h"
 #include "Pause.h"
+#include "PlayerUI.h"
 #include <thread>
 #include <functional>
 
@@ -74,6 +75,7 @@ private:
 
     std::unique_ptr<Player> player;
 
+	std::unique_ptr<PlayerUI> playerUi;
 	std::unique_ptr<Pause> pause;
 
 	std::unique_ptr<Sprite> sprite;

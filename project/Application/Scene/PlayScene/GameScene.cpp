@@ -26,6 +26,7 @@ void GameScene::Initialize() {
 
     input = Input::GetInstance();
 
+
     Object3dBase::GetInstance()->SetDefaultCamera(camera.get());
 
     m_pPlayer = make_unique<Player>();
@@ -33,6 +34,9 @@ void GameScene::Initialize() {
     stage->Initialize(m_pPlayer.get(), camera.get());
     m_pPlayer->Initialize(camera.get(), stage->GetJsonName());
     m_pPlayer->Update();
+
+    m_pPlayerUI = make_unique<PlayerUI>();
+    m_pPlayerUI->Initialize(m_pPlayer.get());
 
     Light::GetInstance()->SetRadius(0.1f);
     GameTime::GetInstance()->SetDeltaPoint();
@@ -73,11 +77,11 @@ void GameScene::Update() {
         switch (m_readyNumber)
         {
         case 0:
-            farClipDist = EaseOutExpo(m_startTimer, 0.0f, m_finalFarClipDistance);
+            farClipDist = EaseOutExpo(0.0f, m_finalFarClipDistance, m_startTimer);
             camera->SetFarClipDistance(farClipDist);
             break;
         case 1:
-            radius = EaseOutExpo(m_startTimer, 0.0f, m_finalScanRadius);
+            radius = EaseOutExpo(0.0f, m_finalScanRadius, m_startTimer);
             Light::GetInstance()->SetRadius(radius);
 
             SkyBox::GetInstance()->SetSunPoewr(m_startTimer);
@@ -99,6 +103,7 @@ void GameScene::Update() {
         break;
     case ScenePhase::Game: // プレイフェーズ
         m_pPlayer->Update();
+        m_pPlayerUI->Update();
         break;
     //case ScenePhase::FadeOut: // シーン遷移演出フェーズ(出)
     //    break;
@@ -129,7 +134,6 @@ void GameScene::Update() {
         Audio::GetInstance()->Play2D("bgm", { 0.0f, 0.0f }, false);
     }
 
-
     SkyBox::GetInstance()->Update();
 
 
@@ -138,7 +142,7 @@ void GameScene::Update() {
         SceneManager::GetInstance()->SetNextScene("GAMESCENE");
     }
 
-   
+
     camera->Update();
 
 }
@@ -157,6 +161,7 @@ void GameScene::Draw() {
 
     SpriteBase::GetInstance()->ShaderDraw();
 
+    m_pPlayerUI->Draw();
     m_pause->Draw();
 }
 

@@ -2,6 +2,7 @@
 #include "JsonLoader.h"
 #include "WinApp.h"
 #include "CollisionManager.h"
+#include "Light.h"
 #include "Player.h"
 #include "OffscreenRendering.h"
 
@@ -48,6 +49,7 @@ void TutorialStage::Initialize(Player* player, Camera* camera)
         tutorialSprites[i]->Update();
     }
 
+    //Light::GetInstance()->SetDirectionDirectionalLight({ 0.175f, -0.5f, -0.87f });
     m_player = player;
     m_camera = camera;
 }
@@ -84,10 +86,10 @@ void TutorialStage::DrawFrontSprite() {}
 
 void TutorialStage::DrawBackSprite()
 {
-    for (int i = 0; i < 4; i++)
+    /*for (int i = 0; i < 4; i++)
     {
         tutorialSprites[i]->Draw();
-    }
+    }*/
 }
 
 void TutorialStage::Finalize()
