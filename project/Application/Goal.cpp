@@ -25,9 +25,9 @@ void Goal::Initialize(const std::string jsonName, Player* player) {
 	if (JsonLoader::GetInstance()->CheckJsonLoaded(jsonName))
 	{
 		// スタート地点の取得
-		vector<JsonData> data = JsonLoader::GetInstance()->GetJsonData(jsonName, "goal");
+		vector<JsonData> m_jsonDatas = JsonLoader::GetInstance()->GetJsonData(jsonName, "goal");
 		// スタート地点が設定されていない又はjsonが読み込めなかった場合はデフォルト位置を使用
-		if (!data.empty())
+		if (!m_jsonDatas.empty())
 		{
 			for (int i = 0; i < m_jsonDatas.size(); i++)
 			{
@@ -41,15 +41,6 @@ void Goal::Initialize(const std::string jsonName, Player* player) {
 			}
 		}
 	}
-	unique_ptr<Object3d> goal;
-	goal = make_unique<Object3d>();
-	goal->Initialize();
-	goal->SetModel("Resources/Model/obj", "goal.obj");
-	Transform t = Transform::Default;
-	t.translate = { 0.0f, 0.0f, 10.0f };
-	goal->SetTransform(t);
-	goal->SetColor({ 0.0f, 1.0f, 0.2f, 0.4f });
-	m_goalObjects.push_back(move(goal));
 }
 
 const bool& Goal::ChceckIsGoal() {

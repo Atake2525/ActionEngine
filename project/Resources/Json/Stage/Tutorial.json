@@ -6,8 +6,8 @@
             "name": "立方体.022",
             "transform": {
                 "translation": [
-                    -6.0,
-                    -3.0,
+                    0.0,
+                    0.0,
                     1.0
                 ],
                 "rotation": [
@@ -31,9 +31,9 @@
             "name": "立方体.023",
             "transform": {
                 "translation": [
-                    28.000045776367188,
-                    73.99996185302734,
-                    16.47004508972168
+                    31.000045776367188,
+                    89.9999771118164,
+                    3.0000393390655518
                 ],
                 "rotation": [
                     0.0,
@@ -53,12 +53,12 @@
         },
         {
             "type": "MESH",
-            "name": "立方体.041",
+            "name": "立方体.044",
             "transform": {
                 "translation": [
-                    29.000045776367188,
-                    87.9999771118164,
-                    1.0000393390655518
+                    16.000022888183594,
+                    37.99998092651367,
+                    -2.1999869346618652
                 ],
                 "rotation": [
                     0.0,
@@ -66,7 +66,7 @@
                     0.0
                 ],
                 "scaling": [
-                    3.0,
+                    1.0,
                     3.0,
                     1.0
                 ]
@@ -75,8 +75,8 @@
             "trap": {
                 "move": "true",
                 "velocity_translation": [
+                    -27.0,
                     0.0,
-                    27.0,
                     0.0
                 ],
                 "velocity_rotation": [
@@ -90,13 +90,9 @@
                     0.0
                 ],
                 "loop": "true",
-                "reverse": "false",
-                "runtime": 6.0,
-                "enable_spawner": "true",
-                "spawner": {
-                    "type": "constant",
-                    "spawn_time": 4.0
-                }
+                "reverse": "true",
+                "runtime": 4.0,
+                "enable_spawner": "false"
             }
         }
     ]
