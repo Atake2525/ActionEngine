@@ -50,8 +50,12 @@ void TestScene::Initialize() {
 	camera->Update();
 
 
+	playerUi = std::make_unique<PlayerUI>();
+	playerUi->Initialize(player.get());
+
 	actionPlayer = std::make_unique<ActionPlayer>();
 	actionPlayer->Initialize(camera.get(), stage->GetJsonName(), false);
+
 
 	pause = std::make_unique<Pause>();
 	pause->Initialize();
@@ -134,10 +138,9 @@ void TestScene::Initialize() {
 Transform boxTransform = Transform::Default;
 void TestScene::Update() {
 
-	pause->Update();
-	if (pause->IsPause())
+	if (input->TriggerKey(DIK_ESCAPE))
 	{
-		return;
+		finished = true;
 	}
 
 	/*if (!start_)
@@ -154,6 +157,7 @@ void TestScene::Update() {
 
 	player->Update();
 	//actionPlayer->Update();
+	playerUi->Update();
 
 	stage->Update();
 
@@ -182,9 +186,7 @@ void TestScene::Update() {
 	box->Update();
 	//goal->Update(player->GetAABB());
 
-	/*ImGui::Begin("capsule");
-	ImGui::DragFloat3("penetration", &penetration.x, 0.1f);
-	ImGui::End();*/
+
 
 	if (tim < 100.0f)
 	{
@@ -261,6 +263,7 @@ void TestScene::Draw() {
 	SpriteBase::GetInstance()->ShaderDraw();
 
 	stage->DrawBackSprite();
+	playerUi->Draw();
 	pause->Draw();
 	sprite->Draw();
 

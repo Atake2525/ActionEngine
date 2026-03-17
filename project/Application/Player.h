@@ -21,9 +21,10 @@ private:
     enum class PlayerWalkState : int {
         Walk = 0,
         Run = 1,
-        Crounch = 2,
+        Crouch = 2,
         WallRun = 3,
         Sliding = 4,
+        Climbing = 5,
     };
 
     // コントロールモード
@@ -56,6 +57,9 @@ public:
     /// 描画処理
     /// </summary>
     void Draw();
+
+    // よじ登りができるか確認する
+    const bool GetIsClimbing() const { return m_canClimbing; }
 
 private: // プレイヤーステート管理
     /// <summary>
@@ -110,6 +114,11 @@ private: // プレイヤーステート管理
     void Sliding();
 
     /// <summary>
+    /// クライミング(よじ登り)処理
+    /// </summary>
+    void Climbing();
+
+    /// <summary>
     /// ジャンプ処理
     /// </summary>
     void Jump();
@@ -123,6 +132,11 @@ private: // プレイヤーステート管理
     /// 重力の適用
     /// </summary>
     void ApplyGravity();
+
+    /// <summary>
+    /// 移動量の更新
+    /// </summary>
+    void UpdateVelocity();
 
     /// <summary>
     /// カメラのParent設定処理
@@ -236,15 +250,18 @@ private:
     //================
     // よじ登り関連
     //================
-    bool m_climbing = false;
+    float m_canClimbingCheckSize = 2.5f; // よじ登り可能かのチェック範囲の増加量
+
+    bool m_canClimbing = false;
+    float m_climbingHeight = -4.0f; // よじ登りができるまでの高さ
 
     // 移動速度
+    const float m_walkSpeed = 6.0f;
+    const float m_runSpeed = 15.0f;
+    const float m_crounchSpeed = 4.0f;
     float m_moveSpeed = 1.0f;
     float m_decelMoveSpeed = 1.0f;
     float m_moveSpeedPre = 1.0f;
-    float m_walkSpeed = 6.0f;
-    float m_runSpeed = 9.0f;
-    float m_crounchSpeed = 4.0f;
     float m_playerSpeed = 0.0f; // 現在の速度
     float m_jumpForce = 0.045f; // ジャンプ力
 
@@ -265,7 +282,7 @@ private:
     float m_fovPre = 0.0f;
     float m_fovChangeTimer = 0.0f;    // FOV補間用タイマー
     float m_fovChangeTime = 0.1f;     // FOV補間時間
-    float m_fovDefault = 1.6f; // デフォルトFOV
+    float m_fovDefault = 1.2f; // デフォルトFOV
     float m_fovRun = 1.9f;    // ダッシュ時FOV
 
 

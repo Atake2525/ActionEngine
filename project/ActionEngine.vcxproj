@@ -181,6 +181,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Player.cpp" />
     <ClCompile Include="Engine\Collision\PhysicsCorrection.cpp" />
     <ClCompile Include="Application\Pause.cpp" />
+    <ClCompile Include="Application\PlayerUI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\ActionPlayer.h">
@@ -276,6 +277,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Player.h" />
     <ClInclude Include="Engine\Collision\PhysicsCorrection.h" />
     <ClInclude Include="Application\Pause.h" />
+    <ClInclude Include="Application\PlayerUI.h" />
     <ClInclude Include="Engine\Presentation\Cinematic\ScanEffect.h" />
   </ItemGroup>
   <ItemGroup>
