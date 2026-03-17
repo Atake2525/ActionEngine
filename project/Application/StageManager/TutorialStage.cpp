@@ -2,11 +2,15 @@
 #include "JsonLoader.h"
 #include "WinApp.h"
 #include "CollisionManager.h"
+#include "Player.h"
+#include "OffscreenRendering.h"
 
 using namespace std;
 
-void TutorialStage::Initialize()
+void TutorialStage::Initialize(Player* player, Camera* camera)
 {
+    OffScreenRendering::GetInstance()->SetGrayscaleColor(GRAYSCALE_SEPIA);
+
     JsonLoader::GetInstance()->LoadJson("Resources/Json/Stage/Tutorial.json", "TutorialStage", false);
 
     // ステージオブジェクトの初期化
@@ -27,11 +31,11 @@ void TutorialStage::Initialize()
 
     // トラップの初期化
     trap = make_unique<Trap>();
-    trap->Initialize("t");
+    trap->Initialize("TutorialStage");
 
     // ゴールの初期化
     goal = make_unique<Goal>();
-    goal->Initialize("t");
+    goal->Initialize("TutorialStage", player);
 
     float windowSizeX = float(WinApp::GetInstance()->GetkClientWidth());
     for (int i = 0; i < 4; i++)
@@ -43,6 +47,9 @@ void TutorialStage::Initialize()
         tutorialSprites[i]->SetScale({ 300.0f, 50.0f });
         tutorialSprites[i]->Update();
     }
+
+    m_player = player;
+    m_camera = camera;
 }
 
 std::string TutorialStage::GetJsonName()
@@ -58,54 +65,7 @@ void TutorialStage::Update()
 
     trap->Update();
 
-   /* if (startMovie_)
-    {
-        movieTimer_ += GameTime::GetInstance()->GetDeltaTime();
-
-        float farClip = camera->GetFarClipDistance();
-        float height;
-
-        AABB landAABB = land->GetAABB();
-        Vector3 landSize = landAABB.max - landAABB.min;
-        float flatLandSize = landSize.x * landSize.z;
-
-        switch (phase_)
-        {
-        case 0:
-
-            farClip = Lerp(1.0f, flatLandSize, movieTimer_ / movieTime_);
-
-            camera->SetFarClipDistance(farClip);
-            break;
-        case 1:
-            height = Lerp(-1.0f, landAABB.max.y + 10.0f, movieTimer_ / movieTime_);
-            land->SetDrawHeiht(height);
-            trap_->SetDrawHeight(height);
-            break;
-        }
-
-        if (movieTimer_ >= movieTime_)
-        {
-            if (phase_ == 1)
-            {
-                startMovie_ = false;
-                movieTimer_ = 0.0f;
-                player_->Freeze(false);
-            }
-            else
-            {
-                camera->SetFarClipDistance(100.0f);
-                movieTimer_ = 0.0f;
-                phase_++;
-                return;
-            }
-        }
-        else
-        {
-            return;
-        }
-    }*/
-
+    goal->ChceckIsGoal();
 }
 
 void TutorialStage::DrawObject3d()
@@ -113,7 +73,7 @@ void TutorialStage::DrawObject3d()
     stageObject->Draw();
     wallRunObject->Draw();
     trap->Draw();
-    goal->Draw();
+    goal->DrawGoalObject();
     for (int i = 0; i < 4; i++)
     {
         tutorialSprites[i]->Update();
