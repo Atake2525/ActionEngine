@@ -38,7 +38,7 @@ void GameTime::UpdateDeltaTime() {
 
 
     lastTime = currentTime;
-    deltaTime = delta.count();
+    deltaTime = std::min(delta.count(), 0.05f);
 }
 
 void GameTime::UpdateCPUUsagePDH()

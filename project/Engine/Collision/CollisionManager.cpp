@@ -52,7 +52,6 @@ void CollisionManager::Update(const std::string& targetName, bool wallDashCollis
 			const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
 			for (AABB terrainAABB : terrains)
 			{
-				terrainAABB = AddSize(terrainAABB, 0.1f);
 				AABB target = collisionTarget[targetName];
 				//Vector3 centerTarget = CenterAABB(target);
 				//target.min = { centerTarget.x /*- 0.5f*/, target.min.y, centerTarget.z /*- 0.5f*/ };
@@ -193,7 +192,6 @@ const Vector3 CollisionManager::GetPenetrationForAABB(const AABB& aabb, bool wal
 			const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
 			for (AABB terrainAABB : terrains)
 			{
-				terrainAABB = AddSize(terrainAABB, 0.1f);
 				AABB target = aabb;
 				//Vector3 centerTarget = CenterAABB(target);
 				//target.min = { centerTarget.x /*- 0.5f*/, target.min.y, centerTarget.z /*- 0.5f*/ };
@@ -286,7 +284,6 @@ const Vector3 CollisionManager::GetAllPenetrationForAABB(const AABB& aabb, bool 
 			const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
 			for (AABB terrainAABB : terrains)
 			{
-				terrainAABB = AddSize(terrainAABB, 0.1f);
 				AABB target = aabb;
 				//Vector3 centerTarget = CenterAABB(target);
 				//target.min = { centerTarget.x /*- 0.5f*/, target.min.y, centerTarget.z /*- 0.5f*/ };
@@ -361,7 +358,6 @@ const float CollisionManager::GetGroundDistance(const std::string& targetName, b
 		const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
 		for (AABB terrainAABB : terrains)
 		{
-			terrainAABB = AddSize(terrainAABB, 0.1f);
 			AABB target = collisionTarget.at(targetName);
 			//Vector3 centerTarget = CenterAABB(target);
 			//target.min = { centerTarget.x /*- 0.5f*/, target.min.y, centerTarget.z /*- 0.5f*/ };
@@ -400,7 +396,6 @@ const float CollisionManager::GetGroundDistanceForAABB(const AABB& aabb, bool wa
 		const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
 		for (AABB terrainAABB : terrains)
 		{
-			terrainAABB = AddSize(terrainAABB, 0.1f);
 			AABB target = aabb;
 			//Vector3 centerTarget = CenterAABB(target);
 			//target.min = { centerTarget.x /*- 0.5f*/, target.min.y, centerTarget.z /*- 0.5f*/ };
@@ -449,7 +444,6 @@ const std::vector<AABB> CollisionManager::GetCollisionObjectAABBsForAABB(const A
 			const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
 			for (AABB terrainAABB : terrains)
 			{
-				terrainAABB = AddSize(terrainAABB, 0.1f);
 				AABB target = aabb;
 				//Vector3 centerTarget = CenterAABB(target);
 				//target.min = { centerTarget.x /*- 0.5f*/, target.min.y, centerTarget.z /*- 0.5f*/ };
@@ -497,7 +491,6 @@ const float CollisionManager::GetGroundMAXDistance(const std::string& targetName
 		const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
 		for (AABB terrainAABB : terrains)
 		{
-			terrainAABB = AddSize(terrainAABB, 0.1f);
 			AABB target = collisionTarget.at(targetName);
 			//Vector3 centerTarget = CenterAABB(target);
 			//target.min = { centerTarget.x /*- 0.5f*/, target.min.y, centerTarget.z /*- 0.5f*/ };
@@ -539,7 +532,6 @@ const float CollisionManager::GetMaxGroundDistanceForAABB(const AABB& aabb, bool
 		for (AABB terrainAABB : terrains)
 		{
             // 座標をAABBに変換
-			terrainAABB = AddSize(terrainAABB, 0.1f);
             AABB target = aabb;
 			//Vector3 centerTarget = CenterAABB(target);
 			//target.min = { centerTarget.x /*- 0.5f*/, target.min.y, centerTarget.z /*- 0.5f*/ };
@@ -603,6 +595,148 @@ const bool CollisionManager::IsCollisionObjectForAABB(const AABB& aabb, bool wal
 	return false;
 }
 
+const float CollisionManager::GetHeightToTopForAABB(const AABB& aabb, bool wallDashCollision)
+{
+	float maxHeight = 0.0f;
+	std::vector<Object3d*> colObj = collisionObject;
+	if (wallDashCollision)
+	{
+		colObj = wallDashCollisionObject;
+	}
+	for (const auto& object : colObj) {
+		// オブジェクトのメッシュごとのAABBを取得する
+		float serchDistance = Distance(object->GetAABB().max, aabb.min);
+		//if (serchDistance <= distance)
+		//{
+		const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
+		for (AABB terrainAABB : terrains)
+		{
+			// 座標をAABBに変換
+			AABB target = aabb;
+
+			// ターゲットとオブジェクトが貫通していたら実行
+			if (CollisionAABBXZ(target, terrainAABB))
+			{
+				// 高さを計算して0.0f未満なら代入
+				float height = target.min.y - terrainAABB.max.y;
+				if (height < 0.0f && maxHeight > height)
+				{
+					maxHeight = height;
+				}
+			}
+		}
+	}
+	
+	return maxHeight;
+}
+
+const Vector3 CollisionManager::GetCollisionObjectDirectionForAABB(const AABB& aabb, bool wallDashCollision)
+{
+	Vector3 direction = Vector3::Zero;
+	std::vector<Object3d*> colObj = collisionObject;
+	if (wallDashCollision)
+	{
+		colObj = wallDashCollisionObject;
+	}
+	for (const auto& object : colObj) {
+		// オブジェクトのメッシュごとのAABBを取得する
+		float serchDistance = Distance(object->GetAABB().max, aabb.min);
+		//if (serchDistance <= distance)
+		//{
+		const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
+		for (AABB terrainAABB : terrains)
+		{
+			// 座標をAABBに変換
+			AABB target = aabb;
+
+			// ターゲットとオブジェクトが貫通していたら実行
+			if (CollisionAABBXZ(target, terrainAABB))
+			{
+				// オブジェクトとaabbの方向を求める
+				Vector3 a = CenterAABB(aabb);
+				a.y = aabb.min.y;
+				Vector3 b;
+				// aabbとの最近接点を求める
+				b.x = clamp(a.x, terrainAABB.min.x, terrainAABB.max.x);
+				b.y = clamp(a.y, terrainAABB.min.y, terrainAABB.max.y);
+				b.z = clamp(a.z, terrainAABB.min.z, terrainAABB.max.z);
+				
+				Vector3 dir = b - a;
+				if (dir.x != 0.0f && dir.z != 0.0f)
+				{
+					if (a.x >= terrainAABB.min.x && a.x <= terrainAABB.max.x)
+					{
+						dir.z = 0.0f;
+					}
+					else
+					{
+						dir.x = 0.0f;
+					}
+					if (a.z >= terrainAABB.min.z && a.z <= terrainAABB.max.z)
+					{
+						dir.x = 0.0f;
+					}
+					else
+					{
+						dir.z = 0.0f;
+					}
+				}
+
+				// 計算した最近接点を使って方向を求める
+				direction += dir;
+
+				
+			}
+		}
+	}
+	// 詳しい数値はいらないのでSign関数で(-1, 1 or 0)にする
+	return { Sign(direction) };
+}
+
+const AABB CollisionManager::GetObjectForCollisionDirection(const AABB& aabb, const Vector3& direction, bool wallDashCollision)
+{
+	Vector3 dir = Vector3::Zero;
+	std::vector<Object3d*> colObj = collisionObject;
+	if (wallDashCollision)
+	{
+		colObj = wallDashCollisionObject;
+	}
+	for (const auto& object : colObj) {
+		// オブジェクトのメッシュごとのAABBを取得する
+		float serchDistance = Distance(object->GetAABB().max, aabb.min);
+		//if (serchDistance <= distance)
+		//{
+		const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
+		for (AABB terrainAABB : terrains)
+		{
+			// 座標をAABBに変換
+			AABB target = aabb;
+
+			// ターゲットとオブジェクトが貫通していたら実行
+			if (CollisionAABBXZ(target, terrainAABB))
+			{
+				// オブジェクトとaabbの方向を求める
+				Vector3 a = CenterAABB(aabb);
+				a.y = aabb.min.y;
+				Vector3 b;
+				// aabbとの最近接点を求める
+				b.x = clamp(a.x, terrainAABB.min.x, terrainAABB.max.x);
+				b.y = clamp(a.y, terrainAABB.min.y, terrainAABB.max.y);
+				b.z = clamp(a.z, terrainAABB.min.z, terrainAABB.max.z);
+				// 計算した最近接点を使って方向を求める
+				dir = b - a;
+
+				if (Sign(dir) == direction)
+				{
+					return terrainAABB;
+				}
+			}
+		}
+	}
+	// 詳しい数値はいらないのでSign関数で(-1, 1 or 0)にする
+	return AABB::Zero;
+}
+
 const Vector3 CollisionManager::CheckPenetrationAmount(const AABB& aabb)
 {
 	Vector3 result = { 0.0f, 0.0f, 0.0f };
@@ -620,7 +754,6 @@ const Vector3 CollisionManager::CheckPenetrationAmount(const AABB& aabb)
 			const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
 			for (AABB terrainAABB : terrains)
 			{
-				terrainAABB = AddSize(terrainAABB, 0.1f);
 				AABB target = aabb;
 				/*Vector3 centerTarget = CenterAABB(target);
 				target.min = { centerTarget.x - 0.5f, target.min.y, centerTarget.z - 0.5f };
