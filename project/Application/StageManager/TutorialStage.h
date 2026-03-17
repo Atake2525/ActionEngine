@@ -11,7 +11,7 @@ public:
     /// <summary>
     /// 初期化
     /// </summary>
-    void Initialize() override;
+    void Initialize(Player* player, Camera* camera) override;
     /// <summary>
     /// JsonNameの取得
     /// </summary>
@@ -38,11 +38,15 @@ public:
     void Finalize() override;
 
 private:
+    Player* m_player = nullptr;
+    Camera* m_camera = nullptr;
     // ステージに必要なものの宣言
     std::unique_ptr<Object3d> stageObject;
     std::unique_ptr<Object3d> wallRunObject;
     std::unique_ptr<Trap> trap;
     std::unique_ptr<Goal> goal;
+
+
 
     std::array< std::unique_ptr<Sprite>, 4> tutorialSprites;
 

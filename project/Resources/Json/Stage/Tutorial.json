@@ -3,12 +3,12 @@
     "objects": [
         {
             "type": "MESH",
-            "name": "立方体.033",
+            "name": "立方体.022",
             "transform": {
                 "translation": [
-                    0.0,
-                    0.0,
-                    35.0
+                    -6.0,
+                    -3.0,
+                    1.0
                 ],
                 "rotation": [
                     0.0,
@@ -28,12 +28,12 @@
         },
         {
             "type": "MESH",
-            "name": "立方体.034",
+            "name": "立方体.023",
             "transform": {
                 "translation": [
-                    23.632429122924805,
-                    101.22188568115234,
-                    34.00000762939453
+                    28.000045776367188,
+                    73.99996185302734,
+                    16.47004508972168
                 ],
                 "rotation": [
                     0.0,
@@ -49,6 +49,54 @@
             "file_name": "goal",
             "trap": {
                 "move": "false"
+            }
+        },
+        {
+            "type": "MESH",
+            "name": "立方体.041",
+            "transform": {
+                "translation": [
+                    29.000045776367188,
+                    87.9999771118164,
+                    1.0000393390655518
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    3.0,
+                    3.0,
+                    1.0
+                ]
+            },
+            "file_name": "trap",
+            "trap": {
+                "move": "true",
+                "velocity_translation": [
+                    0.0,
+                    27.0,
+                    0.0
+                ],
+                "velocity_rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "velocity_scale": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "loop": "true",
+                "reverse": "false",
+                "runtime": 6.0,
+                "enable_spawner": "true",
+                "spawner": {
+                    "type": "constant",
+                    "spawn_time": 4.0
+                }
             }
         }
     ]

@@ -5,428 +5,259 @@
 #include "WinApp.h"
 #include "GameTime.h"
 #include "EasingUtility.h"
+#include "Light.h"
+#include "FadeManager.h"
 
 using namespace std;
 
 void TitleScene::Initialize() {
 
-	//ModelManager::GetInstance()->LoadModel("Resources/Model/gltf/human", "walkMultiMaterial.gltf", true, true);
+    //ModelManager::GetInstance()->LoadModel("Resources/Model/gltf/human", "walkMultiMaterial.gltf", true, true);
 
-	camera = make_unique<Camera>();
-	camera->SetRotate(Vector3(SwapRadian(10.0f), 0.0f, 0.0f));
-	camera->SetTranslate({ 0.0f, 2.8f, -4.4f });
+    camera = make_unique<Camera>();
+    camera->SetRotate(Vector3(SwapRadian(11.5f), SwapRadian(1.5f), 0.0f));
+    camera->SetTranslate({ -1.0f, 1.6f, -3.4f });
+    m_screenChangeTransformPre = camera->GetTransform();
+    camera->Update();
 
-	TextureManager::GetInstance()->LoadTexture("Resources/rostock_laage_airport_4k.dds");
+    TextureManager::GetInstance()->LoadTexture("Resources/rostock_laage_airport_4k.dds");
 
-	SkyBox::GetInstance()->SetCamera(camera.get());
-	SkyBox::GetInstance()->SetTexture("Resources/rostock_laage_airport_4k.dds");
+    SkyBox::GetInstance()->SetCamera(camera.get());
+    SkyBox::GetInstance()->SetTexture("Resources/rostock_laage_airport_4k.dds");
+    SkyBox::GetInstance()->SetSunPoewr(1.0f);
 
-	input = Input::GetInstance();
-	input->ShowMouseCursor(true);
+    input = Input::GetInstance();
+    input->ShowMouseCursor(true);
 
-	Object3dBase::GetInstance()->SetDefaultCamera(camera.get());
+    Object3dBase::GetInstance()->SetDefaultCamera(camera.get());
 
-	ParticleManager::GetInstance()->SetCamera(camera.get());
+    ParticleManager::GetInstance()->SetCamera(camera.get());
 
-	title = make_unique<Object3d>();
-	title->Initialize();
-	title->SetModel("Resources/Model/gltf/title", "title.gltf", true);
-	title->SetTranslate({ -0.04f, 2.0f, 0.0f });
-	title->SetRotate(Vector3(SwapRadian(10.0f), 0.01f, 0.0f));
+    m_charModel = make_unique<Object3d>();
+    m_charModel->Initialize();
+    m_charModel->SetModel("Resources/Model/gltf", "TitleSceneChar.gltf", true, true);
+    m_charModel->AddAnimation("Resources/Model/gltf", "sceneChange_Animation.gltf", "TitleScreen");
+    m_charModel->ToggleStartAnimation();
+    m_charModel->SetRotate({ 0.0f, SwapRadian(180.0f), 0.0f});
+    m_charModel->Update();
 
-	playerModel = make_unique<Object3d>();
-	playerModel->Initialize();
-	playerModel->SetModel("Resources/Model/gltf/char", "idle.gltf", true, true);
-	//playerModel->SetAnimationSpeed(0.1f);
-	playerModel->ToggleStartAnimation();
-	playerModel->SetTranslate({ 0.0f, 0.1f, 0.0f });
+    m_bootScreen = make_unique<Object3d>();
+    m_bootScreen->Initialize();
+    m_bootScreen->SetModel("Resources/Model/obj/Title", "TitleScene_01.obj", true);
+    m_bootScreen->Update();
 
-	stageModel = make_unique<Object3d>();
-	stageModel->Initialize();
-	//stageModel->SetModel("Resources/Model/obj/Stage/StageSelect", "LobbyModel.obj", true);
-	stageModel->SetModel("Resources/Debug/obj", "box.obj", true);
+    Vector2 windowSize = { float(WinApp::GetInstance()->GetkClientWidth()), float(WinApp::GetInstance()->GetkClientHeight()) };
+    m_startUi = make_unique<Sprite>();
+    m_startUi->Initialize("Resources/Sprite/UI/ui_start.png");
+    m_startUi->SetColor({ 0.0f, 0.0f, 0.0f, 1.0f });
+    Vector2 size = m_startUi->GetTextureSize();
+    m_startUi->SetScale(size * 0.2f);
+    m_startUi->SetAnchorPoint({ 0.5f, 0.5f });
+    m_startUi->SetPosition({ windowSize.x * 0.5f, windowSize.y * 0.5f });
+    m_startUi->Update();
 
-	startUI = make_unique<UI>();
-	startUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f), float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) - 64.0f * 3.0f }, Origin::Center, "Resources/Sprite/UI/start.png");
-	startUI->function = [this]() {
-		start = true;
-	};
 
-	playUI = make_unique<UI>();
-	playUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f) + 128.0f, float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) }, Origin::Center, "Resources/Sprite/UI/play.png");
-	playUI->function = []() {
-		SceneManager::GetInstance()->SetNextScene("GAMESCENE");
-	};
+    m_exitUi = make_unique<Sprite>();
+    m_exitUi->Initialize("Resources/Sprite/UI/ui_exit.png");
+    m_exitUi->SetColor({ 0.0f, 0.0f, 0.0f, 1.0f });
+    size = m_exitUi->GetTextureSize();
+    m_exitUi->SetScale(size * 0.2f);
+    m_exitUi->SetAnchorPoint({ 0.5f, 0.5f });
+    m_exitUi->SetPosition({ windowSize.x * 0.5f, windowSize.y * 0.5f + (size.y * 0.3f) });
+    m_exitUi->Update();
 
-	settingUI = make_unique<UI>();
-	settingUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f) + 128.0f, float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) + 72.0f }, Origin::Center, "Resources/Sprite/UI/setting.png");
-	settingUI->function = [this]() {
-	};
+    m_pressAnyKey = make_unique<Sprite>();
+    m_pressAnyKey->Initialize("Resources/Sprite/UI/press_any_key.png");
+    size = m_pressAnyKey->GetTextureSize();
+    m_pressAnyKey->SetScale({ size.x * 0.3f, size.y * 0.3f });
+    m_pressAnyKey->SetAnchorPoint({ 0.5f, 1.0f });
+    m_pressAnyKey->SetPosition({ windowSize.x * 0.6f, windowSize.y * 1.014f });
+    m_pressAnyKey->SetRotatioin(-SwapRadian(1.0f));
+    m_pressAnyKey->Update();
 
-	exitUI = make_unique<UI>();
-	exitUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f) + 128.0f, float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) + 72.0f * 2.0f }, Origin::Center, "Resources/Sprite/UI/exit.png");
-	exitUI->function = [this]() {
-		finished = true;
-	};
+    gamePad = make_unique<Sprite>();
+    gamePad->Initialize("Resources/Sprite/UI/gamepad.png");
+    //gamePad->SetAnchorPoint({ 0.5f, 0.5f });
+    gamePad->SetPosition({ windowSize.x - gamePad->GetTextureSize().x - 10.0f, windowSize.y - gamePad->GetTextureSize().y - 10.0f });
 
-	creditUI = make_unique<UI>();
-	creditUI->CreateButton({ 64.0f + 16.0f, float(WinApp::GetInstance()->GetkClientHeight() - 24.0f - 16.0f) }, Origin::Center, "Resources/Sprite/UI/credit.png");
-	creditUI->function = [this]() {
-		showCredit = !showCredit;
-	};
+    credit_sound = make_unique<Sprite>();
+    credit_sound->Initialize("Resources/Sprite/UI/credit_sound.png");
+    credit_sound->SetAnchorPoint({ 0.5f, 0.5f });
+    credit_sound->SetPosition({ windowSize.x / 2.0f, windowSize.y / 2.0f });
 
-	uiFrame = make_unique<Sprite>();
-	uiFrame->Initialize("Resources/Sprite/UI/uiFrame.png");
-	uiFrame->SetAnchorPoint({ 0.5f, 0.5f });
-	uiFrame->SetPosition({ startUI->GetTransform().translate.x, startUI->GetTransform().translate.y });
+    Audio::GetInstance()->LoadMP3("Resources/sound/select.mp3", "select", 1.0f);
+    Audio::GetInstance()->LoadMP3("Resources/sound/enter.mp3", "enter", 1.0f);
+    //Audio::GetInstance()->LoadMP3("Resources/sound/Experimenta_Model_short.mp3", "bgm", 0.2f);
 
-	gamePad = make_unique<Sprite>();
-	gamePad->Initialize("Resources/Sprite/UI/gamepad.png");
-	//gamePad->SetAnchorPoint({ 0.5f, 0.5f });
-	gamePad->SetPosition({ float(WinApp::GetInstance()->GetkClientWidth() - gamePad->GetTextureSize().x - 10.0f), float(WinApp::GetInstance()->GetkClientHeight() - gamePad->GetTextureSize().y - 10.0f) });
+    //Audio::GetInstance()->Play("bgm", true);
 
-	gamePadOnFrame = make_unique<Sprite>();
-	gamePadOnFrame->Initialize("Resources/Sprite/UI/gamepadONFrame.png");
-	//gamePadOnFrame->SetAnchorPoint({ 0.5f, 0.5f });
-	gamePadOnFrame->SetPosition({ float(WinApp::GetInstance()->GetkClientWidth() - gamePad->GetTextureSize().x - 10.0f), float(WinApp::GetInstance()->GetkClientHeight() - gamePad->GetTextureSize().y - 10.0f) });
+    //Audio::GetInstance()->SetMasterVolume(0.0f);
+    FadeManager::GetInstance()->FadeIn(1.0f);
 
-	credit_sound = make_unique<Sprite>();
-	credit_sound->Initialize("Resources/Sprite/UI/credit_sound.png");
-	credit_sound->SetAnchorPoint({ 0.5f, 0.5f });
-	credit_sound->SetPosition({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f), float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) });
+    Light::GetInstance()->SetPositionPointLight({ 0.2f, 1.9f, 3.4f });
+    Light::GetInstance()->SetIntensityPointLight(1.0f);
+    Light::GetInstance()->SetRadiusPointLight(4.0f);
+    Light::GetInstance()->SetColorPointLight(Vector4{ 1.0f, 93.0f / 255.0f, 0.0f, 1.0f });
 
-	Audio::GetInstance()->LoadMP3("Resources/sound/select.mp3", "select", 1.0f);
-	Audio::GetInstance()->LoadMP3("Resources/sound/enter.mp3", "enter", 1.0f);
-	//Audio::GetInstance()->LoadMP3("Resources/sound/Experimenta_Model_short.mp3", "bgm", 0.2f);
+    Light::GetInstance()->SetDirectionDirectionalLight({ 0.174f, -0.35f, 1.0f });
+    Light::GetInstance()->SetIntensityDirectionalLight(0.5f);
+    Light::GetInstance()->SetRadius(camera->GetFarClipDistance());
 
-	//Audio::GetInstance()->Play("bgm", true);
+    m_sceneScreen = TitleSceneScreen::BootScreen;
 
-	//Audio::GetInstance()->SetMasterVolume(0.0f);
-	FadeManager::GetInstance()->FadeIn(1.0f);
 }
 
 void TitleScene::Update() {
 
-	if (!start_)
-	{
-		if (FadeManager::GetInstance()->CompleteFade())
-		{
-			start_ = true;
-		}
-		else
-		{
-			return;
-		}
-	}
+    if (FadeManager::GetInstance()->IsFade())
+    {
+        return;
+    }
 
-	if (start && !FadeManager::GetInstance()->IsFade())
-	{
-		Vector3 position;
+    if (input->TriggerKey(DIK_ESCAPE))
+    {
+        finished = true;
+    }
 
-		if (input->TriggerKey(DIK_S) || input->TriggerKey(DIK_DOWN) || input->TriggerXButton(DPad::Down))
-		{
-			int selectNum = static_cast<int>(select);
-			selectNum++;
-			if (selectNum > maxSelectNum)
-			{
-				selectNum = 0;
-			}
-			select = static_cast<Select>(selectNum);
-			isUIFrameMove = true;
-			uiFrameMoveTimer = 0.0f;
-		}
-		if (input->TriggerKey(DIK_W) || input->TriggerKey(DIK_UP) || input->TriggerXButton(DPad::Up))
-		{
-			int selectNum = static_cast<int>(select);
-			selectNum--;
-			if (selectNum < 0)
-			{
-				selectNum = maxSelectNum;
-			}
-			select = static_cast<Select>(selectNum);
-			isUIFrameMove = true;
-			uiFrameMoveTimer = 0.0f;
-		}
-		
-		if (select != selectPre)
-		{
-			Audio::GetInstance()->Play("select");
-			switch (select)
-			{
-			case Select::Play:
-				uiFrameStartPoint = uiFrame->GetTransform().translate;
-				uiFrameEndPoint = playUI->GetTransform().translate;
-				break;
-			case Select::Setting:
-				uiFrameStartPoint = uiFrame->GetTransform().translate;
-				uiFrameEndPoint = settingUI->GetTransform().translate;
-				break;
-			case Select::Exit:
-				uiFrameStartPoint = uiFrame->GetTransform().translate;
-				uiFrameEndPoint = exitUI->GetTransform().translate;
-				break;
-			case Select::Credit:
-				uiFrameStartPoint = uiFrame->GetTransform().translate;
-				uiFrameEndPoint = creditUI->GetTransform().translate;
-				break;
-			}
-		}
+    switch (m_sceneScreen)
+    {
+    case TitleScene::TitleSceneScreen::BootScreen:
 
-		if (playUI->InCursor() && select != Select::Play)
-		{
-			select = Select::Play;
-			uiFrameStartPoint = uiFrame->GetTransform().translate;
-			uiFrameEndPoint = playUI->GetTransform().translate;
-			Audio::GetInstance()->Play("select");
-			isUIFrameMove = true;
-			uiFrameMoveTimer = 0.0f;
-		}
-		if (settingUI->InCursor() && select != Select::Setting)
-		{
-			select = Select::Setting;
-			uiFrameStartPoint = uiFrame->GetTransform().translate;
-			uiFrameEndPoint = settingUI->GetTransform().translate;
-			Audio::GetInstance()->Play("select");
-			isUIFrameMove = true;
-			uiFrameMoveTimer = 0.0f;
-		}
-		if (exitUI->InCursor() && select != Select::Exit)
-		{
-			select = Select::Exit;
-			uiFrameStartPoint = uiFrame->GetTransform().translate;
-			uiFrameEndPoint = exitUI->GetTransform().translate;
-			Audio::GetInstance()->Play("select");
-			isUIFrameMove = true;
-			uiFrameMoveTimer = 0.0f;
-		}
-		if (creditUI->InCursor() && select != Select::Credit)
-		{
-			select = Select::Credit;
-			uiFrameStartPoint = uiFrame->GetTransform().translate;
-			uiFrameEndPoint = creditUI->GetTransform().translate;
-			Audio::GetInstance()->Play("select");
-			isUIFrameMove = true;
-			uiFrameMoveTimer = 0.0f;
-		}
+        
 
-		
+        if (input->PressAnyKey() || input->PressAnyButton() || GetAsyncKeyState(VK_LBUTTON) || GetAsyncKeyState(VK_RBUTTON))
+        {
+            m_sceneScreen = TitleSceneScreen::TitleScreen;
 
-		if (uiFrameMoveTimer >= 1.0f)
-		{
-			uiFrameMoveTimer = 0.0f;
-			uiFrameStartPoint = { 0.0f, 0.0f };
-			uiFrameEndPoint = { 0.0f, 0.0f };
-			isUIFrameMove = false;
-		}
-		if (isUIFrameMove)
-		{
-			uiFrameMoveTimer += GameTime::GetInstance()->GetDeltaTime() / uiFrameMoveLImitTime;
-			position = EaseOutQuint(uiFrameStartPoint, uiFrameEndPoint, uiFrameMoveTimer);
-			uiFrame->SetPosition({ position.x, position.y });
-		}
-		
-		if (input->TriggerKey(DIK_RETURN) || input->TriggerKey(DIK_SPACE) || input->TriggerButton(Controller::A))
-		{
-			Audio::GetInstance()->Play("enter");
-			switch (select)
-			{
-			case TitleScene::Select::Play:
-				FadeManager::GetInstance()->FadeOut(1.0f);
-				break;
-			case TitleScene::Select::Setting:
-				settingUI->TriggerFunction();
-				break;
-			case TitleScene::Select::Exit:
-				exitUI->TriggerFunction();
-				break;
-			case TitleScene::Select::Credit:
-				creditUI->TriggerFunction();
-				break;
-			}
-		}
+            m_startUi->Update();
+            m_exitUi->Update();
 
-		if (FadeManager::GetInstance()->CompleteFade())
-		{
-			playUI->TriggerFunction();
-		}
+        }
+        // 何かしらキーを押したらBootScreenからTitleScreenに切り替える
+        m_pressAnyKey->Update();
 
-		if (playUI->TriggerOnButton())
-		{
-			FadeManager::GetInstance()->FadeOut(1.0f);
-			Audio::GetInstance()->Play("enter");
-		}
-		else if (settingUI->TriggerOnButton())
-		{
-			settingUI->TriggerFunction();
-			Audio::GetInstance()->Play("enter");
-		}
-		else if (exitUI->TriggerOnButton())
-		{
-			exitUI->TriggerFunction();
-			Audio::GetInstance()->Play("enter");
-		}
-		else if (creditUI->TriggerOnButton())
-		{
-			creditUI->TriggerFunction();
-			Audio::GetInstance()->Play("enter");
-		}
+        break;
+    case TitleScene::TitleSceneScreen::TitleScreen:
 
-		if (playUI->GetButtonOn())
-		{
-			if (FadeManager::GetInstance()->CompleteFade())
-			{
-				playUI->TriggerFunction();
-			}
-		}
+        // UIにマウスカーソルが入っている時、クリックしたときの処理
+        if (InCursor(m_startUi.get()))
+        {
+            m_startUi->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
+            if (/*GetAsyncKeyState(VK_LBUTTON) & 0x0001 &&*/ GetAsyncKeyState(VK_LBUTTON) == -32768)
+            {
+                m_screenChange = true;
+                m_charModel->ChangePlayAnimation("TitleScreen");
+                m_charModel->ResetAnimationTime();
+            }
+        }
+        else
+        {
+            m_startUi->SetColor({ 0.0f, 0.0f, 0.0f,1.0f });
+        }
 
-	}
-	else
-	{
-		if (startUI->TriggerOnButton() || input->TriggerKey(DIK_RETURN) || input->TriggerKey(DIK_SPACE) || input->TriggerButton(Controller::A))
-		{
-			startUI->TriggerFunction();
-			Audio::GetInstance()->Play("enter");
-			uiFrame->SetPosition({ playUI->GetTransform().translate.x, playUI->GetTransform().translate.y });
-		}
-	}
+        if (InCursor(m_exitUi.get()))
+        {
+            m_exitUi->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
+            if (GetAsyncKeyState(VK_LBUTTON) & 0x0001 && GetAsyncKeyState(VK_LBUTTON) == -32768)
+            {
+                finished = true;
+            }
+        }
+        else
+        {
+            m_exitUi->SetColor({ 0.0f, 0.0f, 0.0f,1.0f });
+        }
 
-	if (input->PushKey(DIK_ESCAPE))
-	{
-		finished = true;
-	}
+        if (m_screenChange)
+        {
+            m_screenChangeTimer += GameTime::GetInstance()->GetDeltaTime() / m_screenChangeTime[m_changeNum];
+            m_screenChangeTimer = std::clamp(m_screenChangeTimer, 0.0f, 1.0f);
+            Transform cameraT = Transform::Default;
+            cameraT.rotate = Lerp(m_screenChangeTransformPre.rotate, m_screenChangeTransform[m_changeNum].rotate, m_screenChangeTimer);
+            cameraT.translate = Lerp(m_screenChangeTransformPre.translate, m_screenChangeTransform[m_changeNum].translate, m_screenChangeTimer);
+            camera->SetTransform(cameraT);
 
-	if (input->IsConnectedController())
-	{
-		gamePad->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
-	}
-	else
-	{
-		gamePad->SetColor({ 1.0f, 1.0f, 1.0f, 0.5f });
-	}
+            if (m_screenChangeTimer == 1.0f && m_changeNum == 0)
+            {
+                m_screenChangeTimer = 0.0f;
+                m_screenChangeTransformPre = cameraT;
+                m_changeNum++;
+                FadeManager::GetInstance()->FadeOut(0.4f);
+                FadeManager::GetInstance()->SetColor({ 1.0f, 1.0f, 1.0f });
+            }
 
-	uiFrame->Update();
+            if (m_screenChangeTimer == 1.0f && m_changeNum == 1)
+            {
+                SceneManager::GetInstance()->SetNextScene("GAMESCENE");
+                m_screenChange = false;
+                /*camera->SetTranslate({ 0.0f, 0.2f, -4.5f });
+                camera->SetRotate({ SwapRadian(-9.5f), 0.0f, 0.0f });
+                m_screenChangeTimer = 0.0f;*/
+            }
+        }
+       
 
-	gamePad->Update();
+        m_startUi->Update();
+        m_exitUi->Update();
 
-	gamePadOnFrame->Update();
+        break;
+    }
 
-	credit_sound->Update();
+    //camera->SetParent(m_charModel->GetJointMatrix("Head"));
 
-	stageModel->Update();
+    m_bootScreen->Update();
 
-	playerModel->Update();
+    m_charModel->Update();
 
-	camera->Update();
+    SkyBox::GetInstance()->Update();
 
-	SkyBox::GetInstance()->Update();
-
-	//input->Update();
-
-	Transform titleTransform = title->GetTransform();
-
-	if (titleTransform.translate.y == 2.1f)
-	{
-		titleUp = false;
-	}
-
-	if (titleTransform.translate.y == 1.9f)
-	{
-		titleUp = true;
-	}
-
-	easeTime += GameTime::GetInstance()->GetDeltaTime() / 2.0f;
-
-	if (titleUp)
-	{
-		titleTransform.translate.y = EaseInOut(easeTime, 1.9f, 2.1f);
-	}
-	else
-	{
-		titleTransform.translate.y = EaseInOut(easeTime, 2.1f, 1.9f);
-	}
-
-	if (easeTime > 1.0f)
-	{
-		easeTime = 0.0f;
-	}
-	title->SetTransform(titleTransform);
-	title->Update();
-
-	selectPre = select;
-
-	
+    camera->Update();
 }
 
 void TitleScene::Draw() {
 
-	if (start)
-	{
-		SpriteBase::GetInstance()->ShaderDraw();
+    switch (m_sceneScreen)
+    {
+    case TitleScene::TitleSceneScreen::BootScreen:
 
+        Object3dBase::GetInstance()->ShaderDraw();
 
+        m_bootScreen->Draw();
 
-		Object3dBase::GetInstance()->ShaderDraw();
+        SkinningObject3dBase::GetInstance()->ShaderDraw();
 
-		stageModel->Draw();
-		title->Draw();
+        m_charModel->Draw();
 
-		SkinningObject3dBase::GetInstance()->ShaderDraw();
+        SpriteBase::GetInstance()->ShaderDraw();
 
-		playerModel->Draw();
+        if (!m_screenChange)
+        {
+            m_pressAnyKey->Draw();
+        }
 
-		WireFrameObjectBase::GetInstance()->ShaderDraw();
+        break;
+    case TitleScene::TitleSceneScreen::TitleScreen:
 
+        Object3dBase::GetInstance()->ShaderDraw();
 
-		ParticleManager::GetInstance()->Draw();
+        m_bootScreen->Draw();
 
-		SpriteBase::GetInstance()->ShaderDraw();
+        SkinningObject3dBase::GetInstance()->ShaderDraw();
 
-		playUI->Draw();
-		settingUI->Draw();
-		exitUI->Draw();
-		creditUI->Draw();
+        m_charModel->Draw();
 
-		uiFrame->Draw();
-		gamePad->Draw();
-		if (input->IsConnectedController())
-		{
-			gamePadOnFrame->Draw();
-		}
+        SpriteBase::GetInstance()->ShaderDraw();
 
-		if (showCredit)
-		{
-			credit_sound->Draw();
-		}
-	}
-	else
-	{
-		SpriteBase::GetInstance()->ShaderDraw();
+        SpriteBase::GetInstance()->ShaderDraw();
 
+        m_startUi->Draw();
+        m_exitUi->Draw();
 
+        break;
+    }
 
-		Object3dBase::GetInstance()->ShaderDraw();
+    SpriteBase::GetInstance()->ShaderDraw();
 
-		stageModel->Draw();
-		title->Draw();
-
-		SkinningObject3dBase::GetInstance()->ShaderDraw();
-
-		playerModel->Draw();
-
-		WireFrameObjectBase::GetInstance()->ShaderDraw();
-
-
-		ParticleManager::GetInstance()->Draw();
-
-		SpriteBase::GetInstance()->ShaderDraw();
-
-		startUI->Draw();
-		
-	}
-
-	SpriteBase::GetInstance()->ShaderDraw();
-	uiFrame->Draw();
-	//SceneFadeManager::GetInstance()->Draw();
 
 }
 

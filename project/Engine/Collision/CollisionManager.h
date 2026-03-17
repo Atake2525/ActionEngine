@@ -87,6 +87,7 @@ public:
 	const Vector3 GetCollisionObjectDirectionForAABB(const AABB& aabb, bool wallDashCollision = false);
 
 	const AABB GetObjectForCollisionDirection(const AABB& aabb, const Vector3& direction, bool wallDashCollision = false);
+	const bool IsCollisionObjectForAABB(const AABB& aabb, bool wallDashCollision = false, const AABB& noSearchAABB = AABB::Zero) const;
 
 	const Vector3 CheckPenetrationAmount(const AABB& aabb);
 

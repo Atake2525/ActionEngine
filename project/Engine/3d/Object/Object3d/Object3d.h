@@ -165,6 +165,7 @@ public:
     // ============================
     const Vector3 GetJointPosition(const std::string jointName);
     const Vector3 GetJointNormal(const std::string jointName);
+    const Matrix4x4 GetJointMatrix(const std::string& jointName);
 
 private:
     // ============================

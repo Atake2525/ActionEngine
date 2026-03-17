@@ -119,6 +119,9 @@ void SkinningObject3dBase::CreateRootSignature() {
 	rootParameters[13].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;    // ConstantBufferView
 	rootParameters[13].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShader
 	rootParameters[13].Descriptor.ShaderRegister = 7;                    // b7
+	rootParameters[14].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;    // ConstantBufferView
+	rootParameters[14].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShader
+	rootParameters[14].Descriptor.ShaderRegister = 8;                    // b7
 	descriptionRootSignature.pParameters = rootParameters;              // ルートパラメータ配列へのポインタ
 	descriptionRootSignature.NumParameters = _countof(rootParameters);  // 配列の長さ
 
@@ -233,4 +236,6 @@ void SkinningObject3dBase::ShaderDraw() {
 	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(5, Light::GetInstance()->GetPointlLightResource()->GetGPUVirtualAddress());
 
 	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(6, Light::GetInstance()->GetSpotLightResource()->GetGPUVirtualAddress());
+
+	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(14, Light::GetInstance()->GetScanResource()->GetGPUVirtualAddress());
 }

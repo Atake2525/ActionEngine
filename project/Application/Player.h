@@ -39,6 +39,7 @@ public:
     ~Player();
 
     const Capsule GetCapsule() { return m_pModel->GetCapsule(); }
+    const AABB& GetAABB() const { return m_playerAABB; }
 
     /// <summary>
     /// 初期化処理
@@ -155,7 +156,9 @@ private: // プレイヤーステート管理
 #endif // !NDEBUG
 
 
-private: // プレイヤーモデル
+private:
+    bool IsDead = false;
+
 
     //==================================================
     // タイマー関連

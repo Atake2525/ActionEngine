@@ -2,9 +2,12 @@
 #include <dxcapi.h>
 #include <wrl.h>
 #include "Culling.h"
+//#include "ScanEffect.h"
 #pragma once
 
 class Camera;
+
+
 
 // オブジェクト描画用クラス
 class Object3dBase {
@@ -46,7 +49,8 @@ public:
 	// Getter(CullingTemplate)
 	CullingTemplate GetCullingTemplate() { return cullingTemplateData; }
 
-	void SetCullingTemplateData(CullingTemplate data) { cullingTemplateData = data; }
+	void SetCullingTemplateData(const CullingTemplate& data) { cullingTemplateData = data; }
+
 
 private:
 
@@ -69,7 +73,7 @@ private:
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
 	// Resource作る度に配列を増やしす
 	// RootParameter作成、PixelShaderのMatrixShaderのTransform
-	D3D12_ROOT_PARAMETER rootParameters[14] = {};
+	D3D12_ROOT_PARAMETER rootParameters[15] = {};
 	// シリアライズしてバイナリにする
 	Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob = nullptr;
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
@@ -97,4 +101,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPilelineState = nullptr;
 
 	CullingTemplate cullingTemplateData;
+
+	
+
 };

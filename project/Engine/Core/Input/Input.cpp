@@ -244,6 +244,21 @@ const int Input::ReturnKeyInt(BYTE keyNumber)
 	return (1 - (keys[keyNumber] >> 7)) * (keyPres[keyNumber] >> 7);
 }
 
+bool Input::PressAnyKey()
+{
+	for (int i = 0; i < 256; i++)
+	{
+		bool key = (keys[i] & 0x80) != 0;
+		bool keypre = (keyPres[i] & 0x80) != 0;
+
+		if (key && !keypre)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 bool Input::PressMouse(int mouseNumber) {
 	if (mouseState.rgbButtons[mouseNumber] && (0x80))
 	{
@@ -1121,6 +1136,38 @@ bool Input::ReturnButton(Controller button) {
 		{
 			return true;
 		}
+	}
+	return false;
+}
+
+bool Input::PressAnyButton()
+{
+	bool button = false;
+	bool buttonPre = false;
+	for (int i = 0; i < 10; i++)
+	{
+		if (!gamePadState.rgbButtons[i] && 0x80)
+		{
+			continue;
+		}
+
+		button = true;
+	}
+
+	for (int i = 0; i < 10; i++)
+	{
+		if (!gamePadStatePre.rgbButtons[i] && 0x80)
+		{
+			continue;
+		}
+
+		buttonPre = true;
+
+	}
+
+	if (button && !buttonPre)
+	{
+		return true;
 	}
 	return false;
 }

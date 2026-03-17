@@ -76,7 +76,6 @@ void Sprite::Initialize(std::string textureFilePath) {
 	// テクスチャサイズの計算
 	AdjustTextureSize();
 
-	Update();
 }
 
 void Sprite::Update() {
