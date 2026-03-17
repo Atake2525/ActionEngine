@@ -74,11 +74,11 @@ void GameScene::Update() {
         switch (m_readyNumber)
         {
         case 0:
-            farClipDist = EaseOutExpo(m_startTimer, 0.0f, m_finalFarClipDistance);
+            farClipDist = EaseOutExpo(0.0f, m_finalFarClipDistance, m_startTimer);
             camera->SetFarClipDistance(farClipDist);
             break;
         case 1:
-            radius = EaseOutExpo(m_startTimer, 0.0f, m_finalScanRadius);
+            radius = EaseOutExpo(0.0f, m_finalScanRadius, m_startTimer);
             Light::GetInstance()->SetRadius(radius);
 
             SkyBox::GetInstance()->SetSunPoewr(m_startTimer);
