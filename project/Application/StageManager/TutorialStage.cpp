@@ -31,11 +31,11 @@ void TutorialStage::Initialize(Player* player, Camera* camera)
 
     // トラップの初期化
     trap = make_unique<Trap>();
-    trap->Initialize("t");
+    trap->Initialize("TutorialStage");
 
     // ゴールの初期化
     goal = make_unique<Goal>();
-    goal->Initialize("t", player);
+    goal->Initialize("TutorialStage", player);
 
     float windowSizeX = float(WinApp::GetInstance()->GetkClientWidth());
     for (int i = 0; i < 4; i++)
