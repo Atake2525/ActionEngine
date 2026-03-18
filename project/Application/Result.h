@@ -36,6 +36,7 @@ private:
     // クリアタイムの分割用
     std::vector<int> m_goalTimeNumbersArray;
 
-    std::vector<std::unique_ptr<Sprite>> m_Sprites;
+
+    std::vector<std::unique_ptr<Sprite>> m_clearTimeSprites;
 };
 
