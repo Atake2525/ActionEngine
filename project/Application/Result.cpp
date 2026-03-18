@@ -7,7 +7,7 @@
 Result::~Result()
 {
 	m_goalTimeNumbersArray.clear();
-	m_Sprites.clear();
+	m_clearTimeSprites.clear();
 }
 
 void Result::Initialize()
@@ -28,9 +28,9 @@ void Result::Update()
 	}
 	else
 	{
-		for (int i = 0; i < m_Sprites.size(); i++)
+		for (int i = 0; i < m_clearTimeSprites.size(); i++)
 		{
-			m_Sprites[i]->Update();
+			m_clearTimeSprites[i]->Update();
 		}
 	}
 
@@ -38,9 +38,9 @@ void Result::Update()
 
 void Result::Draw()
 {
-	for (int i = 0; i < m_Sprites.size(); i++)
+	for (int i = 0; i < m_clearTimeSprites.size(); i++)
 	{
-		m_Sprites[i]->Draw();
+		m_clearTimeSprites[i]->Draw();
 	}
 }
 
@@ -54,23 +54,23 @@ void Result::StageClear()
 		m_goalTimeNumbersArray.resize(digit);
 		for (int i = 0; i < m_goalTimeNumbersArray.size(); i++)
 		{
-			int time = m_playTimer / std::pow(10, i);
+			int time = m_playTimer / int(std::pow(10, i));
 			time %= static_cast<int>(std::pow(10, i + 1));
 			m_goalTimeNumbersArray[i] = time;
 
 			// 桁数の値をSpriteで読み込む
 			std::unique_ptr<Sprite> sprite = std::make_unique<Sprite>();
 			sprite->Initialize("Resources/Sprite/Result/" + std::to_string(time) + ".png");
-			m_Sprites.push_back(move(sprite));
+			m_clearTimeSprites.push_back(move(sprite));
 		}
 
 		// 位置を揃える
 		for (int i = digit; i > 0; i--)
 		{
-			Vector2 spriteScale = m_Sprites[i - 1]->GetScale() * 0.5f;
-			m_Sprites[i - 1]->SetPosition({ (WinApp::GetInstance()->GetkClientWidth() / 2.0f) + spriteScale.x * (digit - i), WinApp::GetInstance()->GetkClientHeight() / 2.0f });
-			m_Sprites[i - 1]->SetScale(spriteScale);
-			m_Sprites[i - 1]->Update();
+			Vector2 spriteScale = m_clearTimeSprites[i - 1]->GetScale() * 0.5f;
+			m_clearTimeSprites[i - 1]->SetPosition({ (WinApp::GetInstance()->GetkClientWidth() / 2.0f) + spriteScale.x * (digit - i), WinApp::GetInstance()->GetkClientHeight() / 2.0f });
+			m_clearTimeSprites[i - 1]->SetScale(spriteScale);
+			m_clearTimeSprites[i - 1]->Update();
 
 		}
 		m_isGoal = true;
