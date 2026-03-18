@@ -58,6 +58,11 @@ public:
     /// </summary>
     void Draw();
 
+    /// <summary>
+    /// プレイヤーの操作を無効にする
+    /// </summary>
+    void SetFreeze(const bool& isFreeze) { m_IsFreeze = isFreeze; };
+
     // よじ登りができるか確認する
     const bool GetIsClimbing() const { return m_canClimbing; }
 
@@ -157,8 +162,8 @@ private: // プレイヤーステート管理
 
 
 private:
-    bool IsDead = false;
-
+    bool m_IsDead = false;
+    bool m_IsFreeze = false;
 
     //==================================================
     // タイマー関連

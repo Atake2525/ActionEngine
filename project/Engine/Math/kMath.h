@@ -158,3 +158,6 @@ float Sign(float value);
 Vector2 Sign(const Vector2& value);
 
 Vector3 Sign(const Vector3& value);
+
+// 桁数の計算
+int GetDigitCount(float value);
