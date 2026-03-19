@@ -48,15 +48,18 @@ void Result::StageClear()
 {
 	if (!m_isGoal)
 	{
+		m_playTimer *= 100.0f;
 		// リザルト(クリアタイムの計算)
 		// プレイ時間を桁数ごとに分割する
 		int digit = GetDigitCount(m_playTimer);
 		m_goalTimeNumbersArray.resize(digit);
+		float timer = 0.0f;
 		for (int i = 0; i < m_goalTimeNumbersArray.size(); i++)
 		{
-			int time = m_playTimer / int(std::pow(10, i));
-			time %= static_cast<int>(std::pow(10, i + 1));
+			int time = (m_playTimer - timer) / int(std::pow(10, i));
+			time %= 10;
 			m_goalTimeNumbersArray[i] = time;
+			timer += time * (std::pow(10, i));
 
 			// 桁数の値をSpriteで読み込む
 			std::unique_ptr<Sprite> sprite = std::make_unique<Sprite>();
