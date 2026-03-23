@@ -71,6 +71,16 @@ inline Vector3 EaseInOut(Vector3 x1, Vector3 x2, float time) {
 	return result;;
 };
 
+inline Vector2 EaseInOut(Vector2 x1, Vector2 x2, float time) {
+
+	Vector2 result;
+
+	result.x = EaseInOut(x1.x, x2.x, time);
+	result.y = EaseInOut(x1.y, x2.y, time);
+
+	return result;;
+};
+
 // easeOutQuint
 inline Vector2 EaseOutQuint(Vector2 x1, Vector2 x2, float time) {
 
