@@ -30,7 +30,7 @@ void TextureManager::Initialize() {
 	// SRVの数と同数
 	textureDatas.reserve(SrvManager::GetInstance()->kMaxSRVCount);
 
-	LoadTexture("Resources/Debug/black1x1.png");
+	LoadTexture("Resources/Sprite/black1x1.png");
     LoadTexture("Resources/Sprite/noise0.png");
 
 }
@@ -114,7 +114,7 @@ void TextureManager::LoadTexture(const std::string& filePath) {
 	textureData.srvHandleCPU = SrvManager::GetInstance()->GetCPUDescriptorHandle(textureData.srvIndex);
 	textureData.srvHandleGPU = SrvManager::GetInstance()->GetGPUDescriptorHandle(textureData.srvIndex);
 
-	uint32_t mapIndex = GetTextureIndexByFilePath("Resources/Debug/black1x1.png");
+	uint32_t mapIndex = GetTextureIndexByFilePath("Resources/Sprite/black1x1.png");
 
 	textureData.normalMapSrvIndex = mapIndex;
 	textureData.metallicMapSrvIndex = mapIndex;
