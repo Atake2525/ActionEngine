@@ -67,11 +67,12 @@ void Pause::Initialize() {
 
 void Pause::Update() {
 
-    if (Input::GetInstance()->TriggerKeyInt(DIK_ESCAPE) && !m_pauseAnim)
+    if (Input::GetInstance()->TriggerKeyInt(DIK_ESCAPE))
     {
-        m_pauseAnim = !m_pauseAnim;
-        m_animTimer = 0.0f;
-        if (m_pause)
+        m_pauseAnim = true;
+        m_pause = !m_pause;
+        //m_animTimer = 0.0f;
+        if (!m_pause)
         {
             Input::GetInstance()->ShowMouseCursor(false);
         }
@@ -84,34 +85,41 @@ void Pause::Update() {
     // ポーズアニメーションが再生されていない限りこれ以上処理をしないようにreturn
     if (m_pauseAnim) {
         // アニメーションタイマーを進める
-        m_animTimer += GameTime::GetInstance()->GetDeltaTime() / m_animTime;
+        if (m_pause)
+        {
+            m_animTimer += GameTime::GetInstance()->GetDeltaTime() / m_animTime;
+        }
+        else
+        {
+            m_animTimer -= GameTime::GetInstance()->GetDeltaTime() / m_animTime;
+        }
+        m_animTimer = std::clamp(m_animTimer, 0.0f, 1.0f);
 
         // それぞれのSpriteに対して位置を変える計算を行う
         for (int i = 0; i < pauseUIs.size(); i++)
         {
             // ポーズ状態へとプレイ画面へ戻るの2種類のタイプでeasingを行う
             Vector4 color = pauseUIs[i].sprite->GetColor();
-            if (!m_pause) // ポーズ状態へ入るとき
-            {
+            //if (!m_pause) // ポーズ状態へ入るとき
+            //{
                 pauseUIs[i].position = EaseOutQuint(pauseUIs[i].targetPosition[0], pauseUIs[i].targetPosition[1], m_animTimer);
                 OffScreenRendering::GetInstance()->SetGrayscaleIntensity(min(m_animTimer * 1.2f, 0.4f));
                 pauseUIs[i].sprite->SetColor({ color.x, color.y, color.z, m_animTimer });
-            }
-            else // ポーズ状態から出る時
-            {
-                pauseUIs[i].position = EaseOutQuint(pauseUIs[i].targetPosition[1], pauseUIs[i].targetPosition[0], m_animTimer);
-                OffScreenRendering::GetInstance()->SetGrayscaleIntensity(min(1.0f - m_animTimer * 1.2f, 0.4f));
-                pauseUIs[i].sprite->SetColor({ color.x, color.y, color.z, EaseOutQuint(1.0f, 0.0f, m_animTimer) });
-            }
+            //}
+            //else // ポーズ状態から出る時
+            //{
+            //    pauseUIs[i].position = EaseOutQuint(pauseUIs[i].targetPosition[1], pauseUIs[i].targetPosition[0], m_animTimer);
+            //    OffScreenRendering::GetInstance()->SetGrayscaleIntensity(min(1.0f - m_animTimer * 1.2f, 0.4f));
+            //    pauseUIs[i].sprite->SetColor({ color.x, color.y, color.z, EaseOutQuint(1.0f, 0.0f, m_animTimer) });
+            //}
 
             pauseUIs[i].sprite->SetPosition(pauseUIs[i].position);
             pauseUIs[i].sprite->Update();
         }
 
         // アニメーションタイマーが1.0fを超えたら終了
-        if (m_animTimer >= 1.0f)
+        if (m_animTimer == 1.0f || m_animTimer == 0.0f)
         {
-            m_pause = !m_pause;
             m_pauseAnim = false;
             //m_animTimer = 0.0f;
         }

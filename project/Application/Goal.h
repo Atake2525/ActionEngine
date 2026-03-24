@@ -7,6 +7,7 @@
 #include "Object3d.h"
 #include <memory>
 #include "AABB.h"
+#include "Result.h"
 
 class Player;
 
@@ -25,6 +26,11 @@ public:
 	void Initialize(const std::string jsonName, Player* player);
 
 	/// <summary>
+	/// 更新処理
+	/// </summary>
+	void Update();
+
+	/// <summary>
 	/// 更新
 	/// </summary>
 	/// <param name="aabb">処理の対象となるAABB</param>
@@ -35,7 +41,7 @@ public:
 	/// </summary>
 	void DrawGoalObject();
 
-
+	void DrawResult();
 
 private:
 	// 全体で使うメンバ変数
@@ -43,6 +49,8 @@ private:
 	Player* m_player = nullptr;
 	std::vector<JsonData> m_jsonDatas;
 	bool m_isGoal = false;
+
+	std::unique_ptr<Result> m_result;
 
 	// オブジェクト(ゴール)関係
 	std::vector<std::unique_ptr<Object3d>> m_goalObjects;
