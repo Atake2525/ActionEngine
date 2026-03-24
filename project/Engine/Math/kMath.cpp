@@ -698,3 +698,13 @@ const Vector2 Vector2::Clamp(Vector2 target, float min, float max) {
 	target.y = std::clamp(target.y, min, max);
 	return target;
 }
+
+int GetDigitCount(float value)
+{
+	value = std::fabs(value);
+
+	if (value < 1.0f)
+		return 1; // 0.x の場合は 1 桁として扱う
+
+	return static_cast<int>(std::floor(std::log10(value))) + 1;
+}

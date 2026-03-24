@@ -5,6 +5,11 @@
 #include "DirectXBase.h"
 #pragma comment(lib, "pdh.lib")
 
+#ifndef NDEBUG
+#include "ImGuiManager.h"
+#endif // !NDEBUG
+
+
 GameTime* GameTime::instance = nullptr;
 
 GameTime* GameTime::GetInstance() {
@@ -24,6 +29,16 @@ void GameTime::Initialize() {
     maxFPS = DirectXBase::GetInstance()->GetMaxFPS();
 }
 
+#ifndef NDEBUG
+void GameTime::DrawImGui()
+{
+    ImGui::Begin("TimeScale");
+    ImGui::DragFloat("TimeScale", &timeScale, 0.01f);
+    ImGui::End();
+
+}
+#endif // !NDEBUG
+
 int GameTime::CreateTimer(float time, bool loop)
 {
     timers.push_back(Timer{ 0.0f, time, loop, false });
@@ -38,7 +53,8 @@ void GameTime::UpdateDeltaTime() {
 
 
     lastTime = currentTime;
-    deltaTime = std::min(delta.count(), 0.05f);
+    deltaTime = std::min(delta.count(), 0.05f) * timeScale;
+    m_unScaledDeltaTime = std::min(delta.count(), 0.05f);
 }
 
 void GameTime::UpdateCPUUsagePDH()
@@ -83,4 +99,5 @@ void GameTime::Update()
             }
         }
     }
+
 }

@@ -147,6 +147,7 @@
     <ClCompile Include="Engine\Collision\PhysicsCorrection.cpp" />
     <ClCompile Include="Application\Pause.cpp" />
     <ClCompile Include="Application\PlayerUI.cpp" />
+    <ClCompile Include="Application\Result.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Math\EasingUtility.h" />
@@ -341,6 +342,7 @@
     <ClInclude Include="Application\Pause.h" />
     <ClInclude Include="Application\PlayerUI.h" />
     <ClInclude Include="Engine\Presentation\Cinematic\ScanEffect.h" />
+    <ClInclude Include="Application\Result.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\PostEffect\BoxFilter.PS.hlsl" />
