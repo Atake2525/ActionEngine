@@ -84,6 +84,9 @@ void MyGame::Update() {
 	ImGui::NewFrame();
 
 	DirectXBase::GetInstance()->Update();
+#ifndef NDEBUG
+	GameTime::GetInstance()->DrawImGui();
+#endif // !NDEBUG
 	Light::GetInstance()->Update();
 	if (WinApp::GetInstance()->IsWindowActive())
 	{

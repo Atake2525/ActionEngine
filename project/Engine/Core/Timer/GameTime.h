@@ -46,11 +46,22 @@ public:
 	/// </summary>
 	void Initialize();
 
+#ifndef NDEBUG
+	void DrawImGui();
+#endif // !NDEBUG
+
+
 	/// <summary>
     /// DeltaTimeの取得
 	/// </summary>
 	/// <returns>deltaTime</returns>
 	const float& GetDeltaTime() const { return deltaTime; }
+
+	/// <summary>
+	/// TimeScaleを反映しない本来のDeltaTime
+	/// </summary>
+	/// <returns></returns>
+	const float& GetUnscaledDeltaTime() const { return m_unScaledDeltaTime; }
 
 	/// <summary>
     /// 固定フレームレート時間の取得
@@ -65,6 +76,13 @@ public:
     const float& GetCPUUsagePDH() const { return cpuUsage; }
 
     const float& GetGPUUsageNVML() const { return gpuUsage; }
+
+	/// <summary>
+	/// タイマーの進行速度を設定
+	/// </summary>
+	void SetTimeScale(const float& scale) { timeScale = scale; };
+
+	const float& GetTimeScale() const { return timeScale; }
 
     /// <summary>
     /// タイマーの作成
@@ -96,6 +114,10 @@ private:
     float gpuUsage = 0.0f;
 
 	float maxFPS = 60.0f;
+
+	float timeScale = 1.0f;
+
+	float m_unScaledDeltaTime = 0.0f;
 
 	std::vector<Timer> timers;
 

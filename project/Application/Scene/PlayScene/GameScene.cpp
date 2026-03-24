@@ -161,6 +161,7 @@ void GameScene::Draw() {
 
     SpriteBase::GetInstance()->ShaderDraw();
 
+    stage->DrawBackSprite();
     m_pPlayerUI->Draw();
     m_pause->Draw();
 }

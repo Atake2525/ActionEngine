@@ -6,6 +6,7 @@
 #include "StageCount.h"
 #include "Collision.h"
 #include "Player.h"
+#include "GameTime.h"
 
 using namespace Logger;
 using namespace std;
@@ -21,6 +22,8 @@ void Goal::Initialize(const std::string jsonName, Player* player) {
 	m_isGoal = false;
 	m_input = Input::GetInstance();
 	m_player = player;
+	m_result = std::make_unique<Result>();
+	m_result->Initialize();
 
 	if (JsonLoader::GetInstance()->CheckJsonLoaded(jsonName))
 	{
@@ -43,6 +46,18 @@ void Goal::Initialize(const std::string jsonName, Player* player) {
 	}
 }
 
+void Goal::Update()
+{
+	m_result->Update();
+	// ゴールした時の処理
+	if (ChceckIsGoal())
+	{
+		//GameTime::GetInstance()->SetTimeScale(0.5f);
+		m_player->SetFreeze(true);
+		m_result->StageClear();
+	}
+}
+
 const bool& Goal::ChceckIsGoal() {
 	AABB aabb = m_player->GetAABB();
 	for (int i = 0; i < m_goalObjects.size(); i++)
@@ -61,4 +76,9 @@ void Goal::DrawGoalObject() {
 	{
 		m_goalObjects[i]->Draw();
 	}
+}
+
+void Goal::DrawResult()
+{
+	m_result->Draw();
 }

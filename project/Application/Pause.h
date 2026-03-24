@@ -31,7 +31,7 @@ public:
     /// </summary>
     void Draw();
 
-    const bool& IsPause()const { return m_pause || m_pauseAnim; }
+    const bool IsPause()const { return m_pause || m_pauseAnim; }
 
 private:
 

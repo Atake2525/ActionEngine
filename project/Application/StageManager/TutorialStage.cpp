@@ -67,7 +67,7 @@ void TutorialStage::Update()
 
     trap->Update();
 
-    goal->ChceckIsGoal();
+    goal->Update();
 }
 
 void TutorialStage::DrawObject3d()
@@ -90,6 +90,7 @@ void TutorialStage::DrawBackSprite()
     {
         tutorialSprites[i]->Draw();
     }*/
+    goal->DrawResult();
 }
 
 void TutorialStage::Finalize()
