@@ -54,7 +54,7 @@ void Result::Update()
         {
             m_clearTimeSprites[i]->Update();
         }
-        Vector2 spriteScale = EaseInOut(Vector2{ 0.0f, 0.0f }, m_windowSize * m_backScreenRatio, m_timer);
+        Vector2 spriteScale = EaseOutQuint(Vector2{ 0.0f, 0.0f }, m_windowSize * m_backScreenRatio, m_timer);
         m_backScreenSprite->SetScale(spriteScale);
         m_backScreenSprite->Update();
 
