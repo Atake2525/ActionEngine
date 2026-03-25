@@ -23,7 +23,7 @@ void Result::Initialize()
     }
     m_windowSize = WinApp::GetInstance()->GetWindowSize();
     DirectX::TexMetadata metaData = TextureManager::GetInstance()->GetMetaData("Resources/Sprite/Result/0.png");
-    m_timeTextureSize = { static_cast<float>(metaData.width), static_cast<float>(metaData.height) };
+    m_timeTextureScale = { (2.0f / m_windowSize.x) * static_cast<float>(metaData.width), (2.0f / m_windowSize.y) * static_cast<float>(metaData.height) };
 
     // リザルト背景用の黒いスプライトを用意
     m_backScreenSprite = std::make_unique<Sprite>();
@@ -101,7 +101,7 @@ void Result::CalculateStageClearTimer()
     // 位置を揃える
     for (int i = digit; i > 0; i--)
     {
-        Vector2 spriteScale = m_clearTimeSprites[i - 1]->GetScale() * 0.5f;
+        Vector2 spriteScale = m_clearTimeSprites[i - 1]->GetScale() * m_timeTextureScale * 3.0f;
         // 背景に合わせて位置を決める
         Vector2 leftTop = m_backScreenSprite->GetPosition() - m_backScreenSprite->GetScale() / 2.0f;
         m_clearTimeSprites[i - 1]->SetPosition({ (leftTop.x + (m_backScreenSprite->GetScale().x * m_textMarginRatio.x)) + spriteScale.x * (digit - i), leftTop.y + (m_backScreenSprite->GetScale().y * m_textMarginRatio.y) });

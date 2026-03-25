@@ -44,7 +44,7 @@ private:
 
     std::unique_ptr<Sprite> m_backScreenSprite;
 
-    Vector2 m_timeTextureSize = Vector2::Zero;
+    Vector2 m_timeTextureScale = Vector2::Zero;
     std::vector<std::unique_ptr<Sprite>> m_clearTimeSprites;
 
     Vector2 m_backScreenRatio = { 0.8f, 0.7f };
