@@ -61,6 +61,10 @@ std::string TutorialStage::GetJsonName()
 
 void TutorialStage::Update()
 {
+    if (Input::GetInstance()->TriggerKey(DIK_RETURN))
+    {
+        goal->SetGoal();
+    }
     stageObject->Update();
 
     wallRunObject->Update();

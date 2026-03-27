@@ -29,10 +29,17 @@ public:
     /// </summary>
     void StageClear();
 
+
 private:
 
     // ステージクリア時間の算出
     void CalculateStageClearTimer();
+
+    enum class ResultDrawPhase {
+        backScreen = 0,
+        clearTime = 1,
+    };
+    ResultDrawPhase m_resultPhase = ResultDrawPhase::backScreen;
 
 private:
     float m_playTimer = 0.0f;
