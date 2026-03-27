@@ -55,33 +55,43 @@ void Result::Initialize()
 
 void Result::Update()
 {
-    if (!m_isGoal)
+    switch (m_resultPhase)
     {
-        m_playTimer += GameTime::GetInstance()->GetUnscaledDeltaTime();
-    }
-    else
-    {
-        // アニメーションさせるためにタイマーを使う
-        m_resultDrawTimer += GameTime::GetInstance()->GetUnscaledDeltaTime();
-        m_resultDrawTimer = std::clamp(m_resultDrawTimer, 0.0f, 1.0f);
-        if (m_resultDrawTimer == 1.0f && !m_calculatedResults)
+    case Result::ResultDrawPhase::backScreen:
+        if (!m_isGoal)
         {
-            CalculateStageClearTimer();
-            m_calculatedResults = true;
+            m_playTimer += GameTime::GetInstance()->GetUnscaledDeltaTime();
         }
-        for (int i = 0; i < m_clearTimeSprites.size(); i++)
+        else
         {
-            m_clearTimeSprites[i]->Update();
-        }
-        float resultTimer = EaseOutQuint(0.0f, 1.0f, m_resultDrawTimer);
-        m_clearTextSprite->SetScale(m_clearTextTextureScale * resultTimer);
-        m_clearTextSprite->Update();
-        m_clearTimeTextSprite->SetScale(m_clearTimeTextureScale * resultTimer);
-        m_clearTimeTextSprite->SetPosition(m_textMarginRatio + m_backScreenSprite->GetPosition() - m_backScreenSprite->GetScale() / 2.0f);
-        m_clearTimeTextSprite->Update();
-        m_backScreenSprite->SetScale((m_windowSize * m_backScreenRatio) * resultTimer);
-        m_backScreenSprite->Update();
+            // アニメーションさせるためにタイマーを使う
+            m_resultDrawTimer += GameTime::GetInstance()->GetUnscaledDeltaTime();
+            m_resultDrawTimer = std::clamp(m_resultDrawTimer, 0.0f, 1.0f);
+            for (int i = 0; i < m_clearTimeSprites.size(); i++)
+            {
+                m_clearTimeSprites[i]->Update();
+            }
+            float resultTimer = EaseOutQuint(0.0f, 1.0f, m_resultDrawTimer);
+            m_clearTextSprite->SetScale(m_clearTextTextureScale * resultTimer);
+            m_clearTextSprite->Update();
+            m_clearTimeTextSprite->SetScale(m_clearTimeTextureScale * resultTimer);
+            m_clearTimeTextSprite->SetPosition(m_textMarginRatio + m_backScreenSprite->GetPosition() - m_backScreenSprite->GetScale() / 2.0f);
+            m_clearTimeTextSprite->Update();
+            m_backScreenSprite->SetScale((m_windowSize * m_backScreenRatio) * resultTimer);
+            m_backScreenSprite->Update();
 
+            if (resultTimer == 1.0f)
+            {
+                m_resultDrawTimer = 0.0f;
+                CalculateStageClearTimer();
+                m_resultPhase = ResultDrawPhase::clearTime;
+            }
+
+        }
+        break;
+    case Result::ResultDrawPhase::clearTime:
+        m_resultDrawTimer += GameTime::GetInstance()->GetUnscaledDeltaTime();
+        break;
     }
 
 }

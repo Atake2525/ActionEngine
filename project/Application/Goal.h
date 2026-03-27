@@ -43,6 +43,11 @@ public:
 
 	void DrawResult();
 
+#ifndef NDEBUG
+	void SetGoal() { m_isGoal = true; }
+#endif // !NDEBUG
+
+
 private:
 	// 全体で使うメンバ変数
 	Input* m_input = nullptr;
