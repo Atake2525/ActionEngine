@@ -44,12 +44,18 @@ private:
 
     std::unique_ptr<Sprite> m_backScreenSprite;
 
-    Vector2 m_timeTextureScale = Vector2::Zero;
+    std::unique_ptr<Sprite> m_clearTextSprite;
+    Vector2 m_clearTextTextureScale = Vector2::Zero;
+
+    std::unique_ptr<Sprite> m_clearTimeTextSprite;
+    Vector2 m_clearTimeTextureScale = Vector2::Zero;
+
     std::vector<std::unique_ptr<Sprite>> m_clearTimeSprites;
+    Vector2 m_timeTextureScale = Vector2::Zero;
 
     Vector2 m_backScreenRatio = { 0.8f, 0.7f };
     Vector2 m_windowSize = Vector2::Zero;
-    float m_timer = 0.0f;
+    float m_resultDrawTimer = 0.0f;
 
     Vector2 m_textMarginRatio = { 0.01f, 0.01f };
 };
