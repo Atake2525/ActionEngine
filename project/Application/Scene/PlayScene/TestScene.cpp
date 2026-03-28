@@ -37,6 +37,9 @@ void TestScene::Initialize() {
 
 	input = Input::GetInstance();
 	input->ShowMouseCursor(true);
+	mouseCursor = std::make_unique<MouseCursor>();
+	mouseCursor->Initialize("Resources/Sprite/Cursor_Hover.png", "Resources/Sprite/Cursor_Press.png");
+	mouseCursor->SetShowCursor(false);
 
 	Object3dBase::GetInstance()->SetDefaultCamera(camera.get());
 
@@ -45,7 +48,7 @@ void TestScene::Initialize() {
 	
 	player = std::make_unique<Player>();
 	stage = std::make_unique<TutorialStage>();
-	stage->Initialize(player.get(), camera.get());
+	stage->Initialize(player.get(), camera.get(), mouseCursor.get());
 	player->Initialize(camera.get(), stage->GetJsonName());
 	camera->Update();
 
@@ -58,7 +61,7 @@ void TestScene::Initialize() {
 
 
 	pause = std::make_unique<Pause>();
-	pause->Initialize();
+	pause->Initialize(mouseCursor.get());
 
 	sprite = std::make_unique<Sprite>();
 	sprite->Initialize("Resources/Sprite/R.png");

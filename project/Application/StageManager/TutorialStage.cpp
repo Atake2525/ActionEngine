@@ -8,7 +8,7 @@
 
 using namespace std;
 
-void TutorialStage::Initialize(Player* player, Camera* camera)
+void TutorialStage::Initialize(Player* player, Camera* camera, MouseCursor* mouseCursor)
 {
     OffScreenRendering::GetInstance()->SetGrayscaleColor(GRAYSCALE_SEPIA);
 
@@ -36,7 +36,7 @@ void TutorialStage::Initialize(Player* player, Camera* camera)
 
     // ゴールの初期化
     goal = make_unique<Goal>();
-    goal->Initialize("TutorialStage", player);
+    goal->Initialize("TutorialStage", player, mouseCursor);
 
     float windowSizeX = float(WinApp::GetInstance()->GetkClientWidth());
     for (int i = 0; i < 4; i++)
@@ -61,6 +61,10 @@ std::string TutorialStage::GetJsonName()
 
 void TutorialStage::Update()
 {
+    if (Input::GetInstance()->TriggerKey(DIK_RETURN))
+    {
+        goal->SetGoal();
+    }
     stageObject->Update();
 
     wallRunObject->Update();

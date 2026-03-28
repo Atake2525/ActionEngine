@@ -397,7 +397,10 @@ void Player::HandleInput()
 
 void Player::Rotate() {
     Vector3 rotate = Vector3::Zero;
-    m_cameraTransform.rotate = m_pCamera->GetTransform().rotate;
+    if (!m_IsFreeze)
+    {
+        m_cameraTransform.rotate = m_pCamera->GetTransform().rotate;
+    }
     // カメラ処理の実装
     // マウスの移動量に基づいてカメラの回転を更新    演出実装時に加速度を付けるなどの調整を行う予定
     switch (m_controlMode)

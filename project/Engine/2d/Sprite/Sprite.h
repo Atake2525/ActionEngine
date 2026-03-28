@@ -5,6 +5,16 @@
 #include "Transform.h"
 #include <string>
 
+#define ANCHORPOINT_LEFTTOP Vector2{0.0f, 0.0f}	// LEFTTOP
+#define ANCHORPOINT_LEFTMIDDLE Vector2{0.0f, 0.5f}	// LEFTMIDDLE
+#define ANCHORPOINT_LEFTBOTTOM Vector2{0.0f, 1.0f}	// LEFTBOTTOM
+#define ANCHORPOINT_MIDDLETOP Vector2{0.5f, 0.0f}	// MIDDLETOP
+#define ANCHORPOINT_MIDDLE Vector2{0.5f, 0.5f} // MIDDLE
+#define ANCHORPOINT_MIDDLEBOTTOM Vector2{0.5f, 1.0f}	// MIDDLEBOTTOM
+#define ANCHORPOINT_RIGHTTOP Vector2{1.0f, 0.0f}  // RIGHTTOP
+#define ANCHORPOINT_RIGHTMIDDLE Vector2{1.0f, 0.5f}	// RIGHTMIDDLE
+#define ANCHORPOINT_RIGHTBOTTOM Vector2{1.0f, 1.0f}	// RIGHTBOTTOM
+
 #pragma once
 
 // スプライト
@@ -24,6 +34,8 @@ public:
 	/// テクスチャ変更
 	/// </summary>
 	void ChangeTexture(std::string textureFilePath);
+
+	void FixTextureScale(const Vector2& scale);
 	
 	/// <summary>
 	/// 描画
@@ -110,8 +122,6 @@ private:
 	float rotation = 0.0f;
 	// 拡縮
 	Vector2 scale = {0.0f, 0.0f};
-	// 色(RGBA)
-	Vector4 color = {1.0f, 1.0f, 1.0f, 1.0f};
 	// 回転の原点
 	Vector2 anchorPoint = {0.0f, 0.0f};
 	// 左右フリップ
@@ -178,5 +188,7 @@ public:
 	void SetStatus(const Vector2& position, const float& rotation, const Vector2& scale, const Vector4& color);
 	// Setter(Texture)
 	void SetTexture(const std::string& textureFilePath);
+
+	const AABB GetAABB();
 
 };
