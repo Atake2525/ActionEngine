@@ -10,6 +10,7 @@
 #include "Result.h"
 
 class Player;
+class MouseCursor;
 
 /// <summary>
 /// ゴール
@@ -23,7 +24,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(const std::string jsonName, Player* player);
+	void Initialize(const std::string jsonName, Player* player, MouseCursor* mouseCursor);
 
 	/// <summary>
 	/// 更新処理
@@ -42,6 +43,11 @@ public:
 	void DrawGoalObject();
 
 	void DrawResult();
+
+#ifndef NDEBUG
+	void SetGoal() { m_isGoal = true; }
+#endif // !NDEBUG
+
 
 private:
 	// 全体で使うメンバ変数
