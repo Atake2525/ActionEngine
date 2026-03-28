@@ -28,6 +28,7 @@
 #include "PlayerUI.h"
 #include <thread>
 #include <functional>
+#include "MouseCursor.h"
 
 #pragma once
 
@@ -63,6 +64,7 @@ private:
 
 	std::unique_ptr<Camera> camera;
 	Input* input = nullptr;
+	std::unique_ptr<MouseCursor> mouseCursor;
 
 	bool cursorshow = true;
 

@@ -5,6 +5,22 @@
 #include "kMath.h"
 #include "Capsule.h"
 
+inline const bool CollisionSprite(const AABB& a, const AABB& b) {
+	if ((a.min.x <= b.max.x && a.max.x >= b.min.x) &&
+		(a.min.y <= b.max.y && a.max.y >= b.min.y)) {
+		return true;
+	}
+	return false;
+}
+
+inline const bool CollisionUISprite(const AABB& a, const Vector2 b) {
+	if ((a.min.x <= b.x && a.max.x >= b.x) &&
+		(a.min.y <= b.y && a.max.y >= b.y)) {
+		return true;
+	}
+	return false;
+}
+
 inline const bool CollisionAABB(const AABB& a, const AABB& b) {
 	if ((a.min.x < b.max.x && a.max.x > b.min.x) &&
 		(a.min.y < b.max.y && a.max.y > b.min.y) &&
