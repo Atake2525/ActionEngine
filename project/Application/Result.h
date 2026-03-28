@@ -36,9 +36,9 @@ private:
 
     // ステージクリア時間の算出
     void CalculateStageClearTimer();
-    // AI: リザルトUIの入力処理
+    // リザルトUIの入力処理
     void UpdateUISelect();
-    // AI: リザルトUIの決定処理
+    // リザルトUIの決定処理
     void EnterSelectUI();
 
     enum class ResultDrawPhase {

@@ -28,7 +28,7 @@ void TitleScene::Initialize() {
     SkyBox::GetInstance()->SetSunPoewr(1.0f);
 
     input = Input::GetInstance();
-    // AI: OS標準カーソルではなく MouseCursor クラス側の描画を使う
+
     input->ShowMouseCursor(false);
     m_mouseCursor = std::make_unique<MouseCursor>();
     m_mouseCursor->Initialize("Resources/Sprite/Cursor_Hover.png", "Resources/Sprite/Cursor_Press.png");
@@ -129,7 +129,7 @@ void TitleScene::Update() {
 
         
 
-        // AI: BootScreen の遷移入力も Input 経由のマウス判定へ置き換える
+
         if (input->PressAnyKey() || input->PressAnyButton() || input->TriggerMouse(0) || input->TriggerMouse(1))
         {
             m_sceneScreen = TitleSceneScreen::TitleScreen;
@@ -150,7 +150,7 @@ void TitleScene::Update() {
         if (CollisionSprite(m_startUi->GetAABB(), aabb))
         {
             m_startUi->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
-            // AI: UIクリック判定は GetAsyncKeyState ではなく Input のトリガー入力に揃える
+
             if (input->TriggerMouse(0))
             {
                 m_screenChange = true;
@@ -166,7 +166,7 @@ void TitleScene::Update() {
         if (CollisionSprite(m_exitUi->GetAABB(), aabb))
         {
             m_exitUi->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
-            // AI: 終了ボタンも Input の左クリックトリガーで判定する
+
             if (input->TriggerMouse(0))
             {
                 finished = true;
