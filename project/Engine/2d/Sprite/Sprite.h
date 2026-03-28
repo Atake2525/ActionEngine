@@ -122,8 +122,6 @@ private:
 	float rotation = 0.0f;
 	// 拡縮
 	Vector2 scale = {0.0f, 0.0f};
-	// 色(RGBA)
-	Vector4 color = {1.0f, 1.0f, 1.0f, 1.0f};
 	// 回転の原点
 	Vector2 anchorPoint = {0.0f, 0.0f};
 	// 左右フリップ
@@ -190,5 +188,7 @@ public:
 	void SetStatus(const Vector2& position, const float& rotation, const Vector2& scale, const Vector4& color);
 	// Setter(Texture)
 	void SetTexture(const std::string& textureFilePath);
+
+	const AABB GetAABB();
 
 };

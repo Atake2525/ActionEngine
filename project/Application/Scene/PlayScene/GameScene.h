@@ -20,6 +20,7 @@
 #include "BaseStage.h"
 #include "Pause.h"
 #include "PlayerUI.h"
+#include "MouseCursor.h"
 
 #pragma once
 
@@ -63,6 +64,7 @@ private:
 	Transform modelTransform;
 
 	Input* input = nullptr;
+	std::unique_ptr<MouseCursor> m_mouseCursor = nullptr;
 
 	AABB aabb;
 

@@ -1,6 +1,6 @@
 #include "BaseStage.h"
 
-void BaseStage::Initialize(Player* player, Camera* camera){}
+void BaseStage::Initialize(Player* player, Camera* camera, MouseCursor* mouseCursor){}
 
 std::string BaseStage::GetJsonName()
 {

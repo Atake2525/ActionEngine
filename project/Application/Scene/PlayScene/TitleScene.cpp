@@ -7,6 +7,7 @@
 #include "EasingUtility.h"
 #include "Light.h"
 #include "FadeManager.h"
+#include "Collision.h"
 
 using namespace std;
 
@@ -27,7 +28,10 @@ void TitleScene::Initialize() {
     SkyBox::GetInstance()->SetSunPoewr(1.0f);
 
     input = Input::GetInstance();
-    input->ShowMouseCursor(true);
+    // AI: OS標準カーソルではなく MouseCursor クラス側の描画を使う
+    input->ShowMouseCursor(false);
+    m_mouseCursor = std::make_unique<MouseCursor>();
+    m_mouseCursor->Initialize("Resources/Sprite/Cursor_Hover.png", "Resources/Sprite/Cursor_Press.png");
 
     Object3dBase::GetInstance()->SetDefaultCamera(camera.get());
 
@@ -125,7 +129,8 @@ void TitleScene::Update() {
 
         
 
-        if (input->PressAnyKey() || input->PressAnyButton() || GetAsyncKeyState(VK_LBUTTON) || GetAsyncKeyState(VK_RBUTTON))
+        // AI: BootScreen の遷移入力も Input 経由のマウス判定へ置き換える
+        if (input->PressAnyKey() || input->PressAnyButton() || input->TriggerMouse(0) || input->TriggerMouse(1))
         {
             m_sceneScreen = TitleSceneScreen::TitleScreen;
 
@@ -138,12 +143,15 @@ void TitleScene::Update() {
 
         break;
     case TitleScene::TitleSceneScreen::TitleScreen:
-
+        Vector2 cursorPosition = m_mouseCursor->GetCursorPos();
+        Vector3 pos = { cursorPosition.x, cursorPosition.y, 0.0f };
+        AABB aabb = { {pos},{pos} };
         // UIにマウスカーソルが入っている時、クリックしたときの処理
-        if (InCursor(m_startUi.get()))
+        if (CollisionSprite(m_startUi->GetAABB(), aabb))
         {
             m_startUi->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
-            if (/*GetAsyncKeyState(VK_LBUTTON) & 0x0001 &&*/ GetAsyncKeyState(VK_LBUTTON) == -32768)
+            // AI: UIクリック判定は GetAsyncKeyState ではなく Input のトリガー入力に揃える
+            if (input->TriggerMouse(0))
             {
                 m_screenChange = true;
                 m_charModel->ChangePlayAnimation("TitleScreen");
@@ -155,10 +163,11 @@ void TitleScene::Update() {
             m_startUi->SetColor({ 0.0f, 0.0f, 0.0f,1.0f });
         }
 
-        if (InCursor(m_exitUi.get()))
+        if (CollisionSprite(m_exitUi->GetAABB(), aabb))
         {
             m_exitUi->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
-            if (GetAsyncKeyState(VK_LBUTTON) & 0x0001 && GetAsyncKeyState(VK_LBUTTON) == -32768)
+            // AI: 終了ボタンも Input の左クリックトリガーで判定する
+            if (input->TriggerMouse(0))
             {
                 finished = true;
             }
@@ -212,6 +221,7 @@ void TitleScene::Update() {
     SkyBox::GetInstance()->Update();
 
     camera->Update();
+    m_mouseCursor->Update();
 }
 
 void TitleScene::Draw() {
@@ -257,7 +267,7 @@ void TitleScene::Draw() {
     }
 
     SpriteBase::GetInstance()->ShaderDraw();
-
+    m_mouseCursor->Draw();
 
 }
 
