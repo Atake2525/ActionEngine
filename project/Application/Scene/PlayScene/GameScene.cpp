@@ -25,13 +25,15 @@ void GameScene::Initialize() {
     SkyBox::GetInstance()->SetSunPoewr(0.0f);
 
     input = Input::GetInstance();
-
+    m_mouseCursor = std::make_unique<MouseCursor>();
+    m_mouseCursor->Initialize("Resources/Sprite/Cursor_Hover.png", "Resources/Sprite/Cursor_Press.png");
+    m_mouseCursor->SetShowCursor(false);
 
     Object3dBase::GetInstance()->SetDefaultCamera(camera.get());
 
     m_pPlayer = make_unique<Player>();
     stage = make_unique<TutorialStage>();
-    stage->Initialize(m_pPlayer.get(), camera.get());
+    stage->Initialize(m_pPlayer.get(), camera.get(), m_mouseCursor.get());
     m_pPlayer->Initialize(camera.get(), stage->GetJsonName());
     m_pPlayer->Update();
 
@@ -42,7 +44,7 @@ void GameScene::Initialize() {
     GameTime::GetInstance()->SetDeltaPoint();
     FadeManager::GetInstance()->FadeIn(1.0f);
     m_pause = make_unique<Pause>();
-    m_pause->Initialize();
+    m_pause->Initialize(m_mouseCursor.get());
 
     m_scenePhase = ScenePhase::FadeIn;
 
@@ -50,6 +52,8 @@ void GameScene::Initialize() {
 
 void GameScene::Update() {
 
+    // ポーズ時にマウスカーソルを使うため一番に更新
+    m_mouseCursor->Update();
     // ポーズはどのフェーズでも行えるようにする
     m_pause->Update();
     if (m_pause->IsPause())
@@ -113,10 +117,10 @@ void GameScene::Update() {
     stage->Update();
 
 #ifndef NDEBUG
-    if (input->TriggerKey(DIK_ESCAPE))
+   /* if (input->TriggerKey(DIK_ESCAPE))
     {
         finished = true;
-    }
+    }*/
 
     if (input->TriggerKey(DIK_F11))
     {
@@ -144,7 +148,6 @@ void GameScene::Update() {
 
 
     camera->Update();
-
 }
 
 void GameScene::Draw() {
@@ -164,6 +167,7 @@ void GameScene::Draw() {
     stage->DrawBackSprite();
     m_pPlayerUI->Draw();
     m_pause->Draw();
+    m_mouseCursor->Draw();
 }
 
 void GameScene::Finalize() {

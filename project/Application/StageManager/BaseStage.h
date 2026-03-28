@@ -3,6 +3,7 @@
 
 class Player;
 class Camera;
+class MouseCursor;
 
 #pragma once
 class BaseStage
@@ -14,7 +15,7 @@ public:
     /// <summary>
     /// 初期化
     /// </summary>
-    virtual void Initialize(Player* player, Camera* camera);
+    virtual void Initialize(Player* player, Camera* camera, MouseCursor* mouseCursor);
 
     /// <summary>
     /// JsonNameの取得
@@ -49,5 +50,6 @@ public:
 private:
     Player* m_player = nullptr;
     Camera* m_camera = nullptr;
+    MouseCursor* m_mouseCursor = nullptr;
 };
 
