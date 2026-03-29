@@ -268,6 +268,7 @@ void Player::UpdateParkourState()
         {
             m_wallRunning = false;
             m_isStartWallRun = false;
+            m_wallPenetration = Vector3::Zero;
         }
     }
     if ((input->TriggerKey(DIK_SPACE) || input->PushButton(Controller::A)) && m_canClimbing)
@@ -604,7 +605,7 @@ void Player::WallRun()
         m_wallRunDirection.z = Sign(wallpenetration.x) * Sign(cameraDirection.z);
 
         // ウォールラン用のオブジェクトとほぼ垂直の視点の場合直前の入力を使って移動方向を算出する
-        if (cameraDirection.z < 0.1f && cameraDirection.z > 0.1f)
+        if (std::fabs(cameraDirection.z) < 0.1f)
         {
             Vector3 walkDirection = TransformNormal({ m_moveInput.x, 0.0f, m_moveInput.y }, cameraMatrix);
 
