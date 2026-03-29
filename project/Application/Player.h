@@ -191,7 +191,7 @@ private:
     //==================================================
     std::unique_ptr<Object3d> m_pModel;
     Camera* m_pCamera = nullptr;
-    Input* input;
+    Input* m_pInput;
 
 
     //==================================================
