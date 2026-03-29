@@ -243,22 +243,6 @@ void Player::UpdateState()
 void Player::UpdateParkourState()
 {
 
-    // 前方への移動量が一定以上の場合にしゃがみ入力でスライディング
-    //if (m_walkState == PlayerWalkState::Crounch) {
-    //    // パルクールが有効で移動量が一定以上の場合
-    //    float moveSpeed = Length({ m_velocity.translate.x, 0.0f, m_velocity.translate.z }) / m_delta;
-    //    if (moveSpeed > m_runSpeed)
-    //    {
-    //        // スライディング入力
-    //        m_walkState = PlayerWalkState::Sliding;
-    //        m_sliding = true;
-    //    }
-    //    else
-    //    {
-    //        m_sliding = false;
-    //    }
-    //}
-
     if (!m_onGround)
     {
         AABB pAABB = m_playerAABB;
@@ -280,7 +264,7 @@ void Player::UpdateParkourState()
         pAABB += m_wallPenetration;
         // 現在の位置(AABB)からウォールラン中の壁の方向に移動させ衝突しているかを判定する
         // 判定していなければウォールランを終了する
-        if (m_wallRunning && (!CollisionManager::GetInstance()->IsCollisionObjectForAABB(pAABB, true) || m_jumpInput == 1.0f))
+        if (m_wallRunning && m_isStartWallRun && (!CollisionManager::GetInstance()->IsCollisionObjectForAABB(pAABB, true) || m_jumpInput == 1.0f))
         {
             m_wallRunning = false;
             m_isStartWallRun = false;
