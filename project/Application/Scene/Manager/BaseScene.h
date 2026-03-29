@@ -17,16 +17,16 @@ public:
 
     virtual void Finalize();
 
-    virtual const bool& EndRequest() { return endRequest; }
+    virtual const bool& EndRequest() { return m_endRequest; }
 
-    virtual void SetSceneManager(SceneManager* sceneManager) { sceneManager_ = sceneManager; }
+    virtual void SetSceneManager(SceneManager* sceneManager) { m_sceneManager = sceneManager; }
 
 private:
-    bool endRequest = false;
+    bool m_endRequest = false;
 
-    bool drawStart = false;
+    bool m_drawStart = false;
 
     // シーンマネージャ
-    SceneManager* sceneManager_ = nullptr;
+    SceneManager* m_sceneManager = nullptr;
 };
 
