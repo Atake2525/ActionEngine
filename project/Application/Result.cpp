@@ -196,10 +196,10 @@ void Result::CalculateStageClearTimer()
     float timer = 0.0f;
     for (int i = 0; i < m_goalTimeNumbersArray.size(); i++)
     {
-        int time = (displayTime - timer) / int(std::pow(10, i));
+        int time = (displayTime - int(timer)) / int(std::pow(10, i));
         time %= 10;
         m_goalTimeNumbersArray[i] = time;
-        timer += time * (std::pow(10, i));
+        timer += time * static_cast<float>(std::pow(10, i));
 
         // 二桁ごとにコロンを入れる(タイムっぽくするために)
         if (i != 0 && i % 2 == 0)
