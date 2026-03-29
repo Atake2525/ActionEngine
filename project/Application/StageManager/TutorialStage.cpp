@@ -61,10 +61,13 @@ std::string TutorialStage::GetJsonName()
 
 void TutorialStage::Update()
 {
+#ifndef NDEBUG
     if (Input::GetInstance()->TriggerKey(DIK_RETURN))
     {
         goal->SetGoal();
     }
+#endif // !NDEBUG
+
     stageObject->Update();
 
     wallRunObject->Update();
