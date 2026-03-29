@@ -794,19 +794,20 @@ void Player::Jump()
     // ジャンプ入力があったらジャンプ処理
     if (m_jumpInput > 0.0f)
     {
+        // ジャンプ開始時の初速を計算
+        float gravityPerFrame = max(-m_gravity.y * m_delta, 0.0f);
+        float jumpStartVelocity = sqrtf(2.0f * gravityPerFrame * m_jumpHeight);
         switch (m_walkState)
         {
         case Player::PlayerWalkState::WallRun:
-            // ジャンプ量(現在のY座標+m_jumpForce)の値を到達地点として設定
-            m_velocity.translate.y = sqrtf(2.0f * -m_gravity.y * m_jumpForce);
+            m_velocity.translate.y = jumpStartVelocity;
             break;
         case Player::PlayerWalkState::Sliding:
             break;
         default:
             if (m_onGround) // 設置状態のジャンプ処理
             {
-                // ジャンプ量(現在のY座標+m_jumpForce)の値を到達地点として設定
-                m_velocity.translate.y = sqrtf(2.0f * -m_gravity.y * m_jumpForce);
+                m_velocity.translate.y = jumpStartVelocity;
             }
             break;
         }
@@ -1009,8 +1010,8 @@ void Player::UpdateDebugUI() {
             m_gravity.x, m_gravity.y, m_gravity.z);
         ImGui::DragFloat("Move Speed", &m_moveSpeed, 0.1f, 0.0f, 100.0f);
 
-        // ジャンプ力
-        ImGui::DragFloat("Jump Force", &m_jumpForce, 0.1f);
+        // AI: 変更前は `Jump Force` としていたが、修正後は最終到達高さを調整する UI に変更。
+        ImGui::DragFloat("Jump Height", &m_jumpHeight, 0.01f, 0.0f, 10.0f);
         ImGui::DragFloat3("Gravity", &m_gravity.x, 0.1f);
 
         float groundDist = CollisionManager::GetInstance()->GetMaxGroundDistanceForAABB(m_playerAABB);

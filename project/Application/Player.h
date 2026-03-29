@@ -268,7 +268,7 @@ private:
     float m_decelMoveSpeed = 1.0f;
     float m_moveSpeedPre = 1.0f;
     float m_playerSpeed = 0.0f; // 現在の速度
-    float m_jumpForce = 0.045f; // ジャンプ力
+    float m_jumpHeight = 3.0f; // 最終的なジャンプ高さ
 
     //==================================================
     // カメラ関連
