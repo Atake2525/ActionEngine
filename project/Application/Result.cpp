@@ -192,7 +192,7 @@ void Result::CalculateStageClearTimer()
 
     // リザルト(クリアタイムの計算)
     // プレイ時間を桁数ごとに分割する
-    int digit = GetDigitCount(displayTime);
+    int digit = GetDigitCount(static_cast<float>(displayTime));
     m_goalTimeNumbersArray.resize(digit);
     float timer = 0.0f;
     for (int i = 0; i < m_goalTimeNumbersArray.size(); i++)
