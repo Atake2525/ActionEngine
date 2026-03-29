@@ -139,9 +139,9 @@ void Pause::Update() {
 
         if (num < 0)
         {
-            num = pauseUIs.size() - 1;
+            num = static_cast<int>(pauseUIs.size()) - 1;
         }
-        else if (num > pauseUIs.size() - 1)
+        else if (num > static_cast<int>(pauseUIs.size()) - 1)
         {
             num = 0;
         }
