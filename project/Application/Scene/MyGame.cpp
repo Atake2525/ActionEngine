@@ -49,6 +49,9 @@ void MyGame::Initialize() {
 	Input::GetInstance()->Initialize();
 
 	Audio::GetInstance()->Initialize();
+	Audio::GetInstance()->LoadMP3("Resources/sound/select.mp3", "select");
+	Audio::GetInstance()->LoadMP3("Resources/sound/enter.mp3", "select_enter");
+	Audio::GetInstance()->LoadMP3("Resources/sound/cancel.mp3", "select_cancel");
 
 	FadeManager::GetInstance()->Initialize();
 
