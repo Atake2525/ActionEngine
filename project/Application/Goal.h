@@ -7,8 +7,10 @@
 #include "Object3d.h"
 #include <memory>
 #include "AABB.h"
+#include "Result.h"
 
 class Player;
+class MouseCursor;
 
 /// <summary>
 /// ゴール
@@ -22,7 +24,12 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(const std::string jsonName, Player* player);
+	void Initialize(const std::string jsonName, Player* player, MouseCursor* mouseCursor);
+
+	/// <summary>
+	/// 更新処理
+	/// </summary>
+	void Update();
 
 	/// <summary>
 	/// 更新
@@ -35,6 +42,11 @@ public:
 	/// </summary>
 	void DrawGoalObject();
 
+	void DrawResult();
+
+#ifndef NDEBUG
+	void SetGoal() { m_isGoal = true; }
+#endif // !NDEBUG
 
 
 private:
@@ -43,6 +55,8 @@ private:
 	Player* m_player = nullptr;
 	std::vector<JsonData> m_jsonDatas;
 	bool m_isGoal = false;
+
+	std::unique_ptr<Result> m_result;
 
 	// オブジェクト(ゴール)関係
 	std::vector<std::unique_ptr<Object3d>> m_goalObjects;

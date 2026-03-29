@@ -1,6 +1,5 @@
 #include "Pause.h"
 #include "WinApp.h"
-#include "Input.h"
 #include "EasingUtility.h"
 #include "GameTime.h"
 #include "OffScreenRendering.h"
@@ -8,11 +7,16 @@
 #include "SceneManager.h"
 #include "Audio.h"
 #include "FadeManager.h"
+#include "MouseCursor.h"
+#include "Collision.h"
 
 using namespace std;
 
-void Pause::Initialize() {
-    Vector2 m_windowSize = { float(WinApp::GetInstance()->GetkClientWidth()), float(WinApp::GetInstance()->GetkClientHeight()) };
+void Pause::Initialize(MouseCursor* mouseCursor) {
+    m_windowSize = WinApp::GetInstance()->GetWindowSize();
+
+    m_input = Input::GetInstance();
+    m_mouseCursor = mouseCursor;
 
     m_outSize.x = m_windowSize.x * 0.1f;
     m_outSize.y = m_windowSize.y * 0.1f;
@@ -67,53 +71,53 @@ void Pause::Initialize() {
 
 void Pause::Update() {
 
-    if (Input::GetInstance()->TriggerKeyInt(DIK_ESCAPE) && !m_pauseAnim)
+    if (m_input->TriggerKeyInt(DIK_ESCAPE))
     {
-        m_pauseAnim = !m_pauseAnim;
-        m_animTimer = 0.0f;
-        if (m_pause)
+        m_pauseAnim = true;
+        m_pause = !m_pause;
+        //m_animTimer = 0.0f;
+        if (!m_pause)
         {
-            Input::GetInstance()->ShowMouseCursor(false);
+            m_mouseCursor->SetShowCursor(false);
         }
         else
         {
-            Input::GetInstance()->ShowMouseCursor(true);
+            m_mouseCursor->SetShowCursor(true);
+            m_mouseCursor->SetCursorPosition({ m_windowSize.x / 2.0f, m_windowSize.y / 4.5f });
         }
     }
 
     // ポーズアニメーションが再生されていない限りこれ以上処理をしないようにreturn
     if (m_pauseAnim) {
         // アニメーションタイマーを進める
-        m_animTimer += GameTime::GetInstance()->GetDeltaTime() / m_animTime;
+        if (m_pause)
+        {
+            m_animTimer += GameTime::GetInstance()->GetDeltaTime() / m_animTime;
+        }
+        else
+        {
+            m_animTimer -= GameTime::GetInstance()->GetDeltaTime() / m_animTime;
+        }
+        m_animTimer = std::clamp(m_animTimer, 0.0f, 1.0f);
 
         // それぞれのSpriteに対して位置を変える計算を行う
         for (int i = 0; i < pauseUIs.size(); i++)
         {
             // ポーズ状態へとプレイ画面へ戻るの2種類のタイプでeasingを行う
             Vector4 color = pauseUIs[i].sprite->GetColor();
-            if (!m_pause) // ポーズ状態へ入るとき
-            {
-                pauseUIs[i].position = EaseOutQuint(pauseUIs[i].targetPosition[0], pauseUIs[i].targetPosition[1], m_animTimer);
-                OffScreenRendering::GetInstance()->SetGrayscaleIntensity(min(m_animTimer * 1.2f, 0.4f));
-                pauseUIs[i].sprite->SetColor({ color.x, color.y, color.z, m_animTimer });
-            }
-            else // ポーズ状態から出る時
-            {
-                pauseUIs[i].position = EaseOutQuint(pauseUIs[i].targetPosition[1], pauseUIs[i].targetPosition[0], m_animTimer);
-                OffScreenRendering::GetInstance()->SetGrayscaleIntensity(min(1.0f - m_animTimer * 1.2f, 0.4f));
-                pauseUIs[i].sprite->SetColor({ color.x, color.y, color.z, EaseOutQuint(m_animTimer, 1.0f, 0.0f)});
-            }
+            pauseUIs[i].position = EaseOutQuint(pauseUIs[i].targetPosition[0], pauseUIs[i].targetPosition[1], m_animTimer);
+            OffScreenRendering::GetInstance()->SetGrayscaleIntensity(min(m_animTimer * 1.2f, 0.4f));
+            pauseUIs[i].sprite->SetColor({ color.x, color.y, color.z, m_animTimer });
 
             pauseUIs[i].sprite->SetPosition(pauseUIs[i].position);
             pauseUIs[i].sprite->Update();
         }
 
         // アニメーションタイマーが1.0fを超えたら終了
-        if (m_animTimer >= 1.0f)
+        if (m_animTimer == 1.0f || m_animTimer == 0.0f)
         {
-            m_pause = !m_pause;
             m_pauseAnim = false;
-            m_animTimer = 0.0f;
+            //m_animTimer = 0.0f;
         }
     }
 
@@ -122,13 +126,22 @@ void Pause::Update() {
     {
         // キー入力処理
         int num = static_cast<int>(m_pauseSelect);
-        num += (Input::GetInstance()->TriggerKeyInt(DIK_S) | Input::GetInstance()->TriggerKeyInt(DIK_DOWN));
-        num -= (Input::GetInstance()->TriggerKeyInt(DIK_W) | Input::GetInstance()->TriggerKeyInt(DIK_UP));
+        num += (m_input->TriggerKeyInt(DIK_S) | m_input->TriggerKeyInt(DIK_DOWN));
+        num -= (m_input->TriggerKeyInt(DIK_W) | m_input->TriggerKeyInt(DIK_UP));
+
+        for (int i = 0; i < pauseUIs.size(); i++)
+        {
+            if (CollisionUISprite(pauseUIs[i].sprite->GetAABB(), m_mouseCursor->GetCursorPos()))
+            {
+                num = i;
+            }
+        }
+
         if (num < 0)
         {
-            num = pauseUIs.size() - 1;
+            num = static_cast<int>(pauseUIs.size()) - 1;
         }
-        else if (num > pauseUIs.size() - 1)
+        else if (num > static_cast<int>(pauseUIs.size()) - 1)
         {
             num = 0;
         }
@@ -152,12 +165,12 @@ void Pause::Update() {
             Vector3 color = {
                        0.0f,
                        1.0f,
-                       EaseOutQuint(m_animTimer, 1.0f, 0.0f)
+                       EaseOutQuint(1.0f, 0.0f, m_animTimer)
             };
             pauseUIs[static_cast<int>(m_pauseSelect)].sprite->SetColor({ color.x, color.y, color.z, 1.0f });
             pauseUIs[static_cast<int>(m_pauseSelect)].sprite->Update();
-            
-            pauseUIs[static_cast<int>(m_selectNumberPre)].sprite->SetColor({0.0f, 1.0f, 1.0f, 1.0f });
+
+            pauseUIs[static_cast<int>(m_selectNumberPre)].sprite->SetColor({ 0.0f, 1.0f, 1.0f, 1.0f });
             pauseUIs[static_cast<int>(m_selectNumberPre)].sprite->Update();
 
             if (m_animTimer >= 1.0f)
@@ -167,7 +180,7 @@ void Pause::Update() {
         }
         else
         {
-            if (Input::GetInstance()->TriggerKeyInt(DIK_RETURN) || Input::GetInstance()->TriggerKeyInt(DIK_SPACE) || Input::GetInstance()->TriggerMouse(0))
+            if (m_input->TriggerKeyInt(DIK_RETURN) || m_input->TriggerKeyInt(DIK_SPACE) || m_input->TriggerMouse(0))
             {
                 Enter(static_cast<int>(m_pauseSelect));
             }
@@ -192,14 +205,15 @@ void Pause::Enter(int selectNumber) {
     {
     case PauseSelect::back:
         m_pauseAnim = !m_pauseAnim;
+        m_pause = false;
         m_animTimer = 0.0f;
         if (m_pause)
         {
-            Input::GetInstance()->ShowMouseCursor(false);
+            m_input->ShowMouseCursor(false);
         }
         else
         {
-            Input::GetInstance()->ShowMouseCursor(true);
+            m_input->ShowMouseCursor(true);
         }
         break;
     case PauseSelect::restart:

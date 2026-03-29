@@ -16,10 +16,11 @@
 #include "SkyBox.h"
 #include "CollisionManager.h"
 #include <memory>
-#include "ActionPlayer.h"
 #include "Player.h"
 #include "BaseStage.h"
 #include "Pause.h"
+#include "PlayerUI.h"
+#include "MouseCursor.h"
 
 #pragma once
 
@@ -63,6 +64,7 @@ private:
 	Transform modelTransform;
 
 	Input* input = nullptr;
+	std::unique_ptr<MouseCursor> m_mouseCursor = nullptr;
 
 	AABB aabb;
 
@@ -73,9 +75,8 @@ private:
 	Vector2 leftTop;
 	Transform transformSprite;
 
-	std::unique_ptr<ActionPlayer> player_ = nullptr;
-
 	std::unique_ptr<Player> m_pPlayer = nullptr;
+	std::unique_ptr<PlayerUI> m_pPlayerUI = nullptr;
 
 	bool start_ = false;
 

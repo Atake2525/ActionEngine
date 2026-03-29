@@ -64,9 +64,19 @@ inline Vector3 EaseInOut(Vector3 x1, Vector3 x2, float time) {
 
 	Vector3 result;
 
-	result.x = EaseInOut(time, x1.x, x2.x);
-	result.y = EaseInOut(time, x1.y, x2.y);
-	result.z = EaseInOut(time, x1.z, x2.z);
+	result.x = EaseInOut(x1.x, x2.x, time);
+	result.y = EaseInOut(x1.y, x2.y, time);
+	result.z = EaseInOut(x1.z, x2.z, time);
+
+	return result;;
+};
+
+inline Vector2 EaseInOut(Vector2 x1, Vector2 x2, float time) {
+
+	Vector2 result;
+
+	result.x = EaseInOut(x1.x, x2.x, time);
+	result.y = EaseInOut(x1.y, x2.y, time);
 
 	return result;;
 };
@@ -76,8 +86,8 @@ inline Vector2 EaseOutQuint(Vector2 x1, Vector2 x2, float time) {
 
 	Vector2 result;
 
-	result.x = EaseOutQuint(time, x1.x, x2.x);
-	result.y = EaseOutQuint(time, x1.y, x2.y);
+	result.x = EaseOutQuint(x1.x, x2.x, time);
+	result.y = EaseOutQuint(x1.y, x2.y, time);
 
 	return result;;
 };
@@ -87,9 +97,9 @@ inline Vector3 EaseOutQuint(Vector3 x1, Vector3 x2, float time) {
 
 	Vector3 result;
 
-	result.x = EaseOutQuint(time, x1.x, x2.x);
-	result.y = EaseOutQuint(time, x1.y, x2.y);
-	result.z = EaseOutQuint(time, x1.z, x2.z);
+	result.x = EaseOutQuint(x1.x, x2.x, time);
+	result.y = EaseOutQuint(x1.y, x2.y, time);
+	result.z = EaseOutQuint(x1.z, x2.z, time);
 
 	return result;;
 };
@@ -98,9 +108,9 @@ inline Vector3 EaseOutQuint(Vector3 x1, Vector3 x2, float time) {
 inline Vector3 EaseInBack(Vector3 x1, Vector3 x2, float time) {
 	Vector3 result;
 
-	result.x = EaseInBack(time, x1.x, x2.x);
-	result.y = EaseInBack(time, x1.y, x2.y);
-	result.z = EaseInBack(time, x1.z, x2.z);
+	result.x = EaseInBack(x1.x, x2.x, time);
+	result.y = EaseInBack(x1.y, x2.y, time);
+	result.z = EaseInBack(x1.z, x2.z, time);
 
 	return result;;
 };
@@ -121,8 +131,8 @@ inline float EaseOutExpo(float start, float end, float time) {
 inline Vector2 EaseInExpo(Vector2 start, Vector2 end, float time) {
 	Vector2 result;
 
-	result.x = EaseInBack(time, start.x, end.x);
-	result.y = EaseInBack(time, start.y, end.y);
+	result.x = EaseInBack(start.x, end.x, time);
+	result.y = EaseInBack(start.y, end.y, time);
 
 	return result;
 }
@@ -130,9 +140,9 @@ inline Vector2 EaseInExpo(Vector2 start, Vector2 end, float time) {
 inline Vector3 EaseOutExpo(Vector3 start, Vector3 end, float time) {
 	Vector3 result;
 
-	result.x = EaseOutExpo(time, start.x, end.x);
-	result.y = EaseOutExpo(time, start.y, end.y);
-	result.z = EaseOutExpo(time, start.z, end.z);
+	result.x = EaseOutExpo(start.x, end.x, time);
+	result.y = EaseOutExpo(start.y, end.y, time);
+	result.z = EaseOutExpo(start.z, end.z, time);
 
 	return result;
 }
@@ -158,8 +168,8 @@ inline float EaseOutElastic(float start, float end, float time) {
 inline Vector2 EaseOutElastic(Vector2 start, Vector2 end, float time) {
 	Vector2 result;
 
-	result.x = EaseOutElastic(time, start.x, end.x);
-	result.y = EaseOutElastic(time, start.y, end.y);
+	result.x = EaseOutElastic(start.x, end.x, time);
+	result.y = EaseOutElastic(start.y, end.y, time);
 
 	return result;
 }
@@ -167,9 +177,9 @@ inline Vector2 EaseOutElastic(Vector2 start, Vector2 end, float time) {
 inline Vector3 EaseOutElastic(Vector3 start, Vector3 end, float time) {
 	Vector3 result;
 
-	result.x = EaseOutElastic(time, start.x, end.x);
-	result.y = EaseOutElastic(time, start.y, end.y);
-	result.z = EaseOutElastic(time, start.z, end.z);
+	result.x = EaseOutElastic(start.x, end.x, time);
+	result.y = EaseOutElastic(start.y, end.y, time);
+	result.z = EaseOutElastic(start.z, end.z, time);
 
 	return result;
 }

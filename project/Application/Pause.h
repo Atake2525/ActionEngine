@@ -2,6 +2,7 @@
 #include <memory>
 #include <array>
 #include <string>
+#include "Input.h"
 #pragma once
 
 enum class PauseSelect : uint8_t {
@@ -12,6 +13,8 @@ enum class PauseSelect : uint8_t {
     title = 4,
 };
 
+class MouseCursor;
+
 class Pause
 {
 public:
@@ -19,7 +22,7 @@ public:
     /// <summary>
     /// 初期化処理
     /// </summary>
-    void Initialize();
+    void Initialize(MouseCursor* mouseCursor);
 
     /// <summary>
     /// 更新処理
@@ -31,7 +34,7 @@ public:
     /// </summary>
     void Draw();
 
-    const bool& IsPause()const { return m_pause || m_pauseAnim; }
+    const bool IsPause()const { return m_pause || m_pauseAnim; }
 
 private:
 
@@ -43,6 +46,9 @@ private:
     };
 
     std::array<PauseSprite, 5> pauseUIs;
+
+    Input* m_input = nullptr;
+    MouseCursor* m_mouseCursor = nullptr;
 
     PauseSelect m_pauseSelect = PauseSelect::back;
 

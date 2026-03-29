@@ -369,24 +369,27 @@ void Player::HandleInput()
     m_moveInput = Vector2::Zero;
     m_jumpInput = 0.0f;
 
-    switch (m_controlMode)
+    if (!m_IsFreeze)
     {
-    case Player::ControlMode::KeyboardMouse:
-        // キー入力による移動
-        m_moveInput.y += Input::GetInstance()->PushKeyInt(DIK_W);
-        m_moveInput.y += -Input::GetInstance()->PushKeyInt(DIK_S);
-        m_moveInput.x += -Input::GetInstance()->PushKeyInt(DIK_A);
-        m_moveInput.x += Input::GetInstance()->PushKeyInt(DIK_D);
-        m_jumpInput += Input::GetInstance()->TriggerKeyInt(DIK_SPACE);
+        switch (m_controlMode)
+        {
+        case Player::ControlMode::KeyboardMouse:
+            // キー入力による移動
+            m_moveInput.y += Input::GetInstance()->PushKeyInt(DIK_W);
+            m_moveInput.y += -Input::GetInstance()->PushKeyInt(DIK_S);
+            m_moveInput.x += -Input::GetInstance()->PushKeyInt(DIK_A);
+            m_moveInput.x += Input::GetInstance()->PushKeyInt(DIK_D);
+            m_jumpInput += Input::GetInstance()->TriggerKeyInt(DIK_SPACE);
 
-        break;
-    case Player::ControlMode::Gamepad:
-        // ジョイスティック入力による移動
-        m_moveInput = input->GetJoyStickVelocity();
-        m_moveInput.y *= -1.0f;
-        m_jumpInput += Input::GetInstance()->TriggerButton(Controller::A);
+            break;
+        case Player::ControlMode::Gamepad:
+            // ジョイスティック入力による移動
+            m_moveInput = input->GetJoyStickVelocity();
+            m_moveInput.y *= -1.0f;
+            m_jumpInput += Input::GetInstance()->TriggerButton(Controller::A);
 
-        break;
+            break;
+        }
     }
 
 
@@ -394,7 +397,10 @@ void Player::HandleInput()
 
 void Player::Rotate() {
     Vector3 rotate = Vector3::Zero;
-    m_cameraTransform.rotate = m_pCamera->GetTransform().rotate;
+    if (!m_IsFreeze)
+    {
+        m_cameraTransform.rotate = m_pCamera->GetTransform().rotate;
+    }
     // カメラ処理の実装
     // マウスの移動量に基づいてカメラの回転を更新    演出実装時に加速度を付けるなどの調整を行う予定
     switch (m_controlMode)
