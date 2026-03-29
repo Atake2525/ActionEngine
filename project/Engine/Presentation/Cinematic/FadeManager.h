@@ -42,6 +42,10 @@ public:
 
 	void FadeIn(const float time = 0.0f);
 
+	void SetFinishedFadeFunction(std::function<void()>& func) { finishedFadeFunction = func; }
+
+	void ClearFunction() { finishedFadeFunction = nullptr; }
+
 	void Draw();
 
 private:
@@ -60,7 +64,8 @@ private:
 
 	Vector3 color_ = { 1.0f, 1.0f, 1.0f };
 
-	std::function<void()> function;
+	std::function<void()> fadeFunction;
+	std::function<void()> finishedFadeFunction;
 
 	Sprite* sprite_ = nullptr;
 };

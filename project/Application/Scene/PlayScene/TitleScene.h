@@ -17,6 +17,7 @@
 #include <map>
 #include "UI.h"
 #include <memory>
+#include "MouseCursor.h"
 
 #pragma once
 
@@ -110,6 +111,8 @@ private:
     std::unique_ptr<Sprite> credit_sound = nullptr;
 
     bool start_ = false;
+
+    std::unique_ptr<MouseCursor> m_mouseCursor;
 
 };
 

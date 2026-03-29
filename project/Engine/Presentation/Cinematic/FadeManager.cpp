@@ -28,7 +28,7 @@ void FadeManager::Initialize() {
 	sprite_->Initialize("Resources/Sprite/white1x1.png");
 	sprite_->SetColor({ color_.x, color_.y, color_.z, alpha_ });
 	sprite_->SetScale({ float(WinApp::GetInstance()->GetkClientWidth()), float(WinApp::GetInstance()->GetkClientHeight()) });
-	function = [this]() {
+	fadeFunction = [this]() {
 		alpha_ = Lerp(alphaPre_, goalAlpha_, fadeTimer_);
 		};
 }
@@ -54,16 +54,21 @@ void FadeManager::Update() {
 	if (fade_)
 	{
 		fadeTimer_ += deltaTime / fadeTime_;
-		if (function)
-		{
-			function();
-		}
 		alpha_ = std::clamp(alpha_, 0.0f, 1.0f);
+		if (fadeFunction)
+		{
+			fadeFunction();
+		}
 		if (fadeTimer_ >= 1.0f)
 		{
 			fade_ = false;
 			completeFade_ = true;
 			fadeTimer_ = 0.0f;
+			if (finishedFadeFunction)
+			{
+				finishedFadeFunction();
+				finishedFadeFunction = nullptr;
+			}
 		}
 		sprite_->SetColor({ color_.x, color_.y, color_.z, alpha_ });
 	}
@@ -81,9 +86,18 @@ void FadeManager::Update() {
 	{
 		maxDeltaTime_ = 0.0f;
 	}
+	if (ImGui::Button("FadeIn"))
+	{
+		FadeIn(1.0f);
+	}
+	if (ImGui::Button("FadeOut"))
+	{
+		FadeOut(1.0f);
+	}
+
 	ImGui::End();
 
-	sprite_->SetColor({ color_.x, color_.y, color_.z, alpha_ });
+	//sprite_->SetColor({ color_.x, color_.y, color_.z, alpha_ });
 
 #endif // !NDEBUG
 
@@ -99,7 +113,7 @@ void FadeManager::FadeOut(const float time) {
 		goalAlpha_ = 1.0f;
 		fadeTime_ = time;
 		fadeTimer_ = 0.0f;
-		function = [this]() {
+		fadeFunction = [this]() {
 			alpha_ = Lerp(alphaPre_, goalAlpha_, fadeTimer_);
 			};
 	}
@@ -115,8 +129,8 @@ void FadeManager::FadeIn(const float time) {
 		fadeTime_ = time;
 		fadeTimer_ = 0.0f;
 
-		function = [this]() {
-			alpha_ = EaseInBack(fadeTimer_, alphaPre_, goalAlpha_);
+		fadeFunction = [this]() {
+			alpha_ = EaseInBack(alphaPre_, goalAlpha_, fadeTimer_);
 			};
 	}
 }

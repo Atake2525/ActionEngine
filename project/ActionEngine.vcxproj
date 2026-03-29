@@ -182,6 +182,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Collision\PhysicsCorrection.cpp" />
     <ClCompile Include="Application\Pause.cpp" />
     <ClCompile Include="Application\PlayerUI.cpp" />
+    <ClCompile Include="Application\Result.cpp" />
+    <ClCompile Include="Engine\Core\Input\MouseCursor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\ActionPlayer.h">
@@ -279,6 +281,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Pause.h" />
     <ClInclude Include="Application\PlayerUI.h" />
     <ClInclude Include="Engine\Presentation\Cinematic\ScanEffect.h" />
+    <ClInclude Include="Application\Result.h" />
+    <ClInclude Include="Engine\Core\Input\MouseCursor.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="externals\assimp\lib\Release\assimp-vc143-mtd.lib">

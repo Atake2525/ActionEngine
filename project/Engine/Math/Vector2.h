@@ -30,6 +30,12 @@ inline Vector2 operator-(Vector2 v) {
 	return v;
 }
 
+inline Vector2 operator+(Vector2 v1, Vector2 v2) {
+	v1.x += v2.x;
+	v1.y += v2.y;
+	return v1;
+}
+
 inline Vector2 operator-(Vector2 v1, Vector2 v2) {
 	v1.x -= v2.x;
 	v1.y -= v2.y;
@@ -38,6 +44,10 @@ inline Vector2 operator-(Vector2 v1, Vector2 v2) {
 
 inline Vector2 operator*(const Vector2& v, float f) {
 	return { v.x * f, v.y * f };
+}
+
+inline Vector2 operator*(const Vector2& v1, const Vector2& v2) {
+	return { v1.x * v2.x, v1.y * v2.y };
 }
 
 inline Vector2 operator+=(Vector2& v, float f) {

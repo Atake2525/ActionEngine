@@ -282,18 +282,18 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 			modelData.matVertexData[meshName].skinClusterData[JointName] = jointWeightData;
 		}
 	}
-	uint32_t texIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/Debug/black1x1.png");
+	uint32_t texIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/Sprite/black1x1.png");
 	// テクスチャが無い場合white1x1を張るようにする
 	if (scene->mNumMaterials == 0)
 	{
 		MaterialData matData;
-		matData.textureFilePath = "Resources/Debug/white1x1.png";
+		matData.textureFilePath = "Resources/Sprite/white1x1.png";
 
-		matData.normalMapFilePath = "Resources/Debug/black1x1.png";
+		matData.normalMapFilePath = "Resources/Sprite/black1x1.png";
 		matData.normalMapIndex = texIndex;
-		matData.metallicMapFilePath = "Resources/Debug/black1x1.png";
+		matData.metallicMapFilePath = "Resources/Sprite/black1x1.png";
 		matData.metallicMapIndex = texIndex;
-		matData.roughnessMapFilePath = "Resources/Debug/black1x1.png";
+		matData.roughnessMapFilePath = "Resources/Sprite/black1x1.png";
 		matData.roughnessMapIndex = texIndex;
 
 		// テクスチャ読み込み
@@ -340,7 +340,7 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 			}
 			else
 			{
-				matData.normalMapFilePath = "Resources/Debug/black1x1.png";
+				matData.normalMapFilePath = "Resources/Sprite/black1x1.png";
 				matData.normalMapIndex = texIndex;
 			}
 			if (material->GetTexture(aiTextureType_METALNESS, 0, &textureFilePath) == AI_SUCCESS) {
@@ -350,7 +350,7 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 			}
 			else
 			{
-				matData.metallicMapFilePath = "Resources/Debug/black1x1.png";
+				matData.metallicMapFilePath = "Resources/Sprite/black1x1.png";
 				matData.metallicMapIndex = texIndex;
 			}
 			if (material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &textureFilePath) == AI_SUCCESS) {
@@ -360,7 +360,7 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 			}
 			else
 			{
-				matData.roughnessMapFilePath = "Resources/Debug/black1x1.png";
+				matData.roughnessMapFilePath = "Resources/Sprite/black1x1.png";
 				matData.roughnessMapIndex = texIndex;
 			}
 
@@ -393,13 +393,13 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 		else // マテリアルが割り当てられていない場合はwhite1x1を割り当てる
 		{
 			MaterialData matData;
-			matData.textureFilePath = "Resources/Debug/white1x1.png";
+			matData.textureFilePath = "Resources/Sprite/white1x1.png";
 
-			matData.normalMapFilePath = "Resources/Debug/black1x1.png";
+			matData.normalMapFilePath = "Resources/Sprite/black1x1.png";
 			matData.normalMapIndex = texIndex;
-			matData.metallicMapFilePath = "Resources/Debug/black1x1.png";
+			matData.metallicMapFilePath = "Resources/Sprite/black1x1.png";
 			matData.metallicMapIndex = texIndex;
-			matData.roughnessMapFilePath = "Resources/Debug/black1x1.png";
+			matData.roughnessMapFilePath = "Resources/Sprite/black1x1.png";
 			matData.roughnessMapIndex = texIndex;
 
 			// テクスチャ読み込み
@@ -587,18 +587,18 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 		}
 
 	}
-	uint32_t texIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/Debug/black1x1.png");
+	uint32_t texIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/Sprite/black1x1.png");
 	// マテリアルが作成されていない場合はwhite1x1を使用
 	if (scene->mNumMaterials == 1 || scene->mNumMaterials == 0)
 	{
 		MaterialData matData;
-		matData.textureFilePath = "Resources/Debug/white1x1.png";
+		matData.textureFilePath = "Resources/Sprite/white1x1.png";
 
-		matData.normalMapFilePath = "Resources/Debug/black1x1.png";
+		matData.normalMapFilePath = "Resources/Sprite/black1x1.png";
 		matData.normalMapIndex = texIndex;
-		matData.metallicMapFilePath = "Resources/Debug/black1x1.png";
+		matData.metallicMapFilePath = "Resources/Sprite/black1x1.png";
 		matData.metallicMapIndex = texIndex;
-		matData.roughnessMapFilePath = "Resources/Debug/black1x1.png";
+		matData.roughnessMapFilePath = "Resources/Sprite/black1x1.png";
 		matData.roughnessMapIndex = texIndex;
 
 		// テクスチャ読み込み
@@ -642,7 +642,7 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 			}
 			else
 			{
-				matData.normalMapFilePath = "Resources/Debug/black1x1.png";
+				matData.normalMapFilePath = "Resources/Sprite/black1x1.png";
 				matData.normalMapIndex = texIndex;
 			}
 			if (material->GetTexture(aiTextureType_METALNESS, 0, &textureFilePath) == AI_SUCCESS) {
@@ -652,7 +652,7 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 			}
 			else
 			{
-				matData.metallicMapFilePath = "Resources/Debug/black1x1.png";
+				matData.metallicMapFilePath = "Resources/Sprite/black1x1.png";
 				matData.metallicMapIndex = texIndex;
 			}
 			if (material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &textureFilePath) == AI_SUCCESS) {
@@ -662,7 +662,7 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 			}
 			else
 			{
-				matData.roughnessMapFilePath = "Resources/Debug/black1x1.png";
+				matData.roughnessMapFilePath = "Resources/Sprite/black1x1.png";
 				matData.roughnessMapIndex = texIndex;
 			}
 
@@ -692,13 +692,13 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 		else // マテリアルが割り当てられていない場合はwhite1x1を割り当てる
 		{
 			MaterialData matData;
-			matData.textureFilePath = "Resources/Debug/white1x1.png";
+			matData.textureFilePath = "Resources/Sprite/white1x1.png";
 
-			matData.normalMapFilePath = "Resources/Debug/black1x1.png";
+			matData.normalMapFilePath = "Resources/Sprite/black1x1.png";
 			matData.normalMapIndex = texIndex;
-			matData.metallicMapFilePath = "Resources/Debug/black1x1.png";
+			matData.metallicMapFilePath = "Resources/Sprite/black1x1.png";
 			matData.metallicMapIndex = texIndex;
-			matData.roughnessMapFilePath = "Resources/Debug/black1x1.png";
+			matData.roughnessMapFilePath = "Resources/Sprite/black1x1.png";
 			matData.roughnessMapIndex = texIndex;
 
 			// テクスチャ読み込み
