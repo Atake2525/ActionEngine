@@ -6,7 +6,7 @@
     <ClCompile Include="Engine\Math\kMath.cpp">
       <Filter>Math</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\BlackBox\ImGui\ImGuiManager.cpp">
+    <ClCompile Include="Engine\Backroom\ImGui\ImGuiManager.cpp">
       <Filter>External\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Audio\Audio.cpp">
@@ -18,10 +18,7 @@
     <ClCompile Include="Engine\Collision\CollisionManager.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\BlackBox\LeakChecker\D3DResourceLeakChecker.cpp">
-      <Filter>Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\BlackBox\Animation\DebugAnimation.cpp">
+    <ClCompile Include="Engine\Backroom\LeakChecker\D3DResourceLeakChecker.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
     <ClCompile Include="Application\Scene\Manager\BaseScene.cpp">
@@ -51,7 +48,7 @@
     <ClCompile Include="Engine\JsonLoader\JsonLoader.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\BlackBox\Log\Logger.cpp">
+    <ClCompile Include="Engine\Backroom\Log\Logger.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
     <ClCompile Include="Engine\3d\Model\Model\Model.cpp">
@@ -84,7 +81,7 @@
     <ClCompile Include="Engine\Core\SrvManager\SrvManager.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\BlackBox\Log\StringUtility.cpp">
+    <ClCompile Include="Engine\Backroom\Log\StringUtility.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
     <ClCompile Include="Engine\LoadManager\TextureManager\TextureManager.cpp">
@@ -174,7 +171,7 @@
     <ClInclude Include="Engine\Math\Vector4.h">
       <Filter>Math</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\BlackBox\ImGui\ImGuiManager.h">
+    <ClInclude Include="Engine\Backroom\ImGui\ImGuiManager.h">
       <Filter>External\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Math\Animator.h">
@@ -195,10 +192,7 @@
     <ClInclude Include="Engine\Collision\CollisionManager.h">
       <Filter>Engine</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\BlackBox\LeakChecker\D3DResourceLeakChecker.h">
-      <Filter>Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\BlackBox\Animation\DebugAnimation.h">
+    <ClInclude Include="Engine\Backroom\LeakChecker\D3DResourceLeakChecker.h">
       <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="Application\Scene\Manager\BaseScene.h">
@@ -228,7 +222,7 @@
     <ClInclude Include="Engine\Lighting\Light.h">
       <Filter>Engine</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\BlackBox\Log\Logger.h">
+    <ClInclude Include="Engine\Backroom\Log\Logger.h">
       <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="Engine\3d\Model\Model\Model.h">
@@ -264,7 +258,7 @@
     <ClInclude Include="Engine\Core\SrvManager\SrvManager.h">
       <Filter>Engine</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\BlackBox\Log\StringUtility.h">
+    <ClInclude Include="Engine\Backroom\Log\StringUtility.h">
       <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="Engine\LoadManager\TextureManager\TextureManager.h">
