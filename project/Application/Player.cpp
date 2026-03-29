@@ -140,8 +140,6 @@ void Player::Update()
     ApplyGravity();
 #endif // !NDEBUG
 
-    //m_transform.translate += m_velocity.translate;
-
     m_transform.rotate += m_velocity.rotate;
     m_pModel->SetTransform(m_transform);
 
@@ -151,7 +149,6 @@ void Player::Update()
     }
 
     m_pModel->Update();
-    //m_pCamera->SetTranslate(m_transform.translate);
     ApplyCameraEffect();
     m_pCamera->SetTransform(m_cameraTransform);
     UpdateCameraParent();
@@ -168,6 +165,16 @@ void Player::UpdateState()
     // 前回の状態を保存
     m_statePre = m_state;
     m_walkStatePre = m_walkState;
+
+    // よじ登り中はClimbingに固定する
+    if (m_isClimbingMotion)
+    {
+        m_walkState = PlayerWalkState::Climbing;
+        m_canClimbing = false;
+        m_onGround = true;
+        m_state = PlayerState::Idle;
+        return;
+    }
 
     // 入力が入ったら最初の入力フラグを立てる
     if (m_moveInput.x != 0.0f || m_moveInput.y != 0.0f)
@@ -243,22 +250,6 @@ void Player::UpdateState()
 void Player::UpdateParkourState()
 {
 
-    // 前方への移動量が一定以上の場合にしゃがみ入力でスライディング
-    //if (m_walkState == PlayerWalkState::Crounch) {
-    //    // パルクールが有効で移動量が一定以上の場合
-    //    float moveSpeed = Length({ m_velocity.translate.x, 0.0f, m_velocity.translate.z }) / m_delta;
-    //    if (moveSpeed > m_runSpeed)
-    //    {
-    //        // スライディング入力
-    //        m_walkState = PlayerWalkState::Sliding;
-    //        m_sliding = true;
-    //    }
-    //    else
-    //    {
-    //        m_sliding = false;
-    //    }
-    //}
-
     if (!m_onGround)
     {
         AABB pAABB = m_playerAABB;
@@ -280,14 +271,18 @@ void Player::UpdateParkourState()
         pAABB += m_wallPenetration;
         // 現在の位置(AABB)からウォールラン中の壁の方向に移動させ衝突しているかを判定する
         // 判定していなければウォールランを終了する
-        if (m_wallRunning && (!CollisionManager::GetInstance()->IsCollisionObjectForAABB(pAABB, true) || m_jumpInput == 1.0f))
+        if (m_wallRunning && m_isStartWallRun && (!CollisionManager::GetInstance()->IsCollisionObjectForAABB(pAABB, true) || m_jumpInput == 1.0f))
         {
             m_wallRunning = false;
             m_isStartWallRun = false;
+            m_wallPenetration = Vector3::Zero;
         }
     }
-    if ((input->TriggerKey(DIK_SPACE) || input->PushButton(Controller::A)) && m_canClimbing)
+    
+    // よじ登りの開始を確認する
+    if ((input->TriggerKey(DIK_SPACE) || input->PushButton(Controller::A)) && m_canClimbing && !m_isClimbingMotion)
     {
+        StartClimbing();
         m_walkState = PlayerWalkState::Climbing;
     }
 }
@@ -420,6 +415,13 @@ void Player::Rotate() {
 }
 
 void Player::Move() {
+    // よじ登り中は他の処理をしないように最初に更新
+    if (m_walkState == PlayerWalkState::Climbing || m_isClimbingMotion)
+    {
+        Climbing();
+        m_playerAABB.max.y = m_playerAABB.min.y + m_playerHeight + m_crouchHeight;
+        return;
+    }
 
     if (!m_wallRunning)
     {
@@ -620,7 +622,7 @@ void Player::WallRun()
         m_wallRunDirection.z = Sign(wallpenetration.x) * Sign(cameraDirection.z);
 
         // ウォールラン用のオブジェクトとほぼ垂直の視点の場合直前の入力を使って移動方向を算出する
-        if (cameraDirection.z < 0.1f && cameraDirection.z > 0.1f)
+        if (std::fabs(cameraDirection.z) < 0.1f)
         {
             Vector3 walkDirection = TransformNormal({ m_moveInput.x, 0.0f, m_moveInput.y }, cameraMatrix);
 
@@ -734,22 +736,17 @@ void Player::Sliding()
     m_playerSpeed = max(fabs(m_moveAmount.x), fabs(m_moveAmount.y));
 }
 
-void Player::Climbing()
+void Player::StartClimbing()
 {
-    // プレイヤーの身長を計算
+    // よじ登りの最終地点などの計算
     float height = m_playerAABB.max.y - m_playerAABB.min.y;
 
-    // よじ登りが可能かをチェックした時に使ったAABBと同じものを使ってオブジェクトとの貫通量を計算
     AABB pAABB = m_playerAABB + m_velocity.translate;
     pAABB = AddSize(pAABB, m_canClimbingCheckSize);
     pAABB.min.y = m_playerAABB.min.y;
     pAABB.max.y = m_playerAABB.max.y;
-    
-    Vector3 penetration = CollisionManager::GetInstance()->GetAllPenetrationForAABB(pAABB, false);
-    // よじ登りをするためのオブジェクトのAABBを取得する
-    //Vector3 dir = CollisionManager::GetInstance()->GetCollisionObjectDirectionForAABB(pAABB, false);
+
     Vector3 cameraDir = m_pCamera->GetDirection();
-    
     Vector3 fabsCameraDir = cameraDir;
 
     fabsCameraDir.x = fabs(fabsCameraDir.x);
@@ -758,26 +755,18 @@ void Player::Climbing()
 
     if (fabsCameraDir.x > fabsCameraDir.z)
     {
-        cameraDir = { 1.0f * Sign(cameraDir.x), 0.0f, 0.0f};
+        cameraDir = { 1.0f * Sign(cameraDir.x), 0.0f, 0.0f };
     }
     if (fabsCameraDir.z > fabsCameraDir.x)
     {
-        cameraDir = { 0.0f, 0.0f, 1.0f * Sign(cameraDir.z)};
+        cameraDir = { 0.0f, 0.0f, 1.0f * Sign(cameraDir.z) };
     }
 
     AABB colObj = CollisionManager::GetInstance()->GetObjectForCollisionDirection(pAABB, cameraDir);
-  
-
-    Vector3 halfSize = AABB::GetSize(pAABB) / 2.0f;
-
-    cameraDir = Sign(cameraDir);
 
     Vector3 rePairPosition = Vector3::Zero;
     if (cameraDir.x != 0.0f)
     {
-        /*pAABB = AddSize(pAABB, -penetration.x);
-        rePairPosition.x = CenterAABB(m_playerAABB + m_velocity.translate).x - AABB::GetSize(pAABB).x;*/
-        //float wallPos = size.x - penetration.x;
         if (cameraDir.x > 0.0f)
         {
             rePairPosition.x = m_transform.translate.x - colObj.min.x;
@@ -789,9 +778,6 @@ void Player::Climbing()
     }
     if (cameraDir.z != 0.0f)
     {
-        //pAABB = AddSize(pAABB, -penetration.z);
-        //rePairPosition.z = AABB::GetSize(pAABB).z - CenterAABB(m_playerAABB + m_velocity.translate).z;
-        //rePairPosition.z = penetration.z - (dir.z * m_canClimbingCheckSize + size.z);
         if (cameraDir.z > 0.0f)
         {
             rePairPosition.z = m_transform.translate.z - colObj.min.z;
@@ -801,17 +787,63 @@ void Player::Climbing()
             rePairPosition.z = m_transform.translate.z - colObj.max.z;
         }
     }
-    // Yはインプルに壁の高さを見て計算
+
     float groundObjectDist = CollisionManager::GetInstance()->GetHeightToTopForAABB(pAABB);
     rePairPosition.y = groundObjectDist;
 
-    m_velocity.translate.y = 0.0f;
-    m_transform.translate -= rePairPosition;
+    m_climbingStartTranslate = m_transform.translate;
+    m_climbingEndTranslate = m_transform.translate - rePairPosition;
+    m_climbingTopTranslate = m_climbingStartTranslate + ((m_climbingEndTranslate - m_climbingStartTranslate) * 0.35f);
+    m_climbingTopTranslate.y = max(m_climbingStartTranslate.y, m_climbingEndTranslate.y) + max(height * 0.15f, 0.35f);
 
-    ImGui::Begin("Climbing");
-    ImGui::DragFloat("身長", &height); 
-    ImGui::DragFloat3("RePairPosition", &rePairPosition.x);
-    ImGui::End();
+    m_climbingTimer = 0.0f;
+    m_climbingStep = 0;
+    m_isClimbingMotion = true;
+    m_onGround = true;
+    m_state = PlayerState::Idle;
+    m_wallRunning = false;
+    m_isStartWallRun = false;
+    m_wallPenetration = Vector3::Zero;
+    m_velocity.translate = Vector3::Zero;
+    m_moveAmount = Vector2::Zero;
+}
+
+void Player::Climbing()
+{
+    // よじ登りの動作処理
+    // Stepが進むと完了時間を早める
+    m_climbingTimer += m_delta / m_climbingTime * float(m_climbingStep + 1);
+    float t = clamp(m_climbingTimer, 0.0f, 1.0f);
+    Vector3 climbingPosition = Vector3::Zero;
+
+    if (m_climbingStep == 0)
+    {
+        climbingPosition = EaseInOut(m_climbingStartTranslate, m_climbingTopTranslate, t );
+    }
+    else if (m_climbingStep == 1)
+    {
+        climbingPosition = Lerp(m_climbingTopTranslate, m_climbingEndTranslate, t);
+    }
+
+    Vector3 moveDelta = climbingPosition - m_transform.translate;
+    m_transform.translate = climbingPosition;
+    m_playerAABB += moveDelta;
+    m_velocity.translate = Vector3::Zero;
+    m_moveAmount = Vector2::Zero;
+    m_playerSpeed = 0.0f;
+    m_onGround = true;
+
+    if (t >= 1.0f)
+    {
+        if (m_climbingStep == 1)
+        {
+            m_isClimbingMotion = false;
+            m_walkState = PlayerWalkState::Walk;
+        }
+        m_climbingTimer = 0.0f;
+        m_climbingStep++;
+    }
+
 }
 
 void Player::Jump()
@@ -819,19 +851,20 @@ void Player::Jump()
     // ジャンプ入力があったらジャンプ処理
     if (m_jumpInput > 0.0f)
     {
+        // ジャンプ開始時の初速を計算
+        float gravityPerFrame = max(-m_gravity.y * m_delta, 0.0f);
+        float jumpStartVelocity = sqrtf(2.0f * gravityPerFrame * m_jumpHeight);
         switch (m_walkState)
         {
         case Player::PlayerWalkState::WallRun:
-            // ジャンプ量(現在のY座標+m_jumpForce)の値を到達地点として設定
-            m_velocity.translate.y = sqrtf(2.0f * -m_gravity.y * m_jumpForce);
+            m_velocity.translate.y = jumpStartVelocity;
             break;
         case Player::PlayerWalkState::Sliding:
             break;
         default:
             if (m_onGround) // 設置状態のジャンプ処理
             {
-                // ジャンプ量(現在のY座標+m_jumpForce)の値を到達地点として設定
-                m_velocity.translate.y = sqrtf(2.0f * -m_gravity.y * m_jumpForce);
+                m_velocity.translate.y = jumpStartVelocity;
             }
             break;
         }
@@ -891,9 +924,7 @@ void Player::UpdateVelocity()
 
 void Player::UpdateCameraParent() {
     // カメラのParent設定処理の実装
-    //m_pCamera->SetRotateParent(m_pModel->GetWorldMatrix());
     m_pCamera->SetParent(m_pModel->GetWorldMatrix());
-    //m_pModel->SetParent(m_pCamera->GetWorldMatrix());
 }
 
 void Player::ApplyCameraEffect()
@@ -1036,8 +1067,7 @@ void Player::UpdateDebugUI() {
             m_gravity.x, m_gravity.y, m_gravity.z);
         ImGui::DragFloat("Move Speed", &m_moveSpeed, 0.1f, 0.0f, 100.0f);
 
-        // ジャンプ力
-        ImGui::DragFloat("Jump Force", &m_jumpForce, 0.1f);
+        ImGui::DragFloat("Jump Height", &m_jumpHeight, 0.01f, 0.0f, 10.0f);
         ImGui::DragFloat3("Gravity", &m_gravity.x, 0.1f);
 
         float groundDist = CollisionManager::GetInstance()->GetMaxGroundDistanceForAABB(m_playerAABB);
