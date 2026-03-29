@@ -10,8 +10,7 @@ void MyGame::Initialize() {
 
 	GameTime::GetInstance()->Initialize();
 
-	//WinApp::GetInstance()->Initialize(1920, 1080, WindowMode::FullScreen, L"Engine");
-	WinApp::GetInstance()->Initialize();
+	WinApp::GetInstance()->Initialize(1920, 1080, WindowMode::FullScreen, L"走快");
 
 	DirectXBase::GetInstance()->Initialize();
 
@@ -50,6 +49,9 @@ void MyGame::Initialize() {
 	Input::GetInstance()->Initialize();
 
 	Audio::GetInstance()->Initialize();
+	Audio::GetInstance()->LoadMP3("Resources/sound/select.mp3", "select");
+	Audio::GetInstance()->LoadMP3("Resources/sound/enter.mp3", "select_enter");
+	Audio::GetInstance()->LoadMP3("Resources/sound/cancel.mp3", "select_cancel");
 
 	FadeManager::GetInstance()->Initialize();
 
@@ -59,7 +61,7 @@ void MyGame::Initialize() {
 
 	SceneManager::GetInstance();
 	
-	SceneManager::GetInstance()->SetNextScene("GAMESCENE");
+	SceneManager::GetInstance()->SetNextScene("TITLE");
 
 	//gameScene->Initialize();
 

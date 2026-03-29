@@ -59,9 +59,7 @@ private:
 	Input* m_pInput = nullptr;
 	std::unique_ptr<MouseCursor> m_mouseCursor = nullptr;
 
-#ifndef NDEBUG
-	bool cursorshow = false;
-#endif // !NDEBUG
+	bool m_cursorShow = false;
 
 
 	std::unique_ptr<Player> m_pPlayer = nullptr;

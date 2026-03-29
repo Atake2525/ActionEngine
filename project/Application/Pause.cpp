@@ -9,6 +9,7 @@
 #include "FadeManager.h"
 #include "MouseCursor.h"
 #include "Collision.h"
+#include <functional>
 
 using namespace std;
 
@@ -65,8 +66,6 @@ void Pause::Initialize(MouseCursor* mouseCursor) {
     }
 
     pauseUIs[0].sprite->SetColor({ 0.0f, 1.0f, 0.0f, 1.0f });
-
-    Audio::GetInstance()->LoadMP3("Resources/sound/pause_select.mp3", "pause_select");
 }
 
 void Pause::Update() {
@@ -149,7 +148,7 @@ void Pause::Update() {
         if (num != static_cast<int>(m_pauseSelect))
         {
             m_selectNumberPre = static_cast<int>(m_pauseSelect);
-            Audio::GetInstance()->Play("pause_select");
+            Audio::GetInstance()->Play("select");
             m_changeSelectAnim = true;
             m_animTimer = 0.0f;
         }
@@ -201,32 +200,46 @@ void Pause::Draw() {
 }
 
 void Pause::Enter(int selectNumber) {
+    std::function<void()> restartFunc = [&]() {
+        OffScreenRendering::GetInstance()->SetGrayscaleIntensity(0.0f);
+        SceneManager::GetInstance()->SetNextScene(SceneManager::GetInstance()->GetSceneName());
+        };
+    std::function<void()> goTitleFunc = [&]() {
+        SceneManager::GetInstance()->SetNextScene("TITLE");
+        OffScreenRendering::GetInstance()->SetGrayscaleIntensity(0.0f);
+        };
     switch (m_pauseSelect)
     {
     case PauseSelect::back:
+        Audio::GetInstance()->Play("select_enter");
         m_pauseAnim = !m_pauseAnim;
         m_pause = false;
-        m_animTimer = 0.0f;
+        //m_animTimer = 0.0f;
         if (m_pause)
         {
-            m_input->ShowMouseCursor(false);
+            m_mouseCursor->SetShowCursor(true);
+            m_mouseCursor->SetCursorPosition({ m_windowSize.x / 2.0f, m_windowSize.y / 4.5f });
         }
         else
         {
-            m_input->ShowMouseCursor(true);
+            m_mouseCursor->SetShowCursor(false);
         }
         break;
     case PauseSelect::restart:
-        OffScreenRendering::GetInstance()->SetGrayscaleIntensity(0.0f);
-        SceneManager::GetInstance()->SetNextScene(SceneManager::GetInstance()->GetSceneName());
+        Audio::GetInstance()->Play("select_enter");
+        FadeManager::GetInstance()->FadeOut(0.5f);
+        FadeManager::GetInstance()->SetFinishedFadeFunction(restartFunc);
         break;
     case PauseSelect::stageSelect:
+        Audio::GetInstance()->Play("select_cancel");
         break;
     case PauseSelect::setting:
+        Audio::GetInstance()->Play("select_cancel");
         break;
     case PauseSelect::title:
-        SceneManager::GetInstance()->SetNextScene("TITLE");
-        OffScreenRendering::GetInstance()->SetGrayscaleIntensity(0.0f);
+        Audio::GetInstance()->Play("select_enter");
+        FadeManager::GetInstance()->FadeOut(0.5f);
+        FadeManager::GetInstance()->SetFinishedFadeFunction(goTitleFunc);
         break;
     }
 }

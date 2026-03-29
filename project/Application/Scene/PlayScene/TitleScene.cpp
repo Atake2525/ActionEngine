@@ -13,8 +13,6 @@ using namespace std;
 
 void TitleScene::Initialize() {
 
-    //ModelManager::GetInstance()->LoadModel("Resources/Model/gltf/human", "walkMultiMaterial.gltf", true, true);
-
     m_pCamera = make_unique<Camera>();
     m_pCamera->SetRotate(Vector3(SwapRadian(11.5f), SwapRadian(1.5f), 0.0f));
     m_pCamera->SetTranslate({ -1.0f, 1.6f, -3.4f });
@@ -31,6 +29,7 @@ void TitleScene::Initialize() {
     m_pInput->ShowMouseCursor(false);
     m_mouseCursor = std::make_unique<MouseCursor>();
     m_mouseCursor->Initialize("Resources/Sprite/Cursor_Hover.png", "Resources/Sprite/Cursor_Press.png");
+    m_mouseCursor->SetCursorPosition(WinApp::GetInstance()->GetWindowSize() / 2.0f);
 
     Object3dBase::GetInstance()->SetDefaultCamera(m_pCamera.get());
 
@@ -49,7 +48,7 @@ void TitleScene::Initialize() {
     m_bootScreen->SetModel("Resources/Model/obj/Title", "TitleScene_01.obj", true);
     m_bootScreen->Update();
 
-    Vector2 windowSize = { float(WinApp::GetInstance()->GetkClientWidth()), float(WinApp::GetInstance()->GetkClientHeight()) };
+    Vector2 windowSize = { WinApp::GetInstance()->GetWindowSize() };
     m_startUi = make_unique<Sprite>();
     m_startUi->Initialize("Resources/Sprite/UI/ui_start.png");
     m_startUi->SetColor({ 0.0f, 0.0f, 0.0f, 1.0f });
@@ -80,21 +79,27 @@ void TitleScene::Initialize() {
 
     m_gamePad = make_unique<Sprite>();
     m_gamePad->Initialize("Resources/Sprite/UI/gamepad.png");
-    //m_gamePad->SetAnchorPoint({ 0.5f, 0.5f });
     m_gamePad->SetPosition({ windowSize.x - m_gamePad->GetTextureSize().x - 10.0f, windowSize.y - m_gamePad->GetTextureSize().y - 10.0f });
+    // ゲームパッドが接続されている場合は、ゲームパッドのアイコンをAlpha1.0fで表示する
+    if (m_pInput->IsConnectedController())
+    {
+        m_gamePad->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+    }
+    else
+    {
+        m_gamePad->SetColor({ 1.0f, 1.0f, 1.0f, 0.5f });
+    }
 
     m_credit_sound = make_unique<Sprite>();
     m_credit_sound->Initialize("Resources/Sprite/UI/credit_sound.png");
     m_credit_sound->SetAnchorPoint({ 0.5f, 0.5f });
-    m_credit_sound->SetPosition({ windowSize.x / 2.0f, windowSize.y / 2.0f });
+    m_credit_sound->SetPosition({ windowSize.x / 4.0f, windowSize.y / 2.0f });
 
-    Audio::GetInstance()->LoadMP3("Resources/sound/select.mp3", "select", 1.0f);
-    Audio::GetInstance()->LoadMP3("Resources/sound/enter.mp3", "enter", 1.0f);
-    //Audio::GetInstance()->LoadMP3("Resources/sound/Experimenta_Model_short.mp3", "bgm", 0.2f);
+    m_credit = make_unique<Sprite>();
+    m_credit->Initialize("Resources/Sprite/UI/credit.png");
+    m_credit->SetAnchorPoint(ANCHORPOINT_LEFTBOTTOM);
+    m_credit->SetPosition({ 30.0f, windowSize.y - 30.0f });
 
-    //Audio::GetInstance()->Play("bgm", true);
-
-    //Audio::GetInstance()->SetMasterVolume(0.0f);
     FadeManager::GetInstance()->FadeIn(1.0f);
 
     Light::GetInstance()->SetPositionPointLight({ 0.2f, 1.9f, 3.4f });
@@ -146,8 +151,12 @@ void TitleScene::Update() {
         Vector3 pos = { cursorPosition.x, cursorPosition.y, 0.0f };
         AABB aabb = { {pos},{pos} };
         // UIにマウスカーソルが入っている時、クリックしたときの処理
-        if (CollisionSprite(m_startUi->GetAABB(), aabb))
+        if (CollisionSprite(m_startUi->GetAABB(), aabb) && !m_showCredit)
         {
+            if (m_startUi->GetColor().x != 1.0f)
+            {
+                Audio::GetInstance()->Play("select");
+            }
             m_startUi->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
 
             if (m_pInput->TriggerMouse(0))
@@ -155,19 +164,25 @@ void TitleScene::Update() {
                 m_screenChange = true;
                 m_charModel->ChangePlayAnimation("TitleScreen");
                 m_charModel->ResetAnimationTime();
+                Audio::GetInstance()->Play("select_enter");
             }
         }
         else
         {
-            m_startUi->SetColor({ 0.0f, 0.0f, 0.0f,1.0f });
+            m_startUi->SetColor({ 0.0f, 0.0f, 0.0f, 1.0f });
         }
 
-        if (CollisionSprite(m_exitUi->GetAABB(), aabb))
+        if (CollisionSprite(m_exitUi->GetAABB(), aabb) && !m_showCredit)
         {
+            if (m_exitUi->GetColor().x != 1.0f)
+            {
+                Audio::GetInstance()->Play("select");
+            }
             m_exitUi->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
 
             if (m_pInput->TriggerMouse(0))
             {
+                Audio::GetInstance()->Play("select_enter");
                 finished = true;
             }
         }
@@ -198,15 +213,43 @@ void TitleScene::Update() {
             {
                 SceneManager::GetInstance()->SetNextScene("GAMESCENE");
                 m_screenChange = false;
-                /*camera->SetTranslate({ 0.0f, 0.2f, -4.5f });
-                camera->SetRotate({ SwapRadian(-9.5f), 0.0f, 0.0f });
-                m_screenChangeTimer = 0.0f;*/
             }
         }
-       
+
+        // creditの表示
+        if (CollisionUISprite(m_credit->GetAABB(), m_mouseCursor->GetCursorPos()))
+        {
+            if (m_credit->GetColor().y != 0.0f)
+            {
+                Audio::GetInstance()->Play("select");   
+            }
+            if (m_pInput->TriggerMouse(0))
+            {
+                m_showCredit = !m_showCredit;
+                Audio::GetInstance()->Play("select_enter");
+            }
+            m_credit->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
+        }
+        else
+        {
+            m_credit->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+        }
+
+        // ゲームパッドを読み込みなおす
+        if (CollisionUISprite(m_gamePad->GetAABB(), m_mouseCursor->GetCursorPos()) && m_pInput->TriggerMouse(0))
+        {
+            m_pInput->UpdateDevice();
+            if (m_pInput->IsConnectedController())
+            {
+                m_gamePad->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+            }
+        }
 
         m_startUi->Update();
         m_exitUi->Update();
+        m_gamePad->Update();
+        m_credit->Update();
+        m_credit_sound->Update();
 
         break;
     }
@@ -261,6 +304,12 @@ void TitleScene::Draw() {
 
         m_startUi->Draw();
         m_exitUi->Draw();
+        m_gamePad->Draw();
+        m_credit->Draw();
+        if (m_showCredit)
+        {
+            m_credit_sound->Draw();
+        }
 
         break;
     }
