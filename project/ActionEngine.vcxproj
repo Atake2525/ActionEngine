@@ -107,10 +107,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Application\ActionPlayer.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="Application\Scene\PlayScene\DemoScene.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -163,7 +159,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Scene\Manager\SceneFactory.cpp" />
     <ClCompile Include="Engine\3d\SkyBox\SkyBox.cpp" />
     <ClCompile Include="Engine\JsonLoader\JsonLoader.cpp" />
-    <ClCompile Include="Application\Scene\PlayScene\TestScene.cpp" />
     <ClCompile Include="Engine\Presentation\Cinematic\FadeManager.cpp" />
     <ClCompile Include="Application\Goal.cpp" />
     <ClCompile Include="Application\Trap.cpp" />
@@ -177,7 +172,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="externals\imgui\imgui_tables.cpp" />
     <ClCompile Include="externals\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Application\StageManager\BaseStage.cpp" />
-    <ClCompile Include="Application\Scene\PlayScene\StageSelectScene.cpp" />
     <ClCompile Include="Application\Player.cpp" />
     <ClCompile Include="Engine\Collision\PhysicsCorrection.cpp" />
     <ClCompile Include="Application\Pause.cpp" />
@@ -186,10 +180,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Core\Input\MouseCursor.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Application\ActionPlayer.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
-    </ClInclude>
     <ClInclude Include="Application\Scene\Manager\AbstractSceneFactory.h" />
     <ClInclude Include="Application\Scene\PlayScene\DemoScene.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -259,7 +249,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Scene\PlayScene\TitleScene.h" />
     <ClInclude Include="Application\Scene\Manager\SceneFactory.h" />
     <ClInclude Include="Engine\3d\SkyBox\SkyBox.h" />
-    <ClInclude Include="Application\Scene\PlayScene\TestScene.h" />
     <ClInclude Include="Engine\Presentation\Cinematic\FadeManager.h" />
     <ClInclude Include="Application\Goal.h" />
     <ClInclude Include="Application\Trap.h" />
@@ -274,7 +263,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\imgui\imstb_textedit.h" />
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
     <ClInclude Include="Application\StageManager\BaseStage.h" />
-    <ClInclude Include="Application\Scene\PlayScene\StageSelectScene.h" />
     <ClInclude Include="Application\StageManager\TutorialStage.h" />
     <ClInclude Include="Application\Player.h" />
     <ClInclude Include="Engine\Collision\PhysicsCorrection.h" />

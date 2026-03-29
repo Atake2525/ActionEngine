@@ -81,8 +81,8 @@ private:
         }
     };
 
-    std::unique_ptr<Camera> camera;
-    Input* input = nullptr;
+    std::unique_ptr<Camera> m_pCamera;
+    Input* m_pInput = nullptr;
 
     // BootScreen
 
@@ -101,16 +101,15 @@ private:
 
     //
 
-    int maxSelectNum = 3;
+    int m_maxSelectNum = 3;
 
-    Select select = Select::Play;
-    Select selectPre = Select::Play;
+    Select m_select = Select::Play;
+    Select m_selectPre = Select::Play;
 
-    std::unique_ptr<Sprite> gamePad = nullptr;
+    std::unique_ptr<Sprite> m_gamePad = nullptr;
 
-    std::unique_ptr<Sprite> credit_sound = nullptr;
-
-    bool start_ = false;
+    std::unique_ptr<Sprite> m_credit_sound = nullptr;
+    bool m_start = false;
 
     std::unique_ptr<MouseCursor> m_mouseCursor;
 

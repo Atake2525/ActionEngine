@@ -67,7 +67,7 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
         m_controlMode = ControlMode::KeyboardMouse;
     }
 
-    input = Input::GetInstance();
+    m_pInput = Input::GetInstance();
 
     // デバッグ用の初期設定
 #ifndef NDEBUG
@@ -211,12 +211,12 @@ void Player::UpdateState()
     {
     case Player::ControlMode::KeyboardMouse: // キーボード・マウス
         // ダッシュ入力
-        if (input->PushKeyInt(DIK_LSHIFT))
+        if (m_pInput->PushKeyInt(DIK_LSHIFT))
         {
             m_walkState = PlayerWalkState::Run;
         }
         // しゃがみ入力
-        if (input->PushKeyInt(DIK_LCONTROL))
+        if (m_pInput->PushKeyInt(DIK_LCONTROL))
         {
             m_walkState = PlayerWalkState::Crouch;
         }
@@ -280,7 +280,7 @@ void Player::UpdateParkourState()
     }
     
     // よじ登りの開始を確認する
-    if ((input->TriggerKey(DIK_SPACE) || input->PushButton(Controller::A)) && m_canClimbing && !m_isClimbingMotion)
+    if ((m_pInput->TriggerKey(DIK_SPACE) || m_pInput->PushButton(Controller::A)) && m_canClimbing && !m_isClimbingMotion)
     {
         StartClimbing();
         m_walkState = PlayerWalkState::Climbing;
@@ -379,7 +379,7 @@ void Player::HandleInput()
             break;
         case Player::ControlMode::Gamepad:
             // ジョイスティック入力による移動
-            m_moveInput = input->GetJoyStickVelocity();
+            m_moveInput = m_pInput->GetJoyStickVelocity();
             m_moveInput.y *= -1.0f;
             m_jumpInput += Input::GetInstance()->TriggerButton(Controller::A);
 

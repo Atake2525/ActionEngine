@@ -34,8 +34,6 @@ public:
 	/// テクスチャ変更
 	/// </summary>
 	void ChangeTexture(std::string textureFilePath);
-
-	void FixTextureScale(const Vector2& scale);
 	
 	/// <summary>
 	/// 描画
