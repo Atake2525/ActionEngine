@@ -15,27 +15,26 @@ void TitleScene::Initialize() {
 
     //ModelManager::GetInstance()->LoadModel("Resources/Model/gltf/human", "walkMultiMaterial.gltf", true, true);
 
-    camera = make_unique<Camera>();
-    camera->SetRotate(Vector3(SwapRadian(11.5f), SwapRadian(1.5f), 0.0f));
-    camera->SetTranslate({ -1.0f, 1.6f, -3.4f });
-    m_screenChangeTransformPre = camera->GetTransform();
-    camera->Update();
+    m_pCamera = make_unique<Camera>();
+    m_pCamera->SetRotate(Vector3(SwapRadian(11.5f), SwapRadian(1.5f), 0.0f));
+    m_pCamera->SetTranslate({ -1.0f, 1.6f, -3.4f });
+    m_screenChangeTransformPre = m_pCamera->GetTransform();
+    m_pCamera->Update();
 
     TextureManager::GetInstance()->LoadTexture("Resources/rostock_laage_airport_4k.dds");
 
-    SkyBox::GetInstance()->SetCamera(camera.get());
+    SkyBox::GetInstance()->SetCamera(m_pCamera.get());
     SkyBox::GetInstance()->SetTexture("Resources/rostock_laage_airport_4k.dds");
     SkyBox::GetInstance()->SetSunPoewr(1.0f);
 
-    input = Input::GetInstance();
-
-    input->ShowMouseCursor(false);
+    m_pInput = Input::GetInstance();
+    m_pInput->ShowMouseCursor(false);
     m_mouseCursor = std::make_unique<MouseCursor>();
     m_mouseCursor->Initialize("Resources/Sprite/Cursor_Hover.png", "Resources/Sprite/Cursor_Press.png");
 
-    Object3dBase::GetInstance()->SetDefaultCamera(camera.get());
+    Object3dBase::GetInstance()->SetDefaultCamera(m_pCamera.get());
 
-    ParticleManager::GetInstance()->SetCamera(camera.get());
+    ParticleManager::GetInstance()->SetCamera(m_pCamera.get());
 
     m_charModel = make_unique<Object3d>();
     m_charModel->Initialize();
@@ -79,15 +78,15 @@ void TitleScene::Initialize() {
     m_pressAnyKey->SetRotatioin(-SwapRadian(1.0f));
     m_pressAnyKey->Update();
 
-    gamePad = make_unique<Sprite>();
-    gamePad->Initialize("Resources/Sprite/UI/gamepad.png");
-    //gamePad->SetAnchorPoint({ 0.5f, 0.5f });
-    gamePad->SetPosition({ windowSize.x - gamePad->GetTextureSize().x - 10.0f, windowSize.y - gamePad->GetTextureSize().y - 10.0f });
+    m_gamePad = make_unique<Sprite>();
+    m_gamePad->Initialize("Resources/Sprite/UI/gamepad.png");
+    //m_gamePad->SetAnchorPoint({ 0.5f, 0.5f });
+    m_gamePad->SetPosition({ windowSize.x - m_gamePad->GetTextureSize().x - 10.0f, windowSize.y - m_gamePad->GetTextureSize().y - 10.0f });
 
-    credit_sound = make_unique<Sprite>();
-    credit_sound->Initialize("Resources/Sprite/UI/credit_sound.png");
-    credit_sound->SetAnchorPoint({ 0.5f, 0.5f });
-    credit_sound->SetPosition({ windowSize.x / 2.0f, windowSize.y / 2.0f });
+    m_credit_sound = make_unique<Sprite>();
+    m_credit_sound->Initialize("Resources/Sprite/UI/credit_sound.png");
+    m_credit_sound->SetAnchorPoint({ 0.5f, 0.5f });
+    m_credit_sound->SetPosition({ windowSize.x / 2.0f, windowSize.y / 2.0f });
 
     Audio::GetInstance()->LoadMP3("Resources/sound/select.mp3", "select", 1.0f);
     Audio::GetInstance()->LoadMP3("Resources/sound/enter.mp3", "enter", 1.0f);
@@ -105,7 +104,7 @@ void TitleScene::Initialize() {
 
     Light::GetInstance()->SetDirectionDirectionalLight({ 0.174f, -0.35f, 1.0f });
     Light::GetInstance()->SetIntensityDirectionalLight(0.5f);
-    Light::GetInstance()->SetRadius(camera->GetFarClipDistance());
+    Light::GetInstance()->SetRadius(m_pCamera->GetFarClipDistance());
 
     m_sceneScreen = TitleSceneScreen::BootScreen;
 
@@ -118,7 +117,7 @@ void TitleScene::Update() {
         return;
     }
 
-    if (input->TriggerKey(DIK_ESCAPE))
+    if (m_pInput->TriggerKey(DIK_ESCAPE))
     {
         finished = true;
     }
@@ -130,7 +129,7 @@ void TitleScene::Update() {
         
 
 
-        if (input->PressAnyKey() || input->PressAnyButton() || input->TriggerMouse(0) || input->TriggerMouse(1))
+        if (m_pInput->PressAnyKey() || m_pInput->PressAnyButton() || m_pInput->TriggerMouse(0) || m_pInput->TriggerMouse(1))
         {
             m_sceneScreen = TitleSceneScreen::TitleScreen;
 
@@ -151,7 +150,7 @@ void TitleScene::Update() {
         {
             m_startUi->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
 
-            if (input->TriggerMouse(0))
+            if (m_pInput->TriggerMouse(0))
             {
                 m_screenChange = true;
                 m_charModel->ChangePlayAnimation("TitleScreen");
@@ -167,7 +166,7 @@ void TitleScene::Update() {
         {
             m_exitUi->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
 
-            if (input->TriggerMouse(0))
+            if (m_pInput->TriggerMouse(0))
             {
                 finished = true;
             }
@@ -184,7 +183,7 @@ void TitleScene::Update() {
             Transform cameraT = Transform::Default;
             cameraT.rotate = Lerp(m_screenChangeTransformPre.rotate, m_screenChangeTransform[m_changeNum].rotate, m_screenChangeTimer);
             cameraT.translate = Lerp(m_screenChangeTransformPre.translate, m_screenChangeTransform[m_changeNum].translate, m_screenChangeTimer);
-            camera->SetTransform(cameraT);
+            m_pCamera->SetTransform(cameraT);
 
             if (m_screenChangeTimer == 1.0f && m_changeNum == 0)
             {
@@ -220,7 +219,7 @@ void TitleScene::Update() {
 
     SkyBox::GetInstance()->Update();
 
-    camera->Update();
+    m_pCamera->Update();
     m_mouseCursor->Update();
 }
 
