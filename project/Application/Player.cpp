@@ -140,8 +140,6 @@ void Player::Update()
     ApplyGravity();
 #endif // !NDEBUG
 
-    //m_transform.translate += m_velocity.translate;
-
     m_transform.rotate += m_velocity.rotate;
     m_pModel->SetTransform(m_transform);
 
@@ -151,7 +149,6 @@ void Player::Update()
     }
 
     m_pModel->Update();
-    //m_pCamera->SetTranslate(m_transform.translate);
     ApplyCameraEffect();
     m_pCamera->SetTransform(m_cameraTransform);
     UpdateCameraParent();
@@ -732,7 +729,6 @@ void Player::Climbing()
     
     Vector3 penetration = CollisionManager::GetInstance()->GetAllPenetrationForAABB(pAABB, false);
     // よじ登りをするためのオブジェクトのAABBを取得する
-    //Vector3 dir = CollisionManager::GetInstance()->GetCollisionObjectDirectionForAABB(pAABB, false);
     Vector3 cameraDir = m_pCamera->GetDirection();
     
     Vector3 fabsCameraDir = cameraDir;
@@ -760,9 +756,6 @@ void Player::Climbing()
     Vector3 rePairPosition = Vector3::Zero;
     if (cameraDir.x != 0.0f)
     {
-        /*pAABB = AddSize(pAABB, -penetration.x);
-        rePairPosition.x = CenterAABB(m_playerAABB + m_velocity.translate).x - AABB::GetSize(pAABB).x;*/
-        //float wallPos = size.x - penetration.x;
         if (cameraDir.x > 0.0f)
         {
             rePairPosition.x = m_transform.translate.x - colObj.min.x;
@@ -774,9 +767,6 @@ void Player::Climbing()
     }
     if (cameraDir.z != 0.0f)
     {
-        //pAABB = AddSize(pAABB, -penetration.z);
-        //rePairPosition.z = AABB::GetSize(pAABB).z - CenterAABB(m_playerAABB + m_velocity.translate).z;
-        //rePairPosition.z = penetration.z - (dir.z * m_canClimbingCheckSize + size.z);
         if (cameraDir.z > 0.0f)
         {
             rePairPosition.z = m_transform.translate.z - colObj.min.z;
@@ -876,9 +866,7 @@ void Player::UpdateVelocity()
 
 void Player::UpdateCameraParent() {
     // カメラのParent設定処理の実装
-    //m_pCamera->SetRotateParent(m_pModel->GetWorldMatrix());
     m_pCamera->SetParent(m_pModel->GetWorldMatrix());
-    //m_pModel->SetParent(m_pCamera->GetWorldMatrix());
 }
 
 void Player::ApplyCameraEffect()
