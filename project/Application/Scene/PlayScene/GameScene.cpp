@@ -47,15 +47,15 @@ void GameScene::Initialize() {
     m_pPause->Initialize(m_mouseCursor.get());
 
     m_scenePhase = ScenePhase::FadeIn;
-    m_pInput->ShowMouseCursor(cursorshow);
+    m_pInput->ShowMouseCursor(m_cursorShow);
 }
 
 void GameScene::Update() {
 
-    // ポーズ時にマウスカーソルを使うため一番に更新
-    m_mouseCursor->Update();
     // ポーズはどのフェーズでも行えるようにする
     m_pPause->Update();
+    // ポーズ時にマウスカーソルを使うため前の方で更新
+    m_mouseCursor->Update();
     if (m_pPause->IsPause())
     {
         return;
@@ -109,23 +109,16 @@ void GameScene::Update() {
         m_pPlayer->Update();
         m_pPlayerUI->Update();
         break;
-    //case ScenePhase::FadeOut: // シーン遷移演出フェーズ(出)
-    //    break;
     }
 
 
     m_pStage->Update();
 
 #ifndef NDEBUG
-   /* if (input->TriggerKey(DIK_ESCAPE))
-    {
-        finished = true;
-    }*/
-
     if (m_pInput->TriggerKey(DIK_F11))
     {
-        cursorshow = !cursorshow;
-        m_pInput->ShowMouseCursor(cursorshow);
+        m_cursorShow = !m_cursorShow;
+        m_pInput->ShowMouseCursor(m_cursorShow);
     }
 #else
 
@@ -133,19 +126,7 @@ void GameScene::Update() {
 
     
 
-    if (m_pInput->TriggerKey(DIK_1))
-    {
-        Audio::GetInstance()->Play2D("bgm", { 0.0f, 0.0f }, false);
-    }
-
     SkyBox::GetInstance()->Update();
-
-
-    if (m_pInput->TriggerKey(DIK_R))
-    {
-        SceneManager::GetInstance()->SetNextScene("GAMESCENE");
-    }
-
 
     m_pCamera->Update();
 }

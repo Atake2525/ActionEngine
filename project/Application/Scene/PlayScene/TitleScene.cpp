@@ -13,8 +13,6 @@ using namespace std;
 
 void TitleScene::Initialize() {
 
-    //ModelManager::GetInstance()->LoadModel("Resources/Model/gltf/human", "walkMultiMaterial.gltf", true, true);
-
     m_pCamera = make_unique<Camera>();
     m_pCamera->SetRotate(Vector3(SwapRadian(11.5f), SwapRadian(1.5f), 0.0f));
     m_pCamera->SetTranslate({ -1.0f, 1.6f, -3.4f });
@@ -31,6 +29,7 @@ void TitleScene::Initialize() {
     m_pInput->ShowMouseCursor(false);
     m_mouseCursor = std::make_unique<MouseCursor>();
     m_mouseCursor->Initialize("Resources/Sprite/Cursor_Hover.png", "Resources/Sprite/Cursor_Press.png");
+    m_mouseCursor->SetCursorPosition(WinApp::GetInstance()->GetWindowSize() / 2.0f);
 
     Object3dBase::GetInstance()->SetDefaultCamera(m_pCamera.get());
 

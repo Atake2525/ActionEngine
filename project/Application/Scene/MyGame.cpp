@@ -10,8 +10,7 @@ void MyGame::Initialize() {
 
 	GameTime::GetInstance()->Initialize();
 
-	//WinApp::GetInstance()->Initialize(1920, 1080, WindowMode::FullScreen, L"Engine");
-	WinApp::GetInstance()->Initialize();
+	WinApp::GetInstance()->Initialize(1920, 1080, WindowMode::FullScreen, L"走快");
 
 	DirectXBase::GetInstance()->Initialize();
 
@@ -59,7 +58,7 @@ void MyGame::Initialize() {
 
 	SceneManager::GetInstance();
 	
-	SceneManager::GetInstance()->SetNextScene("GAMESCENE");
+	SceneManager::GetInstance()->SetNextScene("TITLE");
 
 	//gameScene->Initialize();
 

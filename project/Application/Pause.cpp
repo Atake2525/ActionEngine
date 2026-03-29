@@ -9,6 +9,7 @@
 #include "FadeManager.h"
 #include "MouseCursor.h"
 #include "Collision.h"
+#include <functional>
 
 using namespace std;
 
@@ -201,32 +202,42 @@ void Pause::Draw() {
 }
 
 void Pause::Enter(int selectNumber) {
+    std::function<void()> restartFunc = [&]() {
+        OffScreenRendering::GetInstance()->SetGrayscaleIntensity(0.0f);
+        SceneManager::GetInstance()->SetNextScene(SceneManager::GetInstance()->GetSceneName());
+        };
+    std::function<void()> goTitleFunc = [&]() {
+        SceneManager::GetInstance()->SetNextScene("TITLE");
+        OffScreenRendering::GetInstance()->SetGrayscaleIntensity(0.0f);
+        };
     switch (m_pauseSelect)
     {
     case PauseSelect::back:
         m_pauseAnim = !m_pauseAnim;
         m_pause = false;
-        m_animTimer = 0.0f;
+        //m_animTimer = 0.0f;
         if (m_pause)
         {
-            m_input->ShowMouseCursor(false);
+            m_mouseCursor->SetShowCursor(true);
+            m_mouseCursor->SetCursorPosition({ m_windowSize.x / 2.0f, m_windowSize.y / 4.5f });
         }
         else
         {
-            m_input->ShowMouseCursor(true);
+            m_mouseCursor->SetShowCursor(false);
         }
         break;
     case PauseSelect::restart:
-        OffScreenRendering::GetInstance()->SetGrayscaleIntensity(0.0f);
-        SceneManager::GetInstance()->SetNextScene(SceneManager::GetInstance()->GetSceneName());
+
+        FadeManager::GetInstance()->FadeOut(0.5f);
+        FadeManager::GetInstance()->SetFinishedFadeFunction(restartFunc);
         break;
     case PauseSelect::stageSelect:
         break;
     case PauseSelect::setting:
         break;
     case PauseSelect::title:
-        SceneManager::GetInstance()->SetNextScene("TITLE");
-        OffScreenRendering::GetInstance()->SetGrayscaleIntensity(0.0f);
+        FadeManager::GetInstance()->FadeOut(0.5f);
+        FadeManager::GetInstance()->SetFinishedFadeFunction(goTitleFunc);
         break;
     }
 }
