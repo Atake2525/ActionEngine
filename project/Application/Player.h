@@ -124,6 +124,11 @@ private: // プレイヤーステート管理
     void Climbing();
 
     /// <summary>
+    /// クライミング(よじ登り)開始処理
+    /// </summary>
+    void StartClimbing();
+
+    /// <summary>
     /// ジャンプ処理
     /// </summary>
     void Jump();
@@ -259,6 +264,13 @@ private:
 
     bool m_canClimbing = false;
     float m_climbingHeight = -4.0f; // よじ登りができるまでの高さ
+    bool m_isClimbingMotion = false; 
+    int m_climbingStep = 0; // よじ登りのステップ
+    Vector3 m_climbingStartTranslate = Vector3::Zero;
+    Vector3 m_climbingTopTranslate = Vector3::Zero;
+    Vector3 m_climbingEndTranslate = Vector3::Zero;
+    float m_climbingTimer = 0.0f;
+    float m_climbingTime = 0.25f;
 
     // 移動速度
     const float m_walkSpeed = 6.0f;
