@@ -87,13 +87,8 @@ void TitleScene::Initialize() {
     m_credit_sound->SetAnchorPoint({ 0.5f, 0.5f });
     m_credit_sound->SetPosition({ windowSize.x / 2.0f, windowSize.y / 2.0f });
 
-    Audio::GetInstance()->LoadMP3("Resources/sound/select.mp3", "select", 1.0f);
-    Audio::GetInstance()->LoadMP3("Resources/sound/enter.mp3", "enter", 1.0f);
-    //Audio::GetInstance()->LoadMP3("Resources/sound/Experimenta_Model_short.mp3", "bgm", 0.2f);
+    
 
-    //Audio::GetInstance()->Play("bgm", true);
-
-    //Audio::GetInstance()->SetMasterVolume(0.0f);
     FadeManager::GetInstance()->FadeIn(1.0f);
 
     Light::GetInstance()->SetPositionPointLight({ 0.2f, 1.9f, 3.4f });
@@ -147,6 +142,10 @@ void TitleScene::Update() {
         // UIにマウスカーソルが入っている時、クリックしたときの処理
         if (CollisionSprite(m_startUi->GetAABB(), aabb))
         {
+            if (m_startUi->GetColor().x != 1.0f)
+            {
+                Audio::GetInstance()->Play("select");
+            }
             m_startUi->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
 
             if (m_pInput->TriggerMouse(0))
@@ -154,19 +153,25 @@ void TitleScene::Update() {
                 m_screenChange = true;
                 m_charModel->ChangePlayAnimation("TitleScreen");
                 m_charModel->ResetAnimationTime();
+                Audio::GetInstance()->Play("select_enter");
             }
         }
         else
         {
-            m_startUi->SetColor({ 0.0f, 0.0f, 0.0f,1.0f });
+            m_startUi->SetColor({ 0.0f, 0.0f, 0.0f, 1.0f });
         }
 
         if (CollisionSprite(m_exitUi->GetAABB(), aabb))
         {
+            if (m_exitUi->GetColor().x != 1.0f)
+            {
+                Audio::GetInstance()->Play("select");
+            }
             m_exitUi->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
 
             if (m_pInput->TriggerMouse(0))
             {
+                Audio::GetInstance()->Play("select_enter");
                 finished = true;
             }
         }
