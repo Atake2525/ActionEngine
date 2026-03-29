@@ -66,6 +66,8 @@ public:
     // よじ登りができるか確認する
     const bool GetIsClimbing() const { return m_canClimbing; }
 
+    const Transform& GetTransform() const { return m_transform; }
+
 private: // プレイヤーステート管理
     /// <summary>
     /// 状態の更新
