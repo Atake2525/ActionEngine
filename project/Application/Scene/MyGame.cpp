@@ -10,8 +10,8 @@ void MyGame::Initialize() {
 
 	GameTime::GetInstance()->Initialize();
 
-	WinApp::GetInstance()->Initialize(1920, 1080, WindowMode::FullScreen, L"走快");
-	//WinApp::GetInstance()->Initialize();
+	//WinApp::GetInstance()->Initialize(1920, 1080, WindowMode::FullScreen, L"走快");
+	WinApp::GetInstance()->Initialize();
 
 	DirectXBase::GetInstance()->Initialize();
 

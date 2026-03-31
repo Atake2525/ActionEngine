@@ -112,19 +112,7 @@ void GameScene::Update() {
     }
 
 
-    m_pStage->Update();
-
-#ifndef NDEBUG
-    if (m_pInput->TriggerKey(DIK_F11))
-    {
-        m_cursorShow = !m_cursorShow;
-        m_pInput->ShowMouseCursor(m_cursorShow);
-    }
-#else
-
-#endif // !NDEBUG
-
-    
+    m_pStage->Update();    
 
     SkyBox::GetInstance()->Update();
 

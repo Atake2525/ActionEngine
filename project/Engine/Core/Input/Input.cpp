@@ -182,6 +182,18 @@ void Input::Update() {
 	// 全キーの入力情報を取得する
 	result = keyboard->GetDeviceState(sizeof(keys), keys);
 
+#ifndef NDEBUG
+	if (TriggerKey(DIK_F11))
+	{
+		showCursor = !showCursor;
+		if (showCursor)
+		{
+			mouse->Unacquire();
+		}
+	}
+#endif // !NDEBUG
+
+
 	if (!showCursor)
 	{
 		mouseStatePre = mouseState;
