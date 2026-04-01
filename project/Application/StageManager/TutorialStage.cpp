@@ -5,6 +5,9 @@
 #include "Light.h"
 #include "Player.h"
 #include "OffscreenRendering.h"
+#include "FadeManager.h"
+#include <functional>
+#include "SceneManager.h"
 
 using namespace std;
 
@@ -49,7 +52,7 @@ void TutorialStage::Initialize(Player* player, Camera* camera, MouseCursor* mous
         tutorialSprites[i]->Update();
     }
 
-    //Light::GetInstance()->SetDirectionDirectionalLight({ 0.175f, -0.5f, -0.87f });
+
     m_player = player;
     m_camera = camera;
 }
@@ -67,6 +70,18 @@ void TutorialStage::Update()
         goal->SetGoal();
     }
 #endif // !NDEBUG
+
+    if (m_player->GetTransform().translate.y < -120.0f)
+    {
+        FadeManager::GetInstance()->FadeOut(0.5f);
+
+        std::function func = [this]() {
+            OffScreenRendering::GetInstance()->SetGrayscaleIntensity(0.0f);
+            SceneManager::GetInstance()->SetNextScene("GAMESCENE");
+            };
+
+        FadeManager::GetInstance()->SetFinishedFadeFunction(func);
+    }
 
     stageObject->Update();
 

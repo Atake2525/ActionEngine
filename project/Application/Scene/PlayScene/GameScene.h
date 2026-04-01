@@ -49,56 +49,24 @@ public:
 	void Draw() override;
 
 	// 終了処理
-	const bool& EndRequest() override { return finished; }
+	const bool& EndRequest() override { return m_finished; }
 
 private:
-	float speed = 0.25f;
+	std::unique_ptr<Camera> m_pCamera = nullptr;
 
-	bool sneak = false;
+	bool m_finished = false;
 
-	std::unique_ptr<Camera> camera = nullptr;
-
-	bool finished = false;
-
-	Transform cameraTransform;
-	Transform modelTransform;
-
-	Input* input = nullptr;
+	Input* m_pInput = nullptr;
 	std::unique_ptr<MouseCursor> m_mouseCursor = nullptr;
 
-	AABB aabb;
+	bool m_cursorShow = false;
 
-	bool enableLighting = true;
-
-	bool cursorshow = false;
-
-	Vector2 leftTop;
-	Transform transformSprite;
 
 	std::unique_ptr<Player> m_pPlayer = nullptr;
 	std::unique_ptr<PlayerUI> m_pPlayerUI = nullptr;
 
-	bool start_ = false;
-
-	bool startMovie_ = false;
-	float movieTimer_ = 0.0f;
-	float movieTime_ = 2.0f;
-	int phase_ = 0;
-
-	bool back = false;
-
-
-	struct Tutorial
-	{
-        std::unique_ptr<Sprite> sprite;
-		bool isClear = false;
-        float timer = 0.0f;
-		Vector4 color = { 0.0f, 0.0f, 0.0f, 1.0f };
-	};
-
-	std::unique_ptr<BaseStage> stage;
-
-	std::unique_ptr<Pause> m_pause;
+	std::unique_ptr<BaseStage> m_pStage;
+	std::unique_ptr<Pause> m_pPause;
 
 	/// <summary>
 	/// ここからスタート演出用系

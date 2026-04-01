@@ -13,29 +13,27 @@ using namespace std;
 
 void TitleScene::Initialize() {
 
-    //ModelManager::GetInstance()->LoadModel("Resources/Model/gltf/human", "walkMultiMaterial.gltf", true, true);
-
-    camera = make_unique<Camera>();
-    camera->SetRotate(Vector3(SwapRadian(11.5f), SwapRadian(1.5f), 0.0f));
-    camera->SetTranslate({ -1.0f, 1.6f, -3.4f });
-    m_screenChangeTransformPre = camera->GetTransform();
-    camera->Update();
+    m_pCamera = make_unique<Camera>();
+    m_pCamera->SetRotate(Vector3(SwapRadian(11.5f), SwapRadian(1.5f), 0.0f));
+    m_pCamera->SetTranslate({ -1.0f, 1.6f, -3.4f });
+    m_screenChangeTransformPre = m_pCamera->GetTransform();
+    m_pCamera->Update();
 
     TextureManager::GetInstance()->LoadTexture("Resources/rostock_laage_airport_4k.dds");
 
-    SkyBox::GetInstance()->SetCamera(camera.get());
+    SkyBox::GetInstance()->SetCamera(m_pCamera.get());
     SkyBox::GetInstance()->SetTexture("Resources/rostock_laage_airport_4k.dds");
     SkyBox::GetInstance()->SetSunPoewr(1.0f);
 
-    input = Input::GetInstance();
-
-    input->ShowMouseCursor(false);
+    m_pInput = Input::GetInstance();
+    m_pInput->ShowMouseCursor(false);
     m_mouseCursor = std::make_unique<MouseCursor>();
     m_mouseCursor->Initialize("Resources/Sprite/Cursor_Hover.png", "Resources/Sprite/Cursor_Press.png");
+    m_mouseCursor->SetCursorPosition(WinApp::GetInstance()->GetWindowSize() / 2.0f);
 
-    Object3dBase::GetInstance()->SetDefaultCamera(camera.get());
+    Object3dBase::GetInstance()->SetDefaultCamera(m_pCamera.get());
 
-    ParticleManager::GetInstance()->SetCamera(camera.get());
+    ParticleManager::GetInstance()->SetCamera(m_pCamera.get());
 
     m_charModel = make_unique<Object3d>();
     m_charModel->Initialize();
@@ -50,52 +48,54 @@ void TitleScene::Initialize() {
     m_bootScreen->SetModel("Resources/Model/obj/Title", "TitleScene_01.obj", true);
     m_bootScreen->Update();
 
-    Vector2 windowSize = { float(WinApp::GetInstance()->GetkClientWidth()), float(WinApp::GetInstance()->GetkClientHeight()) };
-    m_startUi = make_unique<Sprite>();
-    m_startUi->Initialize("Resources/Sprite/UI/ui_start.png");
-    m_startUi->SetColor({ 0.0f, 0.0f, 0.0f, 1.0f });
-    Vector2 size = m_startUi->GetTextureSize();
-    m_startUi->SetScale(size * 0.2f);
-    m_startUi->SetAnchorPoint({ 0.5f, 0.5f });
-    m_startUi->SetPosition({ windowSize.x * 0.5f, windowSize.y * 0.5f });
-    m_startUi->Update();
+    Vector2 windowSize = { WinApp::GetInstance()->GetWindowSize() };
+    
+    // STARTとEXITのUIスプライトの初期化
+    m_uiSprites[0] = make_unique<Sprite>();
+    m_uiSprites[0]->Initialize("Resources/Sprite/UI/ui_start.png");
+    m_uiBaseScale[0] = m_uiSprites[0]->GetScale();
+    m_uiSprites[0]->SetAnchorPoint({ 0.5f, 0.5f });
+    m_uiSprites[0]->SetPosition({ windowSize.x * 0.5f, windowSize.y * 0.5f });
+    m_uiSprites[0]->Update();
 
-
-    m_exitUi = make_unique<Sprite>();
-    m_exitUi->Initialize("Resources/Sprite/UI/ui_exit.png");
-    m_exitUi->SetColor({ 0.0f, 0.0f, 0.0f, 1.0f });
-    size = m_exitUi->GetTextureSize();
-    m_exitUi->SetScale(size * 0.2f);
-    m_exitUi->SetAnchorPoint({ 0.5f, 0.5f });
-    m_exitUi->SetPosition({ windowSize.x * 0.5f, windowSize.y * 0.5f + (size.y * 0.3f) });
-    m_exitUi->Update();
+    m_uiSprites[1] = make_unique<Sprite>();
+    m_uiSprites[1]->Initialize("Resources/Sprite/UI/ui_exit.png");
+    m_uiBaseScale[1] = m_uiSprites[1]->GetScale();
+    m_uiSprites[1]->SetAnchorPoint({ 0.5f, 0.5f });
+    m_uiSprites[1]->SetPosition({ windowSize.x * 0.5f, windowSize.y * 0.5f + m_uiBaseScale[1].y * 1.2f});
 
     m_pressAnyKey = make_unique<Sprite>();
     m_pressAnyKey->Initialize("Resources/Sprite/UI/press_any_key.png");
-    size = m_pressAnyKey->GetTextureSize();
+    Vector2 size = m_pressAnyKey->GetTextureSize();
     m_pressAnyKey->SetScale({ size.x * 0.3f, size.y * 0.3f });
     m_pressAnyKey->SetAnchorPoint({ 0.5f, 1.0f });
     m_pressAnyKey->SetPosition({ windowSize.x * 0.6f, windowSize.y * 1.014f });
     m_pressAnyKey->SetRotatioin(-SwapRadian(1.0f));
     m_pressAnyKey->Update();
 
-    gamePad = make_unique<Sprite>();
-    gamePad->Initialize("Resources/Sprite/UI/gamepad.png");
-    //gamePad->SetAnchorPoint({ 0.5f, 0.5f });
-    gamePad->SetPosition({ windowSize.x - gamePad->GetTextureSize().x - 10.0f, windowSize.y - gamePad->GetTextureSize().y - 10.0f });
+    m_gamePad = make_unique<Sprite>();
+    m_gamePad->Initialize("Resources/Sprite/UI/gamepad.png");
+    m_gamePad->SetPosition({ windowSize.x - m_gamePad->GetTextureSize().x - 10.0f, windowSize.y - m_gamePad->GetTextureSize().y - 10.0f });
+    // ゲームパッドが接続されている場合は、ゲームパッドのアイコンをAlpha1.0fで表示する
+    if (m_pInput->IsConnectedController())
+    {
+        m_gamePad->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+    }
+    else
+    {
+        m_gamePad->SetColor({ 1.0f, 1.0f, 1.0f, 0.5f });
+    }
 
-    credit_sound = make_unique<Sprite>();
-    credit_sound->Initialize("Resources/Sprite/UI/credit_sound.png");
-    credit_sound->SetAnchorPoint({ 0.5f, 0.5f });
-    credit_sound->SetPosition({ windowSize.x / 2.0f, windowSize.y / 2.0f });
+    m_credit_sound = make_unique<Sprite>();
+    m_credit_sound->Initialize("Resources/Sprite/UI/credit_sound.png");
+    m_credit_sound->SetAnchorPoint({ 0.5f, 0.5f });
+    m_credit_sound->SetPosition({ windowSize.x / 4.0f, windowSize.y / 2.0f });
 
-    Audio::GetInstance()->LoadMP3("Resources/sound/select.mp3", "select", 1.0f);
-    Audio::GetInstance()->LoadMP3("Resources/sound/enter.mp3", "enter", 1.0f);
-    //Audio::GetInstance()->LoadMP3("Resources/sound/Experimenta_Model_short.mp3", "bgm", 0.2f);
+    m_credit = make_unique<Sprite>();
+    m_credit->Initialize("Resources/Sprite/UI/credit.png");
+    m_credit->SetAnchorPoint(ANCHORPOINT_LEFTBOTTOM);
+    m_credit->SetPosition({ 30.0f, windowSize.y - 30.0f });
 
-    //Audio::GetInstance()->Play("bgm", true);
-
-    //Audio::GetInstance()->SetMasterVolume(0.0f);
     FadeManager::GetInstance()->FadeIn(1.0f);
 
     Light::GetInstance()->SetPositionPointLight({ 0.2f, 1.9f, 3.4f });
@@ -105,7 +105,7 @@ void TitleScene::Initialize() {
 
     Light::GetInstance()->SetDirectionDirectionalLight({ 0.174f, -0.35f, 1.0f });
     Light::GetInstance()->SetIntensityDirectionalLight(0.5f);
-    Light::GetInstance()->SetRadius(camera->GetFarClipDistance());
+    Light::GetInstance()->SetRadius(m_pCamera->GetFarClipDistance());
 
     m_sceneScreen = TitleSceneScreen::BootScreen;
 
@@ -118,7 +118,7 @@ void TitleScene::Update() {
         return;
     }
 
-    if (input->TriggerKey(DIK_ESCAPE))
+    if (m_pInput->TriggerKey(DIK_ESCAPE))
     {
         finished = true;
     }
@@ -130,12 +130,14 @@ void TitleScene::Update() {
         
 
 
-        if (input->PressAnyKey() || input->PressAnyButton() || input->TriggerMouse(0) || input->TriggerMouse(1))
+        if (m_pInput->PressAnyKey() || m_pInput->PressAnyButton() || m_pInput->TriggerMouse(0) || m_pInput->TriggerMouse(1))
         {
             m_sceneScreen = TitleSceneScreen::TitleScreen;
 
-            m_startUi->Update();
-            m_exitUi->Update();
+            for (auto& uiSprite : m_uiSprites)
+            {
+                uiSprite->Update();
+            }
 
         }
         // 何かしらキーを押したらBootScreenからTitleScreenに切り替える
@@ -147,34 +149,48 @@ void TitleScene::Update() {
         Vector3 pos = { cursorPosition.x, cursorPosition.y, 0.0f };
         AABB aabb = { {pos},{pos} };
         // UIにマウスカーソルが入っている時、クリックしたときの処理
-        if (CollisionSprite(m_startUi->GetAABB(), aabb))
+        if (CollisionSprite(m_uiSprites[0]->GetAABB(), aabb) && !m_showCredit)
         {
-            m_startUi->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
+            if (m_uiSprites[0]->GetColor().x != 0.0f)
+            {
+                Audio::GetInstance()->Play("select");
+            }
+            m_uiSprites[0]->SetColor({ 0.0f, 1.0f, 0.6f, 1.0f});
+            m_uiSprites[0]->SetScale(m_uiBaseScale[0] * 1.1f);
 
-            if (input->TriggerMouse(0))
+            if (m_pInput->TriggerMouse(0) || m_pInput->TriggerKey(DIK_SPACE) || m_pInput->TriggerKey(DIK_RETURN))
             {
                 m_screenChange = true;
                 m_charModel->ChangePlayAnimation("TitleScreen");
                 m_charModel->ResetAnimationTime();
+                Audio::GetInstance()->Play("select_enter");
             }
         }
         else
         {
-            m_startUi->SetColor({ 0.0f, 0.0f, 0.0f,1.0f });
+            m_uiSprites[0]->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+            m_uiSprites[0]->SetScale(m_uiBaseScale[0]);
         }
 
-        if (CollisionSprite(m_exitUi->GetAABB(), aabb))
+        if (CollisionSprite(m_uiSprites[1]->GetAABB(), aabb) && !m_showCredit)
         {
-            m_exitUi->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
-
-            if (input->TriggerMouse(0))
+            if (m_uiSprites[1]->GetColor().x != 0.0f)
             {
+                Audio::GetInstance()->Play("select");
+            }
+            m_uiSprites[1]->SetColor({ 0.0f, 1.0f, 0.6f, 1.0f});
+            m_uiSprites[1]->SetScale(m_uiBaseScale[1] * 1.1f);
+
+            if (m_pInput->TriggerMouse(0) || m_pInput->TriggerKey(DIK_SPACE) || m_pInput->TriggerKey(DIK_RETURN))
+            {
+                Audio::GetInstance()->Play("select_enter");
                 finished = true;
             }
         }
         else
         {
-            m_exitUi->SetColor({ 0.0f, 0.0f, 0.0f,1.0f });
+            m_uiSprites[1]->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+            m_uiSprites[1]->SetScale( m_uiBaseScale[1] );
         }
 
         if (m_screenChange)
@@ -184,7 +200,7 @@ void TitleScene::Update() {
             Transform cameraT = Transform::Default;
             cameraT.rotate = Lerp(m_screenChangeTransformPre.rotate, m_screenChangeTransform[m_changeNum].rotate, m_screenChangeTimer);
             cameraT.translate = Lerp(m_screenChangeTransformPre.translate, m_screenChangeTransform[m_changeNum].translate, m_screenChangeTimer);
-            camera->SetTransform(cameraT);
+            m_pCamera->SetTransform(cameraT);
 
             if (m_screenChangeTimer == 1.0f && m_changeNum == 0)
             {
@@ -199,15 +215,45 @@ void TitleScene::Update() {
             {
                 SceneManager::GetInstance()->SetNextScene("GAMESCENE");
                 m_screenChange = false;
-                /*camera->SetTranslate({ 0.0f, 0.2f, -4.5f });
-                camera->SetRotate({ SwapRadian(-9.5f), 0.0f, 0.0f });
-                m_screenChangeTimer = 0.0f;*/
             }
         }
-       
 
-        m_startUi->Update();
-        m_exitUi->Update();
+        // creditの表示
+        if (CollisionUISprite(m_credit->GetAABB(), m_mouseCursor->GetCursorPos()))
+        {
+            if (m_credit->GetColor().y != 0.0f)
+            {
+                Audio::GetInstance()->Play("select");   
+            }
+            if (m_pInput->TriggerMouse(0))
+            {
+                m_showCredit = !m_showCredit;
+                Audio::GetInstance()->Play("select_enter");
+            }
+            m_credit->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
+        }
+        else
+        {
+            m_credit->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+        }
+
+        // ゲームパッドを読み込みなおす
+        if (CollisionUISprite(m_gamePad->GetAABB(), m_mouseCursor->GetCursorPos()) && m_pInput->TriggerMouse(0))
+        {
+            m_pInput->UpdateDevice();
+            if (m_pInput->IsConnectedController())
+            {
+                m_gamePad->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+            }
+        }
+
+        for (auto& uiSprite : m_uiSprites)
+        {
+            uiSprite->Update();
+        }
+        m_gamePad->Update();
+        m_credit->Update();
+        m_credit_sound->Update();
 
         break;
     }
@@ -220,7 +266,7 @@ void TitleScene::Update() {
 
     SkyBox::GetInstance()->Update();
 
-    camera->Update();
+    m_pCamera->Update();
     m_mouseCursor->Update();
 }
 
@@ -260,8 +306,16 @@ void TitleScene::Draw() {
 
         SpriteBase::GetInstance()->ShaderDraw();
 
-        m_startUi->Draw();
-        m_exitUi->Draw();
+        for (auto& uiSprite : m_uiSprites)
+        {
+            uiSprite->Draw();
+        }
+        m_gamePad->Draw();
+        m_credit->Draw();
+        if (m_showCredit)
+        {
+            m_credit_sound->Draw();
+        }
 
         break;
     }

@@ -64,7 +64,7 @@
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)\Engine\Presentation\Cinematic;$(ProjectDir)\Engine\JsonLoader;$(ProjectDir)\Engine\Game;$(ProjectDir)\Application\Scene\PlayScene;$(ProjectDir)\Application\Scene\Manager;$(ProjectDir)\Engine\BlackBox\Log;$(ProjectDir)\Engine\BlackBox;$(ProjectDir)\Engine\BlackBox\ImGui;$(ProjectDir)\Engine\3d\SkyBox;$(ProjectDir)\Engine\3d\Object\Skinning;$(ProjectDir)\Engine\BlackBox\Animation;$(ProjectDir)\Engine\UI;$(ProjectDir)\Engine\Lighting;$(ProjectDir)externels\assimp\include;$(ProjectDir)\Engine\LoadManager\ParticleManager;$(ProjectDir)\Engine\LoadManager\TextureManager;$(ProjectDir)\Engine\LoadManager\ModelManager;$(ProjectDir)\Engine\Core\WinApp;$(ProjectDir)\Engine\Core\Input;$(ProjectDir)\Engine\Core\SrvManager;$(ProjectDir)\Engine\Core\BaseEngine;$(ProjectDir)\Engine\Collision;$(ProjectDir)\Engine\BlackBox\LeakChecker;$(ProjectDir)\Engine\Audio;$(ProjectDir)\Engine\2d\SpriteBase;$(ProjectDir)\Engine\2d\Sprite;$(ProjectDir)\Engine\Math;$(ProjectDir)\Engine\3d\Object\WireFrame;$(ProjectDir)\Engine\3d\Object\Object3dBase;$(ProjectDir)\Engine\3d\Object\Object3d;$(ProjectDir)\Engine\3d\Model\ModelBase;$(ProjectDir)\Engine\3d\Model\Model;$(ProjectDir)\Engine\3d\Camera;$(ProjectDir)\Application\Scene;$(ProjectDir)\Application\FrameWork;$(ProjectDir)\Application;$(ProjectDir);$(ProjectDir)\Engine\Core\Timer;$(ProjectDir)\Application\StageManager;$(ProjectDir)externals\assimp\include;$(ProjectDir)\Engine\3d\DebugLine</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\Engine\Presentation\Cinematic;$(ProjectDir)\Engine\JsonLoader;$(ProjectDir)\Engine\Game;$(ProjectDir)\Application\Scene\PlayScene;$(ProjectDir)\Application\Scene\Manager;$(ProjectDir)\Engine\Backroom\Log;$(ProjectDir)\Engine\Backroom;$(ProjectDir)\Engine\Backroom\ImGui;$(ProjectDir)\Engine\3d\SkyBox;$(ProjectDir)\Engine\3d\Object\Skinning;$(ProjectDir)\Engine\UI;$(ProjectDir)\Engine\Lighting;$(ProjectDir)externels\assimp\include;$(ProjectDir)\Engine\LoadManager\ParticleManager;$(ProjectDir)\Engine\LoadManager\TextureManager;$(ProjectDir)\Engine\LoadManager\ModelManager;$(ProjectDir)\Engine\Core\WinApp;$(ProjectDir)\Engine\Core\Input;$(ProjectDir)\Engine\Core\SrvManager;$(ProjectDir)\Engine\Core\BaseEngine;$(ProjectDir)\Engine\Collision;$(ProjectDir)\Engine\Backroom\LeakChecker;$(ProjectDir)\Engine\Audio;$(ProjectDir)\Engine\2d\SpriteBase;$(ProjectDir)\Engine\2d\Sprite;$(ProjectDir)\Engine\Math;$(ProjectDir)\Engine\3d\Object\WireFrame;$(ProjectDir)\Engine\3d\Object\Object3dBase;$(ProjectDir)\Engine\3d\Object\Object3d;$(ProjectDir)\Engine\3d\Model\ModelBase;$(ProjectDir)\Engine\3d\Model\Model;$(ProjectDir)\Engine\3d\Camera;$(ProjectDir)\Application\Scene;$(ProjectDir)\Application\FrameWork;$(ProjectDir)\Application;$(ProjectDir);$(ProjectDir)\Engine\Core\Timer;$(ProjectDir)\Application\StageManager;$(ProjectDir)externals\assimp\include;$(ProjectDir)\Engine\3d\DebugLine</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -90,7 +90,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(ProjectDir)\Engine\JsonLoader;$(ProjectDir)\Engine\Game;$(ProjectDir)\Application\Scene\PlayScene;$(ProjectDir)\Application\Scene\Manager;$(ProjectDir)\Engine\BlackBox\Log;$(ProjectDir)\Engine\BlackBox;$(ProjectDir)\Engine\BlackBox\ImGui;$(ProjectDir)\Engine\3d\SkyBox;$(ProjectDir)\Engine\3d\Object\Skinning;$(ProjectDir)\Engine\BlackBox\Animation;$(ProjectDir)\Engine\UI;$(ProjectDir)\Engine\Lighting;$(ProjectDir)externels\assimp\include;$(ProjectDir)\Engine\LoadManager\ParticleManager;$(ProjectDir)\Engine\LoadManager\TextureManager;$(ProjectDir)\Engine\LoadManager\ModelManager;$(ProjectDir)\Engine\Core\WinApp;$(ProjectDir)\Engine\Core\Input;$(ProjectDir)\Engine\Core\SrvManager;$(ProjectDir)\Engine\Core\BaseEngine;$(ProjectDir)\Engine\Collision;$(ProjectDir)\Engine\BlackBox\LeakChecker;$(ProjectDir)\Engine\Audio;$(ProjectDir)\Engine\2d\SpriteBase;$(ProjectDir)\Engine\2d\Sprite;$(ProjectDir)\Engine\Math;$(ProjectDir)\Engine\3d\Object\WireFrame;$(ProjectDir)\Engine\3d\Object\Object3dBase;$(ProjectDir)\Engine\3d\Object\Object3d;$(ProjectDir)\Engine\3d\Model\ModelBase;$(ProjectDir)\Engine\3d\Model\Model;$(ProjectDir)\Engine\3d\Camera;$(ProjectDir)\Application\Scene;$(ProjectDir)\Application\FrameWork;$(ProjectDir)\Application;$(ProjectDir);%(AdditionalIncludeDirectories);$(ProjectDir)\Engine\Presentation\Cinematic;$(ProjectDir)\Engine\Core\Timer;$(ProjectDir)\Application\StageManager;$(ProjectDir)externals\assimp\include;$(ProjectDir)\Engine\3d\DebugLine</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\Engine\JsonLoader;$(ProjectDir)\Engine\Game;$(ProjectDir)\Application\Scene\PlayScene;$(ProjectDir)\Application\Scene\Manager;$(ProjectDir)\Engine\Backroom\Log;$(ProjectDir)\Engine\Backroom;$(ProjectDir)\Engine\Backroom\ImGui;$(ProjectDir)\Engine\3d\SkyBox;$(ProjectDir)\Engine\3d\Object\Skinning;$(ProjectDir)\Engine\UI;$(ProjectDir)\Engine\Lighting;$(ProjectDir)externels\assimp\include;$(ProjectDir)\Engine\LoadManager\ParticleManager;$(ProjectDir)\Engine\LoadManager\TextureManager;$(ProjectDir)\Engine\LoadManager\ModelManager;$(ProjectDir)\Engine\Core\WinApp;$(ProjectDir)\Engine\Core\Input;$(ProjectDir)\Engine\Core\SrvManager;$(ProjectDir)\Engine\Core\BaseEngine;$(ProjectDir)\Engine\Collision;$(ProjectDir)\Engine\Backroom\LeakChecker;$(ProjectDir)\Engine\Audio;$(ProjectDir)\Engine\2d\SpriteBase;$(ProjectDir)\Engine\2d\Sprite;$(ProjectDir)\Engine\Math;$(ProjectDir)\Engine\3d\Object\WireFrame;$(ProjectDir)\Engine\3d\Object\Object3dBase;$(ProjectDir)\Engine\3d\Object\Object3d;$(ProjectDir)\Engine\3d\Model\ModelBase;$(ProjectDir)\Engine\3d\Model\Model;$(ProjectDir)\Engine\3d\Camera;$(ProjectDir)\Application\Scene;$(ProjectDir)\Application\FrameWork;$(ProjectDir)\Application;$(ProjectDir);%(AdditionalIncludeDirectories);$(ProjectDir)\Engine\Presentation\Cinematic;$(ProjectDir)\Engine\Core\Timer;$(ProjectDir)\Application\StageManager;$(ProjectDir)externals\assimp\include;$(ProjectDir)\Engine\3d\DebugLine</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -107,10 +107,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Application\ActionPlayer.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="Application\Scene\PlayScene\DemoScene.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -124,11 +120,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\3d\DebugLine\DebugLine.cpp" />
     <ClCompile Include="Engine\3d\DebugLine\DebugLineBase.cpp" />
     <ClCompile Include="Engine\3d\Object\Skinning\SkinningObject3dBase.cpp" />
-    <ClCompile Include="Engine\BlackBox\Log\Logger.cpp" />
-    <ClCompile Include="Engine\BlackBox\Log\StringUtility.cpp" />
+    <ClCompile Include="Engine\Backroom\Log\Logger.cpp" />
+    <ClCompile Include="Engine\Backroom\Log\StringUtility.cpp" />
     <ClCompile Include="Engine\Collision\CollisionManager.cpp" />
     <ClCompile Include="Engine\Core\BaseEngine\OffScreenRendering.cpp" />
-    <ClCompile Include="Engine\BlackBox\Animation\DebugAnimation.cpp" />
     <ClCompile Include="Engine\LoadManager\ParticleManager\ParticleManager.cpp" />
     <ClCompile Include="Engine\UI\Text.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -138,7 +133,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Audio\Audio.cpp" />
     <ClCompile Include="Engine\2d\SpriteBase\SpriteBase.cpp" />
     <ClCompile Include="Engine\3d\Camera\Camera.cpp" />
-    <ClCompile Include="Engine\BlackBox\LeakChecker\D3DResourceLeakChecker.cpp" />
+    <ClCompile Include="Engine\Backroom\LeakChecker\D3DResourceLeakChecker.cpp" />
     <ClCompile Include="Engine\Core\BaseEngine\DirectXBase.cpp" />
     <ClCompile Include="Engine\Core\Input\Input.cpp" />
     <ClCompile Include="Engine\Math\kMath.cpp" />
@@ -157,13 +152,12 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Scene\MyGame.cpp" />
     <ClCompile Include="Engine\Lighting\Light.cpp" />
     <ClCompile Include="Engine\Core\SrvManager\SrvManager.cpp" />
-    <ClCompile Include="Engine\BlackBox\ImGui\ImGuiManager.cpp" />
+    <ClCompile Include="Engine\Backroom\ImGui\ImGuiManager.cpp" />
     <ClCompile Include="Application\Scene\Manager\SceneManager.cpp" />
     <ClCompile Include="Application\Scene\PlayScene\TitleScene.cpp" />
     <ClCompile Include="Application\Scene\Manager\SceneFactory.cpp" />
     <ClCompile Include="Engine\3d\SkyBox\SkyBox.cpp" />
     <ClCompile Include="Engine\JsonLoader\JsonLoader.cpp" />
-    <ClCompile Include="Application\Scene\PlayScene\TestScene.cpp" />
     <ClCompile Include="Engine\Presentation\Cinematic\FadeManager.cpp" />
     <ClCompile Include="Application\Goal.cpp" />
     <ClCompile Include="Application\Trap.cpp" />
@@ -177,7 +171,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="externals\imgui\imgui_tables.cpp" />
     <ClCompile Include="externals\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Application\StageManager\BaseStage.cpp" />
-    <ClCompile Include="Application\Scene\PlayScene\StageSelectScene.cpp" />
     <ClCompile Include="Application\Player.cpp" />
     <ClCompile Include="Engine\Collision\PhysicsCorrection.cpp" />
     <ClCompile Include="Application\Pause.cpp" />
@@ -186,10 +179,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Core\Input\MouseCursor.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Application\ActionPlayer.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
-    </ClInclude>
     <ClInclude Include="Application\Scene\Manager\AbstractSceneFactory.h" />
     <ClInclude Include="Application\Scene\PlayScene\DemoScene.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -203,11 +192,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\3d\DebugLine\DebugLine.h" />
     <ClInclude Include="Engine\3d\DebugLine\DebugLineBase.h" />
     <ClInclude Include="Engine\3d\Object\Skinning\SkinningObject3dBase.h" />
-    <ClInclude Include="Engine\BlackBox\Log\Logger.h" />
-    <ClInclude Include="Engine\BlackBox\Log\StringUtility.h" />
+    <ClInclude Include="Engine\Backroom\Log\Logger.h" />
+    <ClInclude Include="Engine\Backroom\Log\StringUtility.h" />
     <ClInclude Include="Engine\Collision\CollisionManager.h" />
     <ClInclude Include="Engine\Core\BaseEngine\OffScreenRendering.h" />
-    <ClInclude Include="Engine\BlackBox\Animation\DebugAnimation.h" />
     <ClInclude Include="Engine\JsonLoader\json.hpp" />
     <ClInclude Include="Engine\JsonLoader\JsonLoader.h" />
     <ClInclude Include="Engine\LoadManager\ParticleManager\ParticleManager.h" />
@@ -229,7 +217,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Audio\Audio.h" />
     <ClInclude Include="Engine\2d\SpriteBase\SpriteBase.h" />
     <ClInclude Include="Engine\3d\Camera\Camera.h" />
-    <ClInclude Include="Engine\BlackBox\LeakChecker\D3DResourceLeakChecker.h" />
+    <ClInclude Include="Engine\Backroom\LeakChecker\D3DResourceLeakChecker.h" />
     <ClInclude Include="Engine\Core\BaseEngine\DirectXBase.h" />
     <ClInclude Include="Engine\Core\Input\Input.h" />
     <ClInclude Include="Engine\Math\kMath.h" />
@@ -254,12 +242,11 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Scene\MyGame.h" />
     <ClInclude Include="Engine\Lighting\Light.h" />
     <ClInclude Include="Engine\Core\SrvManager\SrvManager.h" />
-    <ClInclude Include="Engine\BlackBox\ImGui\ImGuiManager.h" />
+    <ClInclude Include="Engine\Backroom\ImGui\ImGuiManager.h" />
     <ClInclude Include="Application\Scene\Manager\SceneManager.h" />
     <ClInclude Include="Application\Scene\PlayScene\TitleScene.h" />
     <ClInclude Include="Application\Scene\Manager\SceneFactory.h" />
     <ClInclude Include="Engine\3d\SkyBox\SkyBox.h" />
-    <ClInclude Include="Application\Scene\PlayScene\TestScene.h" />
     <ClInclude Include="Engine\Presentation\Cinematic\FadeManager.h" />
     <ClInclude Include="Application\Goal.h" />
     <ClInclude Include="Application\Trap.h" />
@@ -274,7 +261,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\imgui\imstb_textedit.h" />
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
     <ClInclude Include="Application\StageManager\BaseStage.h" />
-    <ClInclude Include="Application\Scene\PlayScene\StageSelectScene.h" />
     <ClInclude Include="Application\StageManager\TutorialStage.h" />
     <ClInclude Include="Application\Player.h" />
     <ClInclude Include="Engine\Collision\PhysicsCorrection.h" />

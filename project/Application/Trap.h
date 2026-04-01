@@ -55,16 +55,15 @@ private:
     /// </summary>
     void MakeTrap(Traps& data);
 
-    std::string jsonName_;
+    std::string m_jsonName;
 
-    std::vector<Traps> traps;
+    std::vector<Traps> m_traps;
 
-    float gameTimer_ = 0.0f;
+    float m_gameTimer = 0.0f;
 
-    bool start = false;
+    bool m_start = false;
 
-    std::mt19937 randomEngine;
-
-    int num = 0;
+    std::mt19937 m_randomEngine;
+    int m_num = 0;
 };
 

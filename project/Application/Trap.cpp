@@ -20,9 +20,9 @@ Trap::Trap() {
 }
 
 Trap::~Trap() {
-	for (int i = 0; i < traps.size(); i++)
+	for (int i = 0; i < m_traps.size(); i++)
 	{
-		CollisionManager::GetInstance()->DeleteCollision(traps[i].object.get());
+		CollisionManager::GetInstance()->DeleteCollision(m_traps[i].object.get());
 	}
 }
 
@@ -33,13 +33,13 @@ void Trap::Initialize(std::string jsonName) {
 	}
 	random_device seedGenerator;
 	mt19937 random(seedGenerator());
-	randomEngine = random;
-	num = 0;
-	gameTimer_ = 0.0f;
-	traps.clear();
+	m_randomEngine = random;
+	m_num = 0;
+	m_gameTimer = 0.0f;
+	m_traps.clear();
 	string str;
 	vector<JsonData> json;
-	jsonName_ = jsonName;
+	m_jsonName = jsonName;
 	if (JsonLoader::GetInstance()->CheckJsonLoaded(jsonName))
 	{
 		// スタート地点の取得
@@ -55,7 +55,7 @@ void Trap::Initialize(std::string jsonName) {
 				trap.object->SetModel("Resources/Model/obj", "trap.obj", true);
 				trap.start = data.transform;
 				trap.trapData = data.trap;
-				trap.startFrame = gameTimer_;
+				trap.startFrame = m_gameTimer;
 				if (!data.trap.loop && !data.trap.reverse)
 				{
 					trap.reverse = true;
@@ -78,15 +78,15 @@ void Trap::Initialize(std::string jsonName) {
 					{
 						trap.trapData.spawnerTime = data.trap.spawnerTime;
 						uniform_real_distribution<float> distribution(data.trap.spawnerTime.x, data.trap.spawnerTime.y);
-						trap.trapData.spawnTime = distribution(randomEngine);
+						trap.trapData.spawnTime = distribution(m_randomEngine);
 					}
 
 				}
-				trap.number = num;
+				trap.number = m_num;
 				trap.object->Update();
-				traps.push_back(std::move(trap));
-				CollisionManager::GetInstance()->AddCollision(traps[num].object.get());
-				num++;
+				m_traps.push_back(std::move(trap));
+				CollisionManager::GetInstance()->AddCollision(m_traps[m_num].object.get());
+				m_num++;
 			}
 		}
 		else
@@ -99,24 +99,24 @@ void Trap::Initialize(std::string jsonName) {
 void Trap::Update() {
 
     // 経過時間を更新
-    gameTimer_ += GameTime::GetInstance()->GetDeltaTime();
+    m_gameTimer += GameTime::GetInstance()->GetDeltaTime();
 
     // -----------------------------
     // 初回更新時の初期化処理
     // -----------------------------
-    if (!start)
+    if (!m_start)
     {
-        Log("更新開始 : " + std::to_string(gameTimer_) + "\n");
+        Log("更新開始 : " + std::to_string(m_gameTimer) + "\n");
 
         // 全トラップの初期位置を設定し、開始フレームを記録
-        for (int i = 0; i < traps.size(); i++)
+        for (int i = 0; i < m_traps.size(); i++)
         {
-            traps[i].object->SetTransform(traps[i].start);
-            traps[i].startFrame = gameTimer_;
+            m_traps[i].object->SetTransform(m_traps[i].start);
+            m_traps[i].startFrame = m_gameTimer;
         }
 
-        Log("更新初期処理終了 : " + std::to_string(gameTimer_) + "\n");
-        start = true;
+        Log("更新初期処理終了 : " + std::to_string(m_gameTimer) + "\n");
+        m_start = true;
     }
 
 #ifndef NDEBUG
@@ -124,18 +124,18 @@ void Trap::Update() {
     // デバッグ用 ImGui ウィンドウ
     // -----------------------------
     ImGui::Begin("Trap");
-    ImGui::TextColored({ 1.0f, 1.0f, 1.0f, 1.0f }, "経過時間 %.1f", gameTimer_);
+    ImGui::TextColored({ 1.0f, 1.0f, 1.0f, 1.0f }, "経過時間 %.1f", m_gameTimer);
 
     // JSON 再読み込みボタン
     if (ImGui::Button("Json再読み込み"))
     {
         // 既存コリジョン削除
-        for (int i = 0; i < traps.size(); i++)
+        for (int i = 0; i < m_traps.size(); i++)
         {
-            CollisionManager::GetInstance()->DeleteCollision(traps[i].object.get());
+            CollisionManager::GetInstance()->DeleteCollision(m_traps[i].object.get());
         }
         // JSON 再ロード
-        Initialize(jsonName_);
+        Initialize(m_jsonName);
     }
     ImGui::End();
 #endif
@@ -143,104 +143,104 @@ void Trap::Update() {
     // -----------------------------
     // 各トラップの更新処理
     // -----------------------------
-    for (int i = 0; i < traps.size(); i++)
+    for (int i = 0; i < m_traps.size(); i++)
     {
         // -----------------------------------------
         // スポナー型トラップ（一定時間ごとに生成）
         // -----------------------------------------
-        if (traps[i].trapData.spawner)
+        if (m_traps[i].trapData.spawner)
         {
             // spawnTime を超えたら生成
-            if (traps[i].trapData.spawnTime <= gameTimer_)
+            if (m_traps[i].trapData.spawnTime <= m_gameTimer)
             {
-                MakeTrap(traps[i]);
+                MakeTrap(m_traps[i]);
 
                 // 次の spawnTime を設定（ランダム or 固定）
-                if (traps[i].trapData.spawnerTime.y != -1.0f)
+                if (m_traps[i].trapData.spawnerTime.y != -1.0f)
                 {
                     uniform_real_distribution<float> distribution(
-                        traps[i].trapData.spawnerTime.x,
-                        traps[i].trapData.spawnerTime.y
+                        m_traps[i].trapData.spawnerTime.x,
+                        m_traps[i].trapData.spawnerTime.y
                     );
-                    traps[i].trapData.spawnTime = distribution(randomEngine) + gameTimer_;
+                    m_traps[i].trapData.spawnTime = distribution(m_randomEngine) + m_gameTimer;
                 }
                 else
                 {
-                    traps[i].trapData.spawnTime = traps[i].trapData.spawnerTime.x + gameTimer_;
+                    m_traps[i].trapData.spawnTime = m_traps[i].trapData.spawnerTime.x + m_gameTimer;
                 }
             }
         }
         // -----------------------------------------
         // 移動トラップの反転・ループ処理
         // -----------------------------------------
-        else if (gameTimer_ > traps[i].startFrame + traps[i].trapData.runTime &&
-            traps[i].trapData.runTime > 0.0f &&
-            traps[i].trapData.move)
+        else if (m_gameTimer > m_traps[i].startFrame + m_traps[i].trapData.runTime &&
+            m_traps[i].trapData.runTime > 0.0f &&
+            m_traps[i].trapData.move)
         {
             // ループしない & すでに reverse 状態 → 削除
-            if (!traps[i].trapData.loop && traps[i].reverse)
+            if (!m_traps[i].trapData.loop && m_traps[i].reverse)
             {
-                CollisionManager::GetInstance()->DeleteCollision(traps[i].object.get());
-                traps.erase(traps.cbegin() + i);
+                CollisionManager::GetInstance()->DeleteCollision(m_traps[i].object.get());
+                m_traps.erase(m_traps.cbegin() + i);
                 continue;
             }
 
             // reverse が false → 初期位置に戻す
-            if (!traps[i].trapData.reverse)
+            if (!m_traps[i].trapData.reverse)
             {
-                traps[i].object->SetTransform(traps[i].start);
-                traps[i].reverse = true;
+                m_traps[i].object->SetTransform(m_traps[i].start);
+                m_traps[i].reverse = true;
             }
             else
             {
                 // reverse が true → 速度反転して折り返し
-                traps[i].trapData.velocity *= -1.0f;
-                traps[i].start = traps[i].object->GetTransform();
-                traps[i].reverse = !traps[i].reverse;
+                m_traps[i].trapData.velocity *= -1.0f;
+                m_traps[i].start = m_traps[i].object->GetTransform();
+                m_traps[i].reverse = !m_traps[i].reverse;
             }
 
             // 新しい開始時間を記録
-            traps[i].startFrame = gameTimer_;
+            m_traps[i].startFrame = m_gameTimer;
         }
 
         // -----------------------------------------
         // トラップの Transform を補間して更新
         // -----------------------------------------
-        Transform newTransform = traps[i].object->GetTransform();
+        Transform newTransform = m_traps[i].object->GetTransform();
 
         // 0〜1 の補間係数
-        float time = (gameTimer_ - traps[i].startFrame) / traps[i].trapData.runTime;
+        float time = (m_gameTimer - m_traps[i].startFrame) / m_traps[i].trapData.runTime;
         time = std::clamp(time, 0.0f, 1.0f);
 
         // 各要素を Lerp で補間
-        newTransform.scale = Lerp(traps[i].start.scale, traps[i].start.scale + traps[i].trapData.velocity.scale, time);
-        newTransform.rotate = Lerp(traps[i].start.rotate, traps[i].start.rotate + traps[i].trapData.velocity.rotate, time);
-        newTransform.translate = Lerp(traps[i].start.translate, traps[i].start.translate + traps[i].trapData.velocity.translate, time);
+        newTransform.scale = Lerp(m_traps[i].start.scale, m_traps[i].start.scale + m_traps[i].trapData.velocity.scale, time);
+        newTransform.rotate = Lerp(m_traps[i].start.rotate, m_traps[i].start.rotate + m_traps[i].trapData.velocity.rotate, time);
+        newTransform.translate = Lerp(m_traps[i].start.translate, m_traps[i].start.translate + m_traps[i].trapData.velocity.translate, time);
 
         // Transform を適用して更新
-        traps[i].object->SetTransform(newTransform);
-        traps[i].object->Update();
+        m_traps[i].object->SetTransform(newTransform);
+        m_traps[i].object->Update();
     }
 }
 
 void Trap::Draw() {
 
-	for (int i = 0; i < traps.size(); i++)
+	for (int i = 0; i < m_traps.size(); i++)
 	{
-		if (!traps[i].trapData.spawner)
+		if (!m_traps[i].trapData.spawner)
 		{
-			traps[i].object->Draw();
+			m_traps[i].object->Draw();
 		}
 	}
 }
 
 void Trap::SetDrawHeight(const float height) {
 
-	for (int i = 0; i < traps.size(); i++)
+	for (int i = 0; i < m_traps.size(); i++)
 	{
-		if (!traps[i].trapData.spawner)
+		if (!m_traps[i].trapData.spawner)
 		{
-			traps[i].object->SetDrawHeiht(height);
+			m_traps[i].object->SetDrawHeiht(height);
 		}
 	}
 }
@@ -253,7 +253,7 @@ void Trap::MakeTrap(Traps& data) {
 	trap.object->SetModel("Resources/Model/obj", "trap.obj", true);
 	trap.start = data.start;
 	trap.trapData = data.trapData;
-	trap.startFrame = gameTimer_;
+	trap.startFrame = m_gameTimer;
 	if (!data.trapData.loop && !data.trapData.reverse)
 	{
 		trap.reverse = true;
@@ -263,9 +263,9 @@ void Trap::MakeTrap(Traps& data) {
 		trap.reverse = false;
 	}
 	trap.trapData.spawner = false;
-	trap.number = num;
+	trap.number = m_num;
 	trap.object->Update();
-	traps.push_back(std::move(trap));
-	CollisionManager::GetInstance()->AddCollision(traps[int(traps.size() - 1)].object.get());
-	num++;
+	m_traps.push_back(std::move(trap));
+	CollisionManager::GetInstance()->AddCollision(m_traps[int(m_traps.size() - 1)].object.get());
+	m_num++;
 }

@@ -11,6 +11,7 @@
 #include "FadeManager.h"
 #include "Collision.h"
 #include "MouseCursor.h"
+#include "Audio.h"
 
 Result::~Result()
 {
@@ -136,7 +137,7 @@ void Result::Update()
             // 選択されていたら色を変えてサイズを大きくする
             if (selectNum == i)
             {
-                color = { 1.0f, 1.0f, 0.6f, 1.0f };
+                color = { 0.0f, 1.0f, 0.6f, 1.0f };
                 scaleRatio = 1.1f;
             }
             else
@@ -191,7 +192,7 @@ void Result::CalculateStageClearTimer()
 
     // リザルト(クリアタイムの計算)
     // プレイ時間を桁数ごとに分割する
-    int digit = GetDigitCount(displayTime);
+    int digit = GetDigitCount(static_cast<float>(displayTime));
     m_goalTimeNumbersArray.resize(digit);
     float timer = 0.0f;
     for (int i = 0; i < m_goalTimeNumbersArray.size(); i++)
@@ -239,16 +240,22 @@ void Result::UpdateUISelect()
     if (input->TriggerKey(DIK_W) || input->TriggerKey(DIK_UP))
     {
         selectIndex--;
+        Audio::GetInstance()->Play("select");
     }
     if (input->TriggerKey(DIK_S) || input->TriggerKey(DIK_DOWN))
     {
         selectIndex++;
+        Audio::GetInstance()->Play("select");
     }
 
     for (int i = 0; i < m_uiSprites.size(); i++)
     {
         if (CollisionUISprite(m_uiSprites[i]->GetAABB(), m_mouseCursor->GetCursorPos()))
         {
+            if (selectIndex != i)
+            {
+                Audio::GetInstance()->Play("select");
+            }
             selectIndex = i;
         }
     }
@@ -282,10 +289,12 @@ void Result::EnterSelectUI()
     switch (m_resultSelect)
     {
     case ResultSelect::retry:
+        Audio::GetInstance()->Play("select_enter");
         FadeManager::GetInstance()->FadeOut(1.0f);
         FadeManager::GetInstance()->SetFinishedFadeFunction(retryFunc);
         break;
     case ResultSelect::title:
+        Audio::GetInstance()->Play("select_enter");
         FadeManager::GetInstance()->FadeOut(1.0f);
         FadeManager::GetInstance()->SetFinishedFadeFunction(goTitleFunc);
         break;
