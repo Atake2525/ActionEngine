@@ -155,10 +155,10 @@ void TitleScene::Update() {
             {
                 Audio::GetInstance()->Play("select");
             }
-            m_uiSprites[0]->SetColor({ 0.0f, 0.9f, 0.6f, 1.0f});
+            m_uiSprites[0]->SetColor({ 0.0f, 1.0f, 0.6f, 1.0f});
             m_uiSprites[0]->SetScale(m_uiBaseScale[0] * 1.1f);
 
-            if (m_pInput->TriggerMouse(0))
+            if (m_pInput->TriggerMouse(0) || m_pInput->TriggerKey(DIK_SPACE) || m_pInput->TriggerKey(DIK_RETURN))
             {
                 m_screenChange = true;
                 m_charModel->ChangePlayAnimation("TitleScreen");
@@ -178,10 +178,10 @@ void TitleScene::Update() {
             {
                 Audio::GetInstance()->Play("select");
             }
-            m_uiSprites[1]->SetColor({ 0.0f, 0.7f, 0.8f, 1.0f});
+            m_uiSprites[1]->SetColor({ 0.0f, 1.0f, 0.6f, 1.0f});
             m_uiSprites[1]->SetScale(m_uiBaseScale[1] * 1.1f);
 
-            if (m_pInput->TriggerMouse(0))
+            if (m_pInput->TriggerMouse(0) || m_pInput->TriggerKey(DIK_SPACE) || m_pInput->TriggerKey(DIK_RETURN))
             {
                 Audio::GetInstance()->Play("select_enter");
                 finished = true;

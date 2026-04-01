@@ -54,20 +54,20 @@ void Pause::Initialize(MouseCursor* mouseCursor) {
         // Spriteの中心位置を決める(横 : 中心, 縦 : 上)
         pauseUIs[i].sprite->SetAnchorPoint(ANCHORPOINT_MIDDLE);
         // 初期位置の設定(スクリーン上に無ければ良い)
-        pauseUIs[i].sprite->SetPosition({ m_windowSize.x * 0.5f, i * 20.0f });
+        pauseUIs[i].sprite->SetPosition({ m_windowSize.x * 0.5f, -pauseUIs[i].sprite->GetScale().y });
         // 色を好きに変更するためにSpriteの色を白にしているため変更
-        pauseUIs[i].sprite->SetColor({ 0.0f, 1.0f, 1.0f, 1.0f });
+        pauseUIs[i].sprite->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
 
         pauseUIs[i].baseScale = { pauseUIs[i].sprite->GetScale() };
 
         // ポーズの切り替えアニメーション用の位置決め
         pauseUIs[i].targetPosition[0] = { m_windowSize.x * 0.5f, -pauseUIs[i].sprite->GetScale().y };
         float size = (m_windowSize.y - m_outSize.y * 2.0f) / float(pauseUIs.size());
-        float targetPosY = max(((m_windowSize.y - m_outSize.y * 2.0f) / float(pauseUIs.size())) * i + m_outSize.y, pauseUIs[i].sprite->GetScale().y * i);
-        pauseUIs[i].targetPosition[1] = { m_windowSize.x * 0.5f, targetPosY };
+        float targetPosY = max(((m_windowSize.y - m_outSize.y * 2.0f) / float(pauseUIs.size())) * i + m_outSize.y, pauseUIs[i].sprite->GetScale().y * 1.2f * i);
+        pauseUIs[i].targetPosition[1] = { m_windowSize.x * 0.5f, m_windowSize.y / 12.0f + targetPosY };
     }
 
-    pauseUIs[0].sprite->SetColor({ 0.0f, 0.8f, 0.7f, 1.0f });
+    pauseUIs[0].sprite->SetColor({ 0.0f, 1.0f, 0.6f, 1.0f });
 }
 
 void Pause::Update() {
@@ -80,11 +80,13 @@ void Pause::Update() {
         if (!m_pause)
         {
             m_mouseCursor->SetShowCursor(false);
+            m_animTimer = 1.0f;
         }
         else
         {
             m_mouseCursor->SetShowCursor(true);
             m_mouseCursor->SetCursorPosition({ m_windowSize.x / 2.0f, m_windowSize.y / 4.5f });
+            m_animTimer = 0.0f;
         }
     }
 
@@ -168,7 +170,7 @@ void Pause::Update() {
                        0.7f,
                        EaseOutQuint(1.0f, 0.8f, m_animTimer)
             };*/
-            pauseUIs[static_cast<int>(m_pauseSelect)].sprite->SetColor({ 0.0f, 0.9f, 0.6, 1.0f });
+            pauseUIs[static_cast<int>(m_pauseSelect)].sprite->SetColor({ 0.0f, 1.0f, 0.6f, 1.0f });
             pauseUIs[static_cast<int>(m_pauseSelect)].sprite->SetScale(pauseUIs[static_cast<int>(m_pauseSelect)].baseScale * 1.1f);
             pauseUIs[static_cast<int>(m_pauseSelect)].sprite->Update();
 
