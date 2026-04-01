@@ -16,25 +16,25 @@ void GameScene::Initialize() {
 
     TextureManager::GetInstance()->LoadTexture("Resources/rostock_laage_airport_4k.dds");
 
-    camera = make_unique<Camera>();
-    camera->SetTranslate({ 0.0f, 1.8f, 0.0f });
-    camera->SetFarClipDistance(0.0f);
+    m_pCamera = make_unique<Camera>();
+    m_pCamera->SetTranslate({ 0.0f, 1.8f, 0.0f });
+    m_pCamera->SetFarClipDistance(0.0f);
 
-    SkyBox::GetInstance()->SetCamera(camera.get());
+    SkyBox::GetInstance()->SetCamera(m_pCamera.get());
     SkyBox::GetInstance()->SetTexture("Resources/rostock_laage_airport_4k.dds");
     SkyBox::GetInstance()->SetSunPoewr(0.0f);
 
-    input = Input::GetInstance();
+    m_pInput = Input::GetInstance();
     m_mouseCursor = std::make_unique<MouseCursor>();
     m_mouseCursor->Initialize("Resources/Sprite/Cursor_Hover.png", "Resources/Sprite/Cursor_Press.png");
     m_mouseCursor->SetShowCursor(false);
 
-    Object3dBase::GetInstance()->SetDefaultCamera(camera.get());
+    Object3dBase::GetInstance()->SetDefaultCamera(m_pCamera.get());
 
     m_pPlayer = make_unique<Player>();
-    stage = make_unique<TutorialStage>();
-    stage->Initialize(m_pPlayer.get(), camera.get(), m_mouseCursor.get());
-    m_pPlayer->Initialize(camera.get(), stage->GetJsonName());
+    m_pStage = make_unique<TutorialStage>();
+    m_pStage->Initialize(m_pPlayer.get(), m_pCamera.get(), m_mouseCursor.get());
+    m_pPlayer->Initialize(m_pCamera.get(), m_pStage->GetJsonName());
     m_pPlayer->Update();
 
     m_pPlayerUI = make_unique<PlayerUI>();
@@ -43,20 +43,20 @@ void GameScene::Initialize() {
     Light::GetInstance()->SetRadius(0.1f);
     GameTime::GetInstance()->SetDeltaPoint();
     FadeManager::GetInstance()->FadeIn(1.0f);
-    m_pause = make_unique<Pause>();
-    m_pause->Initialize(m_mouseCursor.get());
+    m_pPause = make_unique<Pause>();
+    m_pPause->Initialize(m_mouseCursor.get());
 
     m_scenePhase = ScenePhase::FadeIn;
-
+    m_pInput->ShowMouseCursor(m_cursorShow);
 }
 
 void GameScene::Update() {
 
-    // ポーズ時にマウスカーソルを使うため一番に更新
-    m_mouseCursor->Update();
     // ポーズはどのフェーズでも行えるようにする
-    m_pause->Update();
-    if (m_pause->IsPause())
+    m_pPause->Update();
+    // ポーズ時にマウスカーソルを使うため前の方で更新
+    m_mouseCursor->Update();
+    if (m_pPause->IsPause())
     {
         return;
     }
@@ -82,7 +82,7 @@ void GameScene::Update() {
         {
         case 0:
             farClipDist = EaseOutExpo(0.0f, m_finalFarClipDistance, m_startTimer);
-            camera->SetFarClipDistance(farClipDist);
+            m_pCamera->SetFarClipDistance(farClipDist);
             break;
         case 1:
             radius = EaseOutExpo(0.0f, m_finalScanRadius, m_startTimer);
@@ -109,45 +109,26 @@ void GameScene::Update() {
         m_pPlayer->Update();
         m_pPlayerUI->Update();
         break;
-    //case ScenePhase::FadeOut: // シーン遷移演出フェーズ(出)
-    //    break;
     }
 
 
-    stage->Update();
+    m_pStage->Update();
 
 #ifndef NDEBUG
-   /* if (input->TriggerKey(DIK_ESCAPE))
+    if (m_pInput->TriggerKey(DIK_F11))
     {
-        finished = true;
-    }*/
-
-    if (input->TriggerKey(DIK_F11))
-    {
-        cursorshow = !cursorshow;
+        m_cursorShow = !m_cursorShow;
+        m_pInput->ShowMouseCursor(m_cursorShow);
     }
 #else
 
 #endif // !NDEBUG
 
     
-    input->ShowMouseCursor(cursorshow);
-
-    if (input->TriggerKey(DIK_1))
-    {
-        Audio::GetInstance()->Play2D("bgm", { 0.0f, 0.0f }, false);
-    }
 
     SkyBox::GetInstance()->Update();
 
-
-    if (input->TriggerKey(DIK_R))
-    {
-        SceneManager::GetInstance()->SetNextScene("GAMESCENE");
-    }
-
-
-    camera->Update();
+    m_pCamera->Update();
 }
 
 void GameScene::Draw() {
@@ -157,19 +138,19 @@ void GameScene::Draw() {
 
     Object3dBase::GetInstance()->ShaderDraw();
 
-    stage->DrawObject3d();
+    m_pStage->DrawObject3d();
 
     SkinningObject3dBase::GetInstance()->ShaderDraw();
 
 
     SpriteBase::GetInstance()->ShaderDraw();
 
-    stage->DrawBackSprite();
+    m_pStage->DrawBackSprite();
     m_pPlayerUI->Draw();
-    m_pause->Draw();
+    m_pPause->Draw();
     m_mouseCursor->Draw();
 }
 
 void GameScene::Finalize() {
-    stage->Finalize();
+    m_pStage->Finalize();
 }

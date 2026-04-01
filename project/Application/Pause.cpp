@@ -9,6 +9,7 @@
 #include "FadeManager.h"
 #include "MouseCursor.h"
 #include "Collision.h"
+#include <functional>
 
 using namespace std;
 
@@ -51,22 +52,22 @@ void Pause::Initialize(MouseCursor* mouseCursor) {
         // 諸々の初期化処理
         pauseUIs[i].sprite->Initialize("Resources/Sprite/Pause/" + str + ".png");
         // Spriteの中心位置を決める(横 : 中心, 縦 : 上)
-        pauseUIs[i].sprite->SetAnchorPoint({ 0.5f, 0.0f });
+        pauseUIs[i].sprite->SetAnchorPoint(ANCHORPOINT_MIDDLE);
         // 初期位置の設定(スクリーン上に無ければ良い)
-        pauseUIs[i].sprite->SetPosition({ m_windowSize.x * 0.5f, i * 20.0f });
+        pauseUIs[i].sprite->SetPosition({ m_windowSize.x * 0.5f, -pauseUIs[i].sprite->GetScale().y });
         // 色を好きに変更するためにSpriteの色を白にしているため変更
-        pauseUIs[i].sprite->SetColor({ 0.0f, 1.0f, 1.0f, 1.0f });
+        pauseUIs[i].sprite->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+
+        pauseUIs[i].baseScale = { pauseUIs[i].sprite->GetScale() };
 
         // ポーズの切り替えアニメーション用の位置決め
         pauseUIs[i].targetPosition[0] = { m_windowSize.x * 0.5f, -pauseUIs[i].sprite->GetScale().y };
         float size = (m_windowSize.y - m_outSize.y * 2.0f) / float(pauseUIs.size());
-        float targetPosY = max(((m_windowSize.y - m_outSize.y * 2.0f) / float(pauseUIs.size())) * i + m_outSize.y, pauseUIs[i].sprite->GetScale().y * i);
-        pauseUIs[i].targetPosition[1] = { m_windowSize.x * 0.5f, targetPosY };
+        float targetPosY = max(((m_windowSize.y - m_outSize.y * 2.0f) / float(pauseUIs.size())) * i + m_outSize.y, pauseUIs[i].sprite->GetScale().y * 1.2f * i);
+        pauseUIs[i].targetPosition[1] = { m_windowSize.x * 0.5f, m_windowSize.y / 12.0f + targetPosY };
     }
 
-    pauseUIs[0].sprite->SetColor({ 0.0f, 1.0f, 0.0f, 1.0f });
-
-    Audio::GetInstance()->LoadMP3("Resources/sound/pause_select.mp3", "pause_select");
+    pauseUIs[0].sprite->SetColor({ 0.0f, 1.0f, 0.6f, 1.0f });
 }
 
 void Pause::Update() {
@@ -79,11 +80,13 @@ void Pause::Update() {
         if (!m_pause)
         {
             m_mouseCursor->SetShowCursor(false);
+            m_animTimer = 1.0f;
         }
         else
         {
             m_mouseCursor->SetShowCursor(true);
             m_mouseCursor->SetCursorPosition({ m_windowSize.x / 2.0f, m_windowSize.y / 4.5f });
+            m_animTimer = 0.0f;
         }
     }
 
@@ -149,7 +152,7 @@ void Pause::Update() {
         if (num != static_cast<int>(m_pauseSelect))
         {
             m_selectNumberPre = static_cast<int>(m_pauseSelect);
-            Audio::GetInstance()->Play("pause_select");
+            Audio::GetInstance()->Play("select");
             m_changeSelectAnim = true;
             m_animTimer = 0.0f;
         }
@@ -162,15 +165,17 @@ void Pause::Update() {
             m_animTimer += GameTime::GetInstance()->GetDeltaTime() / m_animTime / 0.4f;
 
             // 選択されているUIに対して処理を行う
-            Vector3 color = {
+            /*Vector3 color = {
                        0.0f,
-                       1.0f,
-                       EaseOutQuint(1.0f, 0.0f, m_animTimer)
-            };
-            pauseUIs[static_cast<int>(m_pauseSelect)].sprite->SetColor({ color.x, color.y, color.z, 1.0f });
+                       0.7f,
+                       EaseOutQuint(1.0f, 0.8f, m_animTimer)
+            };*/
+            pauseUIs[static_cast<int>(m_pauseSelect)].sprite->SetColor({ 0.0f, 1.0f, 0.6f, 1.0f });
+            pauseUIs[static_cast<int>(m_pauseSelect)].sprite->SetScale(pauseUIs[static_cast<int>(m_pauseSelect)].baseScale * 1.1f);
             pauseUIs[static_cast<int>(m_pauseSelect)].sprite->Update();
 
-            pauseUIs[static_cast<int>(m_selectNumberPre)].sprite->SetColor({ 0.0f, 1.0f, 1.0f, 1.0f });
+            pauseUIs[static_cast<int>(m_selectNumberPre)].sprite->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+            pauseUIs[static_cast<int>(m_selectNumberPre)].sprite->SetScale(pauseUIs[static_cast<int>(m_selectNumberPre)].baseScale);
             pauseUIs[static_cast<int>(m_selectNumberPre)].sprite->Update();
 
             if (m_animTimer >= 1.0f)
@@ -201,32 +206,46 @@ void Pause::Draw() {
 }
 
 void Pause::Enter(int selectNumber) {
+    std::function<void()> restartFunc = [&]() {
+        OffScreenRendering::GetInstance()->SetGrayscaleIntensity(0.0f);
+        SceneManager::GetInstance()->SetNextScene(SceneManager::GetInstance()->GetSceneName());
+        };
+    std::function<void()> goTitleFunc = [&]() {
+        SceneManager::GetInstance()->SetNextScene("TITLE");
+        OffScreenRendering::GetInstance()->SetGrayscaleIntensity(0.0f);
+        };
     switch (m_pauseSelect)
     {
     case PauseSelect::back:
+        Audio::GetInstance()->Play("select_enter");
         m_pauseAnim = !m_pauseAnim;
         m_pause = false;
-        m_animTimer = 0.0f;
+        //m_animTimer = 0.0f;
         if (m_pause)
         {
-            m_input->ShowMouseCursor(false);
+            m_mouseCursor->SetShowCursor(true);
+            m_mouseCursor->SetCursorPosition({ m_windowSize.x / 2.0f, m_windowSize.y / 4.5f });
         }
         else
         {
-            m_input->ShowMouseCursor(true);
+            m_mouseCursor->SetShowCursor(false);
         }
         break;
     case PauseSelect::restart:
-        OffScreenRendering::GetInstance()->SetGrayscaleIntensity(0.0f);
-        SceneManager::GetInstance()->SetNextScene(SceneManager::GetInstance()->GetSceneName());
+        Audio::GetInstance()->Play("select_enter");
+        FadeManager::GetInstance()->FadeOut(0.5f);
+        FadeManager::GetInstance()->SetFinishedFadeFunction(restartFunc);
         break;
     case PauseSelect::stageSelect:
+        Audio::GetInstance()->Play("select_cancel");
         break;
     case PauseSelect::setting:
+        Audio::GetInstance()->Play("select_cancel");
         break;
     case PauseSelect::title:
-        SceneManager::GetInstance()->SetNextScene("TITLE");
-        OffScreenRendering::GetInstance()->SetGrayscaleIntensity(0.0f);
+        Audio::GetInstance()->Play("select_enter");
+        FadeManager::GetInstance()->FadeOut(0.5f);
+        FadeManager::GetInstance()->SetFinishedFadeFunction(goTitleFunc);
         break;
     }
 }
