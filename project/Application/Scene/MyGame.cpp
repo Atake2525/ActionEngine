@@ -12,7 +12,7 @@ void MyGame::Initialize() {
 
 #ifndef NDEBUG
 	WinApp::GetInstance()->Initialize();
-#elif
+#else
 	WinApp::GetInstance()->Initialize(1920, 1080, WindowMode::FullScreen, L"走快");
 #endif // !NDEBUG
 
