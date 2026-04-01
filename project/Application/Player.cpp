@@ -278,7 +278,7 @@ void Player::UpdateParkourState()
             m_wallPenetration = Vector3::Zero;
         }
     }
-    
+
     // よじ登りの開始を確認する
     if ((m_pInput->TriggerKey(DIK_SPACE) || m_pInput->PushButton(Controller::A)) && m_canClimbing && !m_isClimbingMotion)
     {
@@ -322,14 +322,14 @@ const bool Player::CanClimbing()
     /*dir.x = fabs(dir.x);
     dir.y = fabs(dir.y);
     dir.z = fabs(dir.z);*/
-    
+
     Vector3 fsbsCameraDir;
 
     fsbsCameraDir.x = fabs(cameraDir.x);
     fsbsCameraDir.y = fabs(cameraDir.y);
     fsbsCameraDir.z = fabs(cameraDir.z);
 
-    bool IsWatchingWall = false;    
+    bool IsWatchingWall = false;
     // プレイヤーも壁の方向を向いているかを調べる
     if (dir.x < 0.0f && fsbsCameraDir.x * Sign(cameraDir.x) < -fsbsCameraDir.z)
     {
@@ -341,20 +341,20 @@ const bool Player::CanClimbing()
     }
     if (dir.z < 0.0f && fsbsCameraDir.z * Sign(cameraDir.z) < -fsbsCameraDir.x)
     {
-         IsWatchingWall = true;
+        IsWatchingWall = true;
     }
     if (dir.z > 0.0f && cameraDir.z > fsbsCameraDir.x)
     {
         IsWatchingWall = true;
     }
-    
+
     // 壁の高さを見てm_climbingHeight以内だったらよじ登りできる
     if (m_climbingHeight < groundObjectDist && 0.0f > groundObjectDist && IsWatchingWall && m_state == PlayerState::Falling)
     {
-         return true;
+        return true;
     }
-    
-    
+
+
     return false;
 }
 
@@ -395,17 +395,17 @@ void Player::Rotate() {
     if (!m_IsFreeze)
     {
         m_cameraTransform.rotate = m_pCamera->GetTransform().rotate;
-    }
-    // カメラ処理の実装
-    // マウスの移動量に基づいてカメラの回転を更新    演出実装時に加速度を付けるなどの調整を行う予定
-    switch (m_controlMode)
-    {
-    case Player::ControlMode::KeyboardMouse:
-        rotate = Input::GetInstance()->GetMouseVel3() * 0.001f;
-        break;
-    case Player::ControlMode::Gamepad:
-        rotate = Input::GetInstance()->GetRightJoyStickPos3(0.0f) * 0.00005f;
-        break;
+        // カメラ処理の実装
+        // マウスの移動量に基づいてカメラの回転を更新    演出実装時に加速度を付けるなどの調整を行う予定
+        switch (m_controlMode)
+        {
+        case Player::ControlMode::KeyboardMouse:
+            rotate = Input::GetInstance()->GetMouseVel3() * 0.001f;
+            break;
+        case Player::ControlMode::Gamepad:
+            rotate = Input::GetInstance()->GetRightJoyStickPos3(0.0f) * 0.00005f;
+            break;
+        }
     }
 
     m_cameraTransform.rotate.x += rotate.y;
@@ -819,7 +819,7 @@ void Player::Climbing()
 
     if (m_climbingStep == 0)
     {
-        climbingPosition = EaseInOut(m_climbingStartTranslate, m_climbingTopTranslate, t );
+        climbingPosition = EaseInOut(m_climbingStartTranslate, m_climbingTopTranslate, t);
     }
     else if (m_climbingStep == 1)
     {
