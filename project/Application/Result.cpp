@@ -137,7 +137,7 @@ void Result::Update()
             // 選択されていたら色を変えてサイズを大きくする
             if (selectNum == i)
             {
-                color = { 1.0f, 1.0f, 0.6f, 1.0f };
+                color = { 0.0f, 1.0f, 0.6f, 1.0f };
                 scaleRatio = 1.1f;
             }
             else
