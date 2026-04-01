@@ -41,6 +41,7 @@ private:
     struct PauseSprite
     {
         std::unique_ptr<Sprite> sprite;
+        Vector2 baseScale;
         Vector2 position;
         Vector2 targetPosition[2];
     };
