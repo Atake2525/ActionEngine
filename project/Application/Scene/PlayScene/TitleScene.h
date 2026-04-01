@@ -96,9 +96,11 @@ private:
 
     // TitleScreen 
 
-    std::unique_ptr<Sprite> m_startUi = nullptr;
-    std::unique_ptr<Sprite> m_exitUi = nullptr;
+    /*std::unique_ptr<Sprite> m_startUi = nullptr;
+    std::unique_ptr<Sprite> m_exitUi = nullptr;*/
 
+    std::array<std::unique_ptr<Sprite>, 2> m_uiSprites;
+    std::array<Vector2, 2> m_uiBaseScale = { 0.0f, 0.0f };
     //
 
     int m_maxSelectNum = 3;

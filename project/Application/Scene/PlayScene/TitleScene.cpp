@@ -49,28 +49,24 @@ void TitleScene::Initialize() {
     m_bootScreen->Update();
 
     Vector2 windowSize = { WinApp::GetInstance()->GetWindowSize() };
-    m_startUi = make_unique<Sprite>();
-    m_startUi->Initialize("Resources/Sprite/UI/ui_start.png");
-    m_startUi->SetColor({ 0.0f, 0.0f, 0.0f, 1.0f });
-    Vector2 size = m_startUi->GetTextureSize();
-    m_startUi->SetScale(size * 0.2f);
-    m_startUi->SetAnchorPoint({ 0.5f, 0.5f });
-    m_startUi->SetPosition({ windowSize.x * 0.5f, windowSize.y * 0.5f });
-    m_startUi->Update();
+    
+    // STARTとEXITのUIスプライトの初期化
+    m_uiSprites[0] = make_unique<Sprite>();
+    m_uiSprites[0]->Initialize("Resources/Sprite/UI/ui_start.png");
+    m_uiBaseScale[0] = m_uiSprites[0]->GetScale();
+    m_uiSprites[0]->SetAnchorPoint({ 0.5f, 0.5f });
+    m_uiSprites[0]->SetPosition({ windowSize.x * 0.5f, windowSize.y * 0.5f });
+    m_uiSprites[0]->Update();
 
-
-    m_exitUi = make_unique<Sprite>();
-    m_exitUi->Initialize("Resources/Sprite/UI/ui_exit.png");
-    m_exitUi->SetColor({ 0.0f, 0.0f, 0.0f, 1.0f });
-    size = m_exitUi->GetTextureSize();
-    m_exitUi->SetScale(size * 0.2f);
-    m_exitUi->SetAnchorPoint({ 0.5f, 0.5f });
-    m_exitUi->SetPosition({ windowSize.x * 0.5f, windowSize.y * 0.5f + (size.y * 0.3f) });
-    m_exitUi->Update();
+    m_uiSprites[1] = make_unique<Sprite>();
+    m_uiSprites[1]->Initialize("Resources/Sprite/UI/ui_exit.png");
+    m_uiBaseScale[1] = m_uiSprites[1]->GetScale();
+    m_uiSprites[1]->SetAnchorPoint({ 0.5f, 0.5f });
+    m_uiSprites[1]->SetPosition({ windowSize.x * 0.5f, windowSize.y * 0.5f + m_uiBaseScale[1].y * 1.2f});
 
     m_pressAnyKey = make_unique<Sprite>();
     m_pressAnyKey->Initialize("Resources/Sprite/UI/press_any_key.png");
-    size = m_pressAnyKey->GetTextureSize();
+    Vector2 size = m_pressAnyKey->GetTextureSize();
     m_pressAnyKey->SetScale({ size.x * 0.3f, size.y * 0.3f });
     m_pressAnyKey->SetAnchorPoint({ 0.5f, 1.0f });
     m_pressAnyKey->SetPosition({ windowSize.x * 0.6f, windowSize.y * 1.014f });
@@ -138,8 +134,10 @@ void TitleScene::Update() {
         {
             m_sceneScreen = TitleSceneScreen::TitleScreen;
 
-            m_startUi->Update();
-            m_exitUi->Update();
+            for (auto& uiSprite : m_uiSprites)
+            {
+                uiSprite->Update();
+            }
 
         }
         // 何かしらキーを押したらBootScreenからTitleScreenに切り替える
@@ -151,15 +149,16 @@ void TitleScene::Update() {
         Vector3 pos = { cursorPosition.x, cursorPosition.y, 0.0f };
         AABB aabb = { {pos},{pos} };
         // UIにマウスカーソルが入っている時、クリックしたときの処理
-        if (CollisionSprite(m_startUi->GetAABB(), aabb) && !m_showCredit)
+        if (CollisionSprite(m_uiSprites[0]->GetAABB(), aabb) && !m_showCredit)
         {
-            if (m_startUi->GetColor().x != 1.0f)
+            if (m_uiSprites[0]->GetColor().x != 0.0f)
             {
                 Audio::GetInstance()->Play("select");
             }
-            m_startUi->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
+            m_uiSprites[0]->SetColor({ 0.0f, 1.0f, 0.6f, 1.0f});
+            m_uiSprites[0]->SetScale(m_uiBaseScale[0] * 1.1f);
 
-            if (m_pInput->TriggerMouse(0))
+            if (m_pInput->TriggerMouse(0) || m_pInput->TriggerKey(DIK_SPACE) || m_pInput->TriggerKey(DIK_RETURN))
             {
                 m_screenChange = true;
                 m_charModel->ChangePlayAnimation("TitleScreen");
@@ -169,18 +168,20 @@ void TitleScene::Update() {
         }
         else
         {
-            m_startUi->SetColor({ 0.0f, 0.0f, 0.0f, 1.0f });
+            m_uiSprites[0]->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+            m_uiSprites[0]->SetScale(m_uiBaseScale[0]);
         }
 
-        if (CollisionSprite(m_exitUi->GetAABB(), aabb) && !m_showCredit)
+        if (CollisionSprite(m_uiSprites[1]->GetAABB(), aabb) && !m_showCredit)
         {
-            if (m_exitUi->GetColor().x != 1.0f)
+            if (m_uiSprites[1]->GetColor().x != 0.0f)
             {
                 Audio::GetInstance()->Play("select");
             }
-            m_exitUi->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
+            m_uiSprites[1]->SetColor({ 0.0f, 1.0f, 0.6f, 1.0f});
+            m_uiSprites[1]->SetScale(m_uiBaseScale[1] * 1.1f);
 
-            if (m_pInput->TriggerMouse(0))
+            if (m_pInput->TriggerMouse(0) || m_pInput->TriggerKey(DIK_SPACE) || m_pInput->TriggerKey(DIK_RETURN))
             {
                 Audio::GetInstance()->Play("select_enter");
                 finished = true;
@@ -188,7 +189,8 @@ void TitleScene::Update() {
         }
         else
         {
-            m_exitUi->SetColor({ 0.0f, 0.0f, 0.0f,1.0f });
+            m_uiSprites[1]->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+            m_uiSprites[1]->SetScale( m_uiBaseScale[1] );
         }
 
         if (m_screenChange)
@@ -245,8 +247,10 @@ void TitleScene::Update() {
             }
         }
 
-        m_startUi->Update();
-        m_exitUi->Update();
+        for (auto& uiSprite : m_uiSprites)
+        {
+            uiSprite->Update();
+        }
         m_gamePad->Update();
         m_credit->Update();
         m_credit_sound->Update();
@@ -302,8 +306,10 @@ void TitleScene::Draw() {
 
         SpriteBase::GetInstance()->ShaderDraw();
 
-        m_startUi->Draw();
-        m_exitUi->Draw();
+        for (auto& uiSprite : m_uiSprites)
+        {
+            uiSprite->Draw();
+        }
         m_gamePad->Draw();
         m_credit->Draw();
         if (m_showCredit)
