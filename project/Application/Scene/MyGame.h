@@ -9,7 +9,6 @@
 #include "ModelBase.h"
 #include "TextureManager.h"
 #include "ModelManager.h"
-#include "WireFrameObjectBase.h"
 #include "Light.h"
 #include "Audio.h"
 #include "SrvManager.h"

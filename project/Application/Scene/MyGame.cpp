@@ -31,8 +31,6 @@ void MyGame::Initialize() {
 
 	SkinningObject3dBase::GetInstance()->Initialize();
 
-	WireFrameObjectBase::GetInstance()->Initialize();
-
 	DebugLineBase::GetInstance()->Initialize();
 
 	SkyBox::GetInstance()->Initialize();
@@ -206,8 +204,6 @@ void MyGame::Finalize() {
 	Object3dBase::GetInstance()->Finalize();
 
 	SkinningObject3dBase::GetInstance()->Finalize();
-
-	WireFrameObjectBase::GetInstance()->Finalize();
 
 	DebugLineBase::GetInstance()->Finalize();
 

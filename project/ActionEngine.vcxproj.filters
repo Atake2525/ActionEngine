@@ -96,9 +96,6 @@
     <ClCompile Include="Engine\Core\WinApp\WinApp.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\3d\Object\WireFrame\WireFrameObjectBase.cpp">
-      <Filter>Engine</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Core\Timer\GameTime.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
@@ -274,9 +271,6 @@
       <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Core\WinApp\WinApp.h">
-      <Filter>Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\3d\Object\WireFrame\WireFrameObjectBase.h">
       <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Core\Timer\GameTime.h">
