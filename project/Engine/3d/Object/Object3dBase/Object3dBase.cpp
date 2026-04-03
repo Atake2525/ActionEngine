@@ -172,9 +172,13 @@ void Object3dBase::CreateRootSignature() {
 	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
 	// RasiterzerStateの設定
 	// 裏面(時計回り)を表示しない
-	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	rasterizerDescNormal.CullMode = D3D12_CULL_MODE_BACK;
 	// 三角形の中を塗りつぶす
-	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
+	rasterizerDescNormal.FillMode = D3D12_FILL_MODE_SOLID;
+	// ワイヤーフレーム用も作る
+    rasterizerDescWireFrame.CullMode = D3D12_CULL_MODE_BACK;
+    rasterizerDescWireFrame.FillMode = D3D12_FILL_MODE_WIREFRAME;
+
 	// Shaderをコンパイルする
 	vertexShaderBlob = DirectXBase::GetInstance()->CompileShader(L"Resources/shaders/Model/Object3D.VS.hlsl", L"vs_6_5");
 	assert(vertexShaderBlob != nullptr);
@@ -183,11 +187,16 @@ void Object3dBase::CreateRootSignature() {
 
 	// DepthStencilStateの設定
 	// Depthの機能を有効化する
-	depthStencilDesc.DepthEnable = true;
+	depthStencilDescNormal.DepthEnable = true;
 	// 書き込みします
-	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+	depthStencilDescNormal.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
 	// 比較関数はLessEqual。つまり、近ければ描画される
-	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	depthStencilDescNormal.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+
+	// 前面表示用にも作る
+	depthStencilDescAwayFront.DepthEnable = false;
+	depthStencilDescAwayFront.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+	depthStencilDescAwayFront.DepthFunc = D3D12_COMPARISON_FUNC_ALWAYS;
 }
 
 void Object3dBase::CreateGraphicsPipeLineState() {
@@ -198,7 +207,7 @@ void Object3dBase::CreateGraphicsPipeLineState() {
 	graphicsPipelineStateDesc.VS = { vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize() }; // VertexShader
 	graphicsPipelineStateDesc.PS = { pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize() };   // PixelShader
 	graphicsPipelineStateDesc.BlendState = blendDesc;                                                         // BlendState
-	graphicsPipelineStateDesc.RasterizerState = rasterizerDesc;                                               // RasterizerState
+	graphicsPipelineStateDesc.RasterizerState = rasterizerDescNormal;                                               // RasterizerState
 	// 書き込むRTVの情報
 	graphicsPipelineStateDesc.NumRenderTargets = 1;
 	graphicsPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
@@ -208,18 +217,41 @@ void Object3dBase::CreateGraphicsPipeLineState() {
 	graphicsPipelineStateDesc.SampleDesc.Count = 1;
 	graphicsPipelineStateDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
 	// DepthStencilの設定
-	graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc;
+	graphicsPipelineStateDesc.DepthStencilState = depthStencilDescNormal;
 	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	// 実際に生成
-	HRESULT hr = DirectXBase::GetInstance()->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPilelineState));
+	// 実際に生成(Normal)
+	HRESULT hr = DirectXBase::GetInstance()->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPilelineStateNormal));
+	assert(SUCCEEDED(hr));
+	graphicsPipelineStateDesc.RasterizerState = rasterizerDescWireFrame;
+    // WireFrame用も生成
+	hr = DirectXBase::GetInstance()->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPilelineStateWireFrame));
+	assert(SUCCEEDED(hr));
+    // AwayFront用も作る
+    graphicsPipelineStateDesc.RasterizerState = rasterizerDescNormal;
+	graphicsPipelineStateDesc.DepthStencilState = depthStencilDescAwayFront;
+	hr = DirectXBase::GetInstance()->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPilelineStateAwayFront));
 	assert(SUCCEEDED(hr));
 }
 
-void Object3dBase::ShaderDraw() {
+void Object3dBase::ShaderDraw(Object3dDrawMode drawMode) {
 	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
 	// PSOを設定
-	DirectXBase::GetInstance()->GetCommandList()->SetPipelineState(graphicsPilelineState.Get());
+	switch (drawMode)
+	{
+	case Object3dDrawMode::Normal:
+		DirectXBase::GetInstance()->GetCommandList()->SetPipelineState(graphicsPilelineStateNormal.Get());
+		break;
+	case Object3dDrawMode::AwayFront:
+		DirectXBase::GetInstance()->GetCommandList()->SetPipelineState(graphicsPilelineStateAwayFront.Get());
+		break;
+	case Object3dDrawMode::Wireframe:
+		DirectXBase::GetInstance()->GetCommandList()->SetPipelineState(graphicsPilelineStateWireFrame.Get());
+		break;
+	default:
+		DirectXBase::GetInstance()->GetCommandList()->SetPipelineState(graphicsPilelineStateNormal.Get());
+		break;
+	}
 	// 形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけば良い
 	DirectXBase::GetInstance()->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 

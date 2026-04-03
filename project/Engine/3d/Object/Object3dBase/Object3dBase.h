@@ -7,7 +7,11 @@
 
 class Camera;
 
-
+enum class Object3dDrawMode{
+	Normal = 0,
+	AwayFront = 1,
+	Wireframe = 2,
+};
 
 // オブジェクト描画用クラス
 class Object3dBase {
@@ -38,7 +42,7 @@ public:
 	/// <summary>
 	/// 共通描画設定
 	/// </summary>
-	void ShaderDraw();
+	void ShaderDraw(Object3dDrawMode drawMode = Object3dDrawMode::Normal);
 
 	// Getter(Camera)
 	Camera* GetDefaultCamera() const { return defaultCamera; }
@@ -85,20 +89,25 @@ private:
 	// BlendStateの設定
 	D3D12_BLEND_DESC blendDesc{};
 	// RasiterzerStateの設定
-	D3D12_RASTERIZER_DESC rasterizerDesc{};
+	D3D12_RASTERIZER_DESC rasterizerDescNormal{};
+	D3D12_RASTERIZER_DESC rasterizerDescWireFrame{};
+
 
 	Microsoft::WRL::ComPtr<IDxcBlob> vertexShaderBlob;
 
 	Microsoft::WRL::ComPtr<IDxcBlob> pixelShaderBlob;
 
 	// DepthStencilStateの設定
-	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
+	D3D12_DEPTH_STENCIL_DESC depthStencilDescNormal{};
+	D3D12_DEPTH_STENCIL_DESC depthStencilDescAwayFront{};
 
 	/// GraphicsPipeLineState
 	// PSOを作成する
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
 
-	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPilelineState = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPilelineStateNormal = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPilelineStateAwayFront = nullptr;
+    Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPilelineStateWireFrame = nullptr;
 
 	CullingTemplate cullingTemplateData;
 

@@ -48,6 +48,10 @@ void GameScene::Initialize() {
 
     m_scenePhase = ScenePhase::FadeIn;
     m_pInput->ShowMouseCursor(m_cursorShow);
+
+    m_navigationArrow = make_unique<Object3d>();
+    m_navigationArrow->Initialize();
+    m_navigationArrow->SetModel("Resources/Model/obj", "NavigationArrow.obj", true);
 }
 
 void GameScene::Update() {
@@ -125,6 +129,7 @@ void GameScene::Update() {
 #endif // !NDEBUG
 
     
+    m_navigationArrow->Update();
 
     SkyBox::GetInstance()->Update();
 
@@ -136,9 +141,13 @@ void GameScene::Draw() {
     SpriteBase::GetInstance()->ShaderDraw();
 
 
-    Object3dBase::GetInstance()->ShaderDraw();
+    Object3dBase::GetInstance()->ShaderDraw(Object3dDrawMode::Normal);
 
     m_pStage->DrawObject3d();
+
+    Object3dBase::GetInstance()->ShaderDraw(Object3dDrawMode::AwayFront);
+
+    m_navigationArrow->Draw();
 
     SkinningObject3dBase::GetInstance()->ShaderDraw();
 

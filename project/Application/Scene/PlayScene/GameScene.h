@@ -88,5 +88,6 @@ private:
 	};
 	ScenePhase m_scenePhase = ScenePhase::FadeIn;
 
+	std::unique_ptr<Object3d> m_navigationArrow;
 };
 
