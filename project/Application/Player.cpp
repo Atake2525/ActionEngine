@@ -255,7 +255,7 @@ void Player::UpdateParkourState()
         AABB pAABB = m_playerAABB;
         pAABB += Vector3{ m_velocity.translate.x, 0.0f, m_velocity.translate.z };
         // 落下中かつ壁走り用のオブジェクトに衝突している時に壁走り
-        if (!m_wallRunning && CollisionManager::GetInstance()->IsCollisionObjectForAABB(pAABB, true) && m_velocity.translate.y < 0.0f)
+        if (!m_wallRunning && CollisionManager::GetInstance()->IsCollisionObjectForAABB(pAABB, true, m_wallRunningObjectAABB) && m_velocity.translate.y < 0.0f)
         {
             if (CollisionManager::GetInstance()->GetCollisionObjectAABBsForAABB(pAABB, true).size() != 0)
             {
@@ -1056,6 +1056,9 @@ void Player::UpdateDebugUI() {
 
     ImGui::DragFloat("CrouchHeihgt", &m_crouchHeight, 0.0f);
     ImGui::DragFloat("CrouchHeightOffset", &m_crouchHeightOffset, 0.01f);
+
+    ImGui::DragFloat3("WallRunObjectMin", &m_wallRunningObjectAABB.min.x);
+    ImGui::DragFloat3("WallRunObjectMax", &m_wallRunningObjectAABB.max.x);
 
     ImGui::Separator();
 
