@@ -4,9 +4,10 @@
 #include "externals/imgui/imgui_impl_win32.h"
 #include "GameTime.h"
 #include "JsonLoader.h"
-#include "GameOver.h"
 #include "StageCount.h"
 #include "TutorialStage.h"
+#include "EasingUtility.h"
+#include "Light.h"
 
 using namespace std;
 using namespace ActionEngine::Stage;
@@ -15,107 +16,119 @@ void GameScene::Initialize() {
 
     TextureManager::GetInstance()->LoadTexture("Resources/rostock_laage_airport_4k.dds");
 
-    camera = make_unique<Camera>();
-    camera->SetTranslate({ 0.0f, 1.8f, 0.0f });
+    m_pCamera = make_unique<Camera>();
+    m_pCamera->SetTranslate({ 0.0f, 1.8f, 0.0f });
+    m_pCamera->SetFarClipDistance(0.0f);
 
-    SkyBox::GetInstance()->SetCamera(camera.get());
+    SkyBox::GetInstance()->SetCamera(m_pCamera.get());
     SkyBox::GetInstance()->SetTexture("Resources/rostock_laage_airport_4k.dds");
+    SkyBox::GetInstance()->SetSunPoewr(0.0f);
 
-    input = Input::GetInstance();
+    m_pInput = Input::GetInstance();
+    m_mouseCursor = std::make_unique<MouseCursor>();
+    m_mouseCursor->Initialize("Resources/Sprite/Cursor_Hover.png", "Resources/Sprite/Cursor_Press.png");
+    m_mouseCursor->SetShowCursor(false);
 
-    gameOver_ = make_unique<GameOver>();
-    gameOver_->Initialize();
-    gameClear_ = make_unique<GameClearScene>();
-    gameClear_->Initialize();
+    Object3dBase::GetInstance()->SetDefaultCamera(m_pCamera.get());
 
+    m_pPlayer = make_unique<Player>();
+    m_pStage = make_unique<TutorialStage>();
+    m_pStage->Initialize(m_pPlayer.get(), m_pCamera.get(), m_mouseCursor.get());
+    m_pPlayer->Initialize(m_pCamera.get(), m_pStage->GetJsonName());
+    m_pPlayer->Update();
 
-    Object3dBase::GetInstance()->SetDefaultCamera(camera.get());
+    m_pPlayerUI = make_unique<PlayerUI>();
+    m_pPlayerUI->Initialize(m_pPlayer.get());
 
-    stage = make_unique<TutorialStage>();
-    stage->Initialize();
-
-    stageObject = make_unique<Object3d>();
-    stageObject->Initialize();
-    stageObject->SetModel("Resources/Model/obj/Stage/TutorialStage", "TutorialStage.obj", true);
-
-    player_ = make_unique<ActionPlayer>();
-    player_->Initialize(camera.get(), stage->GetJsonName());
-
+    Light::GetInstance()->SetRadius(0.1f);
     GameTime::GetInstance()->SetDeltaPoint();
     FadeManager::GetInstance()->FadeIn(1.0f);
+    m_pPause = make_unique<Pause>();
+    m_pPause->Initialize(m_mouseCursor.get());
+
+    m_scenePhase = ScenePhase::FadeIn;
+    m_pInput->ShowMouseCursor(m_cursorShow);
 }
 
 void GameScene::Update() {
 
-
-    stage->Update();
-
-    //input->Update();
-
-    stageObject->Update();
-
-    player_->Update();
-
-    if (input->TriggerKey(DIK_ESCAPE))
+    // ポーズはどのフェーズでも行えるようにする
+    m_pPause->Update();
+    // ポーズ時にマウスカーソルを使うため前の方で更新
+    m_mouseCursor->Update();
+    if (m_pPause->IsPause())
     {
-        finished = true;
+        return;
     }
 
-    if (input->TriggerKey(DIK_F11))
+    float farClipDist = 0.0f;
+    float radius = 0.0f;
+    // フェーズ管理
+    switch (m_scenePhase)
     {
-        cursorshow = !cursorshow;
-    }
-    input->ShowMouseCursor(cursorshow);
+    case ScenePhase::FadeIn: // シーン遷移演出フェーズ(入)
+        if (FadeManager::GetInstance()->CompleteFade() || !FadeManager::GetInstance()->IsFade())
+        {
+            m_scenePhase = ScenePhase::Ready;
+            m_finalScanRadius = m_finalFarClipDistance + Light::GetInstance()->GetScanWidth() * 3.0f;
+        }
+        break;
+    case ScenePhase::Ready: // スタート演出フェーズ
+        m_startTimer += GameTime::GetInstance()->GetDeltaTime() / m_startTime;
+        m_startTimer = clamp(m_startTimer, 0.0f, 1.0f);
 
-    if (input->TriggerKey(DIK_1))
+        
+        switch (m_readyNumber)
+        {
+        case 0:
+            farClipDist = EaseOutExpo(0.0f, m_finalFarClipDistance, m_startTimer);
+            m_pCamera->SetFarClipDistance(farClipDist);
+            break;
+        case 1:
+            radius = EaseOutExpo(0.0f, m_finalScanRadius, m_startTimer);
+            Light::GetInstance()->SetRadius(radius);
+
+            SkyBox::GetInstance()->SetSunPoewr(m_startTimer);
+            
+            break;
+        }
+
+        if (m_readyNumber == 1 && m_startTimer == 1.0f)
+        {
+            m_scenePhase = ScenePhase::Game;
+            m_readyNumber = 0;
+        }
+
+        if (m_startTimer == 1.0f)
+        {
+            m_readyNumber++;
+            m_startTimer = 0.0f;
+        }
+        break;
+    case ScenePhase::Game: // プレイフェーズ
+        m_pPlayer->Update();
+        m_pPlayerUI->Update();
+        break;
+    }
+
+
+    m_pStage->Update();
+
+#ifndef NDEBUG
+    if (m_pInput->TriggerKey(DIK_F11))
     {
-        Audio::GetInstance()->Play2D("bgm", { 0.0f, 0.0f }, false);
+        m_cursorShow = !m_cursorShow;
+        m_pInput->ShowMouseCursor(m_cursorShow);
     }
+#else
 
+#endif // !NDEBUG
+
+    
 
     SkyBox::GetInstance()->Update();
 
-   /* if (!start_)
-    {
-        if (FadeManager::GetInstance()->CompleteFade())
-        {
-            start_ = true;
-            startMovie_ = true;
-            phase_ = 0;
-        }
-        else
-        {
-            return;
-        }
-    }*/
-
-    if (input->TriggerKey(DIK_R))
-    {
-        SceneManager::GetInstance()->SetNextScene("GAMESCENE");
-    }
-
-    /*if (input->PushKey(DIK_LSHIFT))
-    {
-        tutorial[1].timer += GameTime::GetInstance()->GetDeltaTime();
-        tutorial[1].color.x = 1.0f - (tutorial[1].timer / 2.0f);
-        tutorial[1].color.z = 1.0f - (tutorial[1].timer / 2.0f);
-        tutorial[1].sprite->SetColor(tutorial[1].color);
-        if (tutorial[1].timer >= 2.0f)
-        {
-            tutorial[1].isClear = true;
-        }
-        tutorial[1].sprite->Update();
-
-    }
-
-    if (player_->IsGameOver())
-    {
-        player_->Freeze(true);
-        gameOver_->Update();
-    }*/
-
-    camera->Update();
-
+    m_pCamera->Update();
 }
 
 void GameScene::Draw() {
@@ -125,19 +138,19 @@ void GameScene::Draw() {
 
     Object3dBase::GetInstance()->ShaderDraw();
 
-    stage->DrawObject3d();
-    stageObject->Draw();
+    m_pStage->DrawObject3d();
 
     SkinningObject3dBase::GetInstance()->ShaderDraw();
 
-    //player_->Draw();
 
     SpriteBase::GetInstance()->ShaderDraw();
 
-    //stage->DrawBackSprite();
-    gameOver_->Draw();
-    gameClear_->Draw();
+    m_pStage->DrawBackSprite();
+    m_pPlayerUI->Draw();
+    m_pPause->Draw();
+    m_mouseCursor->Draw();
 }
 
 void GameScene::Finalize() {
+    m_pStage->Finalize();
 }

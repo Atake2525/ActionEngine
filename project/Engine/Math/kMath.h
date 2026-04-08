@@ -17,10 +17,6 @@ Vector3& operator/=(Vector3& v1, const Vector3& v2);
 
 const Vector3 operator/(const Vector3& v1, const Vector3 v2);
 
-const Vector3 operator+(const Vector3& v1, const float f);
-
-const Vector3 operator-(const Vector3& v1, const float f);
-
 const Vector3 operator/(const Vector3& v1, const float f);
 
 //単位行列の作成
@@ -124,6 +120,8 @@ float SwapRadian(float degree);
 
 float Length(const Vector3& v);
 
+float Length(const Vector2& v);
+
 float Distance(const Vector3& v1, const Vector3& v2);
 
 // AABBから中心座標を計算
@@ -160,3 +158,6 @@ float Sign(float value);
 Vector2 Sign(const Vector2& value);
 
 Vector3 Sign(const Vector3& value);
+
+// 桁数の計算
+int GetDigitCount(float value);

@@ -98,6 +98,11 @@ public:
 	const int ReturnKeyInt(BYTE keyNumber);
 
 	/// <summary>
+	/// 何かしらのキーが入力されたことを確認するボタン
+	/// </summary>
+	bool PressAnyKey();
+
+	/// <summary>
 	/// マウスの押下をチェック
 	/// </summary>
 	/// <param name="mouseNumer">0 = 左クリック</param>
@@ -161,7 +166,7 @@ public:
 	float GetJoyStickDirection3(const Vector3 joyStickPos);
 
 	// ジョイスティックの移動移動量を計算
-	Vector2 GetJoyStickVelocity(const Vector2 joyStickPos, const Vector3 velocity, const bool acceleration = true);
+	Vector2 GetJoyStickVelocity();
 
 	// ジョイスティックの移動移動量を計算
 	Vector3 GetJoyStickVelocity(const Vector3 joyStickPos, const Vector3 velocity, const bool acceleration = true);
@@ -203,6 +208,11 @@ public:
 	/// ボタン(コントローラー)のリターンをチェック
 	/// </summary>
 	bool ReturnButton(Controller button);
+
+	/// <summary>
+	/// 何かしらのボタンが入力されたことを確認するボタン
+	/// </summary>
+	bool PressAnyButton();
 
 private:
 

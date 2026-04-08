@@ -48,6 +48,10 @@ public:
 
 	void SetCamera(Camera* camera);
 
+	void SetColor(const Vector4& color) { materialData->color = color; }
+
+	void SetSunPoewr(const float& power) { sunData->power = power; }
+
 	const uint32_t& GetSrvIndex() const { return srvIndex; }
 
 	/// <summary>
@@ -75,7 +79,7 @@ private:
 	// Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
 	// Resource作る度に配列を増やしす
-	D3D12_ROOT_PARAMETER rootParameters[3] = {};
+	D3D12_ROOT_PARAMETER rootParameters[4] = {};
 	// シリアライズしてバイナリにする
 	Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob = nullptr;
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
@@ -126,6 +130,19 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource;
 	// マテリアルバッファリソース内のデータを指すポインタ
 	Material* materialData = nullptr;
+
+	struct Sun
+	{
+		float power;
+		Vector3 sunDirection;
+		Vector3 topColor;
+		float pad1;
+		Vector3 bottomColor;
+		float pad2;
+	};
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> sunResource;
+	Sun* sunData = nullptr;
 
 	Camera* camera_ = nullptr;
 

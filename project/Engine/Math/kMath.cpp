@@ -16,22 +16,6 @@ const Vector3 operator/(const Vector3& v1, const Vector3 v2) {
 	return result;
 }
 
-const Vector3 operator+(const Vector3& v1, const float f) {
-	Vector3 result;
-	result.x = v1.x / f;
-	result.y = v1.y / f;
-	result.z = v1.z / f;
-	return result;
-}
-
-const Vector3 operator-(const Vector3& v1, const float f) {
-	Vector3 result;
-	result.x = v1.x / f;
-	result.y = v1.y / f;
-	result.z = v1.z / f;
-	return result;
-}
-
 const Vector3 operator/(const Vector3& v1, const float f) {
 	Vector3 result;
 	result.x = v1.x / f;
@@ -543,6 +527,12 @@ float Length(const Vector3& v) {
 	return result;
 }
 
+float Length(const Vector2& v)
+{
+	float result = sqrtf((v.x * v.x) + (v.y * v.y));
+    return result;
+}
+
 float Distance(const Vector3& v1, const Vector3& v2) {
 	Vector3 dist = { v1.x - v2.x, v1.y - v2.y, v1.z - v2.z };
 	float result = Length(dist);
@@ -707,4 +697,14 @@ const Vector2 Vector2::Clamp(Vector2 target, float min, float max) {
 	target.x = std::clamp(target.x, min, max);
 	target.y = std::clamp(target.y, min, max);
 	return target;
+}
+
+int GetDigitCount(float value)
+{
+	value = std::fabs(value);
+
+	if (value < 1.0f)
+		return 1; // 0.x の場合は 1 桁として扱う
+
+	return static_cast<int>(std::floor(std::log10(value))) + 1;
 }

@@ -5,6 +5,22 @@
 #include "kMath.h"
 #include "Capsule.h"
 
+inline const bool CollisionSprite(const AABB& a, const AABB& b) {
+	if ((a.min.x <= b.max.x && a.max.x >= b.min.x) &&
+		(a.min.y <= b.max.y && a.max.y >= b.min.y)) {
+		return true;
+	}
+	return false;
+}
+
+inline const bool CollisionUISprite(const AABB& a, const Vector2 b) {
+	if ((a.min.x <= b.x && a.max.x >= b.x) &&
+		(a.min.y <= b.y && a.max.y >= b.y)) {
+		return true;
+	}
+	return false;
+}
+
 inline const bool CollisionAABB(const AABB& a, const AABB& b) {
 	if ((a.min.x < b.max.x && a.max.x > b.min.x) &&
 		(a.min.y < b.max.y && a.max.y > b.min.y) &&
@@ -42,6 +58,34 @@ inline const bool& CollisionAABBSphere(const AABB& aabb, const Sphere& sphere) {
 }
 
 inline const bool CollisionCapsuleAABB(const Capsule& capsule, const AABB& aabb) {
+	Vector3 closestOnAABB;
+	closestOnAABB.x = std::clamp(capsule.start.x, aabb.min.x, aabb.max.x);
+	closestOnAABB.y = std::clamp(capsule.start.y, aabb.min.y, aabb.max.y);
+	closestOnAABB.z = std::clamp(capsule.start.z, aabb.min.z, aabb.max.z);
+
+	// capsuleの線分の最近接点
+	Vector3	closestOnCapsule;
+	Vector3 ab = capsule.end - capsule.start;
+	float abLen2 = Dot(ab, ab);
+
+	Vector3 p = CenterAABB(aabb);
+	float t = Dot(p - capsule.start, ab) / abLen2;
+
+	closestOnCapsule = capsule.start * (1.0f - t) + capsule.end * t;
+
+	// AABBとCapsuleの最近接点の距離を計算
+	Vector3 dist = closestOnAABB - closestOnCapsule;
+	float len = Dot(dist, dist);
+
+	// 距離がcapsuleの半径よりも小さかったら衝突
+	if (len <= capsule.radius * capsule.radius)
+	{
+		return true;
+	}
+	return  false;
+}
+
+inline const Vector3 CapsuleAABBPenetration(const Capsule& capsule, const AABB& aabb) {
 	// aabbの中心点を求める
 	// 1. AABB の中心ではなく、カプセル線分の start を AABB にクランプする
 	//    → これが AABB に最も近い点の候補になる
@@ -51,6 +95,7 @@ inline const bool CollisionCapsuleAABB(const Capsule& capsule, const AABB& aabb)
 	q.x = std::clamp(p.x, aabb.min.x, aabb.max.x);
 	q.y = std::clamp(p.y, aabb.min.y, aabb.max.y);
 	q.z = std::clamp(p.z, aabb.min.z, aabb.max.z);
+
 
 	Vector3 d = q - capsule.start;
 	Vector3 ba = capsule.end - capsule.start;
@@ -71,12 +116,14 @@ inline const bool CollisionCapsuleAABB(const Capsule& capsule, const AABB& aabb)
 	// 5. カプセル線分最近接点 f と AABB 最近接点の距離
 	Vector3 dist = closestOnAABB - f;
 	float distance = Dot(d, d);
-
+	
 
 	if (distance < capsule.radius * capsule.radius)
 	{
-		return true;
+		Vector3 dir = closestOnAABB - capsule.start;
+		return (1.0f - dist) * capsule.radius;
+
 	}
-	return false;
+	return { 0.0f, 0.0f, 0.0f };
 }
 

@@ -6,6 +6,12 @@
 #include "TextureManager.h"
 #include "SrvManager.h"
 #include "Camera.h"
+#include "Light.h"
+
+#ifndef NDEBUG
+#include "ImGuiManager.h"
+#endif // !NDEBUG
+
 
 using namespace Logger;
 
@@ -54,6 +60,14 @@ void SkyBox::Initialize() {
 	vertexResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(VertexData) * 24);
 
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
+
+	sunResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(Sun));
+	sunResource->Map(0, nullptr, reinterpret_cast<void**>(&sunData));
+
+	sunData->power = 0.0f;
+	sunData->topColor = { 0.45f, 0.65f, 1.0f };
+	sunData->bottomColor = { 0.02f, 0.05f, 0.15f };
+	sunData->sunDirection = { 0.0f, 1.0f, 0.0f };
 
 	// 頂点バッファビューを作成する
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
@@ -187,6 +201,9 @@ void SkyBox::CreateRootSignature() {
 	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;           // PixelShaderで使う
 	rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange;        // Tableの中身の配列を指定
 	rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange);
+	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;              // CBVを使う
+	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;           // PixelShaderで使う
+	rootParameters[3].Descriptor.ShaderRegister = 1;                              // レジスタ番号0とバインド
 	descriptionRootSignature.pParameters = rootParameters;              // ルートパラメータ配列へのポインタ
 	descriptionRootSignature.NumParameters = _countof(rootParameters);  // 配列の長さ
 
@@ -292,8 +309,37 @@ void SkyBox::Update() {
 		worldViewProjectionMatrix = worldMatrix;
 	}
 
+	Vector3 sunDirection = Light::GetInstance()->GetDirectionDirectionalLight();
+	sunData->sunDirection = { sunDirection.x, -sunDirection.y, sunDirection.z };
+
 	transformationMatrix->WVP = worldViewProjectionMatrix;
 	transformationMatrix->World = worldMatrix;
+
+#ifndef NDEBUG
+	ImGui::Begin("Sun Settings");
+
+	// Power
+	ImGui::SliderFloat("Power", &sunData->power, 0.0f, 1.0f);
+
+	// Direction
+	ImGui::Text("Sun Direction");
+	ImGui::DragFloat3("Direction", &sunData->sunDirection.x, 0.01f);
+	// 正規化したい場合
+	if (ImGui::Button("Normalize Direction"))
+	{
+		sunData->sunDirection = Normalize(sunData->sunDirection);
+	}
+
+	// Top Color
+	ImGui::ColorEdit3("Top Color", &sunData->topColor.x);
+
+	// Bottom Color
+	ImGui::ColorEdit3("Bottom Color", &sunData->bottomColor.x);
+
+	ImGui::End();
+#endif // !NDEBUG
+
+
 }
 
 void SkyBox::Draw() {
@@ -309,6 +355,8 @@ void SkyBox::Draw() {
 
 	// wvp用のCBufferの場所を設定
 	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+
+	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(3, sunResource->GetGPUVirtualAddress());
 
 	DirectXBase::GetInstance()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView); // VBVを設定
 

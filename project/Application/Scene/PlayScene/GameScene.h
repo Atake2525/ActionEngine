@@ -16,10 +16,11 @@
 #include "SkyBox.h"
 #include "CollisionManager.h"
 #include <memory>
-#include "GameOver.h"
-#include "GameClearScene.h"
-#include "ActionPlayer.h"
+#include "Player.h"
 #include "BaseStage.h"
+#include "Pause.h"
+#include "PlayerUI.h"
+#include "MouseCursor.h"
 
 #pragma once
 
@@ -48,56 +49,44 @@ public:
 	void Draw() override;
 
 	// 終了処理
-	const bool& EndRequest() override { return finished; }
+	const bool& EndRequest() override { return m_finished; }
 
 private:
-	float speed = 0.25f;
+	std::unique_ptr<Camera> m_pCamera = nullptr;
 
-	bool sneak = false;
+	bool m_finished = false;
 
-	std::unique_ptr<Camera> camera = nullptr;
+	Input* m_pInput = nullptr;
+	std::unique_ptr<MouseCursor> m_mouseCursor = nullptr;
 
-	bool finished = false;
+	bool m_cursorShow = false;
 
-	Transform cameraTransform;
-	Transform modelTransform;
 
-	Input* input = nullptr;
+	std::unique_ptr<Player> m_pPlayer = nullptr;
+	std::unique_ptr<PlayerUI> m_pPlayerUI = nullptr;
 
-	AABB aabb;
+	std::unique_ptr<BaseStage> m_pStage;
+	std::unique_ptr<Pause> m_pPause;
 
-	bool enableLighting = true;
+	/// <summary>
+	/// ここからスタート演出用系
+	/// </summary>
 
-	bool cursorshow = false;
+	float m_startTimer = 0.0f;
+	float m_startTime = 1.5f;
 
-	Vector2 leftTop;
-	Transform transformSprite;
+	float m_finalScanRadius = 0.0f;
+	float m_finalFarClipDistance = 100.0f;
 
-	std::unique_ptr<ActionPlayer> player_ = nullptr;
+	int m_readyNumber = 0;
 
-	bool start_ = false;
-
-	bool startMovie_ = false;
-	float movieTimer_ = 0.0f;
-	float movieTime_ = 2.0f;
-	int phase_ = 0;
-
-	bool back = false;
-
-	std::unique_ptr<GameOver> gameOver_ = nullptr;
-	std::unique_ptr<GameClearScene> gameClear_ = nullptr;
-
-	struct Tutorial
-	{
-        std::unique_ptr<Sprite> sprite;
-		bool isClear = false;
-        float timer = 0.0f;
-		Vector4 color = { 0.0f, 0.0f, 0.0f, 1.0f };
+	enum class ScenePhase : int {
+		FadeIn = 0,
+		Ready = 1,
+		Game = 2,
+		FadeOut = 3,
 	};
-
-	std::unique_ptr<BaseStage> stage;
-
-	std::unique_ptr<Object3d> stageObject;
+	ScenePhase m_scenePhase = ScenePhase::FadeIn;
 
 };
 

@@ -1,314 +1,272 @@
+#pragma once
+
+// ============================
+//  Include
+// ============================
 #include <vector>
+#include <map>
+#include <string>
 #include <wrl.h>
 #include <d3d12.h>
-#include <string>
+
 #include "Vector2.h"
 #include "Vector3.h"
 #include "Vector4.h"
 #include "Matrix4x4.h"
 #include "Transform.h"
-#include "AABB.h"
-#include "OBB.h"
-#include "kMath.h"
 #include "Quaternion.h"
+#include "kMath.h"
+
 #include "Animator.h"
 #include "Model.h"
+
+#include "AABB.h"
+#include "OBB.h"
 #include "Capsule.h"
+
 #include "Culling.h"
-//#include "DebugAnimation.h"
 
-#pragma once
-
-//class Model;
 class Camera;
 
+// ============================
+//  Object3d
+// ============================
 class Object3d {
-public: // メンバ関数
-	// 初期化
-	void Initialize();
+public:
+    // ============================
+    //  Lifecycle
+    // ============================
+    void Initialize();
+    void Update();
+    void Draw();
+    ~Object3d();
 
-	// 更新
-	void Update();
+    // ============================
+    //  Model
+    // ============================
+    void SetModel(const std::string& filePath);
+    void SetModel(const std::string& directoryPath, const std::string& filePath,
+        const bool& enableLighting = false, const bool isAnimation = false);
 
-	// SkinCulsterの更新
-	void UpdateSkinCluster(std::vector<SkinCluster>& skinCluster, const Skeleton& skeleton);
+    // ============================
+    //  Camera
+    // ============================
+    void SetCamera(Camera* camera) { this->camera = camera; }
 
-	// デストラクタ
-	~Object3d();
+    // ============================
+    //  Animation
+    // ============================
+    void ToggleStartAnimation() { startAnimation = !startAnimation; }
+    void SetStartAnimation(bool start) { startAnimation = start; }
+    void ResetAnimationTime();
+    void AddAnimation(std::string directoryPath, std::string filename, std::string animationName);
+    void PlayDefaultAnimation();
+    void ChangePlayAnimation(const std::string key = "DefaultAnimation");
+    void ResetAnimationSpeed() { animationSpeed = 1.0f; }
+    const float& GetChangeAnimationSpeed() const { return changeAnimationSpeed; }
+    void SetChangeAnimationSpeed(const float speed = 0.4f) { changeAnimationSpeed = speed; }
+    void SetAnimationSpeed(const float speed) { animationSpeed = speed; }
+    const float& GetAnimationSpeed() const { return animationSpeed; }
 
-	/// <summary>
-	/// 描画
-	/// </summary>
-	/// <param name="worldPos">CameraPosition</param>
-	void Draw();
+    // ============================
+    //  Transform
+    // ============================
+    const Transform& GetTransform() const { return transform; }
+    const Vector3& GetTranslate() const { return transform.translate; }
+    const Vector3& GetScale() const { return transform.scale; }
+    const Vector3& GetRotate() const { return transform.rotate; }
+    const Vector3 GetRotateInDegree() const;
 
-	void SetModel(const std::string& filePath);
+    void SetTransform(const Transform& transform) { this->transform = transform; }
+    void SetTransform(const Vector3& translate, const Vector3& scale, const Vector3& rotate);
+    void SetTranslate(const Vector3& translate) { transform.translate = translate; }
+    void SetScale(const Vector3& scale) { transform.scale = scale; }
+    void SetRotate(const Vector3& rotate) { transform.rotate = rotate; }
+    void SetRotateInDegree(const Vector3& rotate);
 
-	void SetModel(const std::string& directoryPath, const std::string& filePath, const bool& enableLighting = false, const bool isAnimation = false);
+    // 任意軸回転
+    void SetAxisAngle(const Vector3& rotate) { axisAngle = Normalize(rotate); }
+    void SetQuaternionAngle(const float& angle) { rotateQuaternionMatrix = MakeRotateAxisAngle(axisAngle, angle); }
 
-	void SetCamera(Camera* camera) { this->camera = camera; }
+    // ============================
+    //  Parent Transform
+    // ============================
+    void SetParent(const Matrix4x4& worldMatrix) {
+        parent = worldMatrix;
+        isParent = true;
+        isTranslateParent = false;
+        isRotateParent = false;
+    }
+    void DeleteParent() { isParent = false; }
 
-	void ToggleStartAnimation() { startAnimation = !startAnimation; }
+    void SetTranslateParent(const Matrix4x4& worldMatrix) {
+        translateParent = worldMatrix;
+        isTranslateParent = true;
+        isParent = false;
+        isRotateParent = false;
+    }
+    void DeleteTranslateParent() { isTranslateParent = false; }
 
-	void SetStartAnimation(bool start) { startAnimation = start; }
+    void SetRotateParent(const Matrix4x4& worldMatrix) {
+        rotateParent = worldMatrix;
+        isRotateParent = true;
+        isTranslateParent = false;
+        isParent = false;
+    }
+    void DeleteRotateParent() { isRotateParent = false; }
 
-	void ResetAnimationTime();
+    // ============================
+    //  Rendering
+    // ============================
+    const Vector4& GetColor() const;
+    void SetColor(const Vector4 color);
+    void SetEnableLighting(const bool enableLighting);
+    const bool GetEnableLighting() const;
+    const float GetEnvironmentCoefficient() const;
+    void SetEnvironmentCoefficient(const float amount);
+    void SetShininess(const float& shininess);
+    const float& GetShininess() const;
+    void DebugMode(const bool debugMode);
+    void SetEnableMetallic(const bool flag) { model_->SetEnableMetallic(flag); }
+    const bool GetEnableMetallic() { return model_->GetEnableMetallic(); }
 
-	void AddAnimation(std::string directoryPath, std::string filename, std::string animationName);
+    // ============================
+    //  Culling
+    // ============================
+    void SetDrawHeiht(const float height) { privateCullingData.drawHeight = height; }
+    const CullingTemplate GetCullingTemplateData() const { return privateCullingData; }
 
-	void PlayDefaultAnimation();
+    // ============================
+    //  Collision
+    // ============================
+    const AABB& GetAABB() const { return aabb; }
+    const Matrix4x4& GetWorldMatrix() const { return worldMatrix; }
+    const Capsule& GetCapsule() const { return capsule; }
+    const OBB& GetOBB() const { return obb; }
+    const std::vector<OBB>& GetMultiMeshOBB() const { return multiMeshOBB; }
 
-	void ChangePlayAnimation(const std::string key = "DefaultAnimation");
+    const bool CheckCollisionAABB(Object3d* object) const;
+    const bool CheckCollisionAABBs(Object3d* object) const;
+    const bool CheckCollisionCapsule(Object3d* object) const;
+    const bool CheckCollisionOBB(Object3d* object) const;
+    const bool CheckCollisionOBBs(Object3d* object) const;
+    const bool CheckCollisionOBB(const OBB& obb) const;
+    const bool CheckCollisionOBBs(const OBB& obb) const;
 
-	void ResetAnimationSpeed() { animationSpeed = 1.0f; }
+    void UpdateAABB();
+    void UpdateCapsule();
+    void UpdateOBB();;
 
-	const float& GetChangeAnimationSpeed() const { return changeAnimationSpeed; }
-	// アニメーションの切り替え時間の設定 Default : 0.4f
-	void SetChangeAnimationSpeed(const float speed = 0.4f) { changeAnimationSpeed = speed; }
+    const std::vector<AABB> GetAABBMultiMeshed();
+    void CreateCapsule();
 
-	// Parentを登録(子)
-	// Setter(Parent)
-	void SetParent(const Matrix4x4& worldMatrix) {
-		parent = worldMatrix;
-		isParent = true;
-		isTranslateParent = false;
-		isRotateParent = false;
-	}
-	// Delete Parent(Parent 解除)
-	void DeleteParent() {
-		isParent = false;
-	}
-	// Setter(Parent)
-	void SetTranslateParent(const Matrix4x4& worldMatrix) {
-		translateParent = worldMatrix;
-		isTranslateParent = true;
-		isParent = false;
-		isRotateParent = false;
-	}
-	// Delete Parent(Parent 解除)
-	void DeleteTranslateParent() {
-		isTranslateParent = false;
-	}
-	// Setter(Parent)
-	void SetRotateParent(const Matrix4x4& worldMatrix) {
-		rotateParent = worldMatrix;
-		isRotateParent = true;
-		isTranslateParent = false;
-		isParent = false;
-	}
-	// Delete Parent(Parent 解除)
-	void DeleteRotateParent() {
-		isRotateParent = false;
-	}
+    // ============================
+    //  Joint Info
+    // ============================
+    const Vector3 GetJointPosition(const std::string jointName);
+    const Vector3 GetJointNormal(const std::string jointName);
+    const Matrix4x4 GetJointMatrix(const std::string& jointName);
 
 private:
+    // ============================
+    //  Transform Data
+    // ============================
+    Transform transform;
+    Vector3 axisAngle;
+    Matrix4x4 rotateQuaternionMatrix;
 
-	Transform transform;
+    Matrix4x4 parent;
+    bool isParent = false;
+    Matrix4x4 translateParent;
+    bool isTranslateParent = false;
+    Matrix4x4 rotateParent;
+    bool isRotateParent = false;
 
-	Vector3 axisAngle;
+    Matrix4x4 worldMatrix;
 
+    // ============================
+    //  Camera Data
+    // ============================
+    Camera* camera = nullptr;
 
-	Matrix4x4 rotateQuaternionMatrix;
-
-	Matrix4x4 parent;
-	bool isParent = false;
-	Matrix4x4 translateParent;
-	bool isTranslateParent = false;
-	Matrix4x4 rotateParent;
-	bool isRotateParent = false;
-
-	Camera* camera = nullptr;
-
-private:
-
-	struct CameraForGPU {
-		Vector3 worldPosition;
+    struct CameraForGPU {
+        Vector3 worldPosition;
         float nearClipDistance;
         float farClipDistance;
-		float drawHeihgt;
-	};
+        float drawHeihgt;
+    };
 
-	// 座標変換リソースのバッファリソース
-	Microsoft::WRL::ComPtr<ID3D12Resource> transformationMatrixResource;
-	// 座標変換行列リソース内のデータを指すポインタ
-	TransformationMatrix* transformationMatrix = nullptr;
+    Microsoft::WRL::ComPtr<ID3D12Resource> cameraResource;
+    CameraForGPU* cameraData = nullptr;
 
-	// PhongShading用カメラ
-	Microsoft::WRL::ComPtr<ID3D12Resource> cameraResource;
-	CameraForGPU* cameraData = nullptr;
+    // ============================
+    //  Rendering Data
+    // ============================
+    Microsoft::WRL::ComPtr<ID3D12Resource> transformationMatrixResource;
+    TransformationMatrix* transformationMatrix = nullptr;
 
-	Model* model_ = nullptr;
+    Microsoft::WRL::ComPtr<ID3D12Resource> cullingTemplateResource;
+    CullingTemplate* cullingTemplateData = nullptr;
+    CullingTemplate privateCullingData;
 
-	std::map<std::string, Animation> animation;
-	std::string beforAnimationKey = "DefaultAnimation";
-	std::string animationKey = "DefaultAnimation";
+    // ============================
+    //  Model Data
+    // ============================
+    Model* model_ = nullptr;
 
-	bool changingAnimation = false;
+    // ============================
+    //  Animation Data
+    // ============================
+    std::map<std::string, Animation> animation;
+    std::string beforAnimationKey = "DefaultAnimation";
+    std::string animationKey = "DefaultAnimation";
 
-	float animationTime = 0.0f;
-	float changeAnimationTime = 0.0f;
-	float changeAnimationSpeed = 0.4f;
+    bool changingAnimation = false;
+    float animationTime = 0.0f;
+    float changeAnimationTime = 0.0f;
+    float changeAnimationSpeed = 0.4f;
 
-	bool startAnimation = false;
-	float animationSpeed = 1.0f;
+    bool startAnimation = false;
+    float animationSpeed = 1.0f;
 
-	Skeleton skeleton;
+    Skeleton skeleton;
+    std::vector<SkinCluster> skinCluster;
 
-	std::vector<SkinCluster> skinCluster;
+    // ============================
+    //  Collision Data
+    // ============================
+    AABB aabb;
+    AABB aabbPre;
+    std::vector<AABB> multiMeshAABB;
+    std::vector<AABB> multiMeshAABBPre;
 
+    AABB first;
+    std::vector<AABB> firstMultiMeshAABB;
 
-	// 衝突判定に必要
+    Capsule capsule;
+    Capsule capsulePre;
 
-	// Getterに返すようのAABB(座標を更新する)
-	AABB aabb;
-
-	AABB aabbPre;
-
-	std::vector<AABB> multiMeshAABB;
-
-	std::vector<AABB> multiMeshAABBPre;
-
-	// 初期位置のAABB
-	AABB first;
-
-	std::vector<AABB> firstMultiMeshAABB;
-
-	Matrix4x4 worldMatrix;
-
-	Capsule capsule;
-
-	Capsule capsulePre;
-
-	OBB obb;
-
-	std::vector<OBB> multiMeshOBB;
-
-public:
-
-	// Getter(Transform)
-	const Transform& GetTransform() const { return transform; }
-	// Getter(Translate)
-
-	const Vector3& GetTranslate() const { return transform.translate; }
-	// Getter(Scale)
-	const Vector3& GetScale() const { return transform.scale; }
-	// Getter(Rotate)
-	const Vector3& GetRotate() const { return transform.rotate; }
-	// Getter(Rotate Degree)
-	const Vector3 GetRotateInDegree() const;
-	// Gettre(Color)
-	const Vector4& GetColor() const;
-	// Getter(EnableLighting)
-	const bool GetEnableLighting() const;
-	// 環境マップの反射数値
-	const float GetEnvironmentCoefficient() const;
-	// Getter(shininess)
-	const float& GetShininess() const;
-	// Getter(AABB)
-	const AABB& GetAABB() const { return aabb; }
-	// Getter(worldMatrix)
-	const Matrix4x4& GetWorldMatrix() const { return worldMatrix; }
-	// アニメーションの再生速度を取得
-	const float& GetAnimationSpeed() const { return animationSpeed; }
-
-	const CullingTemplate GetCullingTemplateData() const { return privateCullingData; }
-
-	const OBB& GetOBB() const { return obb; }
-	const std::vector<OBB>& GetMultiMeshOBB() const { return multiMeshOBB; }
-
-	// Setter(Transform)
-	void SetTransform(const Transform& transform) { this->transform = transform; }
-	// Setter(Transform, pos,scale,rotate)
-	void SetTransform(const Vector3& translate, const Vector3& scale, const Vector3& rotate);
-	// Setter(Translate)
-	void SetTranslate(const Vector3& translate) { transform.translate = translate; }
-	// Setter(Scale)
-	void SetScale(const Vector3& scale) { transform.scale = scale; }
-	// Setter(Rotate)
-	void SetRotate(const Vector3& rotate) { transform.rotate = rotate; }
-	// Setter(Rotate Degree)
-	void SetRotateInDegree(const Vector3& rotate);
-	// Setter(Color)
-	void SetColor(const Vector4 color);
-	// Setter(EnableLighting)
-	void SetEnableLighting(const bool enableLighting);
-	// Setter(shininess)
-	void SetShininess(const float& shininess);
-	// 任意軸回転の軸を指定の回転角に変更
-	void SetAxisAngle(const Vector3& rotate) { axisAngle = Normalize(rotate); }
-	// 任意軸回転の回転量を設定
-	void SetQuaternionAngle(const float& angle) { rotateQuaternionMatrix = MakeRotateAxisAngle(axisAngle, angle); }
-	// デバッグ(ワイヤーフレーム)用にテクスチャをwhite1x1に変更
-	void DebugMode(const bool debugMode);
-	// アニメーションの再生速度の設定(初期値 : 1.0f)
-	void SetAnimationSpeed(const float speed) { animationSpeed = speed; }
-
-	const Vector3 GetJointPosition(const std::string jointName);
-
-	const Vector3 GetJointNormal(const std::string jointName);
-
-	void SetEnvironmentCoefficient(const float amount);
-
-	void SetEnableMetallic(const bool flag) { model_->SetEnableMetallic(flag); }
-
-	void SetDrawHeiht(const float height) { privateCullingData.drawHeight = height; }
-
-	const bool GetEnableMetallic() { return model_->GetEnableMetallic(); }
-
-	// Capsuleをモデルを参照して作成
-	void CreateCapsule();
-
-	// Capsuleを取得
-	const Capsule& GetCapsule() const { return capsule; }
-
-public:
-	// 衝突チェック(AABBとAABB)
-	const bool CheckCollisionAABB(Object3d* object) const;
-
-	const std::vector<AABB> GetAABBMultiMeshed();
-
-	// 衝突チェック(AABBと複数AABB)
-	const bool CheckCollisionAABBs(Object3d* object) const;
-
-	const bool CheckCollisionCapsule(Object3d* object) const;
-
-	const bool CheckCollisionOBB(Object3d* object) const;
-
-	const bool CheckCollisionOBBs(Object3d* object) const;
-
-	const bool CheckCollisionOBB(const OBB& obb) const;
-
-	const bool CheckCollisionOBBs(const OBB& obb) const;	
-
-	//const bool CheckCollisionCapsuleMultiAABB(Object3d* object) const;
-
-	//const bool& CheckCollisionSphere(const Sphere& sphere) const;
+    OBB obb;
+    std::vector<OBB> multiMeshOBB;
 
 private:
+    // ============================
+    //  Internal Methods
+    // ============================
+    void CreateTransformationMatrixResource();
+    void CreateCameraResource();
 
-	// TransformationMatrixResourceを作る
-	void CreateTransformationMatrixResource();
-	// CameraResourceを作る
-	void CreateCameraResource();
+    void ApplyAnimation(Skeleton& skeleton, const Animation& animation, float animationTime);
+    const bool ChangeAnimation(Animation& beforAnimation, Animation& afterAnimation,
+        float animationTime, float changeTime);
 
-	// アニメーションの適用(Skeltonに対してAnimationの適用を行う)
-	void ApplyAnimation(Skeleton& skeleton, const Animation& animation, float animationTime);
+    const Skeleton CreateSkelton(const Node& rootNode);
+    const int32_t CreateJoint(const Node& node, const std::optional<int32_t>& parent,
+        std::vector<Joint>& joints);
 
-	const bool ChangeAnimation(Animation& beforAnimation, Animation& afterAnimation, float animationTime, float changeTime);
+    void UpdateSkelton(Skeleton& skelton);
+    std::vector<SkinCluster> CreateSkinCluster(const Skeleton& skeleton,
+        const ModelData& modelData);
 
-	// skeltonの作成
-	const Skeleton CreateSkelton(const Node& rootNode);
-	// Jointの作成
-	const int32_t CreateJoint(const Node& node, const std::optional<int32_t>& parent, std::vector<Joint>& joints);
-
-	void UpdateSkelton(Skeleton& skelton);
-
-	// SkinClusterの作成
-	std::vector<SkinCluster> CreateSkinCluster(const Skeleton& skeleton, const ModelData& modelData);
-
-
-	Microsoft::WRL::ComPtr<ID3D12Resource> cullingTemplateResource = nullptr;
-	CullingTemplate* cullingTemplateData = nullptr;
-	CullingTemplate privateCullingData;
-
+    void UpdateSkinCluster(std::vector<SkinCluster>& skinCluster, const Skeleton& skeleton);
 };

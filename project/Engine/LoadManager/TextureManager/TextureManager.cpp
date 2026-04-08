@@ -30,7 +30,7 @@ void TextureManager::Initialize() {
 	// SRVの数と同数
 	textureDatas.reserve(SrvManager::GetInstance()->kMaxSRVCount);
 
-	LoadTexture("Resources/Debug/black1x1.png");
+	LoadTexture("Resources/Sprite/black1x1.png");
     LoadTexture("Resources/Sprite/noise0.png");
 
 }
@@ -63,7 +63,6 @@ void TextureManager::LoadTexture(const std::string& filePath) {
 	}
 
 	// テクスチャ枚数上限チェック
-	//assert(textureDatas.size() + kSRVIndexTop < SrvManager::GetInstance()->kMaxSRVCount);
 	assert(SrvManager::GetInstance()->CheckAllocate());
 
 
@@ -80,7 +79,6 @@ void TextureManager::LoadTexture(const std::string& filePath) {
 	{
 		hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
 	}
-	//HRESULT hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
 	assert(SUCCEEDED(hr));
 
 	// DirectXTexでは直接的に圧縮フォーマットのMipMap生成に対応していないので、圧縮されていたらそのままimageを使うように変更する。リンク先にあるようにDecompress/Compressで対応しても良い
@@ -110,39 +108,19 @@ void TextureManager::LoadTexture(const std::string& filePath) {
 		textureData.intermediateResource = DirectXBase::GetInstance()->UploadTextureData(textureData.resource, image);
 	}
 
-	// テクスチャデータを追加
-	//textureDatas.resize(textureDatas.size() + 1);
-
-		// テクスチャデータの要素番号をSRVのインデックスとする
-	//uint32_t srvIndex = static_cast<uint32_t>(textureDatas.size() - 1) + kSRVIndexTop;
 	uint32_t srvIndex = SrvManager::GetInstance()->Allocate();
 	textureData.srvIndex = srvIndex;
 
 	textureData.srvHandleCPU = SrvManager::GetInstance()->GetCPUDescriptorHandle(textureData.srvIndex);
 	textureData.srvHandleGPU = SrvManager::GetInstance()->GetGPUDescriptorHandle(textureData.srvIndex);
 
-	uint32_t mapIndex = GetTextureIndexByFilePath("Resources/Debug/black1x1.png");
+	uint32_t mapIndex = GetTextureIndexByFilePath("Resources/Sprite/black1x1.png");
 
 	textureData.normalMapSrvIndex = mapIndex;
 	textureData.metallicMapSrvIndex = mapIndex;
 	textureData.roughnessMapSrvIndex = mapIndex;
 
-	// SRVの作成
-	//D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-
-	//// SRVの設定を行う
-	//srvDesc.Format = textureData.metadata.format;
-	//srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	//srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // 2Dテクスチャ
-	//srvDesc.Texture2D.MipLevels = UINT(textureData.metadata.mipLevels);
-
 	SrvManager::GetInstance()->CreateSRVforTexture2D(srvIndex, textureData.resource, textureData.metadata);
-
-	// 設定をもとにSRVの生成
-	//directxBase_->GetDevice()->CreateShaderResourceView(textureData.resource.Get(), &srvDesc, textureData.srvHandleCPU);
-
-	// MipMap(ミニマップ) : 元画像より小さなテクスチャ群
-
 }
 
 void TextureManager::SetNormalMapTexture(const std::string& targetTextureFilePath, const std::string& filePath)

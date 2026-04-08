@@ -92,3 +92,4 @@ private:
 	bool onButton_ = false;
 };
 
+const bool InCursor(Sprite* sprite);

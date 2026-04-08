@@ -29,16 +29,22 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(const Vector3 color = {1.0f, 1.0f, 1.0f});
+	void Initialize();
 
 	const bool CompleteFade();
 	const bool& IsFade() const { return fade_; }
+
+	void SetColor(const Vector3& color) { color_ = color; }
 
 	void Update();
 
 	void FadeOut(const float time = 0.0f);
 
 	void FadeIn(const float time = 0.0f);
+
+	void SetFinishedFadeFunction(std::function<void()>& func) { finishedFadeFunction = func; }
+
+	void ClearFunction() { finishedFadeFunction = nullptr; }
 
 	void Draw();
 
@@ -58,7 +64,8 @@ private:
 
 	Vector3 color_ = { 1.0f, 1.0f, 1.0f };
 
-	std::function<void()> function;
+	std::function<void()> fadeFunction;
+	std::function<void()> finishedFadeFunction;
 
 	Sprite* sprite_ = nullptr;
 };

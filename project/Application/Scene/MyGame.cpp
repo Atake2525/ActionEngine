@@ -10,8 +10,12 @@ void MyGame::Initialize() {
 
 	GameTime::GetInstance()->Initialize();
 
-	//WinApp::GetInstance()->Initialize(1920, 1080, WindowMode::FullScreen, L"Engine");
+#ifndef NDEBUG
 	WinApp::GetInstance()->Initialize();
+#else
+	WinApp::GetInstance()->Initialize(1920, 1080, WindowMode::FullScreen, L"走快");
+#endif // !NDEBUG
+
 
 	DirectXBase::GetInstance()->Initialize();
 
@@ -50,8 +54,11 @@ void MyGame::Initialize() {
 	Input::GetInstance()->Initialize();
 
 	Audio::GetInstance()->Initialize();
+	Audio::GetInstance()->LoadMP3("Resources/sound/select.mp3", "select");
+	Audio::GetInstance()->LoadMP3("Resources/sound/enter.mp3", "select_enter");
+	Audio::GetInstance()->LoadMP3("Resources/sound/cancel.mp3", "select_cancel");
 
-	FadeManager::GetInstance()->Initialize({0.0f, 0.0f, 0.0f});
+	FadeManager::GetInstance()->Initialize();
 
 	//// ↓---- シーンの初期化 ----↓ ////
 
@@ -59,7 +66,7 @@ void MyGame::Initialize() {
 
 	SceneManager::GetInstance();
 	
-	SceneManager::GetInstance()->SetNextScene("TEST");
+	SceneManager::GetInstance()->SetNextScene("TITLE");
 
 	//gameScene->Initialize();
 
@@ -84,8 +91,14 @@ void MyGame::Update() {
 	ImGui::NewFrame();
 
 	DirectXBase::GetInstance()->Update();
+#ifndef NDEBUG
+	GameTime::GetInstance()->DrawImGui();
+#endif // !NDEBUG
 	Light::GetInstance()->Update();
-	SceneManager::GetInstance()->Update();
+	if (WinApp::GetInstance()->IsWindowActive())
+	{
+		SceneManager::GetInstance()->Update();
+	}
 	ParticleManager::GetInstance()->Update();
 	Audio::GetInstance()->Update();
 	FadeManager::GetInstance()->Update();

@@ -5,6 +5,8 @@
 #include "Logger.h"
 #include "StageCount.h"
 #include "Collision.h"
+#include "Player.h"
+#include "GameTime.h"
 
 using namespace Logger;
 using namespace std;
@@ -15,46 +17,68 @@ Goal::~Goal() {
 
 }
 
-void Goal::Initialize(const std::string jsonName) {
+void Goal::Initialize(const std::string jsonName, Player* player, MouseCursor* mouseCursor) {
 
-	isGoal_ = false;
-	input = Input::GetInstance();
+	m_isGoal = false;
+	m_input = Input::GetInstance();
+	m_player = player;
+	m_result = std::make_unique<Result>();
+	m_result->Initialize(mouseCursor);
 
 	if (JsonLoader::GetInstance()->CheckJsonLoaded(jsonName))
 	{
 		// スタート地点の取得
-		vector<JsonData> data = JsonLoader::GetInstance()->GetJsonData(jsonName, "goal");
+		vector<JsonData> m_jsonDatas = JsonLoader::GetInstance()->GetJsonData(jsonName, "goal");
 		// スタート地点が設定されていない又はjsonが読み込めなかった場合はデフォルト位置を使用
-		if (!data.empty())
+		if (!m_jsonDatas.empty())
 		{
-			for (int i = 0; i < jsonDatas.size(); i++)
+			for (int i = 0; i < m_jsonDatas.size(); i++)
 			{
 				unique_ptr<Object3d> goal;
 				goal = make_unique<Object3d>();
 				goal->Initialize();
 				goal->SetModel("Resources/Model/obj", "goal.obj");
-				goal->SetTransform(jsonDatas[i].transform);
+				goal->SetTransform(m_jsonDatas[i].transform);
 				goal->SetColor({ 0.0f, 1.0f, 0.2f, 0.4f });
-				goalObjects.push_back(move(goal));
+				m_goalObjects.push_back(move(goal));
 			}
 		}
 	}
 }
 
-void Goal::Update(AABB aabb) {
-	for (int i = 0; i < jsonDatas.size(); i++)
+void Goal::Update()
+{
+	m_result->Update();
+	// ゴールした時の処理
+	if (ChceckIsGoal())
 	{
-		goalObjects[i]->Update();
-		if (CollisionAABB(goalObjects[i]->GetAABB(), aabb))
-		{
-			isGoal_ = true;
-		}
+		//GameTime::GetInstance()->SetTimeScale(0.5f);
+		m_player->SetFreeze(true);
+		m_result->StageClear();
 	}
 }
 
-void Goal::Draw() {
-	for (int i = 0; i < jsonDatas.size(); i++)
+const bool& Goal::ChceckIsGoal() {
+	AABB aabb = m_player->GetAABB();
+	for (int i = 0; i < m_goalObjects.size(); i++)
 	{
-		goalObjects[i]->Draw();
+		m_goalObjects[i]->Update();
+		if (CollisionAABB(m_goalObjects[i]->GetAABB(), aabb))
+		{
+			m_isGoal = true;
+		}
 	}
+	return m_isGoal;
+}
+
+void Goal::DrawGoalObject() {
+	for (int i = 0; i < m_goalObjects.size(); i++)
+	{
+		m_goalObjects[i]->Draw();
+	}
+}
+
+void Goal::DrawResult()
+{
+	m_result->Draw();
 }

@@ -3,6 +3,7 @@
 #include "DirectXBase.h"
 #include "TextureManager.h"
 #include "SrvManager.h"
+#include "AABB.h"
 
 void Sprite::SetTransform(const Transform& transform){ 
 	position.x = transform.translate.x;
@@ -38,8 +39,8 @@ void Sprite::SetTransform(const Vector2& position, const float& rotation, const 
 }
 
 void Sprite::SetTexture(const std::string& textureFilePath) {
-	textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(textureFilePath);
 	texturefilePath = textureFilePath;
+	textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(textureFilePath);
 	AdjustTextureSize();
 }
 
@@ -76,7 +77,6 @@ void Sprite::Initialize(std::string textureFilePath) {
 	// テクスチャサイズの計算
 	AdjustTextureSize();
 
-	Update();
 }
 
 void Sprite::Update() {
@@ -237,4 +237,11 @@ void Sprite::AdjustTextureSize() {
 	textureSize.y = static_cast<float>(metadata.height);
 	// 画像サイズをテクスチャサイズに合わせる
 	scale = textureSize;
+}
+
+const AABB Sprite::GetAABB() {
+	return AABB{
+		{position.x - scale.x * anchorPoint.x, position.y - scale.y * anchorPoint.y, 0.0f},
+		{position.x + scale.x - scale.x * anchorPoint.x, position.y + scale.y - scale.y * anchorPoint.y, 0.0f}
+	};
 }

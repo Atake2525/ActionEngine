@@ -2,26 +2,44 @@
 #include "JsonLoader.h"
 #include "WinApp.h"
 #include "CollisionManager.h"
+#include "Light.h"
+#include "Player.h"
+#include "OffscreenRendering.h"
+#include "FadeManager.h"
+#include <functional>
+#include "SceneManager.h"
 
 using namespace std;
 
-void TutorialStage::Initialize()
+void TutorialStage::Initialize(Player* player, Camera* camera, MouseCursor* mouseCursor)
 {
+    OffScreenRendering::GetInstance()->SetGrayscaleColor(GRAYSCALE_SEPIA);
+
     JsonLoader::GetInstance()->LoadJson("Resources/Json/Stage/Tutorial.json", "TutorialStage", false);
 
     // ステージオブジェクトの初期化
     stageObject = make_unique<Object3d>();
     stageObject->Initialize();
     stageObject->SetModel("Resources/Model/obj/Stage/TutorialStage", "TutorialStage.obj", true);
-    CollisionManager::GetInstance()->AddCollision(stageObject.get(), "stageObject");
+    CollisionManager::GetInstance()->AddCollision(stageObject.get());
+    stageObject->Update();
+
+    wallRunObject = make_unique<Object3d>();
+    wallRunObject->Initialize();
+    wallRunObject->SetModel("Resources/Model/obj/Stage/TutorialStage", "TutorialStageWallDashObject.obj", true);
+    CollisionManager::GetInstance()->AddCollision(wallRunObject.get());
+    CollisionManager::GetInstance()->AddWallDashColliison(wallRunObject.get());
+
+    wallRunObject->SetColor({ 1.0f, 0.5f, 0.5f, 1.0f });
+    wallRunObject->Update();
 
     // トラップの初期化
     trap = make_unique<Trap>();
-    trap->Initialize("t");
+    trap->Initialize("TutorialStage");
 
     // ゴールの初期化
     goal = make_unique<Goal>();
-    goal->Initialize("t");
+    goal->Initialize("TutorialStage", player, mouseCursor);
 
     float windowSizeX = float(WinApp::GetInstance()->GetkClientWidth());
     for (int i = 0; i < 4; i++)
@@ -33,6 +51,10 @@ void TutorialStage::Initialize()
         tutorialSprites[i]->SetScale({ 300.0f, 50.0f });
         tutorialSprites[i]->Update();
     }
+
+
+    m_player = player;
+    m_camera = camera;
 }
 
 std::string TutorialStage::GetJsonName()
@@ -42,65 +64,40 @@ std::string TutorialStage::GetJsonName()
 
 void TutorialStage::Update()
 {
+#ifndef NDEBUG
+    if (Input::GetInstance()->TriggerKey(DIK_RETURN))
+    {
+        goal->SetGoal();
+    }
+#endif // !NDEBUG
+
+    if (m_player->GetTransform().translate.y < -120.0f)
+    {
+        FadeManager::GetInstance()->FadeOut(0.5f);
+
+        std::function func = [this]() {
+            OffScreenRendering::GetInstance()->SetGrayscaleIntensity(0.0f);
+            SceneManager::GetInstance()->SetNextScene("GAMESCENE");
+            };
+
+        FadeManager::GetInstance()->SetFinishedFadeFunction(func);
+    }
+
     stageObject->Update();
+
+    wallRunObject->Update();
 
     trap->Update();
 
-   /* if (startMovie_)
-    {
-        movieTimer_ += GameTime::GetInstance()->GetDeltaTime();
-
-        float farClip = camera->GetFarClipDistance();
-        float height;
-
-        AABB landAABB = land->GetAABB();
-        Vector3 landSize = landAABB.max - landAABB.min;
-        float flatLandSize = landSize.x * landSize.z;
-
-        switch (phase_)
-        {
-        case 0:
-
-            farClip = Lerp(1.0f, flatLandSize, movieTimer_ / movieTime_);
-
-            camera->SetFarClipDistance(farClip);
-            break;
-        case 1:
-            height = Lerp(-1.0f, landAABB.max.y + 10.0f, movieTimer_ / movieTime_);
-            land->SetDrawHeiht(height);
-            trap_->SetDrawHeight(height);
-            break;
-        }
-
-        if (movieTimer_ >= movieTime_)
-        {
-            if (phase_ == 1)
-            {
-                startMovie_ = false;
-                movieTimer_ = 0.0f;
-                player_->Freeze(false);
-            }
-            else
-            {
-                camera->SetFarClipDistance(100.0f);
-                movieTimer_ = 0.0f;
-                phase_++;
-                return;
-            }
-        }
-        else
-        {
-            return;
-        }
-    }*/
-
+    goal->Update();
 }
 
 void TutorialStage::DrawObject3d()
 {
     stageObject->Draw();
+    wallRunObject->Draw();
     trap->Draw();
-    goal->Draw();
+    goal->DrawGoalObject();
     for (int i = 0; i < 4; i++)
     {
         tutorialSprites[i]->Update();
@@ -111,14 +108,17 @@ void TutorialStage::DrawFrontSprite() {}
 
 void TutorialStage::DrawBackSprite()
 {
-    for (int i = 0; i < 4; i++)
+    /*for (int i = 0; i < 4; i++)
     {
         tutorialSprites[i]->Draw();
-    }
+    }*/
+    goal->DrawResult();
 }
 
 void TutorialStage::Finalize()
 {
-    CollisionManager::GetInstance()->DeleteCollision("stageObject");
+    CollisionManager::GetInstance()->DeleteCollision(stageObject.get());
+    CollisionManager::GetInstance()->DeleteCollision(wallRunObject.get());
+    CollisionManager::GetInstance()->DeleteWallDashCollision(wallRunObject.get());
     JsonLoader::GetInstance()->DeleteJson("TutorialStage");
 }
