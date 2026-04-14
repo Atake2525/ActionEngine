@@ -61,6 +61,8 @@ private:
 	void CreateRootSignature();
 	// グラフィックスパイプラインの作成
 	void CreateGraphicsPipeLineState();
+    // コンピュートパイプラインの作成
+    void CreateComputePipeLineState();
 
 public:
 	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
@@ -69,11 +71,13 @@ private:
 	/// Rootsignature
 	// DescriptorRange
 	D3D12_DESCRIPTOR_RANGE descriptorRange[5] = {};
+    D3D12_DESCRIPTOR_RANGE descriptorRangeCS[5] = {};
 	// Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
 	// Resource作る度に配列を増やしす
 	// RootParameter作成、PixelShaderのMatrixShaderのTransform
 	D3D12_ROOT_PARAMETER rootParameters[15] = {};
+    D3D12_ROOT_PARAMETER rootParametersCS[5] = {};
 	// シリアライズしてバイナリにする
 	Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob = nullptr;
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
@@ -91,6 +95,8 @@ private:
 
 	Microsoft::WRL::ComPtr<IDxcBlob> pixelShaderBlob;
 
+    Microsoft::WRL::ComPtr<IDxcBlob> computeShaderBlob;
+
 	// DepthStencilStateの設定
 	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
 
@@ -98,7 +104,11 @@ private:
 	// PSOを作成する
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
 
+    D3D12_COMPUTE_PIPELINE_STATE_DESC computePipelineStateDesc{};
+
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPilelineState = nullptr;
+
+    Microsoft::WRL::ComPtr<ID3D12PipelineState> computePipelineState = nullptr;
 
 	CullingTemplate cullingTemplateData;
 

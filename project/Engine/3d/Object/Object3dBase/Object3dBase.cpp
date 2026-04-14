@@ -215,6 +215,55 @@ void Object3dBase::CreateGraphicsPipeLineState() {
 	assert(SUCCEEDED(hr));
 }
 
+void Object3dBase::CreateComputePipeLineState() {
+	HRESULT hr;
+
+    descriptorRangeCS[0].BaseShaderRegister = 0;                                                   // 0から始まる
+    descriptorRangeCS[0].NumDescriptors = 1;                                                       // 数は1つ
+    descriptorRangeCS[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;                              // SRVを使う
+    descriptorRangeCS[1].BaseShaderRegister = 1;                                                   // 1から始まる
+    descriptorRangeCS[1].NumDescriptors = 1;                                                       // 数は1つ
+    descriptorRangeCS[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;                              // SRVを使う
+    descriptorRangeCS[2].BaseShaderRegister = 2;                                                   // 2から始まる
+    descriptorRangeCS[2].NumDescriptors = 1;                                                       // 数は1つ
+    descriptorRangeCS[2].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;                              // SRVを使う
+    descriptorRangeCS[3].BaseShaderRegister = 3;                                                   // 3から始まる
+    descriptorRangeCS[3].NumDescriptors = 1;                                                       // 数は1つ
+    descriptorRangeCS[3].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;                              // UAVを使う
+    descriptorRangeCS[4].BaseShaderRegister = 4;                                                   // 4から始まる
+    descriptorRangeCS[4].NumDescriptors = 1;                                                       // 数は1つ
+    descriptorRangeCS[4].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;                              // CBVを使う
+
+    rootParametersCS[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う
+    rootParametersCS[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;           // 全てのシェーダーで使う
+    rootParametersCS[0].DescriptorTable.pDescriptorRanges = &descriptorRangeCS[0];        // Tableの中身の配列を指定
+	rootParametersCS[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う
+	rootParametersCS[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;           // 全てのシェーダーで使う
+	rootParametersCS[1].DescriptorTable.pDescriptorRanges = &descriptorRangeCS[1];        // Tableの中身の配列を指定
+	rootParametersCS[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う
+	rootParametersCS[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;           // 全てのシェーダーで使う
+	rootParametersCS[2].DescriptorTable.pDescriptorRanges = &descriptorRangeCS[2];        // Tableの中身の配列を指定
+	rootParametersCS[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う
+	rootParametersCS[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;           // 全てのシェーダーで使う
+	rootParametersCS[3].DescriptorTable.pDescriptorRanges = &descriptorRangeCS[3];        // Tableの中身の配列を指定
+	rootParametersCS[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う
+	rootParametersCS[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;           // 全てのシェーダーで使う
+	rootParametersCS[4].DescriptorTable.pDescriptorRanges = &descriptorRangeCS[4];        // Tableの中身の配列を指定
+
+
+    // シェーダーのコンパイル
+    computeShaderBlob = DirectXBase::GetInstance()->CompileShader(L"Resources/shaders/Model/Object3D.CS.hlsl", L"cs_6_5");
+    assert(computeShaderBlob != nullptr);
+
+    // PSOを作成する
+	computePipelineStateDesc.CS = {
+        .pShaderBytecode = computeShaderBlob->GetBufferPointer(),
+        .BytecodeLength = computeShaderBlob->GetBufferSize()
+	};
+	computePipelineStateDesc.pRootSignature = rootSignature.Get();
+    hr = DirectXBase::GetInstance()->GetDevice()->CreateComputePipelineState(&computePipelineStateDesc, IID_PPV_ARGS(&computePipelineState));
+}
+
 void Object3dBase::ShaderDraw() {
 	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
