@@ -72,6 +72,10 @@ void Object3d::Initialize() {
 	cullingTemplateData->drawHeight = -1.0f;
 	privateCullingData.drawHeight = 100.0f;
 
+   /* paletteResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(WellForGPU) * skinCluster.size());
+    inputVertexResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(VertexData) * model_->GetVertices().size());
+    influenceResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(VertexInfluence) * skinCluster);*/
+
 }
 
 void Object3d::Update() {
