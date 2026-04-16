@@ -232,6 +232,13 @@ private:
     Skeleton skeleton;
     std::vector<SkinCluster> skinCluster;
 
+    Microsoft::WRL::ComPtr<ID3D12Resource> paletteResource;
+    Microsoft::WRL::ComPtr<ID3D12Resource> inputVertexResource;
+    Microsoft::WRL::ComPtr<ID3D12Resource> influenceResource;
+    Microsoft::WRL::ComPtr<ID3D12Resource> outputVertexResource;
+    Microsoft::WRL::ComPtr<ID3D12Resource> skinningInformationResource;
+
+
     // ============================
     //  Collision Data
     // ============================
