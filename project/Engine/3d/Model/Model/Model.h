@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <cstdint>
 #include "Vector2.h"
 #include "Vector3.h"
 #include "Vector4.h"
@@ -91,9 +92,37 @@ struct ModelData {
 
 class Model {
 public:
+	struct SkinningInformation
+	{
+		uint32_t numVertices;
+	};
+
+	struct GpuSkinningResource
+	{
+		Microsoft::WRL::ComPtr<ID3D12Resource> paletteResource;
+		Microsoft::WRL::ComPtr<ID3D12Resource> inputVertexResource;
+		Microsoft::WRL::ComPtr<ID3D12Resource> influenceResource;
+		Microsoft::WRL::ComPtr<ID3D12Resource> outputVertexResource;
+		Microsoft::WRL::ComPtr<ID3D12Resource> skinningInformationResource;
+
+		WellForGPU* mappedPalette = nullptr;
+		VertexData* mappedInputVertex = nullptr;
+		VertexInfluence* mappedInfluence = nullptr;
+		SkinningInformation* mappedSkinningInformation = nullptr;
+
+		D3D12_VERTEX_BUFFER_VIEW outputVertexBufferView{};
+
+		uint32_t paletteSrvIndex = UINT32_MAX;
+		uint32_t inputVertexSrvIndex = UINT32_MAX;
+		uint32_t influenceSrvIndex = UINT32_MAX;
+		uint32_t outputVertexUavIndex = UINT32_MAX;
+	};
+
 
 	// 初期化
 	void Initialize(std::string directoryPath, std::string filename, bool enableLighting, bool isAnimation);
+
+    void SkinningUpdate();
 
 	// 更新
 	void Draw();
@@ -132,6 +161,7 @@ public:
 	void DebugMode(bool debugMode) { useWireFrameTexture = debugMode; }
 	// SkinClusterのセット(通常使うものではないため気にしないで良い)
 	void SetSkinCluster(const std::vector<SkinCluster> skinCluster);
+	void CreateSkinningResources(const Skeleton& skeleton);
 
 	// アニメーションの追加
 	void AddAnimation(std::string directoryPath, std::string filename, std::string animationName);
@@ -181,6 +211,7 @@ private:
 	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> materialTemplateResource;
 	// マテリアルバッファリソース内のデータを指すポインタ
 	std::vector<MaterialTemplate*> materialTemplateData;
+	std::vector<GpuSkinningResource> gpuSkinningResources;
 
 private:
 	// .mtlファイルの読み取り

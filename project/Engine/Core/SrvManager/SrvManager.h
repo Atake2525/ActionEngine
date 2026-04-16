@@ -61,6 +61,7 @@ public:
     void CreateUAVforStructuredBuffer(uint32_t uavIndex, Microsoft::WRL::ComPtr<ID3D12Resource> pResource, UINT numElements, UINT structureByteStride);
 
     void SetGraphicsRootDescriptorTable(UINT RootParameterIndex, uint32_t srvIndex);
+    void SetComputeRootDescriptorTable(UINT RootParameterIndex, uint32_t srvIndex);
 
 
 private:
@@ -76,7 +77,5 @@ private:
 private:
     // 次に使用するSRVインデックス
     uint32_t useIndex = 0;
-    uint32_t useUAVIndex = 0;
-
 };
 
