@@ -51,6 +51,8 @@ public:
 
 	void SetCullingTemplateData(const CullingTemplate& data) { cullingTemplateData = data; }
 
+    Microsoft::WRL::ComPtr<ID3D12PipelineState> GetComputePipelineState() { return graphicsPilelineState; }
+    Microsoft::WRL::ComPtr<ID3D12RootSignature> GetComputeRootSignature() { return rootSignatureCS; }
 
 private:
 
@@ -83,6 +85,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
 	// バイナリをもとに作成
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignatureCS = nullptr;
 	// InputLayout
 	D3D12_INPUT_ELEMENT_DESC inputElementDescs[5] = {};
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};

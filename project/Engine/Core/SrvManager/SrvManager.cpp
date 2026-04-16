@@ -128,6 +128,10 @@ void SrvManager::CreateSRVforTexture2D(uint32_t srvIndex, Microsoft::WRL::ComPtr
 
 void SrvManager::CreateSRVforStructuredBuffer(uint32_t srvIndex, Microsoft::WRL::ComPtr<ID3D12Resource> pResource, UINT numElements, UINT structureByteStride)
 {
+	assert(pResource != nullptr);
+	assert(numElements > 0);
+	assert(structureByteStride > 0);
+
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	srvDesc.Format = DXGI_FORMAT_UNKNOWN;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
@@ -140,6 +144,10 @@ void SrvManager::CreateSRVforStructuredBuffer(uint32_t srvIndex, Microsoft::WRL:
 }
 
 void SrvManager::CreateUAVforStructuredBuffer(uint32_t uavIndex, Microsoft::WRL::ComPtr<ID3D12Resource> pResource, UINT numElements, UINT structureByteStride) {
+	assert(pResource != nullptr);
+	assert(numElements > 0);
+	assert(structureByteStride > 0);
+
 	D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc{};
 	uavDesc.Format = DXGI_FORMAT_UNKNOWN;
 	uavDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
@@ -150,15 +158,16 @@ void SrvManager::CreateUAVforStructuredBuffer(uint32_t uavIndex, Microsoft::WRL:
 
 	// 第二引数は今はnullptrにしておく
 	DirectXBase::GetInstance()->GetDevice()->CreateUnorderedAccessView(pResource.Get(), nullptr, &uavDesc, GetCPUDescriptorHandle(uavIndex));
-
-	assert(pResource != nullptr);
-	assert(numElements > 0);
-	assert(structureByteStride > 0);
 }
 
 void SrvManager::SetGraphicsRootDescriptorTable(UINT RootParameterIndex, uint32_t srvIndex)
 {
 	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootDescriptorTable(RootParameterIndex, GetGPUDescriptorHandle(srvIndex));
+}
+
+void SrvManager::SetComputeRootDescriptorTable(UINT RootParameterIndex, uint32_t srvIndex)
+{
+	DirectXBase::GetInstance()->GetCommandList()->SetComputeRootDescriptorTable(RootParameterIndex, GetGPUDescriptorHandle(srvIndex));
 }
 
 void SrvManager::PreDraw() {
