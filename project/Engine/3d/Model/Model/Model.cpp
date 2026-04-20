@@ -7,6 +7,8 @@
 #include "SrvManager.h"
 #include "SkyBox.h"
 #include "json.hpp"
+#include "Object3dBase.h"
+#include "SrvManager.h"
 
 using namespace Logger;
 
@@ -131,6 +133,22 @@ void Model::SkinningUpdate() {
 		}
         index++;
 	}
+	DirectXBase::GetInstance()->GetCommandList()->SetComputeRootSignature(Object3dBase::GetInstance()->GetComputeRootSignature().Get());
+    DirectXBase::GetInstance()->GetCommandList()->SetPipelineState(Object3dBase::GetInstance()->GetComputePipelineState().Get());
+	index = 0;
+
+    SrvManager::GetInstance()->PreDraw();
+
+	for (const auto& matData : modelData.matVertexData)
+	{
+		DirectXBase::GetInstance()->GetCommandList()->SetComputeRootDescriptorTable(0, SrvManager::GetInstance()->GetGPUDescriptorHandle(paletteSrvIndex[index]));
+		DirectXBase::GetInstance()->GetCommandList()->SetComputeRootDescriptorTable(1, SrvManager::GetInstance()->GetGPUDescriptorHandle(inputVertexSrvIndex[index]));
+		DirectXBase::GetInstance()->GetCommandList()->SetComputeRootDescriptorTable(2, SrvManager::GetInstance()->GetGPUDescriptorHandle(influenceSrvIndex[index]));
+		DirectXBase::GetInstance()->GetCommandList()->SetComputeRootDescriptorTable(3, SrvManager::GetInstance()->GetGPUDescriptorHandle(outputVertexUavIndex[index]));
+		DirectXBase::GetInstance()->GetCommandList()->SetComputeRootConstantBufferView(4, skinningInformationResource[index]->GetGPUVirtualAddress());
+        DirectXBase::GetInstance()->GetCommandList()->Dispatch(UINT(matData.second.vertices.size() + 1023) / 1024, 1, 1); // 頂点数に応じてディスパッチサイズを計算
+		index++;
+	}
 }
 
 void Model::Draw() {
@@ -145,7 +163,7 @@ void Model::Draw() {
 		if (isAnimation)
 		{
 			
-			DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootDescriptorTable(9, skinCluster[index].paletteSrvHandle.second);
+			//DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootDescriptorTable(9, skinCluster[index].paletteSrvHandle.second);
 			DirectXBase::GetInstance()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView[0][index]); // VBVを設定
 			DirectXBase::GetInstance()->GetCommandList()->IASetVertexBuffers(1, 1, &vertexBufferView[1][index]); // VBVを設定
 		}
@@ -153,6 +171,7 @@ void Model::Draw() {
 		{
 			DirectXBase::GetInstance()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView[0][index]); // VBVを設定
 		}
+		//DirectXBase::GetInstance()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView[0][index]); // VBVを設定
 
 		DirectXBase::GetInstance()->GetCommandList()->IASetIndexBuffer(&indexBufferView.at(index)); // VBVを設定
 

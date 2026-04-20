@@ -51,7 +51,7 @@ public:
 
 	void SetCullingTemplateData(const CullingTemplate& data) { cullingTemplateData = data; }
 
-    Microsoft::WRL::ComPtr<ID3D12PipelineState> GetComputePipelineState() { return graphicsPilelineState; }
+    Microsoft::WRL::ComPtr<ID3D12PipelineState> GetComputePipelineState() { return computePipelineState; }
     Microsoft::WRL::ComPtr<ID3D12RootSignature> GetComputeRootSignature() { return rootSignatureCS; }
 
 private:
@@ -64,10 +64,11 @@ private:
 	// グラフィックスパイプラインの作成
 	void CreateGraphicsPipeLineState();
     // コンピュートパイプラインの作成
-    void CreateComputePipeLineState();
+    void CreateCSPipeLineState();
 
 public:
 	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
+	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignatureCS{};
 
 private:
 	/// Rootsignature
@@ -83,6 +84,8 @@ private:
 	// シリアライズしてバイナリにする
 	Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob = nullptr;
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
+	Microsoft::WRL::ComPtr<ID3DBlob> signatureBlobCS = nullptr;
+	Microsoft::WRL::ComPtr<ID3DBlob> errorBlobCS = nullptr;
 	// バイナリをもとに作成
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature = nullptr;
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignatureCS = nullptr;
