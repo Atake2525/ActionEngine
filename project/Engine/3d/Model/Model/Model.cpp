@@ -44,7 +44,11 @@ void Model::Initialize(std::string directoryPath, std::string filename, bool ena
 	if (this->isAnimation)
 	{
 		// CODEX: GPU skinning 用リソースはメッシュ単位で保持する。
-		gpuSkinningResources.resize(modelData.matVertexData.size());
+		paletteResource.resize(modelData.matVertexData.size());
+		inputVertexResource.resize(modelData.matVertexData.size());
+		influenceResource.resize(modelData.matVertexData.size());
+		outputVertexResource.resize(modelData.matVertexData.size());
+		skinningInformationResource.resize(modelData.matVertexData.size());
 	}
 	// VertexResourceにデータを書き込むためのアドレスを取得してvertexDataに割り当てる
 	int num = 0;
@@ -112,13 +116,13 @@ void Model::SkinningUpdate() {
 					{
 						continue;
 					}
-					auto& currentInfluence = gpuSkinningResources[index].mappedInfluence[vertexWeight.vertexIndex];
+					auto* currentInfluence = &mappedInfluence[index][vertexWeight.vertexIndex];
 					for (uint32_t i = 0; i < numMaxInfluence; ++i)
 					{
-						if (currentInfluence.weights[i] == 0.0f)
+						if (currentInfluence->weights[i] == 0.0f)
 						{
-							currentInfluence.jointIndices[i] = jointIndex;
-							currentInfluence.weights[i] = vertexWeight.weight;
+							currentInfluence->jointIndices[i] = jointIndex;
+							currentInfluence->weights[i] = vertexWeight.weight;
 							break;
 						}
 					}
@@ -190,30 +194,47 @@ void Model::CreateSkinningResources(const Skeleton& skeleton)
 		return;
 	}
 
-	gpuSkinningResources.resize(modelData.matVertexData.size());
+	paletteResource.resize(modelData.matVertexData.size());
+	inputVertexResource.resize(modelData.matVertexData.size());
+	influenceResource.resize(modelData.matVertexData.size());
+	outputVertexResource.resize(modelData.matVertexData.size());
+	skinningInformationResource.resize(modelData.matVertexData.size());
+	mappedPalette.resize(modelData.matVertexData.size());
+	mappedInputVertex.resize(modelData.matVertexData.size());
+	mappedInfluence.resize(modelData.matVertexData.size());
+	mappedSkinningInformation.resize(modelData.matVertexData.size());
+	outputVertexBufferView.resize(modelData.matVertexData.size());
+	paletteSrvIndex.resize(modelData.matVertexData.size());
+	inputVertexSrvIndex.resize(modelData.matVertexData.size());
+	influenceSrvIndex.resize(modelData.matVertexData.size());
+	outputVertexUavIndex.resize(modelData.matVertexData.size());
 
 	size_t meshIndex = 0;
 	for (const auto& matData : modelData.matVertexData)
 	{
 		// CODEX: MultiMesh ごとに独立した GPU skinning 用バッファと descriptor を作成する。
-		GpuSkinningResource& resource = gpuSkinningResources[meshIndex];
 		const size_t jointCount = skeleton.joints.size();
 		const size_t vertexCount = matData.second.vertices.size();
+		if (vertexCount == 0)
+		{
+			++meshIndex;
+			continue;
+		}
 
-		resource.paletteResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(WellForGPU) * jointCount);
-		resource.inputVertexResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(VertexData) * vertexCount);
-		resource.influenceResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(VertexInfluence) * vertexCount);
-		resource.outputVertexResource = DirectXBase::GetInstance()->CreateUAVBufferResource(sizeof(VertexData) * vertexCount);
-		resource.skinningInformationResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(SkinningInformation));
+		paletteResource[meshIndex] = DirectXBase::GetInstance()->CreateBufferResource(sizeof(WellForGPU) * jointCount);
+		inputVertexResource[meshIndex] = DirectXBase::GetInstance()->CreateBufferResource(sizeof(VertexData) * vertexCount);
+		influenceResource[meshIndex] = DirectXBase::GetInstance()->CreateBufferResource(sizeof(VertexInfluence) * vertexCount);
+		outputVertexResource[meshIndex] = DirectXBase::GetInstance()->CreateUAVBufferResource(sizeof(VertexData) * vertexCount);
+		skinningInformationResource[meshIndex] = DirectXBase::GetInstance()->CreateBufferResource(sizeof(SkinningInformation));
 
-		resource.paletteResource->Map(0, nullptr, reinterpret_cast<void**>(&resource.mappedPalette));
-		std::memset(resource.mappedPalette, 0, sizeof(WellForGPU) * jointCount);
+		paletteResource[meshIndex]->Map(0, nullptr, reinterpret_cast<void**>(&mappedPalette[meshIndex]));
+		std::memset(mappedPalette[meshIndex], 0, sizeof(WellForGPU) * jointCount);
 
-		resource.inputVertexResource->Map(0, nullptr, reinterpret_cast<void**>(&resource.mappedInputVertex));
-		std::memcpy(resource.mappedInputVertex, matData.second.vertices.data(), sizeof(VertexData) * vertexCount);
+		inputVertexResource[meshIndex]->Map(0, nullptr, reinterpret_cast<void**>(&mappedInputVertex[meshIndex]));
+		std::memcpy(mappedInputVertex[meshIndex], matData.second.vertices.data(), sizeof(VertexData) * vertexCount);
 
-		resource.influenceResource->Map(0, nullptr, reinterpret_cast<void**>(&resource.mappedInfluence));
-		std::memset(resource.mappedInfluence, 0, sizeof(VertexInfluence) * vertexCount);
+		influenceResource[meshIndex]->Map(0, nullptr, reinterpret_cast<void**>(&mappedInfluence[meshIndex]));
+		std::memset(mappedInfluence[meshIndex], 0, sizeof(VertexInfluence) * vertexCount);
 
 		for (const auto& jointWeight : matData.second.skinClusterData)
 		{
@@ -230,35 +251,35 @@ void Model::CreateSkinningResources(const Skeleton& skeleton)
 					continue;
 				}
 
-				auto& currentInfluence = resource.mappedInfluence[vertexWeight.vertexIndex];
+				auto* currentInfluence = &mappedInfluence[meshIndex][vertexWeight.vertexIndex];
 				for (uint32_t i = 0; i < numMaxInfluence; ++i)
 				{
-					if (currentInfluence.weights[i] == 0.0f)
+					if (currentInfluence->weights[i] == 0.0f)
 					{
-						currentInfluence.weights[i] = vertexWeight.weight;
-						currentInfluence.jointIndices[i] = it->second;
+						currentInfluence->weights[i] = vertexWeight.weight;
+						currentInfluence->jointIndices[i] = it->second;
 						break;
 					}
 				}
 			}
 		}
 
-		resource.skinningInformationResource->Map(0, nullptr, reinterpret_cast<void**>(&resource.mappedSkinningInformation));
-		resource.mappedSkinningInformation->numVertices = static_cast<uint32_t>(vertexCount);
+		skinningInformationResource[meshIndex]->Map(0, nullptr, reinterpret_cast<void**>(&mappedSkinningInformation[meshIndex]));
+		mappedSkinningInformation[meshIndex]->numVertices = static_cast<uint32_t>(vertexCount);
 
-		resource.outputVertexBufferView.BufferLocation = resource.outputVertexResource->GetGPUVirtualAddress();
-		resource.outputVertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * vertexCount);
-		resource.outputVertexBufferView.StrideInBytes = sizeof(VertexData);
+		outputVertexBufferView[meshIndex].BufferLocation = outputVertexResource[meshIndex]->GetGPUVirtualAddress();
+		outputVertexBufferView[meshIndex].SizeInBytes = UINT(sizeof(VertexData) * vertexCount);
+		outputVertexBufferView[meshIndex].StrideInBytes = sizeof(VertexData);
 
-		resource.paletteSrvIndex = SrvManager::GetInstance()->Allocate();
-		resource.inputVertexSrvIndex = SrvManager::GetInstance()->Allocate();
-		resource.influenceSrvIndex = SrvManager::GetInstance()->Allocate();
-		resource.outputVertexUavIndex = SrvManager::GetInstance()->Allocate();
+		paletteSrvIndex[meshIndex] = SrvManager::GetInstance()->Allocate();
+		inputVertexSrvIndex[meshIndex] = SrvManager::GetInstance()->Allocate();
+		influenceSrvIndex[meshIndex] = SrvManager::GetInstance()->Allocate();
+		outputVertexUavIndex[meshIndex] = SrvManager::GetInstance()->Allocate();
 
-		SrvManager::GetInstance()->CreateSRVforStructuredBuffer(resource.paletteSrvIndex, resource.paletteResource, static_cast<UINT>(jointCount), sizeof(WellForGPU));
-		SrvManager::GetInstance()->CreateSRVforStructuredBuffer(resource.inputVertexSrvIndex, resource.inputVertexResource, static_cast<UINT>(vertexCount), sizeof(VertexData));
-		SrvManager::GetInstance()->CreateSRVforStructuredBuffer(resource.influenceSrvIndex, resource.influenceResource, static_cast<UINT>(vertexCount), sizeof(VertexInfluence));
-		SrvManager::GetInstance()->CreateUAVforStructuredBuffer(resource.outputVertexUavIndex, resource.outputVertexResource, static_cast<UINT>(vertexCount), sizeof(VertexData));
+		SrvManager::GetInstance()->CreateSRVforStructuredBuffer(paletteSrvIndex[meshIndex], paletteResource[meshIndex], static_cast<UINT>(jointCount), sizeof(WellForGPU));
+		SrvManager::GetInstance()->CreateSRVforStructuredBuffer(inputVertexSrvIndex[meshIndex], inputVertexResource[meshIndex], static_cast<UINT>(vertexCount), sizeof(VertexData));
+		SrvManager::GetInstance()->CreateSRVforStructuredBuffer(influenceSrvIndex[meshIndex], influenceResource[meshIndex], static_cast<UINT>(vertexCount), sizeof(VertexInfluence));
+		SrvManager::GetInstance()->CreateUAVforStructuredBuffer(outputVertexUavIndex[meshIndex], outputVertexResource[meshIndex], static_cast<UINT>(vertexCount), sizeof(VertexData));
 
 		++meshIndex;
 	}
@@ -547,6 +568,18 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 			modelData.material.push_back(matData);
 
 		}
+	}
+
+	for (auto it = modelData.matVertexData.begin(); it != modelData.matVertexData.end();)
+	{
+		if (it->second.vertices.empty() || it->second.indices.empty())
+		{
+			Log("Model loader skipped an empty mesh.\n");
+			it = modelData.matVertexData.erase(it);
+			continue;
+		}
+
+		++it;
 	}
 
 	modelData.rootNode = ReadNode(scene->mRootNode);
@@ -841,12 +874,15 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 
 
 
-	for (const auto& matData : modelData.matVertexData)
+	for (auto it = modelData.matVertexData.begin(); it != modelData.matVertexData.end();)
 	{
-		if (matData.second.vertices.empty())
+		if (it->second.vertices.empty() || it->second.indices.empty())
 		{
-			modelData.matVertexData.erase(matData.first);
+			Log("Model loader skipped an empty mesh.\n");
+			it = modelData.matVertexData.erase(it);
+			continue;
 		}
+		++it;
 	}
 	modelData.rootNode = ReadNode(scene->mRootNode);
 	return modelData;
@@ -880,6 +916,13 @@ void Model::CreateMaterialResouce() {
 }
 
 void Model::CreateAABB() {
+	if (modelData.vertices.empty() || modelData.matVertexData.empty())
+	{
+		meshAABB = {};
+		multiMeshAABB.clear();
+		return;
+	}
+
 	meshAABB.min.x = modelData.vertices[0].position.x;
 	meshAABB.min.y = modelData.vertices[0].position.y;
 	meshAABB.min.z = modelData.vertices[0].position.z;
@@ -887,8 +930,13 @@ void Model::CreateAABB() {
 	meshAABB.max.y = modelData.vertices[0].position.y;
 	meshAABB.max.z = modelData.vertices[0].position.z;
 
-	for (const auto matVData : modelData.matVertexData)
+	for (const auto& matVData : modelData.matVertexData)
 	{
+		if (matVData.second.vertices.empty())
+		{
+			continue;
+		}
+
 		AABB firstMultimesh;
 		firstMultimesh.min.x = matVData.second.vertices[0].position.x;
 		firstMultimesh.min.y = matVData.second.vertices[0].position.y;
