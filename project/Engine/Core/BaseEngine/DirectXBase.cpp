@@ -602,29 +602,44 @@ ComPtr<ID3D12Resource> DirectXBase::CreateBufferResource(size_t sizeInBytes) {
 
 Microsoft::WRL::ComPtr<ID3D12Resource> DirectXBase::CreateUAVBufferResource(size_t sizeInBytes)
 {
-    // 頂点リソース用のヒープの設定
+    assert(device != nullptr);
+    assert(sizeInBytes > 0);
+
     D3D12_HEAP_PROPERTIES heapProperties{};
-    heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT; // DefaultHeapを使う
+    heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
 
-    // 頂点リソースの設定
     D3D12_RESOURCE_DESC resourceDesc{};
-
-    // バッファリソース。テクスチャの場合はまた別の設定をする
     resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-    resourceDesc.Width = sizeInBytes; // リソースのサイズ。今回はVector4を3頂点分
-    // バッファの場合はこれらは1にする決まり
+    resourceDesc.Alignment = 0;
+    resourceDesc.Width = sizeInBytes;
     resourceDesc.Height = 1;
     resourceDesc.DepthOrArraySize = 1;
     resourceDesc.MipLevels = 1;
+    resourceDesc.Format = DXGI_FORMAT_UNKNOWN;
     resourceDesc.SampleDesc.Count = 1;
-    resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS; // UAVとして利用するためのフラグ
-
-    // バッファの場合はこれにする決まり
+    resourceDesc.SampleDesc.Quality = 0;
     resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+    resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 
-    // 実際に頂点リソースを作る
     Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
-    HRESULT hr = device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, nullptr, IID_PPV_ARGS(&resource));
+    HRESULT hr = device->CreateCommittedResource(
+        &heapProperties,
+        D3D12_HEAP_FLAG_NONE,
+        &resourceDesc,
+        D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+        nullptr,
+        IID_PPV_ARGS(&resource));
+
+    if (FAILED(hr))
+    {
+        Log(std::format("CreateUAVBufferResource failed. hr=0x{:08X}, sizeInBytes={}\n",
+            static_cast<unsigned int>(hr), sizeInBytes));
+
+        HRESULT removedReason = device->GetDeviceRemovedReason();
+        Log(std::format("GetDeviceRemovedReason=0x{:08X}\n",
+            static_cast<unsigned int>(removedReason)));
+    }
+
     assert(SUCCEEDED(hr));
     return resource;
 }

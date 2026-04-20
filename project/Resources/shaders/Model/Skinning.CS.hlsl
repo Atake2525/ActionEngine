@@ -12,6 +12,8 @@ struct Vertex
     float4 position;
     float2 texcoord;
     float3 normal;
+    float3 tangent;
+    float3 binormal;
 };
 StructuredBuffer<Vertex> gInputVertices : register(t1);
 

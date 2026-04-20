@@ -97,28 +97,6 @@ public:
 		uint32_t numVertices;
 	};
 
-	struct GpuSkinningResource
-	{
-		Microsoft::WRL::ComPtr<ID3D12Resource> paletteResource;
-		Microsoft::WRL::ComPtr<ID3D12Resource> inputVertexResource;
-		Microsoft::WRL::ComPtr<ID3D12Resource> influenceResource;
-		Microsoft::WRL::ComPtr<ID3D12Resource> outputVertexResource;
-		Microsoft::WRL::ComPtr<ID3D12Resource> skinningInformationResource;
-
-		WellForGPU* mappedPalette = nullptr;
-		VertexData* mappedInputVertex = nullptr;
-		VertexInfluence* mappedInfluence = nullptr;
-		SkinningInformation* mappedSkinningInformation = nullptr;
-
-		D3D12_VERTEX_BUFFER_VIEW outputVertexBufferView{};
-
-		uint32_t paletteSrvIndex = UINT32_MAX;
-		uint32_t inputVertexSrvIndex = UINT32_MAX;
-		uint32_t influenceSrvIndex = UINT32_MAX;
-		uint32_t outputVertexUavIndex = UINT32_MAX;
-	};
-
-
 	// 初期化
 	void Initialize(std::string directoryPath, std::string filename, bool enableLighting, bool isAnimation);
 
@@ -211,7 +189,26 @@ private:
 	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> materialTemplateResource;
 	// マテリアルバッファリソース内のデータを指すポインタ
 	std::vector<MaterialTemplate*> materialTemplateData;
-	std::vector<GpuSkinningResource> gpuSkinningResources;
+
+	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> paletteResource;
+	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> inputVertexResource;
+	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> influenceResource;
+	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> outputVertexResource;
+	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> skinningInformationResource;
+
+	std::vector<WellForGPU*> mappedPalette;
+	std::vector<VertexData*> mappedInputVertex;
+	std::vector<VertexInfluence*> mappedInfluence;
+	std::vector<SkinningInformation*> mappedSkinningInformation;
+
+	std::vector<D3D12_VERTEX_BUFFER_VIEW> outputVertexBufferView{};
+
+	std::vector<uint32_t> paletteSrvIndex;
+	std::vector<uint32_t> inputVertexSrvIndex;
+	std::vector<uint32_t> influenceSrvIndex;
+	std::vector<uint32_t> outputVertexUavIndex;
+
+    Skeleton skeleton;
 
 private:
 	// .mtlファイルの読み取り
