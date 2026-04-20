@@ -12,8 +12,8 @@ struct Vertex
     float4 position;
     float2 texcoord;
     float3 normal;
-    float3 tangent;
-    float3 binormal;
+    //float3 tangent;
+    //float3 binormal;
 };
 StructuredBuffer<Vertex> gInputVertices : register(t1);
 
@@ -46,7 +46,7 @@ void main( uint3 DTid : SV_DispatchThreadID )
         VertexInfluence influence = gInfluence[vertexIndex];
         
         // skinning後の頂点を計算
-        Vertex skinned;
+        Vertex skinned = input; 
         skinned.texcoord = input.texcoord;
         
         // 計算の方法はSkinningObject3d.VSと同じ

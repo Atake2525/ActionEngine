@@ -113,7 +113,7 @@ void DirectXBase::InitializeDevice() {
         // デバッグレイヤーを有効化する
         debugController->EnableDebugLayer();
         // さらにGPU側でもチェックを行うようにする
-        debugController->SetEnableGPUBasedValidation(TRUE);
+        debugController->SetEnableGPUBasedValidation(FALSE);
     }
 
 #endif // DEBUG
@@ -626,7 +626,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> DirectXBase::CreateUAVBufferResource(size
         &heapProperties,
         D3D12_HEAP_FLAG_NONE,
         &resourceDesc,
-        D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+        D3D12_RESOURCE_STATE_COMMON,
         nullptr,
         IID_PPV_ARGS(&resource));
 
