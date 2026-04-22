@@ -89,6 +89,9 @@ public:
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(size_t sizeInBytes);
 
+	// StructuredBuffer の UAV として使う GPU リソースを作成
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateUAVBufferResource(size_t sizeInBytes);
+
 	// DirectX12のTextureResourceを作る
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateTextureResource(const DirectX::TexMetadata& metadata);
 

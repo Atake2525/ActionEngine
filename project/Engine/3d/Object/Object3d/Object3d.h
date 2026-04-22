@@ -232,6 +232,7 @@ private:
     Skeleton skeleton;
     std::vector<SkinCluster> skinCluster;
 
+
     // ============================
     //  Collision Data
     // ============================

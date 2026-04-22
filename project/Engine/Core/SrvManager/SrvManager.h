@@ -23,7 +23,8 @@ private:
     SrvManager& operator=(SrvManager&) = delete;
 public:
     // 最大SRV数(最大テクスチャ枚数)
-    static const uint32_t kMaxSRVCount;
+    static const uint32_t maxSRVCount;
+    static const uint32_t maxUAVCount;
 
     // インスタンスの取得
     static SrvManager* GetInstance();
@@ -57,8 +58,11 @@ public:
     void CreateSRVforTexture2D(uint32_t srvIndex, Microsoft::WRL::ComPtr<ID3D12Resource> pResource, DirectX::TexMetadata metaData, D3D12_SRV_DIMENSION dimension);
     // SRV生成(Structured Buffer用)
     void CreateSRVforStructuredBuffer(uint32_t srvIndex, Microsoft::WRL::ComPtr<ID3D12Resource> pResource, UINT numElements, UINT structureByteStride);
+    void CreateUAVforStructuredBuffer(uint32_t uavIndex, Microsoft::WRL::ComPtr<ID3D12Resource> pResource, UINT numElements, UINT structureByteStride);
 
     void SetGraphicsRootDescriptorTable(UINT RootParameterIndex, uint32_t srvIndex);
+    void SetComputeRootDescriptorTable(UINT RootParameterIndex, uint32_t srvIndex);
+
 
 private:
     void CreateDescriptorHeap();
@@ -73,6 +77,5 @@ private:
 private:
     // 次に使用するSRVインデックス
     uint32_t useIndex = 0;
-
 };
 
