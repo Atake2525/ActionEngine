@@ -12,8 +12,8 @@ struct Vertex
     float4 position;
     float2 texcoord;
     float3 normal;
-    //float3 tangent;
-    //float3 binormal;
+    float3 tangent;
+    float3 binormal;
 };
 StructuredBuffer<Vertex> gInputVertices : register(t1);
 
@@ -63,6 +63,18 @@ void main( uint3 DTid : SV_DispatchThreadID )
         skinned.normal += mul(input.normal, (float3x3) gMatrixPalette[influence.index.z].skeletonSpaceInverseTransposeMatrix) * influence.weight.z;
         skinned.normal += mul(input.normal, (float3x3) gMatrixPalette[influence.index.w].skeletonSpaceInverseTransposeMatrix) * influence.weight.w;
         skinned.normal = normalize(skinned.normal); // 正規化して戻してあげる
+
+        skinned.tangent = mul(input.tangent, (float3x3) gMatrixPalette[influence.index.x].skeletonSpaceInverseTransposeMatrix) * influence.weight.x;
+        skinned.tangent += mul(input.tangent, (float3x3) gMatrixPalette[influence.index.y].skeletonSpaceInverseTransposeMatrix) * influence.weight.y;
+        skinned.tangent += mul(input.tangent, (float3x3) gMatrixPalette[influence.index.z].skeletonSpaceInverseTransposeMatrix) * influence.weight.z;
+        skinned.tangent += mul(input.tangent, (float3x3) gMatrixPalette[influence.index.w].skeletonSpaceInverseTransposeMatrix) * influence.weight.w;
+        skinned.tangent = normalize(skinned.tangent);
+
+        skinned.binormal = mul(input.binormal, (float3x3) gMatrixPalette[influence.index.x].skeletonSpaceInverseTransposeMatrix) * influence.weight.x;
+        skinned.binormal += mul(input.binormal, (float3x3) gMatrixPalette[influence.index.y].skeletonSpaceInverseTransposeMatrix) * influence.weight.y;
+        skinned.binormal += mul(input.binormal, (float3x3) gMatrixPalette[influence.index.z].skeletonSpaceInverseTransposeMatrix) * influence.weight.z;
+        skinned.binormal += mul(input.binormal, (float3x3) gMatrixPalette[influence.index.w].skeletonSpaceInverseTransposeMatrix) * influence.weight.w;
+        skinned.binormal = normalize(skinned.binormal);
     
         // Skinning後のちょうてんでーたを格納、つまり書き込む
         gOutputVertices[vertexIndex] = skinned;

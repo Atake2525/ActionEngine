@@ -100,7 +100,7 @@ public:
 	// 初期化
 	void Initialize(std::string directoryPath, std::string filename, bool enableLighting, bool isAnimation);
 
-    void SkinningUpdate();
+    void SkinningUpdate(const Skeleton& skeleton);
 
 	// 更新
 	void Draw();
@@ -207,8 +207,6 @@ private:
 	std::vector<uint32_t> inputVertexSrvIndex;
 	std::vector<uint32_t> influenceSrvIndex;
 	std::vector<uint32_t> outputVertexUavIndex;
-
-    Skeleton skeleton;
 
 private:
 	// .mtlファイルの読み取り

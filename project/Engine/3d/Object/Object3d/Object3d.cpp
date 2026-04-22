@@ -104,7 +104,7 @@ void Object3d::Update() {
         }
         UpdateSkelton(skeleton);
         UpdateSkinCluster(skinCluster, skeleton);
-        model_->SkinningUpdate();
+        model_->SkinningUpdate(skeleton);
     }
 
     if (isParent)
@@ -229,7 +229,7 @@ void Object3d::SetModel(const std::string& filePath) {
         skinCluster.resize(model_->GetModelData().matVertexData.size());
         skinCluster = CreateSkinCluster(skeleton, model_->GetModelData());
         model_->SetSkinCluster(skinCluster);
-        // CODEX: GPU skinning 用リソースは Model 側でメッシュ数に合わせて確保する。
+        // GPUskinning用リソースはModel側でメッシュ数に合わせて確保する。
         model_->CreateSkinningResources(skeleton);
         ApplyAnimation(skeleton, animation[animationKey], animationTime);
         UpdateSkelton(skeleton);
@@ -279,7 +279,7 @@ void Object3d::SetModel(const std::string& directoryPath, const std::string& fil
         skinCluster.resize(model_->GetModelData().matVertexData.size());
         skinCluster = CreateSkinCluster(skeleton, model_->GetModelData());
         model_->SetSkinCluster(skinCluster);
-        // CODEX: GPU skinning 用リソースは Model 側でメッシュ数に合わせて確保する。
+        // GPUskinning用リソースはModel側でメッシュ数に合わせて確保する。
         model_->CreateSkinningResources(skeleton);
         ApplyAnimation(skeleton, animation[animationKey], animationTime);
         UpdateSkelton(skeleton);

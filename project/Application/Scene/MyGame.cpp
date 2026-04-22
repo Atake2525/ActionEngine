@@ -95,10 +95,11 @@ void MyGame::Update() {
 	GameTime::GetInstance()->DrawImGui();
 #endif // !NDEBUG
 	Light::GetInstance()->Update();
-	if (WinApp::GetInstance()->IsWindowActive())
+	/*if (WinApp::GetInstance()->IsWindowActive())
 	{
 		SceneManager::GetInstance()->Update();
-	}
+	}*/
+	SceneManager::GetInstance()->Update();
 	ParticleManager::GetInstance()->Update();
 	Audio::GetInstance()->Update();
 	FadeManager::GetInstance()->Update();

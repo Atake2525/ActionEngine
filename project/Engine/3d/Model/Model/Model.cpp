@@ -45,7 +45,7 @@ void Model::Initialize(std::string directoryPath, std::string filename, bool ena
 	materialTemplateResource.resize(modelData.materialTemplate.size());
 	if (this->isAnimation)
 	{
-		// CODEX: GPU skinning 用リソースはメッシュ単位で保持する。
+		// GPUskinning用リソースはメッシュ単位で保持する。
 		paletteResource.resize(modelData.matVertexData.size());
 		inputVertexResource.resize(modelData.matVertexData.size());
 		influenceResource.resize(modelData.matVertexData.size());
@@ -98,56 +98,55 @@ void Model::Initialize(std::string directoryPath, std::string filename, bool ena
 
 }
 
-void Model::SkinningUpdate() {
-	int index = 0;
-	for (const auto& matData : modelData.matVertexData)
+void Model::SkinningUpdate(const Skeleton& skeleton) {
+	if (!isAnimation)
 	{
-		if (isAnimation)
-		{
-			for (const auto& jointWeight : matData.second.skinClusterData)
-			{
-				auto it = skeleton.jointMap.find(jointWeight.first);
-				if (it == skeleton.jointMap.end())
-				{
-					continue;
-				}
-				uint32_t jointIndex = (*it).second;
-				for (const auto& vertexWeight : jointWeight.second.vertexWeights)
-				{
-					if (vertexWeight.vertexIndex >= matData.second.vertices.size())
-					{
-						continue;
-					}
-					auto* currentInfluence = &mappedInfluence[index][vertexWeight.vertexIndex];
-					for (uint32_t i = 0; i < numMaxInfluence; ++i)
-					{
-						if (currentInfluence->weights[i] == 0.0f)
-						{
-							currentInfluence->jointIndices[i] = jointIndex;
-							currentInfluence->weights[i] = vertexWeight.weight;
-							break;
-						}
-					}
-				}
-			}
-		}
-        index++;
+		return;
 	}
-	DirectXBase::GetInstance()->GetCommandList()->SetComputeRootSignature(Object3dBase::GetInstance()->GetComputeRootSignature().Get());
-    DirectXBase::GetInstance()->GetCommandList()->SetPipelineState(Object3dBase::GetInstance()->GetComputePipelineState().Get());
-	index = 0;
 
-    SrvManager::GetInstance()->PreDraw();
-
+	size_t meshIndex = 0;
 	for (const auto& matData : modelData.matVertexData)
 	{
-		DirectXBase::GetInstance()->GetCommandList()->SetComputeRootDescriptorTable(0, SrvManager::GetInstance()->GetGPUDescriptorHandle(paletteSrvIndex[index]));
-		DirectXBase::GetInstance()->GetCommandList()->SetComputeRootDescriptorTable(1, SrvManager::GetInstance()->GetGPUDescriptorHandle(inputVertexSrvIndex[index]));
-		DirectXBase::GetInstance()->GetCommandList()->SetComputeRootDescriptorTable(2, SrvManager::GetInstance()->GetGPUDescriptorHandle(influenceSrvIndex[index]));
-		DirectXBase::GetInstance()->GetCommandList()->SetComputeRootDescriptorTable(3, SrvManager::GetInstance()->GetGPUDescriptorHandle(outputVertexUavIndex[index]));
-		DirectXBase::GetInstance()->GetCommandList()->SetComputeRootConstantBufferView(4, skinningInformationResource[index]->GetGPUVirtualAddress());
-        DirectXBase::GetInstance()->GetCommandList()->Dispatch(UINT(matData.second.vertices.size() + 1023) / 1024, 1, 1); // 頂点数に応じてディスパッチサイズを計算
-		index++;
+		if (meshIndex >= mappedPalette.size() || meshIndex >= skinCluster.size())
+		{
+			++meshIndex;
+			continue;
+		}
+
+		const size_t jointCount = std::min(skeleton.joints.size(), skinCluster[meshIndex].inverseBindPoseMatrices.size());
+		for (size_t jointIndex = 0; jointIndex < jointCount; ++jointIndex)
+		{
+			mappedPalette[meshIndex][jointIndex].skeletonSpaceMatrix =
+				Multiply(skinCluster[meshIndex].inverseBindPoseMatrices[jointIndex], skeleton.joints[jointIndex].skeletonSpaceMatrix);
+			mappedPalette[meshIndex][jointIndex].skeletonSpaceInverseTransposeMatrix =
+				Transpose(Inverse(mappedPalette[meshIndex][jointIndex].skeletonSpaceMatrix));
+		}
+
+		++meshIndex;
+	}
+
+	auto* commandList = DirectXBase::GetInstance()->GetCommandList().Get();
+	commandList->SetComputeRootSignature(Object3dBase::GetInstance()->GetComputeRootSignature().Get());
+	commandList->SetPipelineState(Object3dBase::GetInstance()->GetComputePipelineState().Get());
+
+	SrvManager::GetInstance()->PreDraw();
+
+	meshIndex = 0;
+	for (const auto& matData : modelData.matVertexData)
+	{
+		commandList->SetComputeRootDescriptorTable(0, SrvManager::GetInstance()->GetGPUDescriptorHandle(paletteSrvIndex[meshIndex]));
+		commandList->SetComputeRootDescriptorTable(1, SrvManager::GetInstance()->GetGPUDescriptorHandle(inputVertexSrvIndex[meshIndex]));
+		commandList->SetComputeRootDescriptorTable(2, SrvManager::GetInstance()->GetGPUDescriptorHandle(influenceSrvIndex[meshIndex]));
+		commandList->SetComputeRootDescriptorTable(3, SrvManager::GetInstance()->GetGPUDescriptorHandle(outputVertexUavIndex[meshIndex]));
+		commandList->SetComputeRootConstantBufferView(4, skinningInformationResource[meshIndex]->GetGPUVirtualAddress());
+		commandList->Dispatch(UINT(matData.second.vertices.size() + 1023) / 1024, 1, 1); // 頂点数に応じてディスパッチサイズを計算
+
+		D3D12_RESOURCE_BARRIER uavBarrier{};
+		uavBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
+		uavBarrier.UAV.pResource = outputVertexResource[meshIndex].Get();
+		commandList->ResourceBarrier(1, &uavBarrier);
+
+		++meshIndex;
 	}
 }
 
@@ -233,7 +232,7 @@ void Model::CreateSkinningResources(const Skeleton& skeleton)
 	size_t meshIndex = 0;
 	for (const auto& matData : modelData.matVertexData)
 	{
-		// CODEX: MultiMesh ごとに独立した GPU skinning 用バッファと descriptor を作成する。
+		// MultiMeshごとに独立したGPUskinning用バッファとdescriptorを作成する。
 		const size_t jointCount = skeleton.joints.size();
 		const size_t vertexCount = matData.second.vertices.size();
 		if (vertexCount == 0)
