@@ -279,10 +279,11 @@ void TitleScene::Draw() {
         Object3dBase::GetInstance()->ShaderDraw();
 
         m_bootScreen->Draw();
-
-        SkinningObject3dBase::GetInstance()->ShaderDraw();
-
         m_charModel->Draw();
+
+        /*SkinningObject3dBase::GetInstance()->ShaderDraw();
+
+        m_charModel->Draw();*/
 
         SpriteBase::GetInstance()->ShaderDraw();
 
@@ -297,10 +298,10 @@ void TitleScene::Draw() {
         Object3dBase::GetInstance()->ShaderDraw();
 
         m_bootScreen->Draw();
+        m_charModel->Draw();
 
         SkinningObject3dBase::GetInstance()->ShaderDraw();
 
-        m_charModel->Draw();
 
         SpriteBase::GetInstance()->ShaderDraw();
 
