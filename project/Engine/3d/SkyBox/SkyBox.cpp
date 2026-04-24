@@ -30,10 +30,6 @@ void SkyBox::Finalize() {
 	instance = nullptr;
 }
 
-void SkyBox::SetTexture(const std::string& filePath) {
-	srvIndex = TextureManager::GetInstance()->GetSrvIndex(filePath);
-}
-
 void SkyBox::SetCamera(Camera* camera) {
 	camera_ = camera;
 }
@@ -165,30 +161,13 @@ void SkyBox::Initialize() {
 
 }
 
+void SkyBox::SetTexture(const std::string& filePath) {
+    srvIndex = TextureManager::GetInstance()->GetSrvIndex(filePath);
+}
+
 void SkyBox::CreateRootSignature() {
 
 	descriptionRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-
-	// DescriptorRange
-	descriptorRange[0].BaseShaderRegister = 0;                                                   // 0から始まる
-	descriptorRange[0].NumDescriptors = 1;                                                       // 数は1つ
-	descriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;                              // SRVを使う
-	descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; // Offsetを自動計算
-
-
-	// Samplerの設定
-	staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;   // バイナリフィルタ
-	staticSamplers[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP; // 0～1の範囲外をリピート
-	staticSamplers[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	staticSamplers[0].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	staticSamplers[0].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;     // 比較しない
-	staticSamplers[0].MaxLOD = D3D12_FLOAT32_MAX;                       // ありったけのMipmapを使う
-	staticSamplers[0].ShaderRegister = 0;                               // レジスタ番号0
-	staticSamplers[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderで使う
-	descriptionRootSignature.pStaticSamplers = staticSamplers;
-	descriptionRootSignature.NumStaticSamplers = _countof(staticSamplers);
-
-
 
 	// RootParameter作成、PixelShaderのMatrixShaderのTransform
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;              // CBVを使う
@@ -197,13 +176,9 @@ void SkyBox::CreateRootSignature() {
 	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;              // CBVを使う
 	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;          // VertexShaderで使う
 	rootParameters[1].Descriptor.ShaderRegister = 0;                              // レジスタ番号0を使う
-	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う
+	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;              // CBVを使う
 	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;           // PixelShaderで使う
-	rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange;        // Tableの中身の配列を指定
-	rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange);
-	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;              // CBVを使う
-	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;           // PixelShaderで使う
-	rootParameters[3].Descriptor.ShaderRegister = 1;                              // レジスタ番号0とバインド
+	rootParameters[2].Descriptor.ShaderRegister = 1;                              // レジスタ番号0とバインド
 	descriptionRootSignature.pParameters = rootParameters;              // ルートパラメータ配列へのポインタ
 	descriptionRootSignature.NumParameters = _countof(rootParameters);  // 配列の長さ
 
@@ -297,7 +272,6 @@ void SkyBox::Update() {
 		transform.scale = { 1.0f, 1.0f, 1.0f };
 	}
 	// 3DのTransform処理
-	//rotatez += SwapRadian(1.0f);
 	Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, Vector3{ 0.0f, 0.0f, 0.0f /*rotatez*/ }, transform.translate);
 
 	Matrix4x4 worldViewProjectionMatrix;
@@ -356,13 +330,11 @@ void SkyBox::Draw() {
 	// wvp用のCBufferの場所を設定
 	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
 
-	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(3, sunResource->GetGPUVirtualAddress());
+	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(2, sunResource->GetGPUVirtualAddress());
 
 	DirectXBase::GetInstance()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView); // VBVを設定
 
 	DirectXBase::GetInstance()->GetCommandList()->IASetIndexBuffer(&indexBufferView); // VBVを設定
-
-	SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(2, srvIndex);
 
 	DirectXBase::GetInstance()->GetCommandList()->DrawIndexedInstanced(36, 1, 0, 0, 0);
 

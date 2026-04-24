@@ -75,17 +75,16 @@ private:
 private:
 
 	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
-	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
-	// Samplerの設定
-	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
+
 	// Resource作る度に配列を増やしす
-	D3D12_ROOT_PARAMETER rootParameters[4] = {};
+	D3D12_ROOT_PARAMETER rootParameters[3] = {};
 	// シリアライズしてバイナリにする
 	Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob = nullptr;
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
 	// InputLayout
 	D3D12_INPUT_ELEMENT_DESC inputElementDescs[1] = {};
 
+    uint32_t srvIndex = 0;
 
 	// PSO
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
@@ -123,8 +122,6 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> indexResource;
 	D3D12_INDEX_BUFFER_VIEW indexBufferView{};
-
-	uint32_t srvIndex;
 
 	// マテリアルのバッファリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource;
