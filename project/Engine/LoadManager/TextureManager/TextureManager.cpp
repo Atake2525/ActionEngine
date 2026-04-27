@@ -28,7 +28,7 @@ void TextureManager::Finalize() {
 
 void TextureManager::Initialize() {
 	// SRVの数と同数
-	textureDatas.reserve(SrvManager::GetInstance()->kMaxSRVCount);
+	textureDatas.reserve(SrvManager::GetInstance()->maxSRVCount);
 
 	LoadTexture("Resources/Sprite/black1x1.png");
     LoadTexture("Resources/Sprite/noise0.png");

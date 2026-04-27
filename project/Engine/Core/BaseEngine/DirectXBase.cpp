@@ -113,7 +113,7 @@ void DirectXBase::InitializeDevice() {
         // デバッグレイヤーを有効化する
         debugController->EnableDebugLayer();
         // さらにGPU側でもチェックを行うようにする
-        debugController->SetEnableGPUBasedValidation(TRUE);
+        debugController->SetEnableGPUBasedValidation(FALSE);
     }
 
 #endif // DEBUG
@@ -596,6 +596,50 @@ ComPtr<ID3D12Resource> DirectXBase::CreateBufferResource(size_t sizeInBytes) {
     // 実際に頂点リソースを作る
     Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
     HRESULT hr = device->CreateCommittedResource(&uploadHeapProperties, D3D12_HEAP_FLAG_NONE, &vertexResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&resource));
+    assert(SUCCEEDED(hr));
+    return resource;
+}
+
+Microsoft::WRL::ComPtr<ID3D12Resource> DirectXBase::CreateUAVBufferResource(size_t sizeInBytes)
+{
+    assert(device != nullptr);
+    assert(sizeInBytes > 0);
+
+    D3D12_HEAP_PROPERTIES heapProperties{};
+    heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
+
+    D3D12_RESOURCE_DESC resourceDesc{};
+    resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+    resourceDesc.Alignment = 0;
+    resourceDesc.Width = sizeInBytes;
+    resourceDesc.Height = 1;
+    resourceDesc.DepthOrArraySize = 1;
+    resourceDesc.MipLevels = 1;
+    resourceDesc.Format = DXGI_FORMAT_UNKNOWN;
+    resourceDesc.SampleDesc.Count = 1;
+    resourceDesc.SampleDesc.Quality = 0;
+    resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+    resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+
+    Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
+    HRESULT hr = device->CreateCommittedResource(
+        &heapProperties,
+        D3D12_HEAP_FLAG_NONE,
+        &resourceDesc,
+        D3D12_RESOURCE_STATE_COMMON,
+        nullptr,
+        IID_PPV_ARGS(&resource));
+
+    if (FAILED(hr))
+    {
+        Log(std::format("CreateUAVBufferResource failed. hr=0x{:08X}, sizeInBytes={}\n",
+            static_cast<unsigned int>(hr), sizeInBytes));
+
+        HRESULT removedReason = device->GetDeviceRemovedReason();
+        Log(std::format("GetDeviceRemovedReason=0x{:08X}\n",
+            static_cast<unsigned int>(removedReason)));
+    }
+
     assert(SUCCEEDED(hr));
     return resource;
 }
