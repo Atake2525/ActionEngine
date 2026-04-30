@@ -47,7 +47,13 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
     m_pModel->Initialize();
     m_pModel->SetModel("Resources/Model/obj/Player", "PlayerCollision.obj", false);
     m_pModel->SetTransform(m_transform);
-    m_pModel->CreateCapsule();
+    //m_pModel->CreateCapsule();
+
+    m_pDrawModel = make_unique<Object3d>();
+    m_pDrawModel->Initialize();
+    m_pDrawModel->SetModel("Resources/Model/gltf/char", "nonHeadWalk.gltf", true, true);
+    m_pDrawModel->ToggleStartAnimation();
+
     m_playerAABB = m_pModel->GetAABB();
     m_playerAABB += m_transform.translate;
     m_playerHeight = AABB::GetSize(m_playerAABB).y;
@@ -148,6 +154,11 @@ void Player::Update()
         m_pModel->SetTransform(m_firstTransform);
     }
 
+    m_pDrawModel->SetTransform(m_transform);
+    Vector3 modelRotate = m_cameraTransform.rotate;
+    modelRotate.x = 0.0f;
+    m_pDrawModel->SetRotate(modelRotate);
+    m_pDrawModel->Update();
     m_pModel->Update();
     ApplyCameraEffect();
     m_pCamera->SetTransform(m_cameraTransform);
@@ -157,7 +168,7 @@ void Player::Update()
 
 void Player::Draw()
 {
-    m_pModel->Draw();
+    m_pDrawModel->Draw();
 }
 
 void Player::UpdateState()
@@ -211,7 +222,7 @@ void Player::UpdateState()
     {
     case Player::ControlMode::KeyboardMouse: // キーボード・マウス
         // ダッシュ入力
-        if (m_pInput->PushKeyInt(DIK_LSHIFT))
+        if (m_pInput->PushKeyInt(DIK_LSHIFT) && (m_velocity.translate.z != 0.0f || m_velocity.translate.x != 0.0f))
         {
             m_walkState = PlayerWalkState::Run;
         }
