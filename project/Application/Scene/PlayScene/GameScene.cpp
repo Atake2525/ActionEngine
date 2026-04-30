@@ -139,9 +139,7 @@ void GameScene::Draw() {
     Object3dBase::GetInstance()->ShaderDraw();
 
     m_pStage->DrawObject3d();
-
-    SkinningObject3dBase::GetInstance()->ShaderDraw();
-
+    m_pPlayer->Draw();
 
     SpriteBase::GetInstance()->ShaderDraw();
 

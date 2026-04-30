@@ -191,6 +191,7 @@ private:
     //==================================================
     // モデル・カメラ・入力
     //==================================================
+    std::unique_ptr<Object3d> m_pDrawModel;
     std::unique_ptr<Object3d> m_pModel;
     Camera* m_pCamera = nullptr;
     Input* m_pInput;
