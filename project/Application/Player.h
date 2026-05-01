@@ -61,6 +61,8 @@ public:
     /// </summary>
     void Update();
 
+    void UpdateModel();
+
     /// <summary>
     /// 描画処理
     /// </summary>
@@ -167,6 +169,11 @@ private: // プレイヤーステート管理
     /// カメラ効果の適用
     /// </summary>
     void ApplyCameraEffect();
+
+    /// <summary>
+    /// モデルのアニメーションを更新する
+    /// </summary>
+    void UpdateModelAnimation();
 
     // デバッグUIの更新
 #ifndef NDEBUG
