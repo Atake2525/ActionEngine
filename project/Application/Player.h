@@ -7,6 +7,14 @@
 class Camera;
 class Input;
 
+struct PlayerCommand {
+    Vector2 move = Vector2::Zero;
+    Vector3 eye = Vector3::Zero;
+    bool crouch = false;
+    bool run = false;
+    bool jump = false;
+};
+
 class Player
 {
 private:
@@ -195,6 +203,7 @@ private:
     std::unique_ptr<Object3d> m_pModel;
     Camera* m_pCamera = nullptr;
     Input* m_pInput;
+    PlayerCommand m_command;
 
 
     //==================================================
