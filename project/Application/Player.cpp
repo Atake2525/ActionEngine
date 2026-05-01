@@ -8,6 +8,7 @@
 #include "CollisionManager.h"
 #include <algorithm>
 #include "EasingUtility.h"
+#include <thread>
 
 
 using namespace std;
@@ -158,12 +159,14 @@ void Player::Update()
     Vector3 modelRotate = m_cameraTransform.rotate;
     modelRotate.x = 0.0f;
     m_pDrawModel->SetRotate(modelRotate);
-    m_pDrawModel->Update();
-    m_pModel->Update();
     ApplyCameraEffect();
+    m_pModel->Update();
     m_pCamera->SetTransform(m_cameraTransform);
     UpdateCameraParent();
+}
 
+void Player::UpdateModel() {
+    m_pDrawModel->Update();
 }
 
 void Player::Draw()
@@ -844,7 +847,7 @@ void Player::Climbing()
 void Player::Jump()
 {
     // ジャンプ入力があったらジャンプ処理
-    if (m_command.jump > 0.0f)
+    if (m_command.jump)
     {
         // ジャンプ開始時の初速を計算
         float gravityPerFrame = max(-m_gravity.y * m_delta, 0.0f);
@@ -999,6 +1002,32 @@ void Player::ApplyCameraEffect()
     m_cameraTransform.rotate.z = Lerp(0.0f, m_wallRunRotateAfter, m_wallRunTimer);
 
 }
+
+void Player::UpdateModelAnimation() {
+    if (m_state == PlayerState::Idle)
+    {
+
+        return;
+    }
+    switch (m_walkState)
+    {
+    case Player::PlayerWalkState::Walk:
+        break;
+    case Player::PlayerWalkState::Run:
+        break;
+    case Player::PlayerWalkState::Crouch:
+        break;
+    case Player::PlayerWalkState::WallRun:
+        break;
+    case Player::PlayerWalkState::Sliding:
+        break;
+    case Player::PlayerWalkState::Climbing:
+        break;
+    default:
+        break;
+    }
+}
+
 #ifndef NDEBUG
 void Player::UpdateDebugUI() {
 

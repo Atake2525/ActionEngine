@@ -14,14 +14,14 @@ using namespace ActionEngine::Stage;
 
 void GameScene::Initialize() {
 
-    TextureManager::GetInstance()->LoadTexture("Resources/rostock_laage_airport_4k.dds");
+    TextureManager::GetInstance()->LoadTexture("Resources/white1x1.dds");
 
     m_pCamera = make_unique<Camera>();
     m_pCamera->SetTranslate({ 0.0f, 1.8f, 0.0f });
     m_pCamera->SetFarClipDistance(0.0f);
 
     SkyBox::GetInstance()->SetCamera(m_pCamera.get());
-    SkyBox::GetInstance()->SetTexture("Resources/rostock_laage_airport_4k.dds");
+    SkyBox::GetInstance()->SetTexture("Resources/white1x1.dds");
     SkyBox::GetInstance()->SetSunPoewr(0.0f);
 
     m_pInput = Input::GetInstance();
@@ -35,7 +35,8 @@ void GameScene::Initialize() {
     m_pStage = make_unique<TutorialStage>();
     m_pStage->Initialize(m_pPlayer.get(), m_pCamera.get(), m_mouseCursor.get());
     m_pPlayer->Initialize(m_pCamera.get(), m_pStage->GetJsonName());
-    m_pPlayer->Update();
+    m_pCamera->Update();
+    m_pPlayer->UpdateModel();
 
     m_pPlayerUI = make_unique<PlayerUI>();
     m_pPlayerUI->Initialize(m_pPlayer.get());
@@ -111,6 +112,8 @@ void GameScene::Update() {
         break;
     }
 
+    m_pCamera->Update();
+    m_pPlayer->UpdateModel();
 
     m_pStage->Update();
 
@@ -127,8 +130,6 @@ void GameScene::Update() {
     
 
     SkyBox::GetInstance()->Update();
-
-    m_pCamera->Update();
 }
 
 void GameScene::Draw() {

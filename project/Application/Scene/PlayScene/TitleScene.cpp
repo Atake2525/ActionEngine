@@ -19,10 +19,10 @@ void TitleScene::Initialize() {
     m_screenChangeTransformPre = m_pCamera->GetTransform();
     m_pCamera->Update();
 
-    TextureManager::GetInstance()->LoadTexture("Resources/rostock_laage_airport_4k.dds");
+    TextureManager::GetInstance()->LoadTexture("Resources/white1x1.dds");
 
     SkyBox::GetInstance()->SetCamera(m_pCamera.get());
-    SkyBox::GetInstance()->SetTexture("Resources/rostock_laage_airport_4k.dds");
+    SkyBox::GetInstance()->SetTexture("Resources/white1x1.dds");
     SkyBox::GetInstance()->SetSunPoewr(1.0f);
 
     m_pInput = Input::GetInstance();
