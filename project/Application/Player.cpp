@@ -66,7 +66,7 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
 
     m_playerAABB = m_pModel->GetAABB();
     m_playerAABB += m_transform.translate;
-    //m_playerHeight = AABB::GetSize(m_playerAABB).y;
+    m_playerHeight = AABB::GetSize(m_playerAABB).y;
     CollisionManager::GetInstance()->AddCollisionTarget(m_playerAABB, "Player");
 
     // カメラの高さをモデルの高さに合わせて調整 (ちょっとだけ低くする)
