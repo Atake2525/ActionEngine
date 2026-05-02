@@ -60,8 +60,10 @@ public:
     void SetStartAnimation(bool start) { startAnimation = start; }
     void ResetAnimationTime();
     void AddAnimation(std::string directoryPath, std::string filename, std::string animationName);
+    void AddAnimationsThreaded(const std::string& directoryPath, const std::vector<std::string>& filenames);
     void PlayDefaultAnimation();
     void ChangePlayAnimation(const std::string key = "DefaultAnimation");
+    const std::string& GetCurrentAnimationKey() const { return animationKey; }
     void ResetAnimationSpeed() { animationSpeed = 1.0f; }
     const float& GetChangeAnimationSpeed() const { return changeAnimationSpeed; }
     void SetChangeAnimationSpeed(const float speed = 0.4f) { changeAnimationSpeed = speed; }

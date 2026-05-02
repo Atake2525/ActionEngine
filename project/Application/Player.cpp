@@ -52,7 +52,16 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
 
     m_pDrawModel = make_unique<Object3d>();
     m_pDrawModel->Initialize();
-    m_pDrawModel->SetModel("Resources/Model/gltf/char", "nonHeadWalk.gltf", true, true);
+    m_pDrawModel->SetModel("Resources/Model/gltf/char", "noHeadIdle.gltf", true, true);
+    // 初期モデル以外の移動アニメーションも起動時にまとめて読み込んでおく。
+    m_pDrawModel->AddAnimationsThreaded("Resources/Model/gltf/char", {
+        "sneak.gltf",
+        "walk.gltf",
+        "walk_back.gltf",
+        "crouch.gltf",
+        "dash.gltf",
+        "fall.gltf",
+        });
     m_pDrawModel->ToggleStartAnimation();
 
     m_playerAABB = m_pModel->GetAABB();
@@ -146,6 +155,8 @@ void Player::Update()
     // 重力の適用
     ApplyGravity();
 #endif // !NDEBUG
+
+    UpdateModelAnimation();
 
     m_transform.rotate += m_velocity.rotate;
     m_pModel->SetTransform(m_transform);
@@ -1004,27 +1015,51 @@ void Player::ApplyCameraEffect()
 }
 
 void Player::UpdateModelAnimation() {
-    if (m_state == PlayerState::Idle)
-    {
+    std::string animName = "DefaultAnimation";
 
-        return;
-    }
     switch (m_walkState)
     {
     case Player::PlayerWalkState::Walk:
+        if (m_command.move.y < 0.0f)
+        {
+            animName = "walk_back";
+        }
+        else
+        {
+            animName = "walk";
+        }
         break;
     case Player::PlayerWalkState::Run:
+        animName = "dash";
         break;
     case Player::PlayerWalkState::Crouch:
+        animName = "crouch";
         break;
     case Player::PlayerWalkState::WallRun:
+        animName = "wall_run";
         break;
     case Player::PlayerWalkState::Sliding:
+        animName = "slide";
         break;
     case Player::PlayerWalkState::Climbing:
+        animName = "climb";
         break;
     default:
         break;
+    }
+
+    if (m_state == PlayerState::Falling)
+    {
+        animName = "fall";
+    }
+    else if (m_state == PlayerState::Idle)
+    {
+        animName = "DefaultAnimation";
+    }
+
+    if (m_pDrawModel->GetCurrentAnimationKey() != animName)
+    {
+        m_pDrawModel->ChangePlayAnimation(animName);
     }
 }
 
