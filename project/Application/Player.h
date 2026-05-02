@@ -266,8 +266,8 @@ private:
     //================
     // しゃがみ関連
     //================
-    float m_playerHeight = 0.0f;
-    float m_cameraHeight = 0.0f;
+    float m_playerHeight = 1.6f;
+    float m_cameraHeight = 1.5f;
     float m_crouchHeight = 0.0f;
     float m_crouchHeightOffset = -0.8f;
 
