@@ -66,12 +66,12 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
 
     m_playerAABB = m_pModel->GetAABB();
     m_playerAABB += m_transform.translate;
-    m_playerHeight = AABB::GetSize(m_playerAABB).y;
+    //m_playerHeight = AABB::GetSize(m_playerAABB).y;
     CollisionManager::GetInstance()->AddCollisionTarget(m_playerAABB, "Player");
 
     // カメラの高さをモデルの高さに合わせて調整 (ちょっとだけ低くする)
     m_cameraTransform.translate.y = m_playerAABB.max.y - m_transform.translate.y - AABB::GetSize(m_playerAABB).y * m_eyeHeight;
-    m_cameraHeight = m_cameraTransform.translate.y;
+    //m_cameraHeight = m_cameraTransform.translate.y;
 
     // コントロールモードの初期設定
     if (Input::GetInstance()->IsConnectedController())
@@ -381,6 +381,8 @@ void Player::HandleInput()
             m_command.jump = Input::GetInstance()->TriggerKeyInt(DIK_SPACE) != 0;
             m_command.crouch = Input::GetInstance()->PushKeyInt(DIK_LCONTROL) != 0;
             m_command.run = Input::GetInstance()->PushKeyInt(DIK_LSHIFT) != 0;
+
+            m_command.eye = Input::GetInstance()->GetMouseVel3() * 0.001f;
             break;
         case Player::ControlMode::Gamepad:
             // ジョイスティック入力による移動
@@ -391,6 +393,8 @@ void Player::HandleInput()
             m_command.crouch = Input::GetInstance()->PushButton(Controller::RightStick) != 0;
             m_command.run = Input::GetInstance()->PushButton(Controller::LeftStick) != 0;
 
+            m_command.eye = Input::GetInstance()->GetRightJoyStickPos3(0.0f) * 0.00005f;
+
             break;
         }
     }
@@ -399,23 +403,8 @@ void Player::HandleInput()
 }
 
 void Player::Rotate() {
-    m_command.eye = Vector3::Zero;
-    if (!m_IsFreeze)
-    {
-        m_cameraTransform.rotate = m_pCamera->GetTransform().rotate;
-        // カメラ処理の実装
-        // マウスの移動量に基づいてカメラの回転を更新    演出実装時に加速度を付けるなどの調整を行う予定
-        switch (m_controlMode)
-        {
-        case Player::ControlMode::KeyboardMouse:
-            m_command.eye = Input::GetInstance()->GetMouseVel3() * 0.001f;
-            break;
-        case Player::ControlMode::Gamepad:
-            m_command.eye = Input::GetInstance()->GetRightJoyStickPos3(0.0f) * 0.00005f;
-            break;
-        }
-    }
-
+    m_cameraTransform.rotate = m_pCamera->GetTransform().rotate;
+    // 視点の回転
     m_cameraTransform.rotate.x += m_command.eye.y;
     m_cameraTransform.rotate.y += m_command.eye.x;
 
@@ -1197,6 +1186,8 @@ void Player::UpdateDebugUI() {
 
     // --- Camera ---
     if (ImGui::CollapsingHeader("Camera")) {
+
+        ImGui::DragFloat("Camera Height", &m_cameraHeight, 0.01f);
 
         if (ImGui::TreeNode("Camera Transform")) {
             ImGui::Text("Pos:  (%.2f, %.2f, %.2f)",
