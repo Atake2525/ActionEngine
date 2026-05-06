@@ -1022,7 +1022,14 @@ void Player::UpdateModelAnimation() {
         animName = "dash";
         break;
     case Player::PlayerWalkState::Crouch:
-        animName = "crouch";
+        if (m_state == PlayerState::Move)
+        {
+            animName = "sneak";
+        }
+        else
+        {
+            animName = "crouch";
+        }
         break;
     case Player::PlayerWalkState::WallRun:
         animName = "wall_run";
