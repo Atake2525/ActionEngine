@@ -18,6 +18,7 @@
 #include "UI.h"
 #include <memory>
 #include "MouseCursor.h"
+#include "TitleSceneUI.h"
 
 #pragma once
 
@@ -50,10 +51,6 @@ public:
 private:
     bool finished = false;
 
-    enum class TitleSceneScreen : int {
-        BootScreen = 0,
-        TitleScreen = 1
-    };
     TitleSceneScreen m_sceneScreen = TitleSceneScreen::BootScreen;
     enum class Select {
         Play = 0,
@@ -90,18 +87,10 @@ private:
 
     std::unique_ptr<Object3d> m_charModel = nullptr;
 
-    std::unique_ptr<Sprite> m_pressAnyKey = nullptr;
-
-    //
 
     // TitleScreen 
 
-    /*std::unique_ptr<Sprite> m_startUi = nullptr;
-    std::unique_ptr<Sprite> m_exitUi = nullptr;*/
-
-    std::array<std::unique_ptr<Sprite>, 2> m_uiSprites;
-    std::array<Vector2, 2> m_uiBaseScale = { 0.0f, 0.0f };
-    //
+    std::unique_ptr<TitleSceneUI> m_titleSceneUI = nullptr;
 
     int m_maxSelectNum = 3;
 
