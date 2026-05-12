@@ -1,7 +1,13 @@
 #include "Particle.hlsli"
 
 
-
+struct PreView
+{
+    float4x4 viewProjection;
+    float4x4 billboardMatrix;
+};
+ConstantBuffer<PreView> gPreView : register(b0);
+StructuredBuffer<Particle> gPareView : register(b0);
 
 struct ParticleForGPU{
     float32_t4x4 WVP;
@@ -9,10 +15,6 @@ struct ParticleForGPU{
     float32_t4 color;
 };
 StructuredBuffer<ParticleForGPU> gParticle : register(t0);
-
-//struct VertexShaderOutput{
-//    float32_t4 position : SV_POSITION;
-//};
 
 struct VertexShaderInput{
     float4 position : POSITION0;
