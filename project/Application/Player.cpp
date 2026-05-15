@@ -1057,6 +1057,9 @@ void Player::UpdateDebugUI() {
     ImGui::DragFloat("CrouchHeihgt", &m_crouchHeight, 0.0f);
     ImGui::DragFloat("CrouchHeightOffset", &m_crouchHeightOffset, 0.01f);
 
+    ImGui::DragFloat3("WallRunObjectMin", &m_wallRunningObjectAABB.min.x);
+    ImGui::DragFloat3("WallRunObjectMax", &m_wallRunningObjectAABB.max.x);
+
     ImGui::Separator();
 
     // --- Movement ---

@@ -53,9 +53,6 @@ void CollisionManager::Update(const std::string& targetName, bool wallDashCollis
 			for (AABB terrainAABB : terrains)
 			{
 				AABB target = collisionTarget[targetName];
-				//Vector3 centerTarget = CenterAABB(target);
-				//target.min = { centerTarget.x /*- 0.5f*/, target.min.y, centerTarget.z /*- 0.5f*/ };
-				//target.max = { centerTarget.x /*+ 0.5f*/, target.max.y, centerTarget.z /*+ 0.5f*/ };
 
 				// ターゲットとオブジェクトが貫通していたら実行
 				if (CollisionAABB(target, terrainAABB))
@@ -126,39 +123,6 @@ void CollisionManager::Update(const std::string& targetName, bool wallDashCollis
 	}
 }
 
-//Vector3 CollisionManager::GetPenetrationForCapsule(const Capsule& capsule)
-//{
-//	Vector3 result = { 0.0f, 0.0f, 0.0f };
-//	Vector3 penetration = { 0.0f, 0.0f, 0.0f };
-//	// CollisionObjectの中身を確認して、capsuleとの貫通量を計算する
-//	for (const auto object : collisionObject)
-//	{
-//		// オブジェクトとの距離を計算して、近ければ処理を行う
-//		AABB objectAABB = object->GetAABB();
-//		float aabbSize = Distance(objectAABB.min, objectAABB.max);
-//		if (capsule.radius + aabbSize > Distance(capsule.end - capsule.start, CenterAABB(objectAABB)))
-//		{
-//			// オブジェクトのメッシュごとのAABBを取得する
-//			const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
-//			// 各メッシュごとに貫通量を計算する
-//			for (AABB terrainAABB : terrains)
-//			{
-//				terrainAABB = AddSize(terrainAABB, 0.1f);
-//				// カプセルとAABBの貫通判定
-//				if (CollisionCapsuleAABB(capsule, terrainAABB))
-//				{
-//					// 貫通量を計算
-//					penetration = PenetrationCapsuleAABB(capsule, terrainAABB);
-//					result.x = max(result.x, penetration.x);
-//					result.y = max(result.y, penetration.y);
-//					result.z = max(result.z, penetration.z);
-//				}
-//			}
-//		}
-//	}
-//	return result;
-//}
-
 void CollisionManager::Finalize() {
 	collisionObject.clear();
 	delete instance;
@@ -193,9 +157,6 @@ const Vector3 CollisionManager::GetPenetrationForAABB(const AABB& aabb, bool wal
 			for (AABB terrainAABB : terrains)
 			{
 				AABB target = aabb;
-				//Vector3 centerTarget = CenterAABB(target);
-				//target.min = { centerTarget.x /*- 0.5f*/, target.min.y, centerTarget.z /*- 0.5f*/ };
-				//target.max = { centerTarget.x /*+ 0.5f*/, target.max.y, centerTarget.z /*+ 0.5f*/ };
 
 				// ターゲットとオブジェクトが貫通していたら実行
 				if (CollisionAABB(target, terrainAABB))
@@ -285,9 +246,6 @@ const Vector3 CollisionManager::GetAllPenetrationForAABB(const AABB& aabb, bool 
 			for (AABB terrainAABB : terrains)
 			{
 				AABB target = aabb;
-				//Vector3 centerTarget = CenterAABB(target);
-				//target.min = { centerTarget.x /*- 0.5f*/, target.min.y, centerTarget.z /*- 0.5f*/ };
-				//target.max = { centerTarget.x /*+ 0.5f*/, target.max.y, centerTarget.z /*+ 0.5f*/ };
 
 				// ターゲットとオブジェクトが貫通していたら実行
 				if (CollisionAABB(target, terrainAABB))
@@ -353,15 +311,10 @@ const float CollisionManager::GetGroundDistance(const std::string& targetName, b
 	for (const auto& object : colObj) {
 		// オブジェクトのメッシュごとのAABBを取得する
 		float serchDistance = Distance(object->GetAABB().max, target->second.min);
-		//if (serchDistance <= distance)
-		//{
 		const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
 		for (AABB terrainAABB : terrains)
 		{
 			AABB target = collisionTarget.at(targetName);
-			//Vector3 centerTarget = CenterAABB(target);
-			//target.min = { centerTarget.x /*- 0.5f*/, target.min.y, centerTarget.z /*- 0.5f*/ };
-			//target.max = { centerTarget.x /*+ 0.5f*/, target.max.y, centerTarget.z /*+ 0.5f*/ };
 
 			// ターゲットとオブジェクトが貫通していたら実行
 			if (CollisionAABBXZ(target, terrainAABB))
@@ -374,7 +327,6 @@ const float CollisionManager::GetGroundDistance(const std::string& targetName, b
 				distance = std::min(distance, dist);
 			}
 		}
-		//}
 	}
 	return distance;
 }
@@ -391,15 +343,10 @@ const float CollisionManager::GetGroundDistanceForAABB(const AABB& aabb, bool wa
 	for (const auto& object : colObj) {
 		// オブジェクトのメッシュごとのAABBを取得する
 		float serchDistance = Distance(object->GetAABB().max, aabb.min);
-		//if (serchDistance <= distance)
-		//{
 		const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
 		for (AABB terrainAABB : terrains)
 		{
 			AABB target = aabb;
-			//Vector3 centerTarget = CenterAABB(target);
-			//target.min = { centerTarget.x /*- 0.5f*/, target.min.y, centerTarget.z /*- 0.5f*/ };
-			//target.max = { centerTarget.x /*+ 0.5f*/, target.max.y, centerTarget.z /*+ 0.5f*/ };
 
 			// ターゲットとオブジェクトが貫通していたら実行
 			if (CollisionAABBXZ(target, terrainAABB))
@@ -412,7 +359,6 @@ const float CollisionManager::GetGroundDistanceForAABB(const AABB& aabb, bool wa
 				distance = std::min(distance, dist);
 			}
 		}
-		//}
 	}
 	return distance;
 }
@@ -445,9 +391,6 @@ const std::vector<AABB> CollisionManager::GetCollisionObjectAABBsForAABB(const A
 			for (AABB terrainAABB : terrains)
 			{
 				AABB target = aabb;
-				//Vector3 centerTarget = CenterAABB(target);
-				//target.min = { centerTarget.x /*- 0.5f*/, target.min.y, centerTarget.z /*- 0.5f*/ };
-				//target.max = { centerTarget.x /*+ 0.5f*/, target.max.y, centerTarget.z /*+ 0.5f*/ };
 
 				// ターゲットとオブジェクトが貫通していたら実行
 				if (CollisionAABB(target, terrainAABB))
@@ -486,15 +429,10 @@ const float CollisionManager::GetGroundMAXDistance(const std::string& targetName
 	for (const auto& object : colObj) {
 		// オブジェクトのメッシュごとのAABBを取得する
 		float serchDistance = Distance(object->GetAABB().max, target->second.min);
-		//if (serchDistance <= distance)
-		//{
 		const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
 		for (AABB terrainAABB : terrains)
 		{
 			AABB target = collisionTarget.at(targetName);
-			//Vector3 centerTarget = CenterAABB(target);
-			//target.min = { centerTarget.x /*- 0.5f*/, target.min.y, centerTarget.z /*- 0.5f*/ };
-			//target.max = { centerTarget.x /*+ 0.5f*/, target.max.y, centerTarget.z /*+ 0.5f*/ };
 
 			// ターゲットとオブジェクトが貫通していたら実行
 			if (CollisionAABBXZ(target, terrainAABB))
@@ -509,7 +447,6 @@ const float CollisionManager::GetGroundMAXDistance(const std::string& targetName
 				}
 			}
 		}
-		//}
 	}
 	return maxDistance;
 }
@@ -526,16 +463,11 @@ const float CollisionManager::GetMaxGroundDistanceForAABB(const AABB& aabb, bool
 	for (const auto& object : colObj) {
 		// オブジェクトのメッシュごとのAABBを取得する
 		float serchDistance = Distance(object->GetAABB().max, aabb.min);
-		//if (serchDistance <= distance)
-		//{
 		const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
 		for (AABB terrainAABB : terrains)
 		{
             // 座標をAABBに変換
             AABB target = aabb;
-			//Vector3 centerTarget = CenterAABB(target);
-			//target.min = { centerTarget.x /*- 0.5f*/, target.min.y, centerTarget.z /*- 0.5f*/ };
-			//target.max = { centerTarget.x /*+ 0.5f*/, target.max.y, centerTarget.z /*+ 0.5f*/ };
 
 			// ターゲットとオブジェクトが貫通していたら実行
 			if (CollisionAABBXZ(target, terrainAABB))
@@ -606,8 +538,6 @@ const float CollisionManager::GetHeightToTopForAABB(const AABB& aabb, bool wallD
 	for (const auto& object : colObj) {
 		// オブジェクトのメッシュごとのAABBを取得する
 		float serchDistance = Distance(object->GetAABB().max, aabb.min);
-		//if (serchDistance <= distance)
-		//{
 		const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
 		for (AABB terrainAABB : terrains)
 		{
@@ -641,8 +571,6 @@ const Vector3 CollisionManager::GetCollisionObjectDirectionForAABB(const AABB& a
 	for (const auto& object : colObj) {
 		// オブジェクトのメッシュごとのAABBを取得する
 		float serchDistance = Distance(object->GetAABB().max, aabb.min);
-		//if (serchDistance <= distance)
-		//{
 		const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
 		for (AABB terrainAABB : terrains)
 		{
@@ -704,8 +632,6 @@ const AABB CollisionManager::GetObjectForCollisionDirection(const AABB& aabb, co
 	for (const auto& object : colObj) {
 		// オブジェクトのメッシュごとのAABBを取得する
 		float serchDistance = Distance(object->GetAABB().max, aabb.min);
-		//if (serchDistance <= distance)
-		//{
 		const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
 		for (AABB terrainAABB : terrains)
 		{
@@ -755,9 +681,6 @@ const Vector3 CollisionManager::CheckPenetrationAmount(const AABB& aabb)
 			for (AABB terrainAABB : terrains)
 			{
 				AABB target = aabb;
-				/*Vector3 centerTarget = CenterAABB(target);
-				target.min = { centerTarget.x - 0.5f, target.min.y, centerTarget.z - 0.5f };
-				target.max = { centerTarget.x + 0.5f, target.max.y, centerTarget.z + 0.5f };*/
 
 				// ターゲットとオブジェクトが貫通していたら実行
 				if (CollisionAABB(target, terrainAABB))

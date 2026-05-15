@@ -12,7 +12,7 @@ void MyGame::Initialize() {
 
 #ifndef NDEBUG
 	WinApp::GetInstance()->Initialize();
-#elif
+#else
 	WinApp::GetInstance()->Initialize(1920, 1080, WindowMode::FullScreen, L"走快");
 #endif // !NDEBUG
 
@@ -95,10 +95,11 @@ void MyGame::Update() {
 	GameTime::GetInstance()->DrawImGui();
 #endif // !NDEBUG
 	Light::GetInstance()->Update();
-	if (WinApp::GetInstance()->IsWindowActive())
+	/*if (WinApp::GetInstance()->IsWindowActive())
 	{
 		SceneManager::GetInstance()->Update();
-	}
+	}*/
+	SceneManager::GetInstance()->Update();
 	ParticleManager::GetInstance()->Update();
 	Audio::GetInstance()->Update();
 	FadeManager::GetInstance()->Update();

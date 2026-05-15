@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <cstdint>
 #include "Vector2.h"
 #include "Vector3.h"
 #include "Vector4.h"
@@ -91,9 +92,15 @@ struct ModelData {
 
 class Model {
 public:
+	struct SkinningInformation
+	{
+		uint32_t numVertices;
+	};
 
 	// 初期化
 	void Initialize(std::string directoryPath, std::string filename, bool enableLighting, bool isAnimation);
+
+    void SkinningUpdate(const Skeleton& skeleton);
 
 	// 更新
 	void Draw();
@@ -132,6 +139,7 @@ public:
 	void DebugMode(bool debugMode) { useWireFrameTexture = debugMode; }
 	// SkinClusterのセット(通常使うものではないため気にしないで良い)
 	void SetSkinCluster(const std::vector<SkinCluster> skinCluster);
+	void CreateSkinningResources(const Skeleton& skeleton);
 
 	// アニメーションの追加
 	void AddAnimation(std::string directoryPath, std::string filename, std::string animationName);
@@ -181,6 +189,24 @@ private:
 	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> materialTemplateResource;
 	// マテリアルバッファリソース内のデータを指すポインタ
 	std::vector<MaterialTemplate*> materialTemplateData;
+
+	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> paletteResource;
+	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> inputVertexResource;
+	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> influenceResource;
+	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> outputVertexResource;
+	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> skinningInformationResource;
+
+	std::vector<WellForGPU*> mappedPalette;
+	std::vector<VertexData*> mappedInputVertex;
+	std::vector<VertexInfluence*> mappedInfluence;
+	std::vector<SkinningInformation*> mappedSkinningInformation;
+
+	std::vector<D3D12_VERTEX_BUFFER_VIEW> outputVertexBufferView{};
+
+	std::vector<uint32_t> paletteSrvIndex;
+	std::vector<uint32_t> inputVertexSrvIndex;
+	std::vector<uint32_t> influenceSrvIndex;
+	std::vector<uint32_t> outputVertexUavIndex;
 
 private:
 	// .mtlファイルの読み取り
