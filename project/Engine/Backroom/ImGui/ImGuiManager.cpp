@@ -40,16 +40,32 @@ void ImGuiManager::Initialize()
 	// ImGuiの初期化。詳細はさして重要ではないので開設は省略する
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	io.ConfigDockingWithShift = false;
+
 	ImGui::StyleColorsDark();
+	ImGuiStyle& style = ImGui::GetStyle();
+	style.WindowMenuButtonPosition = ImGuiDir_Left;
+
 	ImGui_ImplWin32_Init(WinApp::GetInstance()->GetHwnd());
 	ImGui_ImplDX12_Init(
 		DirectXBase::GetInstance()->GetDevice().Get(), DirectXBase::GetInstance()->GetSwapChainDesc().BufferCount, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, SrvManager::GetInstance()->GetDescriptorHeap().Get(), SrvManager::GetInstance()->GetCPUDescriptorHandle(srvIndex),
 		SrvManager::GetInstance()->GetGPUDescriptorHandle(srvIndex));
 	
 	// 日本語化
-	ImGuiIO& io = ImGui::GetIO();
 	ImFont* font = io.Fonts->AddFontFromFileTTF("Resources/Fonts/BIZ-UDGothicR.ttc", 14.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
+}
 
-	//io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // ドッキングを有効化
+void ImGuiManager::BeginDockSpace()
+{
+	ImGuiIO& io = ImGui::GetIO();
+	if ((io.ConfigFlags & ImGuiConfigFlags_DockingEnable) == 0)
+	{
+		return;
+	}
+
+	const ImGuiDockNodeFlags dockspaceFlags = ImGuiDockNodeFlags_PassthruCentralNode;
+	ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport(), dockspaceFlags);
 }
 
