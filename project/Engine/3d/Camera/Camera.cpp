@@ -2,6 +2,7 @@
 #include "kMath.h"
 #include "WinApp.h"
 #include "ImGuiManager.h"
+#include "DirectXBase.h"
 
 Camera::Camera()
 	: transform({ {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} })
@@ -24,9 +25,9 @@ void Camera::Update() {
 
 	Vector3 dirc = { -worldMatrix.m[0][2], -worldMatrix.m[1][2], worldMatrix.m[2][2] };
 
+	ImGui::SetNextWindowPos(ImVec2{ float(WinApp::GetInstance()->GetkClientWidth()) - 300.0f, 18.0f * number }, ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowSize(ImVec2{ 300.0f, 128.0f }, ImGuiCond_FirstUseEver);
 	ImGui::Begin("CameraStatus");
-	ImGui::SetWindowPos(ImVec2{ float(WinApp::GetInstance()->GetkClientWidth()) - 300.0f, 18.0f * number });
-	ImGui::SetWindowSize(ImVec2{ 300.0f, 128.0f });
 	ImGui::DragFloat3("Position", &transform.translate.x, 0.1f);
 	ImGui::DragFloat3("Rotation", &rotate.x, 0.5f);
 	ImGui::DragFloat3("Direction1", &direction.x);
@@ -73,6 +74,7 @@ void Camera::Update() {
 	direction = TransformNormal({ 0.0f, 0.0f, 1.0f }, worldMatrix);
 
 	viewMatrix = Inverse(worldMatrix);
+	aspect = DirectXBase::GetInstance()->GetSceneAspectRatio();
 	projectionMatrix = MakePrespectiveFovMatrix(fovY, aspect, nearClipDistance, farClipDistance);
 
 	viewProjectionMatrix = Multiply(viewMatrix, projectionMatrix);

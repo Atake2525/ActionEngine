@@ -88,7 +88,8 @@ void Input::CreateMouseDevice() {
 	// 入力データ形式のセット
 	result = mouse->SetDataFormat(&c_dfDIMouse);
 	// 排他制御レベルセット
-	result = mouse->SetCooperativeLevel(WinApp::GetInstance()->GetHwnd(), DISCL_EXCLUSIVE | DISCL_FOREGROUND);
+	result = mouse->SetCooperativeLevel(WinApp::GetInstance()->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE
+	);
 	assert(SUCCEEDED(result));
 	if (success)
 	{

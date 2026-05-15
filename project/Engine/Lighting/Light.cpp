@@ -71,9 +71,9 @@ void Light::Initialize() {
 void Light::Update() {
 #ifndef NDEBUG
 
+	ImGui::SetNextWindowPos(ImVec2{ 0.0f, 18.0f * 2 }, ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) - 18.0f * 2 }, ImGuiCond_FirstUseEver);
 	ImGui::Begin("Light");
-	ImGui::SetWindowPos(ImVec2{ 0.0f, 18.0f * 2 });
-	ImGui::SetWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) - 18.0f * 2 });
 	if (ImGui::TreeNode("DirectionalLight / 太陽")) {
 		ImGui::SliderFloat("Intensity / 輝度", &directionalLightData->intensity, 0.0f, 1.0f);
 		ImGui::ColorEdit4("Color / 色", &directionalLightData->color.x);
