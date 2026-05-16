@@ -90,9 +90,6 @@
     <ClCompile Include="Application\Trap.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\UI\UI.cpp">
-      <Filter>Engine</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Core\WinApp\WinApp.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
@@ -141,6 +138,7 @@
     <ClCompile Include="Application\PlayerUI.cpp" />
     <ClCompile Include="Application\Result.cpp" />
     <ClCompile Include="Engine\Core\Input\MouseCursor.cpp" />
+    <ClCompile Include="Application\Scene\TitleSceneUI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Math\EasingUtility.h" />
@@ -270,9 +268,6 @@
     <ClInclude Include="Application\Trap.h">
       <Filter>Engine</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\UI\UI.h">
-      <Filter>Engine</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Core\WinApp\WinApp.h">
       <Filter>Engine</Filter>
     </ClInclude>
@@ -329,6 +324,7 @@
     <ClInclude Include="Engine\Presentation\Cinematic\ScanEffect.h" />
     <ClInclude Include="Application\Result.h" />
     <ClInclude Include="Engine\Core\Input\MouseCursor.h" />
+    <ClInclude Include="Application\Scene\TitleSceneUI.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\PostEffect\BoxFilter.PS.hlsl" />
