@@ -215,6 +215,7 @@ public:
 	bool PressAnyButton();
 
 private:
+	Vector2 m_windowSize = Vector2::Zero;
 
 	// DirectInputのインスタンス生成 キーボード
 	ComPtr<IDirectInput8> directInput = nullptr;

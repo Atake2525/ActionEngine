@@ -26,7 +26,6 @@ void TitleScene::Initialize() {
     SkyBox::GetInstance()->SetSunPoewr(1.0f);
 
     m_pInput = Input::GetInstance();
-    m_pInput->ShowMouseCursor(false);
     m_mouseCursor = std::make_unique<MouseCursor>();
     m_mouseCursor->Initialize("Resources/Sprite/Cursor_Hover.png", "Resources/Sprite/Cursor_Press.png");
     m_mouseCursor->SetCursorPosition(WinApp::GetInstance()->GetWindowSize() / 2.0f);
@@ -185,6 +184,11 @@ void TitleScene::Update() {
 
         break;
     }
+
+    Vector2 mousePos = m_pInput->GetMousePos2();
+    ImGui::Begin("MousePos");
+    ImGui::DragFloat2("MousePos", &mousePos.x);
+    ImGui::End();
 
     m_bootScreen->Update();
 

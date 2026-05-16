@@ -90,9 +90,6 @@
     <ClCompile Include="Application\Trap.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\UI\UI.cpp">
-      <Filter>Engine</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Core\WinApp\WinApp.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
@@ -269,9 +266,6 @@
       <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="Application\Trap.h">
-      <Filter>Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\UI\UI.h">
       <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Core\WinApp\WinApp.h">
