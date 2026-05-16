@@ -129,7 +129,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Engine\UI\UI.cpp" />
     <ClCompile Include="Engine\Audio\Audio.cpp" />
     <ClCompile Include="Engine\2d\SpriteBase\SpriteBase.cpp" />
     <ClCompile Include="Engine\3d\Camera\Camera.cpp" />
@@ -214,7 +213,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="Engine\UI\UI.h" />
     <ClInclude Include="Engine\Audio\Audio.h" />
     <ClInclude Include="Engine\2d\SpriteBase\SpriteBase.h" />
     <ClInclude Include="Engine\3d\Camera\Camera.h" />
