@@ -129,7 +129,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Engine\UI\UI.cpp" />
     <ClCompile Include="Engine\Audio\Audio.cpp" />
     <ClCompile Include="Engine\2d\SpriteBase\SpriteBase.cpp" />
     <ClCompile Include="Engine\3d\Camera\Camera.cpp" />
@@ -177,6 +176,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\PlayerUI.cpp" />
     <ClCompile Include="Application\Result.cpp" />
     <ClCompile Include="Engine\Core\Input\MouseCursor.cpp" />
+    <ClCompile Include="Application\Scene\TitleSceneUI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Scene\Manager\AbstractSceneFactory.h" />
@@ -213,7 +213,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="Engine\UI\UI.h" />
     <ClInclude Include="Engine\Audio\Audio.h" />
     <ClInclude Include="Engine\2d\SpriteBase\SpriteBase.h" />
     <ClInclude Include="Engine\3d\Camera\Camera.h" />
@@ -269,6 +268,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Presentation\Cinematic\ScanEffect.h" />
     <ClInclude Include="Application\Result.h" />
     <ClInclude Include="Engine\Core\Input\MouseCursor.h" />
+    <ClInclude Include="Application\Scene\TitleSceneUI.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="externals\assimp\lib\Release\assimp-vc143-mtd.lib">
