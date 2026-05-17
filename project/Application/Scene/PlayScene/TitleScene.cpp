@@ -211,7 +211,7 @@ void TitleScene::Draw() {
         m_bootScreen->Draw();
         m_charModel->Draw();
 
-        SpriteBase::GetInstance()->ShaderDraw();
+        Render2DBase::GetInstance()->ShaderDraw();
 
         m_titleSceneUI->DrawBootScreen();
 
@@ -225,9 +225,9 @@ void TitleScene::Draw() {
 
         SkinningObject3dBase::GetInstance()->ShaderDraw();
 
-        SpriteBase::GetInstance()->ShaderDraw();
+        Render2DBase::GetInstance()->ShaderDraw();
 
-        SpriteBase::GetInstance()->ShaderDraw();
+        Render2DBase::GetInstance()->ShaderDraw();
 
         m_gamePad->Draw();
         m_credit->Draw();
@@ -240,7 +240,7 @@ void TitleScene::Draw() {
         break;
     }
 
-    SpriteBase::GetInstance()->ShaderDraw();
+    Render2DBase::GetInstance()->ShaderDraw();
     m_mouseCursor->Draw();
 }
 

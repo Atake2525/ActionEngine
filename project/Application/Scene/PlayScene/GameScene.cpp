@@ -133,7 +133,7 @@ void GameScene::Update() {
 
 void GameScene::Draw() {
 
-    SpriteBase::GetInstance()->ShaderDraw();
+    Render2DBase::GetInstance()->ShaderDraw();
 
 
     Object3dBase::GetInstance()->ShaderDraw();
@@ -143,7 +143,7 @@ void GameScene::Draw() {
     SkinningObject3dBase::GetInstance()->ShaderDraw();
 
 
-    SpriteBase::GetInstance()->ShaderDraw();
+    Render2DBase::GetInstance()->ShaderDraw();
 
     m_pStage->DrawBackSprite();
     m_pPlayerUI->Draw();

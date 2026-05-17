@@ -108,7 +108,7 @@
     <ClCompile Include="Application\Scene\Manager\SceneManager.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\2d\SpriteBase\SpriteBase.cpp">
+    <ClCompile Include="Engine\2d\Render2DBase\Render2DBase.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
     <ClCompile Include="Application\Scene\PlayScene\TitleScene.cpp">
@@ -117,7 +117,6 @@
     <ClCompile Include="Engine\3d\Object\Skinning\SkinningObject3dBase.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\UI\Text.cpp" />
     <ClCompile Include="Application\StageManager\StageCount.cpp" />
     <ClCompile Include="Application\StageManager\BaseStage.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp" />
@@ -139,6 +138,10 @@
     <ClCompile Include="Application\Result.cpp" />
     <ClCompile Include="Engine\Core\Input\MouseCursor.cpp" />
     <ClCompile Include="Application\Scene\TitleSceneUI.cpp" />
+    <ClCompile Include="Engine\2d\UI\UIElement.cpp" />
+    <ClCompile Include="Engine\2d\UI\UIContainer.cpp" />
+    <ClCompile Include="Engine\2d\UI\UIButton.cpp" />
+    <ClCompile Include="Engine\2d\UI\UISlider.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Math\EasingUtility.h" />
@@ -286,7 +289,7 @@
     <ClInclude Include="Application\Scene\Manager\SceneManager.h">
       <Filter>Scene</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\2d\SpriteBase\SpriteBase.h">
+    <ClInclude Include="Engine\2d\Render2DBase\Render2DBase.h">
       <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="Application\Scene\PlayScene\TitleScene.h">
@@ -296,7 +299,6 @@
       <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Math\Culling.h" />
-    <ClInclude Include="Engine\UI\Text.h" />
     <ClInclude Include="Engine\JsonLoader\JsonLoader.h" />
     <ClInclude Include="Engine\JsonLoader\json.hpp" />
     <ClInclude Include="Application\StageManager\StageCount.h" />
@@ -325,6 +327,11 @@
     <ClInclude Include="Application\Result.h" />
     <ClInclude Include="Engine\Core\Input\MouseCursor.h" />
     <ClInclude Include="Application\Scene\TitleSceneUI.h" />
+    <ClInclude Include="Engine\2d\UI\UIElement.h" />
+    <ClInclude Include="Engine\Math\SpriteDefinitions.h" />
+    <ClInclude Include="Engine\2d\UI\UIContainer.h" />
+    <ClInclude Include="Engine\2d\UI\UIButton.h" />
+    <ClInclude Include="Engine\2d\UI\UISlider.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\PostEffect\BoxFilter.PS.hlsl" />
