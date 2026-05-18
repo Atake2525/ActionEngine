@@ -3,6 +3,8 @@
 #include <memory>
 #include "MouseCursor.h"
 #include "Input.h"
+#include "UIElement.h"
+#include "UIButton.h"
 #pragma once
 
 enum class TitleSceneScreen : int {
@@ -29,6 +31,8 @@ private:
 
     Input* m_pInput = nullptr;
     MouseCursor* m_mouseCursor = nullptr;
+
+    std::unique_ptr<UI::Button> m_startButton;
 
 };
 

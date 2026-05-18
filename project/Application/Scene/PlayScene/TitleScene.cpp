@@ -150,33 +150,33 @@ void TitleScene::Update() {
         }
 
         // creditの表示
-        if (CollisionUISprite(m_credit->GetAABB(), m_mouseCursor->GetCursorPos()))
-        {
-            if (m_credit->GetColor().y != 0.0f)
-            {
-                Audio::GetInstance()->Play("select");   
-            }
-            if (m_pInput->TriggerMouse(0))
-            {
-                m_showCredit = !m_showCredit;
-                Audio::GetInstance()->Play("select_enter");
-            }
-            m_credit->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
-        }
-        else
-        {
-            m_credit->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
-        }
+        //if (CollisionUISprite(m_credit->GetAABB(), m_mouseCursor->GetCursorPos()))
+        //{
+        //    if (m_credit->GetColor().y != 0.0f)
+        //    {
+        //        Audio::GetInstance()->Play("select");   
+        //    }
+        //    if (m_pInput->TriggerMouse(0))
+        //    {
+        //        m_showCredit = !m_showCredit;
+        //        Audio::GetInstance()->Play("select_enter");
+        //    }
+        //    m_credit->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
+        //}
+        //else
+        //{
+        //    m_credit->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+        //}
 
-        // ゲームパッドを読み込みなおす
-        if (CollisionUISprite(m_gamePad->GetAABB(), m_mouseCursor->GetCursorPos()) && m_pInput->TriggerMouse(0))
-        {
-            m_pInput->UpdateDevice();
-            if (m_pInput->IsConnectedController())
-            {
-                m_gamePad->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
-            }
-        }
+        //// ゲームパッドを読み込みなおす
+        //if (CollisionUISprite(m_gamePad->GetAABB(), m_mouseCursor->GetCursorPos()) && m_pInput->TriggerMouse(0))
+        //{
+        //    m_pInput->UpdateDevice();
+        //    if (m_pInput->IsConnectedController())
+        //    {
+        //        m_gamePad->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+        //    }
+        //}
 
         m_gamePad->Update();
         m_credit->Update();

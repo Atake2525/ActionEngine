@@ -134,7 +134,7 @@ void Pause::Update() {
 
         for (int i = 0; i < pauseUIs.size(); i++)
         {
-            if (CollisionUISprite(pauseUIs[i].sprite->GetAABB(), m_mouseCursor->GetCursorPos()))
+            if (CollisionUISprite(pauseUIs[i].sprite->GetTextureSize(), { 1.0f, 1.0f }, m_mouseCursor->GetCursorPos(), {1.0f, 1.0f}))
             {
                 num = i;
             }
@@ -165,11 +165,6 @@ void Pause::Update() {
             m_animTimer += GameTime::GetInstance()->GetDeltaTime() / m_animTime / 0.4f;
 
             // 選択されているUIに対して処理を行う
-            /*Vector3 color = {
-                       0.0f,
-                       0.7f,
-                       EaseOutQuint(1.0f, 0.8f, m_animTimer)
-            };*/
             pauseUIs[static_cast<int>(m_pauseSelect)].sprite->SetColor({ 0.0f, 1.0f, 0.6f, 1.0f });
             pauseUIs[static_cast<int>(m_pauseSelect)].sprite->SetScale(pauseUIs[static_cast<int>(m_pauseSelect)].baseScale * 1.1f);
             pauseUIs[static_cast<int>(m_pauseSelect)].sprite->Update();
