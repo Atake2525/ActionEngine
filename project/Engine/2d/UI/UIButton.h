@@ -29,6 +29,7 @@ namespace UI {
         void SetActiveReaction(const std::function<void()>& reaction) { m_activeReaction = reaction; }
 
         void SetOnHoverReaction(const ButtonReaction& reaction) { m_onHoverReaction = reaction; }
+        void SetOnClickReaction(const ButtonReaction& reaction) { m_onClickReaction = reaction; }
 
     private:
         std::function<void()> m_activeReaction; // ボタンが押されたときに呼び出される関数

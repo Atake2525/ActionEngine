@@ -150,8 +150,6 @@ public:
 	void SetColor(const Vector4& color) { materialData->color = color; }
 	// Setter(AnchorPoint)
 	void SetAnchorPoint(const Vector2& anchPoint) { anchorPoint = anchPoint; }
-	// Setter(FlipXY)
-	void SetIsFlip(const bool& FlipX, const bool& FlipY);
 	// Setter(TextureLeftTop)
 	void SetTextureLeftTop(const Vector2& LeftTop) { textureLeftTop = LeftTop; }
 	// Setter(TextureSize)

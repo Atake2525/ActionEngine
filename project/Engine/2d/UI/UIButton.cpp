@@ -13,6 +13,7 @@ void Button::Initialize(const std::string& textureFilePath, Input& input) {
     // UI用のSpriteを作成して初期化する
     m_sprite = std::make_unique<Sprite>();
     m_sprite->Initialize(textureFilePath);
+    m_sprite->SetAnchorPoint(ANCHORPOINT_MIDDLE);
     m_originalSpriteSize = m_sprite->GetTextureSize();
 
     m_pInput = &input;
@@ -20,42 +21,35 @@ void Button::Initialize(const std::string& textureFilePath, Input& input) {
 
 void Button::Update() {
     // ボタンが表示されている場合のみ更新する
-    if (m_visible)
+    switch (m_transitionState)
     {
-        switch (m_transitionState)
+    case UITransitionState::Hidden: // ボタンが非表示の状態の処理
+
+        break;
+    case UITransitionState::Entering: // ボタンが表示される途中の処理
+        m_enterReaction();
+        break;
+    case UITransitionState::Shown: // ボタンが表示されている状態の処理
+
+        UpdateButtonState(); // ボタンの状態を更新する
+        if (m_buttonState != m_buttonStatePre) // ボタンの状態が変化した場合
         {
-        case UITransitionState::Hidden: // ボタンが非表示の状態の処理
-            break;
-        case UITransitionState::Entering: // ボタンが表示される途中の処理
-            m_enterReaction();
-            break;
-        case UITransitionState::Shown: // ボタンが表示されている状態の処理
-            
-            UpdateButtonState(); // ボタンの状態を更新する
             UpdateReactions(); // ボタンの状態に応じたリアクションを更新する
-
-            // ボタンが押されたら指定されているアクティブリアクションを実行する
-            if (m_buttonState == ButtonState::Released)
-            {
-                if (m_activeReaction)
-                {
-                    m_activeReaction();
-                }
-            }
-
-            break;
-        case UITransitionState::Exiting: // ボタンが非表示になる途中の処理
-            m_exitReaction();
-            break;
         }
 
-        m_sprite->Update();
+
+        break;
+    case UITransitionState::Exiting: // ボタンが非表示になる途中の処理
+        m_exitReaction();
+        break;
     }
+
+    m_sprite->Update();
 }
 
 void Button::Draw() {
     // ボタンが表示されている場合のみ描画する
-    if (m_visible)
+    if (m_transitionState == UITransitionState::Shown || m_transitionState == UITransitionState::Entering || m_transitionState == UITransitionState::Exiting)
     {
         m_sprite->Draw();
     }
@@ -72,7 +66,7 @@ void Button::UpdateButtonState() {
     Vector2 buttonSize = m_sprite->GetTextureSize();
 
     // マウスがボタンの上にあるかを確認
-    if (CollisionUISprite(buttonPos, buttonSize, mousePos, { 1.0f, 1.0f }))
+    if (CollisionUISprite(buttonPos - buttonSize / 2.0f, buttonSize, mousePos, { 1.0f, 1.0f }))
     {
         m_buttonState = ButtonState::Hovered; // ホバー状態にする
         if (m_pInput->PressMouse(0)) // 左クリックが押されているかをチェック
