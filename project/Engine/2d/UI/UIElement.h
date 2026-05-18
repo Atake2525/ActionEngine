@@ -25,7 +25,11 @@ public:
     void SetEnterReaction(const std::function<void()>& reaction) { m_enterReaction = reaction; }
     void SetExitReaction(const std::function<void()>& reaction) { m_exitReaction = reaction; }
     void SetTransitionState(UITransitionState state) { m_transitionState = state; }
-    void SetVisible(bool visible) { m_visible = visible; }
+
+    void ShowThisFrame() { m_transitionState = UITransitionState::Shown; }
+    void Show() { m_transitionState = UITransitionState::Entering; }
+    void Hide() { m_transitionState = UITransitionState::Exiting; }
+
     void SetPosition(const Vector2& pos);
     const Vector2& GetPosition() const;
     void SetScale(const Vector2& scale);
@@ -36,6 +40,5 @@ protected:
 	std::unique_ptr<Sprite> m_sprite;
     std::function<void()> m_enterReaction;
     std::function<void()> m_exitReaction;
-    bool m_visible = true;
     UITransitionState m_transitionState = UITransitionState::Hidden;
 };

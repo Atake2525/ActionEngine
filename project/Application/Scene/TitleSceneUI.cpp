@@ -37,8 +37,14 @@ TitleSceneUI::TitleSceneUI(MouseCursor* mouseCursor) {
 
     m_startButton = std::make_unique<UI::Button>();
     m_startButton->Initialize("Resources/Sprite/UI/ui_start.png", *m_pInput);
-    m_startButton->SetOnHoverReaction(UI::ButtonReaction{ .highlight = true, .highlightColor = {0.0f, 1.0f, 0.6f, 1.0f}, .scale = true, .scaleAmount = {1.1f, 1.1f} });
-})
+    m_startButton->SetPosition({ windowSize.x * 0.5f, windowSize.y * 0.5f });
+    // 音を鳴らす
+    std::function<void()> startButtonReaction = [this]() {
+        Audio::GetInstance()->Play("select_enter");
+        };
+    m_startButton->SetOnHoverReaction(UI::ButtonReaction{ .highlight = true, .highlightColor = {0.0f, 1.0f, 0.6f, 1.0f}, .scale = true, .scaleAmount = {1.1f, 1.1f}, .custom = startButtonReaction });
+    m_startButton->SetOnClickReaction(UI::ButtonReaction{ .highlight = true, .highlightColor = {1.0f, 1.0f, 0.0f, 1.0f}, .scale = false, .custom = startButtonReaction });
+    m_startButton->ShowThisFrame();
 }
 
 TitleSceneUI::~TitleSceneUI()
@@ -60,6 +66,8 @@ void TitleSceneUI::Update(const TitleSceneScreen& screen) {
         Vector2 cursorPosition = m_mouseCursor->GetCursorPos();
         Vector3 pos = { cursorPosition.x, cursorPosition.y, 0.0f };
         AABB aabb = { {pos},{pos} };
+
+        m_startButton->Update();
 
         // UIにマウスカーソルが入っている時、クリックしたときの処理
         /*if (CollisionSprite(m_uiSprites[1]->GetAABB(), aabb))
@@ -118,8 +126,9 @@ void TitleSceneUI::DrawBootScreen() {
 }
 
 void TitleSceneUI::DrawTitleScreen() {
-    for (int i = 1; i < m_uiSprites.size(); i++)
+   /* for (int i = 1; i < m_uiSprites.size(); i++)
     {
         m_uiSprites[i]->Draw();
-    }
+    }*/
+    m_startButton->Draw();
 }
