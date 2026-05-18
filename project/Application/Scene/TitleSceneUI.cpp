@@ -34,6 +34,11 @@ TitleSceneUI::TitleSceneUI(MouseCursor* mouseCursor) {
 
     m_pInput = Input::GetInstance();
     m_mouseCursor = mouseCursor;
+
+    m_startButton = std::make_unique<UI::Button>();
+    m_startButton->Initialize("Resources/Sprite/UI/ui_start.png", *m_pInput);
+    m_startButton->SetOnHoverReaction(UI::ButtonReaction{ .highlight = true, .highlightColor = {0.0f, 1.0f, 0.6f, 1.0f}, .scale = true, .scaleAmount = {1.1f, 1.1f} });
+})
 }
 
 TitleSceneUI::~TitleSceneUI()
@@ -57,7 +62,7 @@ void TitleSceneUI::Update(const TitleSceneScreen& screen) {
         AABB aabb = { {pos},{pos} };
 
         // UIにマウスカーソルが入っている時、クリックしたときの処理
-        if (CollisionSprite(m_uiSprites[1]->GetAABB(), aabb))
+        /*if (CollisionSprite(m_uiSprites[1]->GetAABB(), aabb))
         {
             if (m_uiSprites[1]->GetColor().x != 0.0f)
             {
@@ -76,10 +81,10 @@ void TitleSceneUI::Update(const TitleSceneScreen& screen) {
         {
             m_uiSprites[1]->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
             m_uiSprites[1]->SetScale(m_uiBaseScale[1]);
-        }
+        }*/
 
         // UIにマウスカーソルが入っている時、クリックしたときの処理
-        if (CollisionSprite(m_uiSprites[2]->GetAABB(), aabb))
+        /*if (CollisionSprite(m_uiSprites[2]->GetAABB(), aabb))
         {
             if (m_uiSprites[2]->GetColor().x != 0.0f)
             {
@@ -98,7 +103,7 @@ void TitleSceneUI::Update(const TitleSceneScreen& screen) {
         {
             m_uiSprites[2]->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
             m_uiSprites[2]->SetScale(m_uiBaseScale[2]);
-        }
+        }*/
         break;
     }
 

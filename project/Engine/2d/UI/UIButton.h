@@ -18,10 +18,10 @@ namespace UI {
         Released,    // 離された状態
     };
 
-    class UIButton : public UIElement {
+    class Button : public UIElement {
     public:
-        UIButton();
-        ~UIButton();
+        Button();
+        ~Button();
         void Initialize(const std::string& textureFilePath, Input& input) override;
         void Update() override;
         void Draw() override;

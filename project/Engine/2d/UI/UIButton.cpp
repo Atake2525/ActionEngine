@@ -3,13 +3,13 @@
 
 using namespace UI;
 
-UIButton::UIButton()
+Button::Button()
 {}
 
-UIButton::~UIButton()
+Button::~Button()
 {}
 
-void UIButton::Initialize(const std::string& textureFilePath, Input& input) {
+void Button::Initialize(const std::string& textureFilePath, Input& input) {
     // UI用のSpriteを作成して初期化する
     m_sprite = std::make_unique<Sprite>();
     m_sprite->Initialize(textureFilePath);
@@ -18,7 +18,7 @@ void UIButton::Initialize(const std::string& textureFilePath, Input& input) {
     m_pInput = &input;
 }
 
-void UIButton::Update() {
+void Button::Update() {
     // ボタンが表示されている場合のみ更新する
     if (m_visible)
     {
@@ -39,6 +39,7 @@ void UIButton::Update() {
             {
                 if (m_activeReaction)
                 {
+                    m_activeReaction();
                 }
             }
 
@@ -46,15 +47,13 @@ void UIButton::Update() {
         case UITransitionState::Exiting: // ボタンが非表示になる途中の処理
             m_exitReaction();
             break;
-        default:
-            break;
         }
 
         m_sprite->Update();
     }
 }
 
-void UIButton::Draw() {
+void Button::Draw() {
     // ボタンが表示されている場合のみ描画する
     if (m_visible)
     {
@@ -62,7 +61,8 @@ void UIButton::Draw() {
     }
 }
 
-void UIButton::UpdateButtonState() {
+
+void Button::UpdateButtonState() {
     // 前の状態を保存
     m_buttonStatePre = m_buttonState;
 
@@ -90,8 +90,8 @@ void UIButton::UpdateButtonState() {
     }
 }
 
-void UIButton::UpdateReactions() {
-    switch (m_buttonState)
+void Button::UpdateReactions() {
+    switch (m_buttonState) // 現在の状態に応じたリアクションを更新
     {
     case ButtonState::Normal:
         if (m_buttonStatePre == ButtonState::Hovered || m_buttonStatePre == ButtonState::Clicked)
@@ -117,14 +117,36 @@ void UIButton::UpdateReactions() {
         }
         if (m_onHoverReaction.scale)
         {
-
+            m_sprite->SetScale({ m_originalSpriteSize * m_onHoverReaction.scaleAmount });
         }
         break;
     case ButtonState::Clicked:
+        if (m_onClickReaction.custom)
+        {
+            m_onClickReaction.custom();
+        }
+        if (m_onClickReaction.highlight)
+        {
+            m_sprite->SetColor(m_onClickReaction.highlightColor);
+        }
+        if (m_onClickReaction.scale)
+        {
+            m_sprite->SetScale({ m_originalSpriteSize * m_onClickReaction.scaleAmount });
+        }
         break;
     case ButtonState::Released:
-        break;
-    default:
+        if (m_onReleaseReaction.custom)
+        {
+            m_onReleaseReaction.custom();
+        }
+        if (m_onReleaseReaction.highlight)
+        {
+            m_sprite->SetColor(m_onReleaseReaction.highlightColor);
+        }
+        if (m_onReleaseReaction.scale)
+        {
+            m_sprite->SetScale({ m_originalSpriteSize * m_onReleaseReaction.scaleAmount });
+        }
         break;
     }
 
