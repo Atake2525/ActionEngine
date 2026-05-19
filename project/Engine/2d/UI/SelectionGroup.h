@@ -15,6 +15,11 @@ namespace UI {
         void SetMoveUpBinding(const InputTrigger& trigger) { m_moveUpBinding.triggers.push_back(trigger); }
         void SetMoveDownBinding(const InputTrigger& trigger) { m_moveDownBinding.triggers.push_back(trigger); }
 
+        // UI要素の使用回数を設定する
+        void SetUsableCount(int count);
+        // UI要素の使用回数を取得する
+        const int GetUsableCount() const { return m_usableCount; }
+
         // UI全体のインタラクトバインドを設定
         void SetAllInteractBinding(const InputTrigger& trigger);
 
@@ -23,7 +28,6 @@ namespace UI {
 
         // グループ内の全てのUI要素を更新する関数
         void Update();
-
         // グループ内の全てのUI要素を描画する関数
         void Draw();
 
@@ -37,5 +41,10 @@ namespace UI {
         using InteractType = std::variant<BYTE, int, Controller>;
         InputBinding m_moveUpBinding; // 上移動の入力バインディング
         InputBinding m_moveDownBinding; // 下移動の入力バインディング
+
+        bool m_firstUpdate = true; // 最初の更新かどうかを示すフラグ
+
+        int m_usableCount = -1; // 何回選択できるかを管理する変数(-1のときは無限に選択できる)
+        void CheckUsable(); // UI要素のアクティベーションをチェックする関数
     };
 };

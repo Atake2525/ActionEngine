@@ -65,7 +65,7 @@ TitleSceneUI::TitleSceneUI() {
     m_selectionGroup->SetMoveUpBinding(UI::InputTrigger{ .key = DIK_W });
     m_selectionGroup->SetMoveDownBinding(UI::InputTrigger{ .key = DIK_S });
     m_selectionGroup->SetAllInteractBinding(UI::InputTrigger{ .key = DIK_RETURN, .mouseButton = MOUSE_LEFT, .controller = Controller::A });
-
+    m_selectionGroup->SetUsableCount(1);
 }
 
 TitleSceneUI::~TitleSceneUI()
