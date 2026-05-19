@@ -24,15 +24,15 @@ public:
     const std::string GetPressUI() const { return m_pressUI; }
 
 private:
-    std::array<std::unique_ptr<Sprite>, 3> m_uiSprites;
-    std::array<Vector2, 3> m_uiBaseScale;
+    std::unique_ptr<Sprite> m_pressAnyKeySprite;
 
     std::string m_pressUI = "none";
 
     Input* m_pInput = nullptr;
     MouseCursor* m_mouseCursor = nullptr;
 
-    std::unique_ptr<UI::Button> m_startButton;
+    std::unique_ptr<UI::UIElement> m_startButton;
+    std::unique_ptr<UI::UIElement> m_exitButton;
 
 };
 

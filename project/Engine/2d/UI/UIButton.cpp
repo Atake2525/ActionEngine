@@ -9,7 +9,7 @@ Button::Button()
 Button::~Button()
 {}
 
-void Button::Initialize(const std::string& textureFilePath, Input& input) {
+void Button::Initialize(const std::string textureFilePath, Input& input) {
     // UI用のSpriteを作成して初期化する
     m_sprite = std::make_unique<Sprite>();
     m_sprite->Initialize(textureFilePath);
@@ -20,26 +20,27 @@ void Button::Initialize(const std::string& textureFilePath, Input& input) {
 }
 
 void Button::Update() {
+    m_controlMode = UpdateControlMode(m_controlMode); // コントロールモードを更新する
     // ボタンが表示されている場合のみ更新する
     switch (m_transitionState)
     {
-    case UITransitionState::Hidden: // ボタンが非表示の状態の処理
+    case TransitionState::Hidden: // ボタンが非表示の状態の処理
 
         break;
-    case UITransitionState::Entering: // ボタンが表示される途中の処理
+    case TransitionState::Entering: // ボタンが表示される途中の処理
         m_enterReaction();
         break;
-    case UITransitionState::Shown: // ボタンが表示されている状態の処理
+    case TransitionState::Shown: // ボタンが表示されている状態の処理
 
-        UpdateButtonState(); // ボタンの状態を更新する
-        if (m_buttonState != m_buttonStatePre) // ボタンの状態が変化した場合
+        UpdateInteractionState(); // ボタンの状態を更新する
+        if (m_interactionState != m_interactionStatePre) // ボタンの状態が変化した場合
         {
             UpdateReactions(); // ボタンの状態に応じたリアクションを更新する
         }
 
 
         break;
-    case UITransitionState::Exiting: // ボタンが非表示になる途中の処理
+    case TransitionState::Exiting: // ボタンが非表示になる途中の処理
         m_exitReaction();
         break;
     }
@@ -49,46 +50,59 @@ void Button::Update() {
 
 void Button::Draw() {
     // ボタンが表示されている場合のみ描画する
-    if (m_transitionState == UITransitionState::Shown || m_transitionState == UITransitionState::Entering || m_transitionState == UITransitionState::Exiting)
+    if (m_transitionState == TransitionState::Shown || m_transitionState == TransitionState::Entering || m_transitionState == TransitionState::Exiting)
     {
         m_sprite->Draw();
     }
 }
 
 
-void Button::UpdateButtonState() {
+void Button::UpdateInteractionState() {
     // 前の状態を保存
-    m_buttonStatePre = m_buttonState;
+    m_interactionStatePre = m_interactionState;
 
-    // マウスの位置を取得
-    Vector2 mousePos = m_pInput->GetWindowMousePos2();
-    Vector2 buttonPos = m_sprite->GetPosition();
-    Vector2 buttonSize = m_sprite->GetTextureSize();
+    switch (m_controlMode)
+    {
+        case ControlMode::Keyboard:
+            // キーボード操作時の処理
 
-    // マウスがボタンの上にあるかを確認
-    if (CollisionUISprite(buttonPos - buttonSize / 2.0f, buttonSize, mousePos, { 1.0f, 1.0f }))
-    {
-        m_buttonState = ButtonState::Hovered; // ホバー状態にする
-        if (m_pInput->PressMouse(0)) // 左クリックが押されているかをチェック
-        {
-            m_buttonState = ButtonState::Clicked; // クリック状態にする
-        }
-        else if (m_pInput->ReturnMouse(0)) // クリック状態で左クリックが離されたかをチェック
-        {
-            m_buttonState = ButtonState::Released; // クリック状態をリセット
-        }
-    }
-    else
-    {
-        m_buttonState = ButtonState::Normal; // 通常状態にする
+            break;
+        case ControlMode::Mouse:
+            // マウス操作時の処理
+            // マウスの位置を取得
+            Vector2 mousePos = m_pInput->GetWindowMousePos2();
+            Vector2 buttonPos = m_sprite->GetPosition();
+            Vector2 buttonSize = m_sprite->GetTextureSize();
+
+            // マウスがボタンの上にあるかを確認
+            if (CollisionUISprite(buttonPos - buttonSize / 2.0f, buttonSize, mousePos, { 1.0f, 1.0f }))
+            {
+                m_interactionState = InteractionState::Selected; // 選択状態にする
+                if (m_pInput->TriggerMouse(0)) // 左クリックが押されているかをチェック
+                {
+                    m_interactionState = InteractionState::Pressed; // 押下状態にする
+                }
+                else if (m_pInput->ReturnMouse(0)) // 押下状態で左クリックが離されたかをチェック
+                {
+                    m_interactionState = InteractionState::Submitted; // 決定状態をリセット
+                }
+            }
+            else
+            {
+                m_interactionState = InteractionState::Idle; // 通常状態にする
+            }
+            break;
+        case ControlMode::GamePad:
+            // ゲームパッド操作時の処理
+            break;
     }
 }
 
 void Button::UpdateReactions() {
-    switch (m_buttonState) // 現在の状態に応じたリアクションを更新
+    switch (m_interactionState) // 現在の状態に応じたリアクションを更新
     {
-    case ButtonState::Normal:
-        if (m_buttonStatePre == ButtonState::Hovered || m_buttonStatePre == ButtonState::Clicked)
+    case InteractionState::Idle:
+        if (m_interactionStatePre == InteractionState::Selected || m_interactionStatePre == InteractionState::Pressed)
         {
             if (m_onHoverReaction.highlight)
             {
@@ -100,7 +114,7 @@ void Button::UpdateReactions() {
             }
         }
         break;
-    case ButtonState::Hovered:
+    case InteractionState::Selected:
         if (m_onHoverReaction.custom)
         {
             m_onHoverReaction.custom();
@@ -114,7 +128,7 @@ void Button::UpdateReactions() {
             m_sprite->SetScale({ m_originalSpriteSize * m_onHoverReaction.scaleAmount });
         }
         break;
-    case ButtonState::Clicked:
+    case InteractionState::Pressed:
         if (m_onClickReaction.custom)
         {
             m_onClickReaction.custom();
@@ -128,7 +142,7 @@ void Button::UpdateReactions() {
             m_sprite->SetScale({ m_originalSpriteSize * m_onClickReaction.scaleAmount });
         }
         break;
-    case ButtonState::Released:
+    case InteractionState::Submitted:
         if (m_onReleaseReaction.custom)
         {
             m_onReleaseReaction.custom();
@@ -140,6 +154,10 @@ void Button::UpdateReactions() {
         if (m_onReleaseReaction.scale)
         {
             m_sprite->SetScale({ m_originalSpriteSize * m_onReleaseReaction.scaleAmount });
+        }
+        if (m_activeReaction)
+        {
+            m_activeReaction(); // ボタンが押されたときのリアクションを呼び出す
         }
         break;
     }

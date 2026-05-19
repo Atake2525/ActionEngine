@@ -177,6 +177,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\2d\UI\UIContainer.cpp" />
     <ClCompile Include="Engine\2d\UI\UIButton.cpp" />
     <ClCompile Include="Engine\2d\UI\UISlider.cpp" />
+    <ClCompile Include="Engine\2d\UI\SelectionGroup.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Scene\Manager\AbstractSceneFactory.h" />
@@ -270,6 +271,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\2d\UI\UIContainer.h" />
     <ClInclude Include="Engine\2d\UI\UIButton.h" />
     <ClInclude Include="Engine\2d\UI\UISlider.h" />
+    <ClInclude Include="Engine\2d\UI\SelectionGroup.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="externals\assimp\lib\Release\assimp-vc143-mtd.lib">
