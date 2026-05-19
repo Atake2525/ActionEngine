@@ -38,7 +38,7 @@ namespace UI {
 
     struct InputTrigger { // 入力トリガーを管理する構造体
         BYTE key = 0;
-        int mouseButton = 0;
+        int mouseButton = -1;
         Controller controller = Controller::None;
         DPad dpad = DPad::None;
     };
@@ -46,18 +46,53 @@ namespace UI {
     struct InputBinding { // 入力バインディングを管理する構造体
         std::vector<InputTrigger> triggers;
 
-        bool Check(Input& input) const {
+        bool CheckPush(Input& input) const {
+            for (const auto& trigger : triggers) {
+                if (trigger.key != 0 && input.PushKey(trigger.key)) {
+                    return true;
+                }
+                if (trigger.mouseButton >= 0 && input.PressMouse(trigger.mouseButton)) {
+                    return true;
+                }
+                if (trigger.controller != Controller::None && input.PushButton(trigger.controller)) {
+                    return true;
+                }
+                if (trigger.dpad != DPad::None && input.PushDPad(trigger.dpad)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        bool CheckTrigger(Input& input) const {
             for (const auto& trigger : triggers) {
                 if (trigger.key != 0 && input.TriggerKey(trigger.key)) {
                     return true;
                 }
-                if (trigger.mouseButton != 0 && input.TriggerMouse(trigger.mouseButton)) {
+                if (trigger.mouseButton >= 0 && input.TriggerMouse(trigger.mouseButton)) {
                     return true;
                 }
                 if (trigger.controller != Controller::None && input.TriggerButton(trigger.controller)) {
                     return true;
                 }
-                if (trigger.dpad != DPad::None && input.TriggerXButton(trigger.dpad)) {
+                if (trigger.dpad != DPad::None && input.TriggerDPad(trigger.dpad)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        bool CheckReturn(Input& input) const {
+            for (const auto& trigger : triggers) {
+                if (trigger.key != 0 && input.ReturnKey(trigger.key)) {
+                    return true;
+                }
+                if (trigger.mouseButton >= 0 && input.ReturnMouse(trigger.mouseButton)) {
+                    return true;
+                }
+                if (trigger.controller != Controller::None && input.ReturnButton(trigger.controller)) {
+                    return true;
+                }
+                if (trigger.dpad != DPad::None && input.ReturnDPad(trigger.dpad)) {
                     return true;
                 }
             }
@@ -74,6 +109,8 @@ namespace UI {
         virtual void Update() = 0;
         virtual void Draw() = 0;
 
+        void AddInteractionBinding(const InputTrigger& binding) { m_interactionBinding.triggers.push_back(binding); }
+
         // リアクションの設定関数群
         void SetEnterReaction(const std::function<void()>& reaction) { m_enterReaction = reaction; }
         void SetExitReaction(const std::function<void()>& reaction) { m_exitReaction = reaction; }
@@ -84,17 +121,23 @@ namespace UI {
         void SetOnPressedReaction(const InteractionReaction& reaction) { m_onPressedReaction = reaction; }
         void SetOnSubmittedReaction(const InteractionReaction& reaction) { m_onSubmittedReaction = reaction; }
 
+        const bool IsActivated() const { return m_activated; }
+
         // 状態変更関数群
         void ShowThisFrame() { m_transitionState = TransitionState::Shown; }
         void HideThisFrame() { m_transitionState = TransitionState::Hidden; }
         void Show() { m_transitionState = TransitionState::Entering; }
         void Hide() { m_transitionState = TransitionState::Exiting; }
 
+        // マウスカーソルの更新(InteractionStateに応じてマウスカーソルを変更する)
+        void UpdateMouseCursor();
+
         // コントロールモードの設定関数
         void SetControlMode(ControlMode mode) { m_controlMode = mode; }
         const ControlMode& GetControlMode() const { return m_controlMode; }
         void StaticControlMode(ControlMode mode) { m_controlMode = mode; m_staticControlMode = true; } 
         void UnstaticControlMode() { m_staticControlMode = false; }
+        void SetSelected(bool selected) { m_selected = selected; }
 
         // 操作系関数群
         void SetPosition(const Vector2 pos);
@@ -114,6 +157,7 @@ namespace UI {
         ControlMode m_controlMode = ControlMode::Mouse;
         bool m_staticControlMode = false; // コントロールモードを固定するかどうか
         bool m_selected = false; // 選択されているかどうか(キーボード、ゲームパッド操作のため)
+        bool m_activated = false; // 押された状態かどうか
         InteractionState m_interactionStatePre = InteractionState::Idle; // ボタンの前の状態
         InteractionState m_interactionState = InteractionState::Idle; // ボタンの現在の状態
 
@@ -126,8 +170,6 @@ namespace UI {
         std::function<void()> m_enterReaction;
         std::function<void()> m_exitReaction;
 
-        BYTE m_interactionKey = 0; // キーボード操作のためのキー番号
-        int m_interactionMouseButton = 0; // マウス操作のためのボタン番号
-        Controller m_interactionControllerButton = Controller::None; // ゲームパッド操作のためのボタン番号
+        InputBinding m_interactionBinding; // どの入力に反応するかを管理するInputBinding
     };
 };

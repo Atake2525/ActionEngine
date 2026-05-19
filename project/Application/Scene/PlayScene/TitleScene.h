@@ -103,7 +103,5 @@ private:
     bool m_showCredit = false;
     bool m_start = false;
 
-    std::unique_ptr<MouseCursor> m_mouseCursor;
-
 };
 

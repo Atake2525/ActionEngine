@@ -56,16 +56,54 @@ const float UI::UIElement::GetRotation() const {
 }
 
 const ControlMode UI::UIElement::UpdateControlMode(ControlMode mode) const {
-    if (!m_staticControlMode)
+    if (m_staticControlMode || m_pInput == nullptr)
     {
-        if (m_pInput->PressAnyKey() && mode != ControlMode::Keyboard)
+        return mode;
+    }
+
+    if (m_pInput->PressAnyKey())
+    {
+        return ControlMode::Keyboard;
+    }
+
+    if (m_pInput->IsConnectedController())
+    {
+        if (m_pInput->PressAnyButton() ||
+            m_pInput->PushDPad(DPad::Up) ||
+            m_pInput->PushDPad(DPad::Down) ||
+            m_pInput->PushDPad(DPad::Left) ||
+            m_pInput->PushDPad(DPad::Right) ||
+            m_pInput->PushDPad(DPad::UpRight) ||
+            m_pInput->PushDPad(DPad::UpLeft) ||
+            m_pInput->PushDPad(DPad::DownRight) ||
+            m_pInput->PushDPad(DPad::DownLeft))
         {
-            return ControlMode::Keyboard;
-        }
-        if (m_interactionState == InteractionState::Selected && mode != ControlMode::Mouse)
-        {
-            return ControlMode::Mouse;
+            return ControlMode::GamePad;
         }
     }
+
+    const Vector2 mouseVelocity = m_pInput->GetMouseVel2();
+    if (mouseVelocity.x != 0.0f ||
+        mouseVelocity.y != 0.0f ||
+        m_pInput->PressMouse(MOUSE_LEFT) ||
+        m_pInput->PressMouse(MOUSE_RIGHT) ||
+        m_pInput->PressMouse(MOUSE_MIDDLE))
+    {
+        return ControlMode::Mouse;
+    }
+
     return mode;
+}
+
+void UIElement::UpdateMouseCursor() {
+    if (m_pInput == nullptr || m_controlMode != ControlMode::Mouse)
+    {
+        return;
+    }
+
+    if (m_interactionState == InteractionState::Selected)
+    {
+        SetCursor(LoadCursor(nullptr, IDC_HAND));
+
+    }
 }
