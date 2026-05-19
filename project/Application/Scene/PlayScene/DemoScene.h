@@ -1,6 +1,6 @@
 #include "Object3d.h"
 #include "Object3dBase.h"
-#include "SpriteBase.h"
+#include "Render2DBase.h"
 #include "Camera.h"
 #include "ModelManager.h"
 #include "TextureManager.h"
