@@ -2,11 +2,11 @@
 
 #pragma once
 
-class UISlider : public UIElement {
+class UISlider : public UI::UIElement {
 public:
     UISlider();
     ~UISlider();
-    void Initialize(const std::string& textureFilePath, Input& input) override;
+    void Initialize(const std::string textureFilePath, Input& input) override;
     void Update() override;
     void Draw() override;
 };

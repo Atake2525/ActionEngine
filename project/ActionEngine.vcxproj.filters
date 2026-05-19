@@ -142,6 +142,7 @@
     <ClCompile Include="Engine\2d\UI\UIContainer.cpp" />
     <ClCompile Include="Engine\2d\UI\UIButton.cpp" />
     <ClCompile Include="Engine\2d\UI\UISlider.cpp" />
+    <ClCompile Include="Engine\2d\UI\SelectionGroup.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Math\EasingUtility.h" />
@@ -332,6 +333,7 @@
     <ClInclude Include="Engine\2d\UI\UIContainer.h" />
     <ClInclude Include="Engine\2d\UI\UIButton.h" />
     <ClInclude Include="Engine\2d\UI\UISlider.h" />
+    <ClInclude Include="Engine\2d\UI\SelectionGroup.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\PostEffect\BoxFilter.PS.hlsl" />
