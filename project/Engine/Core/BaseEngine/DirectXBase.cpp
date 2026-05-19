@@ -6,6 +6,7 @@
 #include "TextureManager.h"
 #include "SrvManager.h"
 #include "OffScreenRendering.h"
+#include <algorithm>
 
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -252,10 +253,12 @@ void DirectXBase::PreDraw() {
     D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
     commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, &dsvHandle);
 
+    const float backBufferClearColor[] = { 0.02f, 0.02f, 0.02f, 1.0f };
+    commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], backBufferClearColor, 0, nullptr);
+
     SrvManager::GetInstance()->PreDraw();
 
-    commandList->RSSetViewports(1, &viewPort);       // Viewportを設定
-    commandList->RSSetScissorRects(1, &scissorRect); // Scirssorを設定
+    ApplySceneViewport();
 
     OffScreenRendering::GetInstance()->Draw();
 
@@ -356,11 +359,9 @@ void DirectXBase::Update() {
 }
 
 void DirectXBase::PostDrawRenderTexture() {
-    // これから書き込むバックバッファのインデックスを取得
-    backBufferIndex = swapChain->GetCurrentBackBufferIndex();
-
+    barrier.Transition.pResource = OffScreenRendering::GetInstance()->GetRenderTextureResource().Get();
     barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+    barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
     // TransitionBarrierを張る
     commandList->ResourceBarrier(1, &barrier);
 
@@ -412,6 +413,8 @@ void DirectXBase::InitializeViewPortRect() {
     viewPort.TopLeftY = 0;
     viewPort.MinDepth = 0.0f;
     viewPort.MaxDepth = 1.0f;
+
+    SetSceneRenderArea(0.0f, 0.0f, viewPort.Width, viewPort.Height);
 }
 
 void DirectXBase::InitializeScissorRect() {
@@ -420,6 +423,45 @@ void DirectXBase::InitializeScissorRect() {
     scissorRect.right = WinApp::GetInstance()->GetkClientWidth();
     scissorRect.top = 0;
     scissorRect.bottom = WinApp::GetInstance()->GetkClientHeight();
+}
+
+void DirectXBase::SetSceneRenderArea(float left, float top, float width, float height) {
+    const float clientWidth = float(WinApp::GetInstance()->GetkClientWidth());
+    const float clientHeight = float(WinApp::GetInstance()->GetkClientHeight());
+
+    left = std::clamp(left, 0.0f, clientWidth - 1.0f);
+    top = std::clamp(top, 0.0f, clientHeight - 1.0f);
+    width = std::clamp(width, 1.0f, clientWidth - left);
+    height = std::clamp(height, 1.0f, clientHeight - top);
+
+    sceneViewPort.TopLeftX = left;
+    sceneViewPort.TopLeftY = top;
+    sceneViewPort.Width = width;
+    sceneViewPort.Height = height;
+    sceneViewPort.MinDepth = 0.0f;
+    sceneViewPort.MaxDepth = 1.0f;
+
+    sceneScissorRect.left = LONG(left);
+    sceneScissorRect.top = LONG(top);
+    sceneScissorRect.right = LONG(left + width);
+    sceneScissorRect.bottom = LONG(top + height);
+}
+
+void DirectXBase::ApplyFullViewport() {
+    commandList->RSSetViewports(1, &viewPort);
+    commandList->RSSetScissorRects(1, &scissorRect);
+}
+
+void DirectXBase::ApplySceneViewport() {
+    commandList->RSSetViewports(1, &sceneViewPort);
+    commandList->RSSetScissorRects(1, &sceneScissorRect);
+}
+
+float DirectXBase::GetSceneAspectRatio() const {
+    if (sceneViewPort.Height <= 0.0f) {
+        return 1.0f;
+    }
+    return sceneViewPort.Width / sceneViewPort.Height;
 }
 
 void DirectXBase::CreateDXCCompiler() {
