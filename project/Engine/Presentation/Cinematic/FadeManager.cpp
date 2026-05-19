@@ -136,6 +136,6 @@ void FadeManager::FadeIn(const float time) {
 }
 
 void FadeManager::Draw() {
-	SpriteBase::GetInstance()->ShaderDraw();
+	Render2DBase::GetInstance()->ShaderDraw();
 	sprite_->Draw();
 }

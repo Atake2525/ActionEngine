@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Sprite.h"
-#include "SpriteBase.h"
+#include "Render2DBase.h"
 #include <functional>
 
 class FadeManager

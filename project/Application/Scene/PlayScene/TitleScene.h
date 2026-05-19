@@ -1,6 +1,6 @@
 #include "Object3d.h"
 #include "Object3dBase.h"
-#include "SpriteBase.h"
+#include "Render2DBase.h"
 #include "Camera.h"
 #include "ModelManager.h"
 #include "TextureManager.h"
@@ -15,7 +15,6 @@
 #include "SceneManager.h"
 #include "SkyBox.h"
 #include <map>
-#include "UI.h"
 #include <memory>
 #include "MouseCursor.h"
 #include "TitleSceneUI.h"
@@ -103,8 +102,6 @@ private:
     std::unique_ptr<Sprite> m_credit = nullptr;
     bool m_showCredit = false;
     bool m_start = false;
-
-    std::unique_ptr<MouseCursor> m_mouseCursor;
 
 };
 

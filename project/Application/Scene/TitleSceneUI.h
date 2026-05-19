@@ -1,8 +1,10 @@
 #include "Sprite.h"
 #include <array>
 #include <memory>
-#include "MouseCursor.h"
 #include "Input.h"
+
+#include "SelectionGroup.h"
+
 #pragma once
 
 enum class TitleSceneScreen : int {
@@ -12,7 +14,7 @@ enum class TitleSceneScreen : int {
 
 class TitleSceneUI {
 public:
-    TitleSceneUI(MouseCursor* mouseCursor);
+    TitleSceneUI();
     ~TitleSceneUI();
 
     void Update(const TitleSceneScreen& screen);
@@ -22,13 +24,13 @@ public:
     const std::string GetPressUI() const { return m_pressUI; }
 
 private:
-    std::array<std::unique_ptr<Sprite>, 3> m_uiSprites;
-    std::array<Vector2, 3> m_uiBaseScale;
+    std::unique_ptr<Sprite> m_pressAnyKeySprite;
 
     std::string m_pressUI = "none";
 
     Input* m_pInput = nullptr;
-    MouseCursor* m_mouseCursor = nullptr;
+
+    std::unique_ptr<UI::SelectionGroup> m_selectionGroup;
 
 };
 
