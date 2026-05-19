@@ -250,14 +250,14 @@ void Result::UpdateUISelect()
 
     for (int i = 0; i < m_uiSprites.size(); i++)
     {
-        if (CollisionUISprite(m_uiSprites[i]->GetAABB(), m_mouseCursor->GetCursorPos()))
+        /*if (CollisionUISprite(m_uiSprites[i]->GetAABB(), m_mouseCursor->GetCursorPos()))
         {
             if (selectIndex != i)
             {
                 Audio::GetInstance()->Play("select");
             }
             selectIndex = i;
-        }
+        }*/
     }
 
     if (selectIndex < 0)

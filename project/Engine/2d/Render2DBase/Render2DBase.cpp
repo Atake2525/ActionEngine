@@ -1,4 +1,4 @@
-#include "SpriteBase.h"
+#include "Render2DBase.h"
 #include "Logger.h"
 #include <cassert>
 #include "DirectXBase.h"
@@ -6,25 +6,25 @@
 using namespace Microsoft::WRL;
 using namespace Logger;
 
-SpriteBase* SpriteBase::instance = nullptr;
+Render2DBase* Render2DBase::instance = nullptr;
 
-SpriteBase* SpriteBase::GetInstance() {
+Render2DBase* Render2DBase::GetInstance() {
 	if (instance == nullptr) {
-		instance = new SpriteBase;
+		instance = new Render2DBase;
 	}
 	return instance;
 }
 
-void SpriteBase::Finalize() {
+void Render2DBase::Finalize() {
 	delete instance;
 	instance = nullptr;
 }
 
-void SpriteBase::Initialize() {
+void Render2DBase::Initialize() {
 	CreateGraphicsPipeLineState();
 }
 
-void SpriteBase::CreateRootSignature() {
+void Render2DBase::CreateRootSignature() {
 	descriptionRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 	// DescriptorRange
@@ -118,7 +118,7 @@ void SpriteBase::CreateRootSignature() {
 	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 }
 
-void SpriteBase::CreateGraphicsPipeLineState() {
+void Render2DBase::CreateGraphicsPipeLineState() {
 	CreateRootSignature();
 	// PSOを作成する
 	graphicsPipelineStateDesc.pRootSignature = rootSignature.Get();                                           // RootSignature
@@ -143,7 +143,7 @@ void SpriteBase::CreateGraphicsPipeLineState() {
 	assert(SUCCEEDED(hr));
 }
 
-void SpriteBase::ShaderDraw() {
+void Render2DBase::ShaderDraw() {
 	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
 	// PSOを設定

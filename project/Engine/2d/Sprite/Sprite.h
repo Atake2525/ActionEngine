@@ -4,16 +4,8 @@
 #include "kMath.h"
 #include "Transform.h"
 #include <string>
+#include "SpriteDefinitions.h"
 
-#define ANCHORPOINT_LEFTTOP Vector2{0.0f, 0.0f}	// LEFTTOP
-#define ANCHORPOINT_LEFTMIDDLE Vector2{0.0f, 0.5f}	// LEFTMIDDLE
-#define ANCHORPOINT_LEFTBOTTOM Vector2{0.0f, 1.0f}	// LEFTBOTTOM
-#define ANCHORPOINT_MIDDLETOP Vector2{0.5f, 0.0f}	// MIDDLETOP
-#define ANCHORPOINT_MIDDLE Vector2{0.5f, 0.5f} // MIDDLE
-#define ANCHORPOINT_MIDDLEBOTTOM Vector2{0.5f, 1.0f}	// MIDDLEBOTTOM
-#define ANCHORPOINT_RIGHTTOP Vector2{1.0f, 0.0f}  // RIGHTTOP
-#define ANCHORPOINT_RIGHTMIDDLE Vector2{1.0f, 0.5f}	// RIGHTMIDDLE
-#define ANCHORPOINT_RIGHTBOTTOM Vector2{1.0f, 1.0f}	// RIGHTBOTTOM
 
 #pragma once
 
@@ -107,8 +99,8 @@ private:
 
 	
 	// 頂点バッファビューを作成する
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
-	D3D12_INDEX_BUFFER_VIEW indexbufferView;
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferView = {};
+	D3D12_INDEX_BUFFER_VIEW indexbufferView = {};
 
 private:
 
@@ -121,11 +113,7 @@ private:
 	// 拡縮
 	Vector2 scale = {0.0f, 0.0f};
 	// 回転の原点
-	Vector2 anchorPoint = {0.0f, 0.0f};
-	// 左右フリップ
-	bool isFlipX = false;
-	// 上下フリップ
-	bool isFlipY = false;
+	Vector2 anchorPoint = ANCHORPOINT_LEFTTOP;
 	// テクスチャ左上座標
 	Vector2 textureLeftTop = {0.0f, 0.0f};
 	// テクスチャ切り出しサイズ
@@ -145,10 +133,6 @@ public:
 	const Vector4& GetColor() const { return materialData->color; }
 	// Getter(AnchorPoint)
 	const Vector2& GetAnchorPoint() const { return anchorPoint; }
-	// Getter(FlipX)
-	const bool& GetIsFlipX() const { return isFlipX; }
-	// Getter(FlipY)
-	const bool& GetIsFlipY() const { return isFlipY; }
 	// Getter(TextureLeftTop)
 	const Vector2& GetTextureLeftTop() const { return textureLeftTop; }
 	// Getter(TextureSize)
@@ -166,12 +150,6 @@ public:
 	void SetColor(const Vector4& color) { materialData->color = color; }
 	// Setter(AnchorPoint)
 	void SetAnchorPoint(const Vector2& anchPoint) { anchorPoint = anchPoint; }
-	// Setter(FlipX)
-	void SetIsFlipX(const bool& FlipX) { isFlipX = FlipX; }
-	// Setter(FlipY)
-	void SetIsFlipY(const bool& FlipY) { isFlipY = FlipY; }
-	// Setter(FlipXY)
-	void SetIsFlip(const bool& FlipX, const bool& FlipY);
 	// Setter(TextureLeftTop)
 	void SetTextureLeftTop(const Vector2& LeftTop) { textureLeftTop = LeftTop; }
 	// Setter(TextureSize)
@@ -186,7 +164,4 @@ public:
 	void SetStatus(const Vector2& position, const float& rotation, const Vector2& scale, const Vector4& color);
 	// Setter(Texture)
 	void SetTexture(const std::string& textureFilePath);
-
-	const AABB GetAABB();
-
 };

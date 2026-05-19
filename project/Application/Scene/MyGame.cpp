@@ -63,7 +63,7 @@ void MyGame::Initialize() {
 
 	ImGuiManager::GetInstance()->Initialize();
 
-	SpriteBase::GetInstance()->Initialize();
+	Render2DBase::GetInstance()->Initialize();
 
 	Object3dBase::GetInstance()->Initialize();
 
@@ -291,7 +291,7 @@ void MyGame::Finalize() {
 
 	ImGuiManager::GetInstance()->Finalize();
 
-	SpriteBase::GetInstance()->Finalize();
+	Render2DBase::GetInstance()->Finalize();
 
 	Object3dBase::GetInstance()->Finalize();
 
