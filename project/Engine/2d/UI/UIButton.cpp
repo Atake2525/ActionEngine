@@ -23,9 +23,14 @@ void Button::Initialize(const std::string textureFilePath, Input& input) {
 }
 
 void Button::Update() {
-    if (m_activated)
+    // 残り使用回数が0以外で、かつアクティベートされている場合は、アクティベートを解除する
+    if (m_usableCount == 0)
     {
         return;
+    }
+    if (m_activated)
+    {
+        m_activated = false;
     }
     m_controlMode = UpdateControlMode(m_controlMode); // コントロールモードを更新する
     // ボタンが表示されている場合のみ更新する
@@ -35,7 +40,9 @@ void Button::Update() {
 
         break;
     case TransitionState::Entering: // ボタンが表示される途中の処理
-        m_enterReaction();
+        if (m_enterReaction) {
+            m_enterReaction();
+        }
         break;
     case TransitionState::Shown: // ボタンが表示されている状態の処理
 
@@ -49,7 +56,9 @@ void Button::Update() {
 
         break;
     case TransitionState::Exiting: // ボタンが非表示になる途中の処理
-        m_exitReaction();
+        if (m_exitReaction) {
+            m_exitReaction();
+        }
         break;
     }
 
@@ -86,6 +95,7 @@ void Button::UpdateInteractionState() {
         else
         {
             m_interactionState = InteractionState::Idle; // 通常状態にする
+            m_selectedReactionLocked = false; // 状態のロックを解除する
         }
 
         break;
@@ -104,6 +114,7 @@ void Button::UpdateInteractionState() {
         else
         {
             m_interactionState = InteractionState::Idle; // 通常状態にする
+            m_selectedReactionLocked = false; // 状態のロックを解除する
         }
         break;
     case ControlMode::GamePad:
@@ -115,6 +126,7 @@ void Button::UpdateInteractionState() {
         else
         {
             m_interactionState = InteractionState::Idle; // 通常状態にする
+            m_selectedReactionLocked = false; // 状態のロックを解除する
         }
         break;
     }
@@ -124,10 +136,12 @@ void Button::UpdateInteractionState() {
         if (m_interactionBinding.CheckPush(*m_pInput)) // 左クリックが押されているかをチェック
         {
             m_interactionState = InteractionState::Pressed; // 押下状態にする
+
         }
         else if (m_interactionBinding.CheckReturn(*m_pInput)) // 押下状態で左クリックが離されたかをチェック
         {
             m_interactionState = InteractionState::Submitted; // 決定状態をリセット
+            m_selectedReactionLocked = true; // 状態をロックする
         }
     }
 }
@@ -150,17 +164,20 @@ void Button::UpdateReactions() {
         Log("Idle Reaction\n");
         break;
     case InteractionState::Selected:
-        if (m_onSelectedReaction.custom)
+        if (!m_selectedReactionLocked)
         {
-            m_onSelectedReaction.custom();
-        }
-        if (m_onSelectedReaction.highlight)
-        {
-            m_sprite->SetColor(m_onSelectedReaction.highlightColor);
-        }
-        if (m_onSelectedReaction.scale)
-        {
-            m_sprite->SetScale({ m_originalSpriteSize * m_onSelectedReaction.scaleAmount });
+            if (m_onSelectedReaction.custom)
+            {
+                m_onSelectedReaction.custom();
+            }
+            if (m_onSelectedReaction.highlight)
+            {
+                m_sprite->SetColor(m_onSelectedReaction.highlightColor);
+            }
+            if (m_onSelectedReaction.scale)
+            {
+                m_sprite->SetScale({ m_originalSpriteSize * m_onSelectedReaction.scaleAmount });
+            }
         }
         Log("Selected Reaction\n");
         break;
@@ -197,6 +214,10 @@ void Button::UpdateReactions() {
             m_activeReaction(); // ボタンが押されたときのリアクションを呼び出す
         }
         m_activated = true;
+        if (m_usableCount < 0)
+        {
+            m_usableCount--; // 使用回数を減らす
+        }
         Log("Submitted Reaction\n");
         Log("Active Reaction\n");
         break;

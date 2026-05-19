@@ -6,7 +6,7 @@ namespace UI {
     class Button : public UIElement {
     public:
         Button();
-        ~Button();
+        ~Button() override;
         void Initialize(const std::string textureFilePath, Input& input) override;
         void Update() override;
         void Draw() override;

@@ -103,7 +103,7 @@ namespace UI {
     class UIElement
     {
     public:
-        ~UIElement() = default;
+        virtual ~UIElement() = default;
 
         virtual void Initialize(const std::string textureFilePath, Input& input) = 0;
         virtual void Update() = 0;
@@ -122,6 +122,7 @@ namespace UI {
         void SetOnSubmittedReaction(const InteractionReaction& reaction) { m_onSubmittedReaction = reaction; }
 
         const bool IsActivated() const { return m_activated; }
+        void SetActivated(bool activated) { m_activated = activated; }
 
         // 状態変更関数群
         void ShowThisFrame() { m_transitionState = TransitionState::Shown; }
@@ -146,6 +147,8 @@ namespace UI {
         const Vector2 GetScale() const;
         void SetRotation(float rotation);
         const float GetRotation() const;
+        void SetUsableCount(int count) { m_usableCount = count; }
+        const int GetUsableCount() const { return m_usableCount; }
 
     protected:
 
@@ -158,6 +161,7 @@ namespace UI {
         bool m_staticControlMode = false; // コントロールモードを固定するかどうか
         bool m_selected = false; // 選択されているかどうか(キーボード、ゲームパッド操作のため)
         bool m_activated = false; // 押された状態かどうか
+        int m_usableCount = -1; // 何回押せるかを管理する変数(-1のときは無限に押せる)
         InteractionState m_interactionStatePre = InteractionState::Idle; // ボタンの前の状態
         InteractionState m_interactionState = InteractionState::Idle; // ボタンの現在の状態
 
@@ -165,6 +169,7 @@ namespace UI {
         InteractionReaction m_onSelectedReaction; // 選択状態のリアクション
         InteractionReaction m_onPressedReaction; // 押下状態のリアクション
         InteractionReaction m_onSubmittedReaction; // 離された状態のリアクション
+        bool m_selectedReactionLocked = false; // リアクションを実行しないようにロックするフラグ
 
         std::unique_ptr<Sprite> m_sprite;
         std::function<void()> m_enterReaction;
