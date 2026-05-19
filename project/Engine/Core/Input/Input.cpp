@@ -194,6 +194,12 @@ void Input::Update() {
     // 全ボタンの入力情報を取得する
     result = mouse->GetDeviceState(sizeof(DIMOUSESTATE), &mouseState);
 
+    if (!showCursor)
+    {
+        // マウスカーソルを中央に移動させる
+        SetCursorPos(static_cast<int>(m_windowSize.x / 2.0f), static_cast<int>(m_windowSize.y / 2.0f));
+    }
+
     if (isControllerConnected)
     {
         // 前回のコントローラーの入力を保存
@@ -640,7 +646,7 @@ bool Input::IsMoveRightJoyStick() {
     return false;
 }
 
-bool Input::PushXButton(DPad dPad) {
+bool Input::PushDPad(DPad dPad) {
     DPad result = DPad::None;
     switch (gamePadState.rgdwPOV[0])
     {
@@ -686,7 +692,7 @@ bool Input::PushXButton(DPad dPad) {
     return false;
 }
 
-bool Input::TriggerXButton(DPad dPad) {
+bool Input::TriggerDPad(DPad dPad) {
     DPad result = DPad::None;
     switch (gamePadState.rgdwPOV[0])
     {
@@ -768,6 +774,91 @@ bool Input::TriggerXButton(DPad dPad) {
         return true;
     }
     return false;
+}
+
+bool Input::ReturnDPad(DPad dPad) {
+    DPad result = DPad::None;
+    switch (gamePadState.rgdwPOV[0])
+    {
+    case 0: // 上
+        result = DPad::Up;
+        break;
+
+    case 18000: // 下
+        result = DPad::Down;
+        break;
+
+    case 9000: // 右
+        result = DPad::Right;
+        break;
+
+    case 27000: // 左
+        result = DPad::Left;
+        break;
+
+    case 4500: // 右上
+        result = DPad::UpRight;
+        break;
+
+    case 31500: // 左上
+        result = DPad::UpLeft;
+        break;
+
+    case 13500: // 右下
+        result = DPad::DownRight;
+        break;
+
+    case 22500: // 左下
+        result = DPad::DownLeft;
+        break;
+
+    }
+
+    DPad resultPre = DPad::None;
+
+    switch (gamePadStatePre.rgdwPOV[0])
+    {
+    case 0: // 上
+        resultPre = DPad::Up;
+        break;
+
+    case 18000: // 下
+        resultPre = DPad::Down;
+        break;
+
+    case 9000: // 右
+        resultPre = DPad::Right;
+        break;
+
+    case 27000: // 左
+        resultPre = DPad::Left;
+        break;
+
+    case 4500: // 右上
+        resultPre = DPad::UpRight;
+        break;
+
+    case 31500: // 左上
+        resultPre = DPad::UpLeft;
+        break;
+
+    case 13500: // 右下
+        resultPre = DPad::DownRight;
+        break;
+
+    case 22500: // 左下
+        resultPre = DPad::DownLeft;
+        break;
+
+    }
+
+
+    if (dPad != result && dPad == resultPre)
+    {
+        return true;
+    }
+    return false;
+
 }
 
 bool Input::PushButton(Controller button) {

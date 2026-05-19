@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Sprite.h"
-#include "UI.h"
 #include "Input.h"
 #include "JsonLoader.h"
 #include "Object3d.h"
