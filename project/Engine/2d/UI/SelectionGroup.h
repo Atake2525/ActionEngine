@@ -33,10 +33,9 @@ namespace UI {
 
     private:
         Input* m_input = nullptr;
-        using UIElementVariant = std::variant<std::shared_ptr<Button>, std::shared_ptr<UISlider>>;
         std::vector<std::shared_ptr<UIElement>> m_uis;
-        int selectedIndex = 0; // 現在選択されているUI要素のインデックス
-        int selectedIndexPre = 0; // 前のフレームで選択されていたUI要素のインデックス
+        int m_selectedIndex = 0; // 現在選択されているUI要素のインデックス
+        int m_selectedIndexPre = 0; // 前のフレームで選択されていたUI要素のインデックス
 
         using InteractType = std::variant<BYTE, int, Controller>;
         InputBinding m_moveUpBinding; // 上移動の入力バインディング

@@ -13,33 +13,33 @@ void SelectionGroup::Update() {
     {
         if (m_firstUpdate)
         {
-            m_uis[0]->SetSelected(true); // 最初のフレームで最初のUI要素を選択状態にする
+            m_uis[m_selectedIndex]->SetSelected(true); // 最初のフレームで最初のUI要素を選択状態にする
             m_firstUpdate = false; // 最初の更新が終わったのでフラグを下ろす
         }
         CheckUsable(); // UI要素の使用可能回数をチェックする
         if (m_moveUpBinding.CheckTrigger(*m_input))
         {
-            selectedIndexPre = selectedIndex; // 前の選択インデックスを保存する
-            selectedIndex--;
+            m_selectedIndexPre = m_selectedIndex; // 前の選択インデックスを保存する
+            m_selectedIndex--;
         }
-        if (selectedIndex < 0)
+        if (m_selectedIndex < 0)
         {
-            selectedIndex = static_cast<int>(m_uis.size() - 1);
+            m_selectedIndex = static_cast<int>(m_uis.size() - 1);
         }
         if (m_moveDownBinding.CheckTrigger(*m_input))
         {
-            selectedIndexPre = selectedIndex; // 前の選択インデックスを保存する
-            selectedIndex++;
+            m_selectedIndexPre = m_selectedIndex; // 前の選択インデックスを保存する
+            m_selectedIndex++;
         }
-        if (selectedIndex == m_uis.size())
+        if (m_selectedIndex == m_uis.size())
         {
-            selectedIndex = 0;
+            m_selectedIndex = 0;
         }
 
-        if (selectedIndex != selectedIndexPre)
+        if (m_selectedIndex != m_selectedIndexPre)
         {
-            m_uis[selectedIndexPre]->SetSelected(false); // 前の選択されていたUI要素を非選択状態にする
-            m_uis[selectedIndex]->SetSelected(true); // 現在選択されているUI要素を選択状態にする
+            m_uis[m_selectedIndexPre]->SetSelected(false); // 前の選択されていたUI要素を非選択状態にする
+            m_uis[m_selectedIndex]->SetSelected(true); // 現在選択されているUI要素を選択状態にする
         }
         for (auto ui : m_uis)
         {
