@@ -79,7 +79,7 @@ void Button::UpdateInteractionState() {
     m_interactionStatePre = m_interactionState;
 
     // マウスカーソルがUIの上にない状態でバインドされた入力があった場合は、状態を変化させない
-    if (m_interactionState == InteractionState::Idle && (m_interactionBinding.CheckPush(*m_pInput) || m_interactionBinding.CheckReturn(*m_pInput)))
+    if (m_interactionState == InteractionState::Idle && (m_interactBinding.CheckPush(*m_pInput) || m_interactBinding.CheckReturn(*m_pInput)))
     {
         return;
     }
@@ -133,12 +133,11 @@ void Button::UpdateInteractionState() {
 
     if (m_interactionState == InteractionState::Selected)
     {
-        if (m_interactionBinding.CheckPush(*m_pInput)) // 左クリックが押されているかをチェック
+        if (m_interactBinding.CheckPush(*m_pInput)) // 左クリックが押されているかをチェック
         {
             m_interactionState = InteractionState::Pressed; // 押下状態にする
-
         }
-        else if (m_interactionBinding.CheckReturn(*m_pInput)) // 押下状態で左クリックが離されたかをチェック
+        else if (m_interactBinding.CheckReturn(*m_pInput)) // 押下状態で左クリックが離されたかをチェック
         {
             m_interactionState = InteractionState::Submitted; // 決定状態をリセット
             m_selectedReactionLocked = true; // 状態をロックする
@@ -197,7 +196,7 @@ void Button::UpdateReactions() {
         Log("Pressed Reaction\n");
         break;
     case InteractionState::Submitted:
-        if (m_onSubmittedReaction.custom)
+         if (m_onSubmittedReaction.custom)
         {
             m_onSubmittedReaction.custom();
         }

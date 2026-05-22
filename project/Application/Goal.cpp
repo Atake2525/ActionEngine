@@ -17,13 +17,13 @@ Goal::~Goal() {
 
 }
 
-void Goal::Initialize(const std::string jsonName, Player* player, MouseCursor* mouseCursor) {
+void Goal::Initialize(const std::string jsonName, Player* player) {
 
 	m_isGoal = false;
 	m_input = Input::GetInstance();
 	m_player = player;
 	m_result = std::make_unique<Result>();
-	m_result->Initialize(mouseCursor);
+	m_result->Initialize();
 
 	if (JsonLoader::GetInstance()->CheckJsonLoaded(jsonName))
 	{

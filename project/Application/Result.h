@@ -2,10 +2,11 @@
 #include <vector>
 #include "Sprite.h"
 #include <memory>
+#include "UIButton.h"
+#include "SelectionGroup.h"
+#include "Input.h"
 
 #pragma once
-
-class MouseCursor;
 
 class Result
 {
@@ -15,7 +16,7 @@ public:
     /// <summary>
     /// 初期化処理
     /// </summary>
-    void Initialize(MouseCursor*  mouseCursor);
+    void Initialize();
 
     /// <summary>
     /// 更新処理
@@ -36,10 +37,6 @@ private:
 
     // ステージクリア時間の算出
     void CalculateStageClearTimer();
-    // リザルトUIの入力処理
-    void UpdateUISelect();
-    // リザルトUIの決定処理
-    void EnterSelectUI();
 
     enum class ResultDrawPhase {
         backScreen = 0,
@@ -56,11 +53,10 @@ private:
     ResultSelect m_resultSelect = ResultSelect::retry;
 
 private:
+    Input* m_pInput = nullptr;
     float m_playTimer = 0.0f;
     bool m_isGoal = false;
     bool m_calculatedResults = false;
-
-    MouseCursor* m_mouseCursor = nullptr;
 
     // クリアタイムの分割用
     std::vector<int> m_goalTimeNumbersArray;
@@ -82,10 +78,7 @@ private:
 
     Vector2 m_textMarginRatio = { 0.01f, 0.01f };
 
-    // リザルトUI用スプライト
-    std::array<std::unique_ptr<Sprite>, 2> m_uiSprites;
-    std::array<Vector2, 2> m_uiBaseScales = {};
-    // UI表示後にマウスカーソルを表示したか
-    bool m_isUiCursorVisible = false;
+    // リザルト用UIGroup
+    std::unique_ptr<UI::SelectionGroup> m_uiSelectionGroup;
 };
 

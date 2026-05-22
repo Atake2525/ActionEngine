@@ -64,9 +64,10 @@ void UI::SelectionGroup::SetUsableCount(int count) {
 }
 
 void SelectionGroup::SetAllInteractBinding(const InputTrigger& trigger) {
+    m_interactBinding.triggers.push_back(trigger);
     for (auto ui : m_uis)
     {
-        ui->AddInteractionBinding(trigger);
+        ui->AddInteractBinding(trigger);
     }
 }
 
@@ -89,4 +90,9 @@ void SelectionGroup::CheckUsable() {
             }
         }
     }
+}
+
+void SelectionGroup::Add(std::shared_ptr<Element> button) {
+    button->SetInteractBinding(m_interactBinding);
+    m_uis.push_back(button);
 }
