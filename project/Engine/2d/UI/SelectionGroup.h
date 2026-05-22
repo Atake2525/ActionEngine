@@ -11,9 +11,16 @@ namespace UI {
         SelectionGroup();
         ~SelectionGroup();
 
+        // 入力の設定関数
         void SetInput(Input* input) { m_input = input; }
         void SetMoveUpBinding(const InputTrigger& trigger) { m_moveUpBinding.triggers.push_back(trigger); }
         void SetMoveDownBinding(const InputTrigger& trigger) { m_moveDownBinding.triggers.push_back(trigger); }
+
+        // 表示状態の設定関数
+        void Show() { for (auto ui : m_uis) { ui->Show(); } }
+        void Hide() { for (auto ui : m_uis) { ui->Hide(); } }
+        void ShowThisFrame() { for (auto ui : m_uis) { ui->ShowThisFrame(); } }
+        void HideThisFrame() { for (auto ui : m_uis) { ui->HideThisFrame(); } }
 
         // UI要素の使用回数を設定する
         void SetUsableCount(int count);
@@ -24,7 +31,7 @@ namespace UI {
         void SetAllInteractBinding(const InputTrigger& trigger);
 
         // グループにUI要素を追加する関数
-        void Add(std::shared_ptr<UIElement> button) { m_uis.push_back(button); }
+        void Add(std::shared_ptr<Element> button);
 
         // グループ内の全てのUI要素を更新する関数
         void Update();
@@ -33,11 +40,12 @@ namespace UI {
 
     private:
         Input* m_input = nullptr;
-        std::vector<std::shared_ptr<UIElement>> m_uis;
+        std::vector<std::shared_ptr<Element>> m_uis;
         int m_selectedIndex = 0; // 現在選択されているUI要素のインデックス
         int m_selectedIndexPre = 0; // 前のフレームで選択されていたUI要素のインデックス
 
-        using InteractType = std::variant<BYTE, int, Controller>;
+        InputBinding m_interactBinding; // インタラクト用バインディング
+
         InputBinding m_moveUpBinding; // 上移動の入力バインディング
         InputBinding m_moveDownBinding; // 下移動の入力バインディング
 

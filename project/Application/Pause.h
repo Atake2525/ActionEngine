@@ -13,7 +13,6 @@ enum class PauseSelect : uint8_t {
     title = 4,
 };
 
-class MouseCursor;
 
 class Pause
 {
@@ -22,7 +21,7 @@ public:
     /// <summary>
     /// 初期化処理
     /// </summary>
-    void Initialize(MouseCursor* mouseCursor);
+    void Initialize();
 
     /// <summary>
     /// 更新処理
@@ -49,7 +48,6 @@ private:
     std::array<PauseSprite, 5> pauseUIs;
 
     Input* m_input = nullptr;
-    MouseCursor* m_mouseCursor = nullptr;
 
     PauseSelect m_pauseSelect = PauseSelect::back;
 

@@ -20,7 +20,7 @@ TitleSceneUI::TitleSceneUI() {
 
     m_pInput = Input::GetInstance();
 
-    std::unique_ptr<UI::UIElement> m_startButton;
+    std::unique_ptr<UI::Element> m_startButton;
     m_startButton = std::make_unique<UI::Button>();
     m_startButton->Initialize("Resources/Sprite/UI/ui_start.png", *m_pInput);
     m_startButton->SetPosition({ windowSize.x * 0.5f, windowSize.y * 0.5f });
@@ -38,7 +38,7 @@ TitleSceneUI::TitleSceneUI() {
     m_startButton->SetActiveReaction(startButtonReaction);
     m_startButton->ShowThisFrame();
 
-    std::unique_ptr<UI::UIElement> m_exitButton;
+    std::unique_ptr<UI::Element> m_exitButton;
     m_exitButton = std::make_unique<UI::Button>();
     m_exitButton->Initialize("Resources/Sprite/UI/ui_exit.png", *m_pInput);
     Vector2 exitButtonSize = m_exitButton->GetScale();
@@ -65,6 +65,7 @@ TitleSceneUI::TitleSceneUI() {
     m_selectionGroup->SetMoveUpBinding(UI::InputTrigger{ .key = DIK_W });
     m_selectionGroup->SetMoveDownBinding(UI::InputTrigger{ .key = DIK_S });
     m_selectionGroup->SetAllInteractBinding(UI::InputTrigger{ .key = DIK_RETURN, .mouseButton = MOUSE_LEFT, .controller = Controller::A });
+    m_selectionGroup->SetAllInteractBinding(UI::InputTrigger{ .key = DIK_SPACE });
     m_selectionGroup->SetUsableCount(1);
 }
 

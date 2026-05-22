@@ -13,11 +13,10 @@
 
 using namespace std;
 
-void Pause::Initialize(MouseCursor* mouseCursor) {
+void Pause::Initialize() {
     m_windowSize = WinApp::GetInstance()->GetWindowSize();
 
     m_input = Input::GetInstance();
-    m_mouseCursor = mouseCursor;
 
     m_outSize.x = m_windowSize.x * 0.1f;
     m_outSize.y = m_windowSize.y * 0.1f;
@@ -79,13 +78,13 @@ void Pause::Update() {
         //m_animTimer = 0.0f;
         if (!m_pause)
         {
-            m_mouseCursor->SetShowCursor(false);
+            //m_mouseCursor->SetShowCursor(false);
             m_animTimer = 1.0f;
         }
         else
         {
-            m_mouseCursor->SetShowCursor(true);
-            m_mouseCursor->SetCursorPosition({ m_windowSize.x / 2.0f, m_windowSize.y / 4.5f });
+            //m_mouseCursor->SetShowCursor(true);
+            //m_mouseCursor->SetCursorPosition({ m_windowSize.x / 2.0f, m_windowSize.y / 4.5f });
             m_animTimer = 0.0f;
         }
     }
@@ -134,10 +133,10 @@ void Pause::Update() {
 
         for (int i = 0; i < pauseUIs.size(); i++)
         {
-            if (CollisionUISprite(pauseUIs[i].sprite->GetTextureSize(), { 1.0f, 1.0f }, m_mouseCursor->GetCursorPos(), {1.0f, 1.0f}))
+           /* if (CollisionUISprite(pauseUIs[i].sprite->GetTextureSize(), { 1.0f, 1.0f }, m_mouseCursor->GetCursorPos(), {1.0f, 1.0f}))
             {
                 num = i;
-            }
+            }*/
         }
 
         if (num < 0)
@@ -218,12 +217,12 @@ void Pause::Enter(int selectNumber) {
         //m_animTimer = 0.0f;
         if (m_pause)
         {
-            m_mouseCursor->SetShowCursor(true);
-            m_mouseCursor->SetCursorPosition({ m_windowSize.x / 2.0f, m_windowSize.y / 4.5f });
+            //m_mouseCursor->SetShowCursor(true);
+            //m_mouseCursor->SetCursorPosition({ m_windowSize.x / 2.0f, m_windowSize.y / 4.5f });
         }
         else
         {
-            m_mouseCursor->SetShowCursor(false);
+            //m_mouseCursor->SetShowCursor(false);
         }
         break;
     case PauseSelect::restart:

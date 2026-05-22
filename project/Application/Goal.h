@@ -9,7 +9,6 @@
 #include "Result.h"
 
 class Player;
-class MouseCursor;
 
 /// <summary>
 /// ゴール
@@ -23,7 +22,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(const std::string jsonName, Player* player, MouseCursor* mouseCursor);
+	void Initialize(const std::string jsonName, Player* player);
 
 	/// <summary>
 	/// 更新処理

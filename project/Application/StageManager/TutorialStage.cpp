@@ -11,7 +11,7 @@
 
 using namespace std;
 
-void TutorialStage::Initialize(Player* player, Camera* camera, MouseCursor* mouseCursor)
+void TutorialStage::Initialize(Player* player, Camera* camera)
 {
     OffScreenRendering::GetInstance()->SetGrayscaleColor(GRAYSCALE_SEPIA);
 
@@ -35,7 +35,7 @@ void TutorialStage::Initialize(Player* player, Camera* camera, MouseCursor* mous
 
     // ゴールの初期化
     goal = make_unique<Goal>();
-    goal->Initialize("TutorialStage", player, mouseCursor);
+    goal->Initialize("TutorialStage", player);
 
     float windowSizeX = float(WinApp::GetInstance()->GetkClientWidth());
     for (int i = 0; i < 4; i++)
