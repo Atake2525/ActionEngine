@@ -25,28 +25,7 @@ void Pause::Initialize() {
     {
         // 設定するpngを調べる
         pauseUIs[i].sprite = make_unique<Sprite>();
-        PauseSelect select = static_cast<PauseSelect>(i);
         string str;
-        switch (select)
-        {
-        case PauseSelect::back:
-            str = "back";
-            break;
-        case PauseSelect::restart:
-            str = "restart";
-            break;
-        case PauseSelect::stageSelect:
-            str = "stageSelect";
-            break;
-        case PauseSelect::setting:
-            str = "setting";
-            break;
-        case PauseSelect::title:
-            str = "title";
-            break;
-        default:
-            break;
-        }
 
         // 諸々の初期化処理
         pauseUIs[i].sprite->Initialize("Resources/Sprite/Pause/" + str + ".png");
@@ -198,6 +177,12 @@ void Pause::Draw() {
         }
     }
 }
+
+void Pause::SetUIEnterReaction()
+{}
+
+void Pause::SetUIExitReaction()
+{}
 
 void Pause::Enter(int selectNumber) {
     std::function<void()> restartFunc = [&]() {

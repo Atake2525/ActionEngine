@@ -28,7 +28,7 @@ namespace UI {
         const int GetUsableCount() const { return m_usableCount; }
 
         // UI全体のインタラクトバインドを設定
-        void SetAllInteractBinding(const InputTrigger& trigger);
+        void SetInteractBinding(const InputTrigger& trigger);
 
         // グループにUI要素を追加する関数
         void Add(std::shared_ptr<Element> button);

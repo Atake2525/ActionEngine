@@ -37,6 +37,8 @@ private:
 
     // ステージクリア時間の算出
     void CalculateStageClearTimer();
+    // リザルトUIの登場リアクションを設定
+    void SetUIEnterReaction(UI::Element& ui, const Vector2& targetPosition, const Vector2& targetScale, int index);
 
     enum class ResultDrawPhase {
         backScreen = 0,
@@ -80,5 +82,8 @@ private:
 
     // リザルト用UIGroup
     std::unique_ptr<UI::SelectionGroup> m_uiSelectionGroup;
+    std::array<float, 2> m_uiEnterTimers = {};
+    float m_uiEnterTime = 0.35f;
+    Vector2 m_uiEnterOffset = { 0.0f, 32.0f };
 };
 

@@ -120,8 +120,10 @@ namespace UI {
         void SetInteractBinding(const InputBinding& binding) { m_interactBinding = binding; }
 
         // リアクションの設定関数群
-        void SetEnterReaction(const std::function<void()>& reaction) { m_enterReaction = reaction; }
-        void SetExitReaction(const std::function<void()>& reaction) { m_exitReaction = reaction; }
+        void SetEnterReaction(const std::function<void()>& reaction) { m_enterReaction = [reaction](Element&) { reaction(); }; }
+        void SetEnterReaction(const std::function<void(Element&)>& reaction) { m_enterReaction = reaction; }
+        void SetExitReaction(const std::function<void()>& reaction) { m_exitReaction = [reaction](Element&) { reaction(); }; }
+        void SetExitReaction(const std::function<void(Element&)>& reaction) { m_exitReaction = reaction; }
         void SetTransitionState(TransitionState state) { m_transitionState = state; }
 
         void SetActiveReaction(const std::function<void()>& reaction) { m_activeReaction = reaction; }
@@ -183,8 +185,8 @@ namespace UI {
         bool m_selectedReactionLocked = false; // リアクションを実行しないようにロックするフラグ
 
         std::unique_ptr<Sprite> m_sprite;
-        std::function<void()> m_enterReaction;
-        std::function<void()> m_exitReaction;
+        std::function<void(Element&)> m_enterReaction;
+        std::function<void(Element&)> m_exitReaction;
 
         InputBinding m_interactBinding; // どの入力に反応するかを管理するInputBinding
     };

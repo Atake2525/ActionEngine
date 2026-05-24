@@ -3,16 +3,9 @@
 #include <array>
 #include <string>
 #include "Input.h"
+#include "UIButton.h"
+#include "SelectionGroup.h"
 #pragma once
-
-enum class PauseSelect : uint8_t {
-    back = 0,
-    restart = 1,
-    stageSelect = 2,
-    setting = 3,
-    title = 4,
-};
-
 
 class Pause
 {
@@ -37,19 +30,18 @@ public:
 
 private:
 
+    void SetUIEnterReaction();
+    void SetUIExitReaction();
+
     struct PauseSprite
     {
-        std::unique_ptr<Sprite> sprite;
-        Vector2 baseScale;
-        Vector2 position;
+        std::unique_ptr<UI::Button> ui;
         Vector2 targetPosition[2];
     };
 
-    std::array<PauseSprite, 5> pauseUIs;
+    std::array<PauseSprite, 5> m_pauseUIs;
 
     Input* m_input = nullptr;
-
-    PauseSelect m_pauseSelect = PauseSelect::back;
 
     Vector2 m_windowSize = { 0.0f };
 

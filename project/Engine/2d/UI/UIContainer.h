@@ -10,7 +10,7 @@ namespace UI {
         ~Container();
 
         // セレクショングループの追加関数
-        void AddSelectionGroup(std::shared_ptr<UI::SelectionGroup> group) { m_selectionGroups.push_back(group); }
+        void Add(std::shared_ptr<UI::SelectionGroup> group) { m_selectionGroups.push_back(group); }
 
         // 更新
         void Update();

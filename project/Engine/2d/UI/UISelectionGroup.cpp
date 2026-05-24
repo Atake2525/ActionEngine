@@ -1,4 +1,4 @@
-#include "SelectionGroup.h"
+#include "UISelectionGroup.h"
 
 using namespace UI;
 
@@ -63,7 +63,7 @@ void UI::SelectionGroup::SetUsableCount(int count) {
     }
 }
 
-void SelectionGroup::SetAllInteractBinding(const InputTrigger& trigger) {
+void SelectionGroup::SetInteractBinding(const InputTrigger& trigger) {
     m_interactBinding.triggers.push_back(trigger);
     for (auto ui : m_uis)
     {
