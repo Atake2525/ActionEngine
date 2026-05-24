@@ -11,6 +11,7 @@
 #include "Collision.h"
 #include "MouseCursor.h"
 #include "Audio.h"
+#include <algorithm>
 
 
 Result::~Result()
@@ -97,16 +98,22 @@ void Result::Initialize()
         m_uiElements[i]->SetOnSelectedReaction(reaction);
     }
     m_uiElements[0]->Initialize("Resources/Sprite/Result/GoTitle.png", *m_pInput);
-    m_uiElements[0]->SetPosition({ basePosition.x + horizontalOffset * -1.2f, basePosition.y });
+    const Vector2 goTitlePosition = { basePosition.x + horizontalOffset * -1.2f, basePosition.y };
+    m_uiElements[0]->SetPosition(goTitlePosition);
     m_uiElements[0]->SetActiveReaction(goTitleFunc);
     Vector2 size = m_uiElements[0]->GetScale();
-    m_uiElements[0]->SetScale(size * 0.8f);
+    const Vector2 goTitleScale = size * 0.8f;
+    m_uiElements[0]->SetScale(goTitleScale);
+    SetUIEnterReaction(*m_uiElements[0], goTitlePosition, goTitleScale, 0);
 
     m_uiElements[1]->Initialize("Resources/Sprite/Result/ReTry.png", *m_pInput);
-    m_uiElements[1]->SetPosition({ basePosition.x + horizontalOffset * 1.2f, basePosition.y });
+    const Vector2 retryPosition = { basePosition.x + horizontalOffset * 1.2f, basePosition.y };
+    m_uiElements[1]->SetPosition(retryPosition);
     m_uiElements[1]->SetActiveReaction(retryFunc);
     size = m_uiElements[1]->GetScale();
-    m_uiElements[1]->SetScale(size * 0.8f);
+    const Vector2 retryScale = size * 0.8f;
+    m_uiElements[1]->SetScale(retryScale);
+    SetUIEnterReaction(*m_uiElements[1], retryPosition, retryScale, 1);
 
     // UIの選択グループを作成
     m_uiSelectionGroup = std::make_unique<UI::SelectionGroup>();
@@ -116,10 +123,10 @@ void Result::Initialize()
     trigger.key = DIK_SPACE;
     trigger.mouseButton = MOUSE_LEFT;
     // UI全体のインタラクトバインドを設定
-    m_uiSelectionGroup->SetAllInteractBinding(trigger);
+    m_uiSelectionGroup->SetInteractBinding(trigger);
     trigger.Reset();
     trigger.key = DIK_RETURN;
-    m_uiSelectionGroup->SetAllInteractBinding(trigger);
+    m_uiSelectionGroup->SetInteractBinding(trigger);
     // UIの移動バインドを設定
     m_uiSelectionGroup->SetMoveDownBinding({ .key = DIK_D, .dpad = DPad::Right });
     m_uiSelectionGroup->SetMoveDownBinding({ .key = DIK_RIGHT });
@@ -174,7 +181,9 @@ void Result::Update()
         m_resultDrawTimer += GameTime::GetInstance()->GetUnscaledDeltaTime();
         if (m_resultDrawTimer >= 0.3f)
         {
+            m_uiEnterTimers.fill(0.0f);
             m_resultPhase = ResultDrawPhase::ui;
+            m_uiSelectionGroup->Show();
             m_pInput->ShowMouseCursor(true);
         }
         break;
@@ -197,12 +206,7 @@ void Result::Draw()
     }
     if (m_resultPhase == ResultDrawPhase::ui)
     {
-        m_uiSelectionGroup->ShowThisFrame();
         m_uiSelectionGroup->Draw();
-    }
-    else
-    {
-        m_uiSelectionGroup->HideThisFrame();
     }
 }
 
@@ -263,4 +267,31 @@ void Result::CalculateStageClearTimer()
         m_clearTimeSprites[i - 1]->Update();
 
     }
+}
+
+void Result::SetUIEnterReaction(UI::Element& ui, const Vector2& targetPosition, const Vector2& targetScale, int index)
+{
+    ui.SetPosition(targetPosition + m_uiEnterOffset);
+    ui.SetScale(Vector2::Zero);
+    ui.SetEnterReaction([this, targetPosition, targetScale, index](UI::Element& element) {
+        if (index < 0 || index >= static_cast<int>(m_uiEnterTimers.size()))
+        {
+            return;
+        }
+
+        m_uiEnterTimers[index] += GameTime::GetInstance()->GetUnscaledDeltaTime() / m_uiEnterTime;
+        m_uiEnterTimers[index] = std::clamp(m_uiEnterTimers[index], 0.0f, 1.0f);
+
+        const float timer = m_uiEnterTimers[index];
+        const float scaleTimer = EaseOutQuint(0.0f, 1.0f, timer);
+        element.SetPosition(EaseOutQuint(targetPosition + m_uiEnterOffset, targetPosition, timer));
+        element.SetScale(targetScale * scaleTimer);
+
+        if (timer >= 1.0f)
+        {
+            element.SetPosition(targetPosition);
+            element.SetScale(targetScale);
+            element.SetTransitionState(UI::TransitionState::Shown);
+        }
+        });
 }

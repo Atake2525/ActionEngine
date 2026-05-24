@@ -41,7 +41,7 @@ void Button::Update() {
         break;
     case TransitionState::Entering: // ボタンが表示される途中の処理
         if (m_enterReaction) {
-            m_enterReaction();
+            m_enterReaction(*this);
         }
         break;
     case TransitionState::Shown: // ボタンが表示されている状態の処理
@@ -57,7 +57,7 @@ void Button::Update() {
         break;
     case TransitionState::Exiting: // ボタンが非表示になる途中の処理
         if (m_exitReaction) {
-            m_exitReaction();
+            m_exitReaction(*this);
         }
         break;
     }
