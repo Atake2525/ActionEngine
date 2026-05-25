@@ -93,6 +93,9 @@ void SelectionGroup::CheckUsable() {
 }
 
 void SelectionGroup::Add(std::shared_ptr<Element> button) {
-    button->SetInteractBinding(m_interactBinding);
+    if (!m_interactBinding.triggers.empty())
+    {
+        button->SetInteractBinding(m_interactBinding);
+    }
     m_uis.push_back(button);
 }

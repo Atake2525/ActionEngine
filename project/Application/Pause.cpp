@@ -21,31 +21,7 @@ void Pause::Initialize() {
     m_outSize.x = m_windowSize.x * 0.1f;
     m_outSize.y = m_windowSize.y * 0.1f;
 
-    for (int i = 0; i < pauseUIs.size(); i++)
-    {
-        // 設定するpngを調べる
-        pauseUIs[i].sprite = make_unique<Sprite>();
-        string str;
-
-        // 諸々の初期化処理
-        pauseUIs[i].sprite->Initialize("Resources/Sprite/Pause/" + str + ".png");
-        // Spriteの中心位置を決める(横 : 中心, 縦 : 上)
-        pauseUIs[i].sprite->SetAnchorPoint(ANCHORPOINT_MIDDLE);
-        // 初期位置の設定(スクリーン上に無ければ良い)
-        pauseUIs[i].sprite->SetPosition({ m_windowSize.x * 0.5f, -pauseUIs[i].sprite->GetScale().y });
-        // 色を好きに変更するためにSpriteの色を白にしているため変更
-        pauseUIs[i].sprite->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
-
-        pauseUIs[i].baseScale = { pauseUIs[i].sprite->GetScale() };
-
-        // ポーズの切り替えアニメーション用の位置決め
-        pauseUIs[i].targetPosition[0] = { m_windowSize.x * 0.5f, -pauseUIs[i].sprite->GetScale().y };
-        float size = (m_windowSize.y - m_outSize.y * 2.0f) / float(pauseUIs.size());
-        float targetPosY = max(((m_windowSize.y - m_outSize.y * 2.0f) / float(pauseUIs.size())) * i + m_outSize.y, pauseUIs[i].sprite->GetScale().y * 1.2f * i);
-        pauseUIs[i].targetPosition[1] = { m_windowSize.x * 0.5f, m_windowSize.y / 12.0f + targetPosY };
-    }
-
-    pauseUIs[0].sprite->SetColor({ 0.0f, 1.0f, 0.6f, 1.0f });
+    SetupUI();
 }
 
 void Pause::Update() {
@@ -55,16 +31,16 @@ void Pause::Update() {
         m_pauseAnim = true;
         m_pause = !m_pause;
         //m_animTimer = 0.0f;
-        if (!m_pause)
-        {
-            //m_mouseCursor->SetShowCursor(false);
-            m_animTimer = 1.0f;
-        }
-        else
+        if (m_pause)
         {
             //m_mouseCursor->SetShowCursor(true);
             //m_mouseCursor->SetCursorPosition({ m_windowSize.x / 2.0f, m_windowSize.y / 4.5f });
-            m_animTimer = 0.0f;
+            m_selectionGroup->Show();
+        }
+        else
+        {
+            //m_mouseCursor->SetShowCursor(false);
+            m_selectionGroup->Hide();
         }
     }
 
@@ -81,150 +57,130 @@ void Pause::Update() {
         }
         m_animTimer = std::clamp(m_animTimer, 0.0f, 1.0f);
 
-        // それぞれのSpriteに対して位置を変える計算を行う
-        for (int i = 0; i < pauseUIs.size(); i++)
-        {
-            // ポーズ状態へとプレイ画面へ戻るの2種類のタイプでeasingを行う
-            Vector4 color = pauseUIs[i].sprite->GetColor();
-            pauseUIs[i].position = EaseOutQuint(pauseUIs[i].targetPosition[0], pauseUIs[i].targetPosition[1], m_animTimer);
-            OffScreenRendering::GetInstance()->SetGrayscaleIntensity(min(m_animTimer * 1.2f, 0.4f));
-            pauseUIs[i].sprite->SetColor({ color.x, color.y, color.z, m_animTimer });
-
-            pauseUIs[i].sprite->SetPosition(pauseUIs[i].position);
-            pauseUIs[i].sprite->Update();
-        }
-
-        // アニメーションタイマーが1.0fを超えたら終了
-        if (m_animTimer == 1.0f || m_animTimer == 0.0f)
-        {
-            m_pauseAnim = false;
-            //m_animTimer = 0.0f;
-        }
+        
     }
 
-    // ポーズ中の処理
-    if (m_pause && !m_pauseAnim)
-    {
-        // キー入力処理
-        int num = static_cast<int>(m_pauseSelect);
-        num += (m_input->TriggerKeyInt(DIK_S) | m_input->TriggerKeyInt(DIK_DOWN));
-        num -= (m_input->TriggerKeyInt(DIK_W) | m_input->TriggerKeyInt(DIK_UP));
-
-        for (int i = 0; i < pauseUIs.size(); i++)
-        {
-           /* if (CollisionUISprite(pauseUIs[i].sprite->GetTextureSize(), { 1.0f, 1.0f }, m_mouseCursor->GetCursorPos(), {1.0f, 1.0f}))
-            {
-                num = i;
-            }*/
-        }
-
-        if (num < 0)
-        {
-            num = static_cast<int>(pauseUIs.size()) - 1;
-        }
-        else if (num > static_cast<int>(pauseUIs.size()) - 1)
-        {
-            num = 0;
-        }
-
-        if (num != static_cast<int>(m_pauseSelect))
-        {
-            m_selectNumberPre = static_cast<int>(m_pauseSelect);
-            Audio::GetInstance()->Play("select");
-            m_changeSelectAnim = true;
-            m_animTimer = 0.0f;
-        }
-
-        // 入力による処理
-        if (m_changeSelectAnim)
-        {
-            m_pauseSelect = static_cast<PauseSelect>(num);
-            // タイマーを進める
-            m_animTimer += GameTime::GetInstance()->GetDeltaTime() / m_animTime / 0.4f;
-
-            // 選択されているUIに対して処理を行う
-            pauseUIs[static_cast<int>(m_pauseSelect)].sprite->SetColor({ 0.0f, 1.0f, 0.6f, 1.0f });
-            pauseUIs[static_cast<int>(m_pauseSelect)].sprite->SetScale(pauseUIs[static_cast<int>(m_pauseSelect)].baseScale * 1.1f);
-            pauseUIs[static_cast<int>(m_pauseSelect)].sprite->Update();
-
-            pauseUIs[static_cast<int>(m_selectNumberPre)].sprite->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
-            pauseUIs[static_cast<int>(m_selectNumberPre)].sprite->SetScale(pauseUIs[static_cast<int>(m_selectNumberPre)].baseScale);
-            pauseUIs[static_cast<int>(m_selectNumberPre)].sprite->Update();
-
-            if (m_animTimer >= 1.0f)
-            {
-                m_changeSelectAnim = false;
-            }
-        }
-        else
-        {
-            if (m_input->TriggerKeyInt(DIK_RETURN) || m_input->TriggerKeyInt(DIK_SPACE) || m_input->TriggerMouse(0))
-            {
-                Enter(static_cast<int>(m_pauseSelect));
-            }
-        }
-    }
-    m_selectNumber = static_cast<int>(m_pauseSelect);
+    m_selectionGroup->Update();
 
 }
 
 void Pause::Draw() {
-    if (m_pause || m_pauseAnim)
-    {
-        for (int i = 0; i < pauseUIs.size(); i++)
-        {
-            pauseUIs[i].sprite->Draw();
-        }
-    }
+    m_selectionGroup->Draw();
 }
 
-void Pause::SetUIEnterReaction()
-{}
 
-void Pause::SetUIExitReaction()
-{}
 
-void Pause::Enter(int selectNumber) {
-    std::function<void()> restartFunc = [&]() {
-        OffScreenRendering::GetInstance()->SetGrayscaleIntensity(0.0f);
-        SceneManager::GetInstance()->SetNextScene(SceneManager::GetInstance()->GetSceneName());
-        };
-    std::function<void()> goTitleFunc = [&]() {
-        SceneManager::GetInstance()->SetNextScene("TITLE");
-        OffScreenRendering::GetInstance()->SetGrayscaleIntensity(0.0f);
-        };
-    switch (m_pauseSelect)
+void Pause::SetupUI() {
+
+    m_selectionGroup = std::make_unique<UI::SelectionGroup>();
+    m_selectionGroup->SetInput(m_input);
+
+    std::array<std::unique_ptr<UI::Element>, 5> ui;
+
+    for (int i = 0; i < ui.size(); i++)
     {
-    case PauseSelect::back:
-        Audio::GetInstance()->Play("select_enter");
-        m_pauseAnim = !m_pauseAnim;
-        m_pause = false;
-        //m_animTimer = 0.0f;
-        if (m_pause)
-        {
-            //m_mouseCursor->SetShowCursor(true);
-            //m_mouseCursor->SetCursorPosition({ m_windowSize.x / 2.0f, m_windowSize.y / 4.5f });
+        // 設定するpngを調べる
+        ui[i] = make_unique<UI::Button>();
+        string str;
+
+        switch (i) {
+        case 0:
+            ui[0]->Initialize("Resources/Sprite/Pause/back.png", *m_input);
+            ui[i]->SetActiveReaction([this]() {
+                Audio::GetInstance()->Play("select_enter");
+                m_pause = false;
+                m_selectionGroup->Hide();
+                });
+            break;
+        case 1:
+            ui[1]->Initialize("Resources/Sprite/Pause/restart.png", *m_input);
+            ui[i]->SetActiveReaction([]() {
+                std::function<void()> restartFunc = []() {
+                    OffScreenRendering::GetInstance()->SetGrayscaleIntensity(0.0f);
+                    SceneManager::GetInstance()->SetNextScene(SceneManager::GetInstance()->GetSceneName());
+                    };
+                Audio::GetInstance()->Play("select_enter");
+                FadeManager::GetInstance()->FadeOut(0.5f);
+                FadeManager::GetInstance()->SetFinishedFadeFunction(restartFunc);
+                });
+            break;
+        case 2:
+            ui[2]->Initialize("Resources/Sprite/Pause/setting.png", *m_input);
+            ui[i]->SetActiveReaction([]() {
+                Audio::GetInstance()->Play("select_cancel");
+                });
+            break;
+        case 3:
+            ui[3]->Initialize("Resources/Sprite/Pause/stageselect.png", *m_input);
+            ui[i]->SetActiveReaction([]() {
+                Audio::GetInstance()->Play("select_cancel");
+                });
+            break;
+        case 4:
+            ui[4]->Initialize("Resources/Sprite/Pause/title.png", *m_input);
+            ui[i]->SetActiveReaction([]() {
+                std::function<void()> goTitleFunc = []() {
+                    SceneManager::GetInstance()->SetNextScene("TITLE");
+                    OffScreenRendering::GetInstance()->SetGrayscaleIntensity(0.0f);
+                    };
+                Audio::GetInstance()->Play("select_enter");
+                FadeManager::GetInstance()->FadeOut(0.5f);
+                FadeManager::GetInstance()->SetFinishedFadeFunction(goTitleFunc);
+                });
+            break;
         }
-        else
-        {
-            //m_mouseCursor->SetShowCursor(false);
-        }
-        break;
-    case PauseSelect::restart:
-        Audio::GetInstance()->Play("select_enter");
-        FadeManager::GetInstance()->FadeOut(0.5f);
-        FadeManager::GetInstance()->SetFinishedFadeFunction(restartFunc);
-        break;
-    case PauseSelect::stageSelect:
-        Audio::GetInstance()->Play("select_cancel");
-        break;
-    case PauseSelect::setting:
-        Audio::GetInstance()->Play("select_cancel");
-        break;
-    case PauseSelect::title:
-        Audio::GetInstance()->Play("select_enter");
-        FadeManager::GetInstance()->FadeOut(0.5f);
-        FadeManager::GetInstance()->SetFinishedFadeFunction(goTitleFunc);
-        break;
+        // 初期位置の設定(スクリーン上に無ければ良い)
+        ui[i]->SetPosition({ m_windowSize.x * 0.5f, -ui[i]->GetScale().y });
+        ui[i]->SetOnSelectedReaction(UI::InteractionReaction{ .highlight = true, .highlightColor{0.0f, 1.0f, 0.6f, 1.0f} });
+
+        // ポーズの切り替えアニメーション用の位置決め
+        Vector2 exitPos = { m_windowSize.x * 0.5f, -ui[i]->GetScale().y };
+        float size = (m_windowSize.y - m_outSize.y * 2.0f) / float(ui.size());
+        float targetPosY = max(((m_windowSize.y - m_outSize.y * 2.0f) / float(ui.size())) * i + m_outSize.y, ui[i]->GetScale().y * 1.2f * i);
+        Vector2 enterPos = { m_windowSize.x * 0.5f, m_windowSize.y / 12.0f + targetPosY };
+
+        Vector2 firstPos = Vector2::Zero;
+        float animTimer = 0.0f;
+        float animTime = 0.4f;
+        ui[i]->SetEnterReaction([firstPos, enterPos, animTimer = 0.0f, animTime = 0.4f, firstFrame = false](UI::Element& element) mutable {
+            if (!firstFrame)
+            {
+                firstPos = element.GetPosition();
+                firstFrame = true;
+            }
+            animTimer += GameTime::GetInstance()->GetUnscaledDeltaTime() / animTime;
+            animTimer = std::clamp(animTimer, 0.0f, 1.0f);
+            element.SetPosition(EaseOutQuint(firstPos, enterPos, animTimer));
+            if (animTimer >= 1.0f)
+            {
+                animTimer = 0.0f;
+                firstFrame = false;
+                element.ShowThisFrame();
+            }
+            });
+        ui[i]->SetExitReaction([firstPos, exitPos, animTimer = 0.0f, animTime = 0.4f, firstFrame = false](UI::Element& element) mutable {
+            if (!firstFrame)
+            {
+                firstPos = element.GetPosition();
+                firstFrame = true;
+            }
+            animTimer += GameTime::GetInstance()->GetUnscaledDeltaTime() / animTime;
+            animTimer = std::clamp(animTimer, 0.0f, 1.0f);
+            element.SetPosition(EaseOutQuint(firstPos, exitPos, animTimer));
+            if (animTimer >= 1.0f)
+            {
+                animTimer = 0.0f;
+                firstFrame = false;
+                element.HideThisFrame();
+            }
+            });
+
+        m_selectionGroup->Add(move(ui[i]));
     }
+    m_selectionGroup->SetMoveUpBinding(UI::InputTrigger{ .key = DIK_W, .dpad = DPad::Up });
+    m_selectionGroup->SetMoveUpBinding(UI::InputTrigger{ .key = DIK_UP });
+    m_selectionGroup->SetMoveDownBinding(UI::InputTrigger{ .key = DIK_S, .dpad = DPad::Down });
+    m_selectionGroup->SetMoveDownBinding(UI::InputTrigger{ .key = DIK_DOWN, .dpad = DPad::Down });
+    m_selectionGroup->SetInteractBinding(UI::InputTrigger{ .key = DIK_SPACE, .mouseButton = 0, .controller = Controller::A });
+    m_selectionGroup->SetInteractBinding(UI::InputTrigger{ .key = DIK_RETURN });
 }

@@ -4,7 +4,7 @@
 #include <string>
 #include "Input.h"
 #include "UIButton.h"
-#include "SelectionGroup.h"
+#include "UISelectionGroup.h"
 #pragma once
 
 class Pause
@@ -30,16 +30,8 @@ public:
 
 private:
 
-    void SetUIEnterReaction();
-    void SetUIExitReaction();
-
-    struct PauseSprite
-    {
-        std::unique_ptr<UI::Button> ui;
-        Vector2 targetPosition[2];
-    };
-
-    std::array<PauseSprite, 5> m_pauseUIs;
+    void SetupUI();
+    std::unique_ptr<UI::SelectionGroup> m_selectionGroup = nullptr;
 
     Input* m_input = nullptr;
 
@@ -63,10 +55,5 @@ private:
     Vector2 m_selectingPos = { 0.0f, 10.0f };
     // 選択されているときのサイズの倍率
     float m_selectingScale = 1.2f;
-
-
-/// 関数
-
-    void Enter(int selectNumber);
 
 };

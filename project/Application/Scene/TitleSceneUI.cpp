@@ -3,7 +3,7 @@
 #include "Audio.h"
 #include "UIElement.h"
 #include "UIButton.h"
-#include "SelectionGroup.h"
+#include "UISelectionGroup.h"
 
 TitleSceneUI::TitleSceneUI() {
     // STARTとEXITのUIスプライトの初期化
