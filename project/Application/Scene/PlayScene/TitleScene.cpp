@@ -156,16 +156,6 @@ void TitleScene::Update() {
         // creditの表示
         m_creditUI->Update();
 
-        //// ゲームパッドを読み込みなおす
-        //if (CollisionUISprite(m_gamePad->GetAABB(), m_mouseCursor->GetCursorPos()) && m_pInput->TriggerMouse(0))
-        //{
-        //    m_pInput->UpdateDevice();
-        //    if (m_pInput->IsConnectedController())
-        //    {
-        //        m_gamePad->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
-        //    }
-        //}
-
         m_gamePad->Update();
         m_credit_sound->Update();
 
