@@ -9,6 +9,7 @@
 #include "FadeManager.h"
 #include "MouseCursor.h"
 #include "Collision.h"
+#include <cstddef>
 #include <functional>
 
 using namespace std;
@@ -70,27 +71,23 @@ void Pause::SetupUI() {
     m_selectionGroup = std::make_unique<UI::SelectionGroup>();
     m_selectionGroup->SetInput(m_input);
 
-    // UIElementの定義
-    std::array<std::unique_ptr<UI::Element>, 5> ui;
+    struct PauseMenuItem {
+        const char* texturePath;
+        std::function<void()> activeReaction;
+    };
 
-    for (int i = 0; i < ui.size(); i++)
-    {
-        // 各々初期化
-        ui[i] = make_unique<UI::Button>();
-        string str;
-
-        switch (i) { // それぞれのpngを指定してリアクション設定
-        case 0:
-            ui[0]->Initialize("Resources/Sprite/Pause/back.png", *m_input);
-            ui[i]->SetActiveReaction([this]() {
+    constexpr std::size_t menuItemCount = 5;
+    const std::array<PauseMenuItem, menuItemCount> menuItems = { {
+        {
+            "Resources/Sprite/Pause/back.png",
+            [this]() {
                 Audio::GetInstance()->Play("select_enter");
                 TogglePauseMenu();
-                m_selectionGroup->Hide();
-                });
-            break;
-        case 1:
-            ui[1]->Initialize("Resources/Sprite/Pause/restart.png", *m_input);
-            ui[i]->SetActiveReaction([]() {
+            }
+        },
+        {
+            "Resources/Sprite/Pause/restart.png",
+            []() {
                 std::function<void()> restartFunc = []() {
                     OffScreenRendering::GetInstance()->SetGrayscaleIntensity(0.0f);
                     SceneManager::GetInstance()->SetNextScene(SceneManager::GetInstance()->GetSceneName());
@@ -98,23 +95,23 @@ void Pause::SetupUI() {
                 Audio::GetInstance()->Play("select_enter");
                 FadeManager::GetInstance()->FadeOut(0.5f);
                 FadeManager::GetInstance()->SetFinishedFadeFunction(restartFunc);
-                });
-            break;
-        case 2:
-            ui[2]->Initialize("Resources/Sprite/Pause/setting.png", *m_input);
-            ui[i]->SetActiveReaction([]() {
+            }
+        },
+        {
+            "Resources/Sprite/Pause/setting.png",
+            []() {
                 Audio::GetInstance()->Play("select_cancel");
-                });
-            break;
-        case 3:
-            ui[3]->Initialize("Resources/Sprite/Pause/stageselect.png", *m_input);
-            ui[i]->SetActiveReaction([]() {
+            }
+        },
+        {
+            "Resources/Sprite/Pause/stageselect.png",
+            []() {
                 Audio::GetInstance()->Play("select_cancel");
-                });
-            break;
-        case 4:
-            ui[4]->Initialize("Resources/Sprite/Pause/title.png", *m_input);
-            ui[i]->SetActiveReaction([]() {
+            }
+        },
+        {
+            "Resources/Sprite/Pause/title.png",
+            []() {
                 std::function<void()> goTitleFunc = []() {
                     SceneManager::GetInstance()->SetNextScene("TITLE");
                     OffScreenRendering::GetInstance()->SetGrayscaleIntensity(0.0f);
@@ -122,16 +119,26 @@ void Pause::SetupUI() {
                 Audio::GetInstance()->Play("select_enter");
                 FadeManager::GetInstance()->FadeOut(0.5f);
                 FadeManager::GetInstance()->SetFinishedFadeFunction(goTitleFunc);
-                });
-            break;
-        }
+            }
+        },
+    } };
+
+    // UIElementの定義
+    std::array<std::unique_ptr<UI::Element>, menuItemCount> ui;
+
+    for (std::size_t i = 0; i < ui.size(); i++)
+    {
+        // 各々初期化
+        ui[i] = make_unique<UI::Button>();
+        ui[i]->Initialize(menuItems[i].texturePath, *m_input);
+        ui[i]->SetActiveReaction(menuItems[i].activeReaction);
+
         // 初期位置の設定(スクリーン上に無ければ良い)
         ui[i]->SetPosition({ m_windowSize.x * 0.5f, -ui[i]->GetScale().y });
         ui[i]->SetOnSelectedReaction(UI::InteractionReaction{ .highlight = true, .highlightColor{0.0f, 1.0f, 0.6f, 1.0f} });
 
         // ポーズの切り替えアニメーション用の位置決め
         Vector2 exitPos = { m_windowSize.x * 0.5f, -ui[i]->GetScale().y };
-        float size = (m_windowSize.y - outSize.y * 2.0f) / float(ui.size());
         float targetPosY = max(((m_windowSize.y - outSize.y * 2.0f) / float(ui.size())) * i + outSize.y, ui[i]->GetScale().y * 1.2f * i);
         Vector2 enterPos = { m_windowSize.x * 0.5f, m_windowSize.y / 12.0f + targetPosY };
 
