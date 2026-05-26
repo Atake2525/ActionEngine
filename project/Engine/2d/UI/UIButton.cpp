@@ -23,11 +23,7 @@ void Button::Initialize(const std::string textureFilePath, Input& input) {
 }
 
 void Button::Update() {
-    // 残り使用回数が0以外で、かつアクティベートされている場合は、アクティベートを解除する
-    if (m_usableCount == 0)
-    {
-        return;
-    }
+    // アクティベート後の確認フラグをfalseに戻す
     if (m_activated)
     {
         m_activated = false;
@@ -41,23 +37,27 @@ void Button::Update() {
         break;
     case TransitionState::Entering: // ボタンが表示される途中の処理
         if (m_enterReaction) {
-            m_enterReaction();
+            m_enterReaction(*this);
         }
         break;
     case TransitionState::Shown: // ボタンが表示されている状態の処理
-
-        UpdateInteractionState(); // ボタンの状態を更新する
-        UpdateMouseCursor(); // マウスカーソルを更新する
-        if (m_interactionState != m_interactionStatePre) // ボタンの状態が変化した場合
+        // 使用可能数が0以外であれば処理するようにする
+        if (m_usableCount != 0)
         {
-            UpdateReactions(); // ボタンの状態に応じたリアクションを更新する
+            UpdateInteractionState(); // ボタンの状態を更新する
+            UpdateMouseCursor(); // マウスカーソルを更新する
+            if (m_interactionState != m_interactionStatePre) // ボタンの状態が変化した場合
+            {
+                UpdateReactions(); // ボタンの状態に応じたリアクションを更新する
+            }
         }
+
 
 
         break;
     case TransitionState::Exiting: // ボタンが非表示になる途中の処理
         if (m_exitReaction) {
-            m_exitReaction();
+            m_exitReaction(*this);
         }
         break;
     }
@@ -79,7 +79,7 @@ void Button::UpdateInteractionState() {
     m_interactionStatePre = m_interactionState;
 
     // マウスカーソルがUIの上にない状態でバインドされた入力があった場合は、状態を変化させない
-    if (m_interactionState == InteractionState::Idle && (m_interactionBinding.CheckPush(*m_pInput) || m_interactionBinding.CheckReturn(*m_pInput)))
+    if (m_interactionState == InteractionState::Idle && (m_interactBinding.CheckPush(*m_pInput) || m_interactBinding.CheckReturn(*m_pInput)))
     {
         return;
     }
@@ -133,12 +133,11 @@ void Button::UpdateInteractionState() {
 
     if (m_interactionState == InteractionState::Selected)
     {
-        if (m_interactionBinding.CheckPush(*m_pInput)) // 左クリックが押されているかをチェック
+        if (m_interactBinding.CheckPush(*m_pInput)) // 左クリックが押されているかをチェック
         {
             m_interactionState = InteractionState::Pressed; // 押下状態にする
-
         }
-        else if (m_interactionBinding.CheckReturn(*m_pInput)) // 押下状態で左クリックが離されたかをチェック
+        else if (m_interactBinding.CheckReturn(*m_pInput)) // 押下状態で左クリックが離されたかをチェック
         {
             m_interactionState = InteractionState::Submitted; // 決定状態をリセット
             m_selectedReactionLocked = true; // 状態をロックする

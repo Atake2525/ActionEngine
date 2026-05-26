@@ -3,7 +3,7 @@
 
 namespace UI {
 
-    class Button : public UIElement {
+    class Button : public Element {
     public:
         Button();
         ~Button() override;
@@ -12,12 +12,6 @@ namespace UI {
         void Draw() override;
 
     private:
-
-        // スプライトの元のサイズを保存するための変数
-        Vector2 m_originalSpriteSize = Vector2::Zero;
-
-        
-
         // ボタンのホバー、クリックなどを更新
         void UpdateInteractionState();
         // リアクションの更新

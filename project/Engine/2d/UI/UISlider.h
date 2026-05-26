@@ -2,7 +2,7 @@
 
 #pragma once
 
-class UISlider : public UI::UIElement {
+class UISlider : public UI::Element {
 public:
     UISlider();
     ~UISlider();

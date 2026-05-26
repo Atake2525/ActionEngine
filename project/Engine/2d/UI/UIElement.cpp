@@ -2,7 +2,7 @@
 
 using namespace UI;
 
-void UIElement::SetPosition(const Vector2 pos) {
+void Element::SetPosition(const Vector2 pos) {
     // まずはSpriteが存在するか確認する
     if (!m_sprite) {
         return; // Spriteが存在しない場合は何もしない
@@ -11,7 +11,7 @@ void UIElement::SetPosition(const Vector2 pos) {
     m_sprite->Update(); // 位置を変更した後にSpriteを更新する
 }
 
-const Vector2 UIElement::GetPosition() const
+const Vector2 Element::GetPosition() const
 {
     // まずはSpriteが存在するか確認する
     if (!m_sprite) {
@@ -20,16 +20,17 @@ const Vector2 UIElement::GetPosition() const
     return m_sprite->GetPosition();
 }
 
-void UIElement::SetScale(const Vector2 scale) {
+void Element::SetScale(const Vector2 scale) {
     // まずはSpriteが存在するか確認する
     if (!m_sprite) {
         return; // Spriteが存在しない場合は何もしない
     }
+    m_originalSpriteSize = scale;
     m_sprite->SetScale(scale);
     m_sprite->Update(); // 拡縮を変更した後にSpriteを更新する
 }
 
-const Vector2 UIElement::GetScale() const {
+const Vector2 Element::GetScale() const {
     // まずはSpriteが存在するか確認する
     if (!m_sprite)
     {
@@ -38,7 +39,7 @@ const Vector2 UIElement::GetScale() const {
     return m_sprite->GetScale(); // 拡縮を取得する
 }
 
-void UI::UIElement::SetRotation(float rotation) {
+void Element::SetRotation(float rotation) {
     if (!m_sprite)
     {
         return;
@@ -47,7 +48,7 @@ void UI::UIElement::SetRotation(float rotation) {
     m_sprite->Update(); // 回転を変更した後にSpriteを更新する
 }
 
-const float UI::UIElement::GetRotation() const {
+const float Element::GetRotation() const {
     if (!m_sprite)
     {
         return 0.0f;// Spriteが存在しない場合はゼロを返す
@@ -55,7 +56,7 @@ const float UI::UIElement::GetRotation() const {
     return m_sprite->GetRotation(); // 回転を取得する
 }
 
-const ControlMode UI::UIElement::UpdateControlMode(ControlMode mode) const {
+const ControlMode Element::UpdateControlMode(ControlMode mode) const {
     if (m_staticControlMode || m_pInput == nullptr)
     {
         return mode;
@@ -95,7 +96,7 @@ const ControlMode UI::UIElement::UpdateControlMode(ControlMode mode) const {
     return mode;
 }
 
-void UIElement::UpdateMouseCursor() {
+void Element::UpdateMouseCursor() {
     if (m_pInput == nullptr || m_controlMode != ControlMode::Mouse)
     {
         return;

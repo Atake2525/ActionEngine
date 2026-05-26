@@ -33,7 +33,7 @@ void GameScene::Initialize() {
 
     m_pPlayer = make_unique<Player>();
     m_pStage = make_unique<TutorialStage>();
-    m_pStage->Initialize(m_pPlayer.get(), m_pCamera.get(), m_mouseCursor.get());
+    m_pStage->Initialize(m_pPlayer.get(), m_pCamera.get());
     m_pPlayer->Initialize(m_pCamera.get(), m_pStage->GetJsonName());
     m_pPlayer->Update();
 
@@ -44,7 +44,7 @@ void GameScene::Initialize() {
     GameTime::GetInstance()->SetDeltaPoint();
     FadeManager::GetInstance()->FadeIn(1.0f);
     m_pPause = make_unique<Pause>();
-    m_pPause->Initialize(m_mouseCursor.get());
+    m_pPause->Initialize();
 
     m_scenePhase = ScenePhase::FadeIn;
     m_pInput->ShowMouseCursor(m_cursorShow);

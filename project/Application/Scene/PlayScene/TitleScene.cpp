@@ -64,10 +64,17 @@ void TitleScene::Initialize() {
     m_credit_sound->SetAnchorPoint({ 0.5f, 0.5f });
     m_credit_sound->SetPosition({ windowSize.x / 4.0f, windowSize.y / 2.0f });
 
-    m_credit = make_unique<Sprite>();
-    m_credit->Initialize("Resources/Sprite/UI/credit.png");
-    m_credit->SetAnchorPoint(ANCHORPOINT_LEFTBOTTOM);
-    m_credit->SetPosition({ 30.0f, windowSize.y - 30.0f });
+    m_creditUI = make_unique<UI::Button>();
+    m_creditUI->Initialize("Resources/Sprite/UI/credit.png", *m_pInput);
+    m_creditUI->SetPosition({ windowSize.x * 0.05f, windowSize.y * 0.95f });
+    std::function<void()>creditFunc = [this]() {
+        m_showCredit = !m_showCredit;
+        Audio::GetInstance()->Play("select");
+        };
+    m_creditUI->SetActiveReaction(creditFunc);
+    m_creditUI->AddInteractBinding(UI::InputTrigger{ .key = DIK_SPACE, .mouseButton = 0, .controller = Controller::A });
+    m_creditUI->AddInteractBinding(UI::InputTrigger{ .key = DIK_RETURN });
+    m_creditUI->ShowThisFrame();
 
     m_titleSceneUI = make_unique<TitleSceneUI>();
 
@@ -147,45 +154,15 @@ void TitleScene::Update() {
         }
 
         // creditの表示
-        //if (CollisionUISprite(m_credit->GetAABB(), m_mouseCursor->GetCursorPos()))
-        //{
-        //    if (m_credit->GetColor().y != 0.0f)
-        //    {
-        //        Audio::GetInstance()->Play("select");   
-        //    }
-        //    if (m_pInput->TriggerMouse(0))
-        //    {
-        //        m_showCredit = !m_showCredit;
-        //        Audio::GetInstance()->Play("select_enter");
-        //    }
-        //    m_credit->SetColor({ 1.0f, 0.0f, 0.0f, 1.0f });
-        //}
-        //else
-        //{
-        //    m_credit->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
-        //}
-
-        //// ゲームパッドを読み込みなおす
-        //if (CollisionUISprite(m_gamePad->GetAABB(), m_mouseCursor->GetCursorPos()) && m_pInput->TriggerMouse(0))
-        //{
-        //    m_pInput->UpdateDevice();
-        //    if (m_pInput->IsConnectedController())
-        //    {
-        //        m_gamePad->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
-        //    }
-        //}
+        m_creditUI->Update();
 
         m_gamePad->Update();
-        m_credit->Update();
         m_credit_sound->Update();
 
         break;
     }
 
     Vector2 mousePos = m_pInput->GetMousePos2();
-    ImGui::Begin("MousePos");
-    ImGui::DragFloat2("MousePos", &mousePos.x);
-    ImGui::End();
 
     m_bootScreen->Update();
 
@@ -226,7 +203,7 @@ void TitleScene::Draw() {
         Render2DBase::GetInstance()->ShaderDraw();
 
         m_gamePad->Draw();
-        m_credit->Draw();
+        m_creditUI->Draw();
         m_titleSceneUI->DrawTitleScreen();
         if (m_showCredit)
         {
