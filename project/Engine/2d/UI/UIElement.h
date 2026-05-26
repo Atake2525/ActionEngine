@@ -41,6 +41,13 @@ namespace UI {
         int mouseButton = -1;
         Controller controller = Controller::None;
         DPad dpad = DPad::None;
+
+        void Reset() {
+            key = 0;
+            mouseButton = -1;
+            controller = Controller::None;
+            dpad = DPad::None;
+        }
     };
 
     struct InputBinding { // 入力バインディングを管理する構造体
@@ -100,20 +107,23 @@ namespace UI {
         }
     };
 
-    class UIElement
+    class Element
     {
     public:
-        virtual ~UIElement() = default;
+        virtual ~Element() = default;
 
         virtual void Initialize(const std::string textureFilePath, Input& input) = 0;
         virtual void Update() = 0;
         virtual void Draw() = 0;
 
-        void AddInteractionBinding(const InputTrigger& binding) { m_interactionBinding.triggers.push_back(binding); }
+        void AddInteractBinding(const InputTrigger& binding) { m_interactBinding.triggers.push_back(binding); }
+        void SetInteractBinding(const InputBinding& binding) { m_interactBinding = binding; }
 
         // リアクションの設定関数群
-        void SetEnterReaction(const std::function<void()>& reaction) { m_enterReaction = reaction; }
-        void SetExitReaction(const std::function<void()>& reaction) { m_exitReaction = reaction; }
+        void SetEnterReaction(const std::function<void()>& reaction) { m_enterReaction = [reaction](Element&) { reaction(); }; }
+        void SetEnterReaction(const std::function<void(Element&)>& reaction) { m_enterReaction = reaction; }
+        void SetExitReaction(const std::function<void()>& reaction) { m_exitReaction = [reaction](Element&) { reaction(); }; }
+        void SetExitReaction(const std::function<void(Element&)>& reaction) { m_exitReaction = reaction; }
         void SetTransitionState(TransitionState state) { m_transitionState = state; }
 
         void SetActiveReaction(const std::function<void()>& reaction) { m_activeReaction = reaction; }
@@ -165,6 +175,9 @@ namespace UI {
         InteractionState m_interactionStatePre = InteractionState::Idle; // ボタンの前の状態
         InteractionState m_interactionState = InteractionState::Idle; // ボタンの現在の状態
 
+        // スプライトの元のサイズを保存するための変数
+        Vector2 m_originalSpriteSize = Vector2::Zero;
+
         std::function<void()> m_activeReaction; // ボタンが押されたときに呼び出される関数
         InteractionReaction m_onSelectedReaction; // 選択状態のリアクション
         InteractionReaction m_onPressedReaction; // 押下状態のリアクション
@@ -172,9 +185,9 @@ namespace UI {
         bool m_selectedReactionLocked = false; // リアクションを実行しないようにロックするフラグ
 
         std::unique_ptr<Sprite> m_sprite;
-        std::function<void()> m_enterReaction;
-        std::function<void()> m_exitReaction;
+        std::function<void(Element&)> m_enterReaction;
+        std::function<void(Element&)> m_exitReaction;
 
-        InputBinding m_interactionBinding; // どの入力に反応するかを管理するInputBinding
+        InputBinding m_interactBinding; // どの入力に反応するかを管理するInputBinding
     };
 };

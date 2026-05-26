@@ -3,7 +3,7 @@
 #include <memory>
 #include "Input.h"
 
-#include "SelectionGroup.h"
+#include "UISelectionGroup.h"
 
 #pragma once
 

@@ -11,7 +11,7 @@ public:
     /// <summary>
     /// 初期化
     /// </summary>
-    void Initialize(Player* player, Camera* camera, MouseCursor* mouseCursor) override;
+    void Initialize(Player* player, Camera* camera) override;
     /// <summary>
     /// JsonNameの取得
     /// </summary>
@@ -40,7 +40,6 @@ public:
 private:
     Player* m_player = nullptr;
     Camera* m_camera = nullptr;
-    MouseCursor* mouseCursor = nullptr;
     // ステージに必要なものの宣言
     std::unique_ptr<Object3d> stageObject;
     std::unique_ptr<Object3d> wallRunObject;

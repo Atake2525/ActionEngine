@@ -18,6 +18,7 @@
 #include <memory>
 #include "MouseCursor.h"
 #include "TitleSceneUI.h"
+#include "UIButton.h"
 
 #pragma once
 
@@ -99,7 +100,8 @@ private:
     std::unique_ptr<Sprite> m_gamePad = nullptr;
 
     std::unique_ptr<Sprite> m_credit_sound = nullptr;
-    std::unique_ptr<Sprite> m_credit = nullptr;
+    std::unique_ptr<UI::Element> m_creditUI = nullptr;
+
     bool m_showCredit = false;
     bool m_start = false;
 
