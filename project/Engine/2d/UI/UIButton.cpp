@@ -23,11 +23,7 @@ void Button::Initialize(const std::string textureFilePath, Input& input) {
 }
 
 void Button::Update() {
-    // 残り使用回数が0以外で、かつアクティベートされている場合は、アクティベートを解除する
-    if (m_usableCount == 0)
-    {
-        return;
-    }
+    // アクティベート後の確認フラグをfalseに戻す
     if (m_activated)
     {
         m_activated = false;
@@ -45,13 +41,17 @@ void Button::Update() {
         }
         break;
     case TransitionState::Shown: // ボタンが表示されている状態の処理
-
-        UpdateInteractionState(); // ボタンの状態を更新する
-        UpdateMouseCursor(); // マウスカーソルを更新する
-        if (m_interactionState != m_interactionStatePre) // ボタンの状態が変化した場合
+        // 使用可能数が0以外であれば処理するようにする
+        if (m_usableCount != 0)
         {
-            UpdateReactions(); // ボタンの状態に応じたリアクションを更新する
+            UpdateInteractionState(); // ボタンの状態を更新する
+            UpdateMouseCursor(); // マウスカーソルを更新する
+            if (m_interactionState != m_interactionStatePre) // ボタンの状態が変化した場合
+            {
+                UpdateReactions(); // ボタンの状態に応じたリアクションを更新する
+            }
         }
+
 
 
         break;
@@ -196,7 +196,7 @@ void Button::UpdateReactions() {
         Log("Pressed Reaction\n");
         break;
     case InteractionState::Submitted:
-         if (m_onSubmittedReaction.custom)
+        if (m_onSubmittedReaction.custom)
         {
             m_onSubmittedReaction.custom();
         }

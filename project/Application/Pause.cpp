@@ -14,13 +14,11 @@
 using namespace std;
 
 void Pause::Initialize() {
+    // 処理に必要な値の取得
     m_windowSize = WinApp::GetInstance()->GetWindowSize();
-
     m_input = Input::GetInstance();
 
-    m_outSize.x = m_windowSize.x * 0.1f;
-    m_outSize.y = m_windowSize.y * 0.1f;
-
+    // UIの初期化
     SetupUI();
 }
 
@@ -28,67 +26,65 @@ void Pause::Update() {
 
     if (m_input->TriggerKeyInt(DIK_ESCAPE))
     {
-        m_pauseAnim = true;
-        m_pause = !m_pause;
-        //m_animTimer = 0.0f;
-        if (m_pause)
-        {
-            //m_mouseCursor->SetShowCursor(true);
-            //m_mouseCursor->SetCursorPosition({ m_windowSize.x / 2.0f, m_windowSize.y / 4.5f });
-            m_selectionGroup->Show();
-        }
-        else
-        {
-            //m_mouseCursor->SetShowCursor(false);
-            m_selectionGroup->Hide();
-        }
+        // ポーズ移行処理を実行
+        TogglePauseMenu();
     }
-
-    // ポーズアニメーションが再生されていない限りこれ以上処理をしないようにreturn
-    if (m_pauseAnim) {
-        // アニメーションタイマーを進める
-        if (m_pause)
-        {
-            m_animTimer += GameTime::GetInstance()->GetDeltaTime() / m_animTime;
-        }
-        else
-        {
-            m_animTimer -= GameTime::GetInstance()->GetDeltaTime() / m_animTime;
-        }
-        m_animTimer = std::clamp(m_animTimer, 0.0f, 1.0f);
-
-        
-    }
-
+    // UIを更新
     m_selectionGroup->Update();
 
 }
 
 void Pause::Draw() {
+    // UIを描画
+    // UIクラス内で描画処理の切り替えを行っているため常にDrawを呼び出して大丈夫
     m_selectionGroup->Draw();
 }
 
+void Pause::TogglePauseMenu() {
+    // ポーズフラグの切り替え
+    m_pause = !m_pause;
+    if (m_pause)
+    {
+        // マウスカーソルを表示してカーソルの位置を指定
+        m_input->ShowMouseCursor(true);
+        SetCursorPos(static_cast<int>(m_windowSize.x / 2.0f), static_cast<int>(m_windowSize.y / 4.5f));
+        // enterReactionを再生
+        m_selectionGroup->Show();
+    }
+    else
+    {
+        // マウスカーソルを非表示に戻す
+        m_input->ShowMouseCursor(false);
+        // exitReactionを再生
+        m_selectionGroup->Hide();
+    }
+}
 
+void Pause::SetupUI() { 
+    // ウィンドウサイズの
+    Vector2 outSize;
+    outSize.x = m_windowSize.x * 0.1f;
+    outSize.y = m_windowSize.y * 0.1f;
 
-void Pause::SetupUI() {
-
+    // メンバ変数(SelectionGroup)の作成
     m_selectionGroup = std::make_unique<UI::SelectionGroup>();
     m_selectionGroup->SetInput(m_input);
 
+    // UIElementの定義
     std::array<std::unique_ptr<UI::Element>, 5> ui;
 
     for (int i = 0; i < ui.size(); i++)
     {
-        // 設定するpngを調べる
+        // 各々初期化
         ui[i] = make_unique<UI::Button>();
         string str;
 
-        switch (i) {
+        switch (i) { // それぞれのpngを指定してリアクション設定
         case 0:
             ui[0]->Initialize("Resources/Sprite/Pause/back.png", *m_input);
             ui[i]->SetActiveReaction([this]() {
                 Audio::GetInstance()->Play("select_enter");
-                m_pause = false;
+                TogglePauseMenu();
                 m_selectionGroup->Hide();
                 });
             break;
@@ -135,13 +131,14 @@ void Pause::SetupUI() {
 
         // ポーズの切り替えアニメーション用の位置決め
         Vector2 exitPos = { m_windowSize.x * 0.5f, -ui[i]->GetScale().y };
-        float size = (m_windowSize.y - m_outSize.y * 2.0f) / float(ui.size());
-        float targetPosY = max(((m_windowSize.y - m_outSize.y * 2.0f) / float(ui.size())) * i + m_outSize.y, ui[i]->GetScale().y * 1.2f * i);
+        float size = (m_windowSize.y - outSize.y * 2.0f) / float(ui.size());
+        float targetPosY = max(((m_windowSize.y - outSize.y * 2.0f) / float(ui.size())) * i + outSize.y, ui[i]->GetScale().y * 1.2f * i);
         Vector2 enterPos = { m_windowSize.x * 0.5f, m_windowSize.y / 12.0f + targetPosY };
 
         Vector2 firstPos = Vector2::Zero;
         float animTimer = 0.0f;
         float animTime = 0.4f;
+        // EnterとExitのReactionを設定
         ui[i]->SetEnterReaction([firstPos, enterPos, animTimer = 0.0f, animTime = 0.4f, firstFrame = false](UI::Element& element) mutable {
             if (!firstFrame)
             {
@@ -177,6 +174,7 @@ void Pause::SetupUI() {
 
         m_selectionGroup->Add(move(ui[i]));
     }
+    // それぞれの操作設定
     m_selectionGroup->SetMoveUpBinding(UI::InputTrigger{ .key = DIK_W, .dpad = DPad::Up });
     m_selectionGroup->SetMoveUpBinding(UI::InputTrigger{ .key = DIK_UP });
     m_selectionGroup->SetMoveDownBinding(UI::InputTrigger{ .key = DIK_S, .dpad = DPad::Down });
