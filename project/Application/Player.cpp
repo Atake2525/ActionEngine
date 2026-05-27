@@ -182,7 +182,7 @@ void Player::UpdateModel() {
 
 void Player::Draw()
 {
-    m_pDrawModel->Draw();
+    //m_pDrawModel->Draw();
 }
 
 void Player::UpdateState()
