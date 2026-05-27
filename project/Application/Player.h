@@ -7,6 +7,14 @@
 class Camera;
 class Input;
 
+struct PlayerCommand {
+    Vector2 move = Vector2::Zero;
+    Vector3 eye = Vector3::Zero;
+    bool crouch = false;
+    bool run = false;
+    bool jump = false;
+};
+
 class Player
 {
 private:
@@ -52,6 +60,8 @@ public:
     /// 更新処理
     /// </summary>
     void Update();
+
+    void UpdateModel();
 
     /// <summary>
     /// 描画処理
@@ -160,6 +170,11 @@ private: // プレイヤーステート管理
     /// </summary>
     void ApplyCameraEffect();
 
+    /// <summary>
+    /// モデルのアニメーションを更新する
+    /// </summary>
+    void UpdateModelAnimation();
+
     // デバッグUIの更新
 #ifndef NDEBUG
     void UpdateDebugUI();
@@ -191,9 +206,11 @@ private:
     //==================================================
     // モデル・カメラ・入力
     //==================================================
+    std::unique_ptr<Object3d> m_pDrawModel;
     std::unique_ptr<Object3d> m_pModel;
     Camera* m_pCamera = nullptr;
     Input* m_pInput;
+    PlayerCommand m_command;
 
 
     //==================================================
@@ -250,7 +267,7 @@ private:
     // しゃがみ関連
     //================
     float m_playerHeight = 0.0f;
-    float m_cameraHeight = 0.0f;
+    float m_cameraHeight = 1.5f;
     float m_crouchHeight = 0.0f;
     float m_crouchHeightOffset = -0.8f;
 

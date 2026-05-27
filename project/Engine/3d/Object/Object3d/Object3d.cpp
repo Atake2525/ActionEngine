@@ -327,6 +327,21 @@ void Object3d::AddAnimation(std::string directoryPath, std::string filename, std
     }
 }
 
+void Object3d::AddAnimationsThreaded(const std::string& directoryPath, const std::vector<std::string>& filenames) {
+    if (model_->IsAnimation())
+    {
+        // 読み込みはModel側で並列実行し、Object3d側は反映済みのテーブルを受け取るだけにする。
+        model_->AddAnimationsThreaded(directoryPath, filenames);
+        animation = model_->GetAnimation();
+        Log("アニメーションの並列読み込み完了\n");
+    }
+    else
+    {
+        Log("this object is not enable animation\n");
+        Log("このオブジェクトはアニメーションが有効化されていません\n");
+    }
+}
+
 void Object3d::PlayDefaultAnimation() {
     beforAnimationKey = animationKey;
     animationKey = "DefaultAnimation";

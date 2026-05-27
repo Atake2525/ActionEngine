@@ -144,6 +144,8 @@ public:
 	// アニメーションの追加
 	void AddAnimation(std::string directoryPath, std::string filename, std::string animationName);
 
+	void AddAnimationsThreaded(const std::string& directoryPath, const std::vector<std::string>& filenames);
+
 
 	void SetEnvironmentCoefficient(const float amount) { materialData->environmentCoefficient = amount; }
 

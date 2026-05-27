@@ -9,6 +9,7 @@
 #include "json.hpp"
 #include "Object3dBase.h"
 #include "SrvManager.h"
+#include <thread>
 
 using namespace Logger;
 
@@ -309,6 +310,51 @@ void Model::AddAnimation(std::string directoryPath, std::string filename, std::s
 {
 	Animation anim = LoadAnimationFile(directoryPath, filename);
 	animation[animationName] = anim;
+}
+
+void Model::AddAnimationsThreaded(const std::string& directoryPath, const std::vector<std::string>& filenames)
+{
+	if (filenames.empty())
+	{
+		return;
+	}
+
+	auto animationNameFromFilename = [](const std::string& filename) {
+		size_t start = filename.find_last_of("/\\");
+		start = (start == std::string::npos) ? 0 : start + 1;
+		size_t end = filename.find_last_of('.');
+		if (end == std::string::npos || end < start)
+		{
+			end = filename.size();
+		}
+		return filename.substr(start, end - start);
+		};
+
+	std::vector<Animation> loadedAnimations(filenames.size());
+	std::vector<std::thread> threads;
+	threads.reserve(filenames.size());
+
+	for (size_t i = 0; i < filenames.size(); i++)
+	{
+		// Assimpの読み込みはファイル単位で独立しているので並列化できる。
+		threads.emplace_back([&, i]() {
+			loadedAnimations[i] = LoadAnimationFile(directoryPath, filenames[i]);
+			});
+	}
+
+	for (std::thread& thread : threads)
+	{
+		if (thread.joinable())
+		{
+			thread.join();
+		}
+	}
+
+	for (size_t i = 0; i < filenames.size(); i++)
+	{
+		// スレッド側では共有mapを書き換えず、join後にメインスレッドで一括登録する。
+		animation[animationNameFromFilename(filenames[i])] = loadedAnimations[i];
+	}
 }
 
 MaterialData Model::LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename) {

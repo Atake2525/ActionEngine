@@ -13,10 +13,10 @@ void DemoScene::Initialize() {
 	camera->SetRotate(Vector3(SwapRadian(10.0f), 0.0f, 0.0f));
 	camera->SetTranslate({ 0.0f, 2.8f, -8.0f });
 
-	TextureManager::GetInstance()->LoadTexture("Resources/rostock_laage_airport_4k.dds");
+	TextureManager::GetInstance()->LoadTexture("Resources/white1x1.dds");
 
 	SkyBox::GetInstance()->SetCamera(camera.get());
-	SkyBox::GetInstance()->SetTexture("Resources/rostock_laage_airport_4k.dds");
+	SkyBox::GetInstance()->SetTexture("Resources/white1x1.dds");
 
 	input = Input::GetInstance();
 	input->ShowMouseCursor(true);
