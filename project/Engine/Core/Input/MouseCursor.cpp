@@ -34,7 +34,7 @@ void MouseCursor::Update() {
     pos = Vector2::Clamp(pos, { 0.0f, 0.0f }, m_windowSize);
     m_cursorPos = pos;
     m_cursorSprite->SetPosition(m_cursorPos);
-    if (m_input->PressMouse(0))
+    if (m_input->PressMouse(MOUSE_LEFT))
     {
         m_cursorSprite->SetTexture(m_cursorTextures[1]);
         Vector2 scale = m_cursorSprite->GetScale();

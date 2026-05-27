@@ -11,7 +11,7 @@
 
 using namespace std;
 
-void TutorialStage::Initialize(Player* player, Camera* camera, MouseCursor* mouseCursor)
+void TutorialStage::Initialize(Player* player, Camera* camera)
 {
     OffScreenRendering::GetInstance()->SetGrayscaleColor(GRAYSCALE_SEPIA);
 
@@ -21,7 +21,6 @@ void TutorialStage::Initialize(Player* player, Camera* camera, MouseCursor* mous
     stageObject = make_unique<Object3d>();
     stageObject->Initialize();
     stageObject->SetModel("Resources/Model/obj/Stage/TutorialStage", "Model.obj", true);
-    //CollisionManager::GetInstance()->AddCollision(stageObject.get());
     stageObject->Update();
 
     collisionObject = make_unique<Object3d>();
@@ -30,22 +29,13 @@ void TutorialStage::Initialize(Player* player, Camera* camera, MouseCursor* mous
     collisionObject->Update();
     CollisionManager::GetInstance()->AddCollision(collisionObject.get());
 
-    /*wallRunObject = make_unique<Object3d>();
-    wallRunObject->Initialize();
-    wallRunObject->SetModel("Resources/Model/obj/Stage/TutorialStage", "TutorialStageWallDashObject.obj", true);
-    CollisionManager::GetInstance()->AddCollision(wallRunObject.get());
-    CollisionManager::GetInstance()->AddWallDashColliison(wallRunObject.get());*/
-
-    /*wallRunObject->SetColor({ 1.0f, 0.5f, 0.5f, 1.0f });
-    wallRunObject->Update();*/
-
     // トラップの初期化
     trap = make_unique<Trap>();
     trap->Initialize("TutorialStage");
 
     // ゴールの初期化
     goal = make_unique<Goal>();
-    goal->Initialize("TutorialStage", player, mouseCursor);
+    goal->Initialize("TutorialStage", player);
 
     float windowSizeX = float(WinApp::GetInstance()->GetkClientWidth());
     for (int i = 0; i < 4; i++)
@@ -91,8 +81,6 @@ void TutorialStage::Update()
 
     stageObject->Update();
 
-    //wallRunObject->Update();
-
     trap->Update();
 
     goal->Update();
@@ -101,7 +89,6 @@ void TutorialStage::Update()
 void TutorialStage::DrawObject3d()
 {
     stageObject->Draw();
-    //wallRunObject->Draw();
     trap->Draw();
     goal->DrawGoalObject();
     for (int i = 0; i < 4; i++)
@@ -114,10 +101,6 @@ void TutorialStage::DrawFrontSprite() {}
 
 void TutorialStage::DrawBackSprite()
 {
-    /*for (int i = 0; i < 4; i++)
-    {
-        tutorialSprites[i]->Draw();
-    }*/
     goal->DrawResult();
 }
 

@@ -13,9 +13,9 @@ inline const bool CollisionSprite(const AABB& a, const AABB& b) {
 	return false;
 }
 
-inline const bool CollisionUISprite(const AABB& a, const Vector2 b) {
-	if ((a.min.x <= b.x && a.max.x >= b.x) &&
-		(a.min.y <= b.y && a.max.y >= b.y)) {
+inline const bool CollisionUISprite(const Vector2& a, const Vector2& aScale, const Vector2& b, const Vector2& bScale) {
+	if ((a.x <= b.x + bScale.x && a.x + aScale.x >= b.x) &&
+		(a.y <= b.y + bScale.y && a.y + aScale.y >= b.y)) {
 		return true;
 	}
 	return false;

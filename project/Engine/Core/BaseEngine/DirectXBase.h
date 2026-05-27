@@ -63,6 +63,11 @@ public:
 	// 描画後処理
 	void PostDrawRenderTexture();
 
+	void SetSceneRenderArea(float left, float top, float width, float height);
+	void ApplyFullViewport();
+	void ApplySceneViewport();
+	float GetSceneAspectRatio() const;
+
 	const DXGI_SWAP_CHAIN_DESC1 GetSwapChainDesc() const { return swapChainDesc; }
 
 	const D3D12_RENDER_TARGET_VIEW_DESC GetRTVDesc() const { return rtvDesc; }
@@ -203,8 +208,10 @@ private:
 	HANDLE fenceEvent;
 	// ビューポート矩形
 	D3D12_VIEWPORT viewPort{};
+	D3D12_VIEWPORT sceneViewPort{};
 	// シザー矩形
 	D3D12_RECT scissorRect{};
+	D3D12_RECT sceneScissorRect{};
 	// dxcCompilerを初期化
 	Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils = nullptr;
 	Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler = nullptr;

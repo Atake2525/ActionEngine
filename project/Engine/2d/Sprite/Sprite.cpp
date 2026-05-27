@@ -1,5 +1,5 @@
 #include "Sprite.h"
-#include "SpriteBase.h"
+#include "Render2DBase.h"
 #include "DirectXBase.h"
 #include "TextureManager.h"
 #include "SrvManager.h"
@@ -87,19 +87,7 @@ void Sprite::Update() {
 	float top = 0.0f - anchorPoint.y;
 	float bottom = 1.0f - anchorPoint.y;
 
-	// 左右上下フリップの設定
-
-	// 左右反転
-	if (isFlipX) {
-		left = -left;
-		right = -right;
-	}
-	// 上下反転
-	if (isFlipY) {
-		top = -top;
-		bottom = -bottom;
-	}
-
+	
 	// テクスチャ範囲指定の設定
 	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(texturefilePath);
 	float tex_left = textureLeftTop.x / metadata.width;
@@ -224,11 +212,6 @@ void Sprite::SetTransformatinMatrix() {
 	transformationMatrixData->World = MakeIdentity4x4();
 }
 
-void Sprite::SetIsFlip(const bool& FlipX, const bool& FlipY) {
-	isFlipX = FlipX;
-	isFlipY = FlipY;
-}
-
 void Sprite::AdjustTextureSize() {
 	// テクスチャメタデータを取得
 	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(texturefilePath);
@@ -237,11 +220,4 @@ void Sprite::AdjustTextureSize() {
 	textureSize.y = static_cast<float>(metadata.height);
 	// 画像サイズをテクスチャサイズに合わせる
 	scale = textureSize;
-}
-
-const AABB Sprite::GetAABB() {
-	return AABB{
-		{position.x - scale.x * anchorPoint.x, position.y - scale.y * anchorPoint.y, 0.0f},
-		{position.x + scale.x - scale.x * anchorPoint.x, position.y + scale.y - scale.y * anchorPoint.y, 0.0f}
-	};
 }

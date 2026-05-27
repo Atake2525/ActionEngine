@@ -589,9 +589,9 @@ void Audio::Resume(const std::string soundName) {
 void Audio::Update() {
 
 #ifndef NDEBUG
+	ImGui::SetNextWindowPos(ImVec2{ 0.0f, 18.0f * 4 }, ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) - 18.0f * 2 }, ImGuiCond_FirstUseEver);
 	ImGui::Begin("Audio");
-	ImGui::SetWindowPos(ImVec2{ 0.0f, 18.0f * 4 });
-	ImGui::SetWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) - 18.0f * 2 });
 	ImGui::SliderFloat("MasterVolume", &masterVolume, 0.0f, 1.0f);
 	for (AudioList list : audioList)
 	{
