@@ -84,13 +84,13 @@ void OffScreenRendering::Initialize() {
 
 void OffScreenRendering::Update() {
 #ifndef NDEBUG
+	ImGui::SetNextWindowPos(ImVec2{ 0.0f, 18.0f }, ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) - 18.0f }, ImGuiCond_FirstUseEver);
 	ImGui::Begin("PostEffect");
 	/*if (ImGui::IsPopupOpen("PostEffect"))
 	{
 		Log("openPostEffect");
 	}*/
-	ImGui::SetWindowPos(ImVec2{ 0.0f, 18.0f });
-	ImGui::SetWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) - 18.0f });
 	if (ImGui::CollapsingHeader("Grayscale / グレイスケール", ImGuiTreeNodeFlags_DefaultOpen)) {
 		ImGui::SliderFloat("グレースケール強度", &grayscale->grayscaleIntensity, 0.0f, 1.0f);
 		ImGui::ColorEdit3("ColTone", &grayscale->toneColor.x);
@@ -260,6 +260,7 @@ void OffScreenRendering::Draw() {
 	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
 	// PSOを設定
 	DirectXBase::GetInstance()->GetCommandList()->SetPipelineState(graphicsPilelineState.Get());
+	DirectXBase::GetInstance()->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	// grayscale
 	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(2, grayscaleResouce->GetGPUVirtualAddress());
 	// vignetting

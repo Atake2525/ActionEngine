@@ -4,17 +4,17 @@
 #pragma once
 
 // スプライト描画用クラス
-class SpriteBase {
+class Render2DBase {
 private:
 	// シングルトンパターンを適用
-	static SpriteBase* instance;
+	static Render2DBase* instance;
 
 	// コンストラクタ、デストラクタの隠蔽
-	SpriteBase() = default;
-	~SpriteBase() = default;
+	Render2DBase() = default;
+	~Render2DBase() = default;
 	// コピーコンストラクタ、コピー代入演算子の封印
-	SpriteBase(SpriteBase&) = delete;
-	SpriteBase& operator=(SpriteBase&) = delete;
+	Render2DBase(Render2DBase&) = delete;
+	Render2DBase& operator=(Render2DBase&) = delete;
 
 public:
 	/// <summary>
@@ -23,7 +23,7 @@ public:
 	void Initialize();
 
 	// インスタンスの取得
-	static SpriteBase* GetInstance();
+	static Render2DBase* GetInstance();
 
 	// 終了処理
 	void Finalize();

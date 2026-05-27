@@ -6,12 +6,13 @@
 #include "WinApp.h"
 #include "EasingUtility.h"
 #include "ImGuiManager.h"
-#include "Input.h"
 #include "SceneManager.h"
 #include "FadeManager.h"
 #include "Collision.h"
 #include "MouseCursor.h"
 #include "Audio.h"
+#include <algorithm>
+
 
 Result::~Result()
 {
@@ -19,9 +20,11 @@ Result::~Result()
     m_clearTimeSprites.clear();
 }
 
-void Result::Initialize(MouseCursor* mouseCursor)
+void Result::Initialize()
 {
-    m_mouseCursor = mouseCursor;
+
+    m_pInput = Input::GetInstance();
+
     // 0 ~ 9 までのSpriteをあらかじめ読み込んでおく
     for (int i = 0; i < 10; i++)
     {
@@ -62,22 +65,78 @@ void Result::Initialize(MouseCursor* mouseCursor)
     const Vector2 basePosition = m_backScreenSprite->GetPosition() + Vector2{ 0.0f, m_windowSize.y * 0.12f };
     const float horizontalOffset = m_windowSize.x * 0.16f;
 
-    // タイトルへ
-    m_uiSprites[0] = std::make_unique<Sprite>();
-    m_uiSprites[0]->Initialize("Resources/Sprite/Result/GoTitle.png");
-    m_uiSprites[0]->SetAnchorPoint(ANCHORPOINT_MIDDLE);
-    m_uiBaseScales[0] = m_uiSprites[0]->GetScale() * 0.8f;
-    m_uiSprites[0]->SetScale(Vector2::Zero);
-    m_uiSprites[0]->SetPosition({ basePosition.x + horizontalOffset * -1.0f, basePosition.y });
-    m_uiSprites[0]->Update();
-    // リトライ
-    m_uiSprites[1] = std::make_unique<Sprite>();
-    m_uiSprites[1]->Initialize("Resources/Sprite/Result/ReTry.png");
-    m_uiSprites[1]->SetAnchorPoint(ANCHORPOINT_MIDDLE);
-    m_uiBaseScales[1] = m_uiSprites[1]->GetScale() * 0.8f;
-    m_uiSprites[1]->SetScale(Vector2::Zero);
-    m_uiSprites[1]->SetPosition({ basePosition.x + horizontalOffset * 1.0f, basePosition.y });
-    m_uiSprites[1]->Update();
+    std::function<void()> retryFunc = [&]() {
+        std::function<void()> sceneFunc = [&]() {
+            SceneManager::GetInstance()->SetNextScene(SceneManager::GetInstance()->GetSceneName());
+            };
+        Audio::GetInstance()->Play("select_enter");
+        FadeManager::GetInstance()->FadeOut(1.0f);
+        FadeManager::GetInstance()->SetFinishedFadeFunction(sceneFunc);
+        };
+    std::function<void()> goTitleFunc = [&]() {
+        std::function<void()> sceneFunc = [&]() {
+            SceneManager::GetInstance()->SetNextScene("TITLE");
+
+            };
+        Audio::GetInstance()->Play("select_enter");
+        FadeManager::GetInstance()->FadeOut(1.0f);
+        FadeManager::GetInstance()->SetFinishedFadeFunction(sceneFunc);
+        };
+
+    UI::InteractionReaction reaction;
+    reaction.scale = true;
+    reaction.scaleAmount = { 1.1f, 1.1f };
+    reaction.highlightColor = { 0.0f, 1.0f, 0.6f, 1.0f };
+    reaction.highlight = true;
+    reaction.custom = [this]() {
+        Audio::GetInstance()->Play("select");
+        };
+    std::array<std::unique_ptr<UI::Element>, 2> m_uiElements;
+    for (int i = 0; i < m_uiElements.size(); i++)
+    {
+        m_uiElements[i] = std::make_unique<UI::Button>();
+        m_uiElements[i]->SetOnSelectedReaction(reaction);
+    }
+    m_uiElements[0]->Initialize("Resources/Sprite/Result/GoTitle.png", *m_pInput);
+    const Vector2 goTitlePosition = { basePosition.x + horizontalOffset * -1.2f, basePosition.y };
+    m_uiElements[0]->SetPosition(goTitlePosition);
+    m_uiElements[0]->SetActiveReaction(goTitleFunc);
+    Vector2 size = m_uiElements[0]->GetScale();
+    const Vector2 goTitleScale = size * 0.8f;
+    m_uiElements[0]->SetScale(goTitleScale);
+    SetUIEnterReaction(*m_uiElements[0], goTitlePosition, goTitleScale, 0);
+
+    m_uiElements[1]->Initialize("Resources/Sprite/Result/ReTry.png", *m_pInput);
+    const Vector2 retryPosition = { basePosition.x + horizontalOffset * 1.2f, basePosition.y };
+    m_uiElements[1]->SetPosition(retryPosition);
+    m_uiElements[1]->SetActiveReaction(retryFunc);
+    size = m_uiElements[1]->GetScale();
+    const Vector2 retryScale = size * 0.8f;
+    m_uiElements[1]->SetScale(retryScale);
+    SetUIEnterReaction(*m_uiElements[1], retryPosition, retryScale, 1);
+
+    // UIの選択グループを作成
+    m_uiSelectionGroup = std::make_unique<UI::SelectionGroup>();
+    m_uiSelectionGroup->SetInput(m_pInput);
+    UI::InputTrigger trigger;
+    trigger.controller = Controller::A;
+    trigger.key = DIK_SPACE;
+    trigger.mouseButton = MOUSE_LEFT;
+    // UI全体のインタラクトバインドを設定
+    m_uiSelectionGroup->SetInteractBinding(trigger);
+    trigger.Reset();
+    trigger.key = DIK_RETURN;
+    m_uiSelectionGroup->SetInteractBinding(trigger);
+    // UIの移動バインドを設定
+    m_uiSelectionGroup->SetMoveDownBinding({ .key = DIK_D, .dpad = DPad::Right });
+    m_uiSelectionGroup->SetMoveDownBinding({ .key = DIK_RIGHT });
+    m_uiSelectionGroup->SetMoveUpBinding({ .key = DIK_A, .dpad = DPad::Left });
+    m_uiSelectionGroup->SetMoveUpBinding({ .key = DIK_LEFT });
+    // UI要素を選択グループに追加
+    m_uiSelectionGroup->Add(move(m_uiElements[0]));
+    m_uiSelectionGroup->Add(move(m_uiElements[1]));
+    // UIの使用可能数の設定
+    m_uiSelectionGroup->SetUsableCount(1);
 
     m_playTimer = 0.0f;
 }
@@ -122,33 +181,15 @@ void Result::Update()
         m_resultDrawTimer += GameTime::GetInstance()->GetUnscaledDeltaTime();
         if (m_resultDrawTimer >= 0.3f)
         {
+            m_uiEnterTimers.fill(0.0f);
             m_resultPhase = ResultDrawPhase::ui;
-            m_mouseCursor->SetShowCursor(true);
-            m_mouseCursor->SetCursorPosition(m_windowSize / 2.0f);
+            m_uiSelectionGroup->Show();
+            m_pInput->ShowMouseCursor(true);
         }
         break;
     case Result::ResultDrawPhase::ui:
-        UpdateUISelect();
-        for (int i = 0; i < m_uiSprites.size(); i++)
-        {
-            int selectNum = static_cast<int>(m_resultSelect);
-            float scaleRatio = 1.0f;
-            Vector4 color;
-            // 選択されていたら色を変えてサイズを大きくする
-            if (selectNum == i)
-            {
-                color = { 0.0f, 1.0f, 0.6f, 1.0f };
-                scaleRatio = 1.1f;
-            }
-            else
-            {
-                color = { 1.0f, 1.0f, 1.0f, 0.8f };
-                scaleRatio = 1.0f;
-            }
-            m_uiSprites[i]->SetScale(m_uiBaseScales[i] * scaleRatio);
-            m_uiSprites[i]->SetColor(color);
-            m_uiSprites[i]->Update();
-        }
+        m_uiSelectionGroup->Update();
+
         break;
     }
 
@@ -165,16 +206,12 @@ void Result::Draw()
     }
     if (m_resultPhase == ResultDrawPhase::ui)
     {
-        for (const auto& sprite : m_uiSprites)
-        {
-            sprite->Draw();
-        }
+        m_uiSelectionGroup->Draw();
     }
 }
 
 void Result::StageClear()
 {
-    //CalculateStageClearTimer();
     m_isGoal = true;
 }
 
@@ -232,71 +269,29 @@ void Result::CalculateStageClearTimer()
     }
 }
 
-void Result::UpdateUISelect()
+void Result::SetUIEnterReaction(UI::Element& ui, const Vector2& targetPosition, const Vector2& targetScale, int index)
 {
-    Input* input = Input::GetInstance();
-
-    int selectIndex = static_cast<int>(m_resultSelect);
-    if (input->TriggerKey(DIK_W) || input->TriggerKey(DIK_UP))
-    {
-        selectIndex--;
-        Audio::GetInstance()->Play("select");
-    }
-    if (input->TriggerKey(DIK_S) || input->TriggerKey(DIK_DOWN))
-    {
-        selectIndex++;
-        Audio::GetInstance()->Play("select");
-    }
-
-    for (int i = 0; i < m_uiSprites.size(); i++)
-    {
-        if (CollisionUISprite(m_uiSprites[i]->GetAABB(), m_mouseCursor->GetCursorPos()))
+    ui.SetPosition(targetPosition + m_uiEnterOffset);
+    ui.SetScale(Vector2::Zero);
+    ui.SetEnterReaction([this, targetPosition, targetScale, index](UI::Element& element) {
+        if (index < 0 || index >= static_cast<int>(m_uiEnterTimers.size()))
         {
-            if (selectIndex != i)
-            {
-                Audio::GetInstance()->Play("select");
-            }
-            selectIndex = i;
+            return;
         }
-    }
 
-    if (selectIndex < 0)
-    {
-        selectIndex = static_cast<int>(m_uiSprites.size()) - 1;
-    }
-    else if (selectIndex >= static_cast<int>(m_uiSprites.size()))
-    {
-        selectIndex = 0;
-    }
-    m_resultSelect = static_cast<ResultSelect>(selectIndex);
+        m_uiEnterTimers[index] += GameTime::GetInstance()->GetUnscaledDeltaTime() / m_uiEnterTime;
+        m_uiEnterTimers[index] = std::clamp(m_uiEnterTimers[index], 0.0f, 1.0f);
 
+        const float timer = m_uiEnterTimers[index];
+        const float scaleTimer = EaseOutQuint(0.0f, 1.0f, timer);
+        element.SetPosition(EaseOutQuint(targetPosition + m_uiEnterOffset, targetPosition, timer));
+        element.SetScale(targetScale * scaleTimer);
 
-    if (input->TriggerKey(DIK_RETURN) || input->TriggerKey(DIK_SPACE) || input->TriggerMouse(0))
-    {
-        EnterSelectUI();
-    }
-}
-
-void Result::EnterSelectUI()
-{
-    std::function<void()> retryFunc = [&]() {
-        SceneManager::GetInstance()->SetNextScene(SceneManager::GetInstance()->GetSceneName());
-        };
-    std::function<void()> goTitleFunc = [&]() {
-        SceneManager::GetInstance()->SetNextScene("TITLE");
-        };
-    // UIの選択結果に応じてシーンを切り替える
-    switch (m_resultSelect)
-    {
-    case ResultSelect::retry:
-        Audio::GetInstance()->Play("select_enter");
-        FadeManager::GetInstance()->FadeOut(1.0f);
-        FadeManager::GetInstance()->SetFinishedFadeFunction(retryFunc);
-        break;
-    case ResultSelect::title:
-        Audio::GetInstance()->Play("select_enter");
-        FadeManager::GetInstance()->FadeOut(1.0f);
-        FadeManager::GetInstance()->SetFinishedFadeFunction(goTitleFunc);
-        break;
-    }
+        if (timer >= 1.0f)
+        {
+            element.SetPosition(targetPosition);
+            element.SetScale(targetScale);
+            element.SetTransitionState(UI::TransitionState::Shown);
+        }
+        });
 }

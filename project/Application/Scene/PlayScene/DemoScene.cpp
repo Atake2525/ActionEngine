@@ -43,7 +43,7 @@ void DemoScene::Update() {
 
 void DemoScene::Draw() {
 
-	SpriteBase::GetInstance()->ShaderDraw();
+	Render2DBase::GetInstance()->ShaderDraw();
 
 
 	Object3dBase::GetInstance()->ShaderDraw();

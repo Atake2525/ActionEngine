@@ -4,7 +4,7 @@
 #include "WinApp.h"
 #include "DirectXBase.h"
 #include "Input.h"
-#include "SpriteBase.h"
+#include "Render2DBase.h"
 #include "Object3dBase.h"
 #include "ModelBase.h"
 #include "TextureManager.h"
