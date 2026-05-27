@@ -8,6 +8,7 @@
 #include "CollisionManager.h"
 #include <algorithm>
 #include "EasingUtility.h"
+#include <thread>
 
 
 using namespace std;
@@ -47,7 +48,22 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
     m_pModel->Initialize();
     m_pModel->SetModel("Resources/Model/obj/Player", "PlayerCollision.obj", false);
     m_pModel->SetTransform(m_transform);
-    m_pModel->CreateCapsule();
+    //m_pModel->CreateCapsule();
+
+    m_pDrawModel = make_unique<Object3d>();
+    m_pDrawModel->Initialize();
+    m_pDrawModel->SetModel("Resources/Model/gltf/char", "noHeadIdle.gltf", true, true);
+    // 初期モデル以外の移動アニメーションも起動時にまとめて読み込んでおく。
+    m_pDrawModel->AddAnimationsThreaded("Resources/Model/gltf/char", {
+        "sneak.gltf",
+        "walk.gltf",
+        "walk_back.gltf",
+        "crouch.gltf",
+        "dash.gltf",
+        "fall.gltf",
+        });
+    m_pDrawModel->ToggleStartAnimation();
+
     m_playerAABB = m_pModel->GetAABB();
     m_playerAABB += m_transform.translate;
     m_playerHeight = AABB::GetSize(m_playerAABB).y;
@@ -55,7 +71,7 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
 
     // カメラの高さをモデルの高さに合わせて調整 (ちょっとだけ低くする)
     m_cameraTransform.translate.y = m_playerAABB.max.y - m_transform.translate.y - AABB::GetSize(m_playerAABB).y * m_eyeHeight;
-    m_cameraHeight = m_cameraTransform.translate.y;
+    //m_cameraHeight = m_cameraTransform.translate.y;
 
     // コントロールモードの初期設定
     if (Input::GetInstance()->IsConnectedController())
@@ -140,6 +156,8 @@ void Player::Update()
     ApplyGravity();
 #endif // !NDEBUG
 
+    UpdateModelAnimation();
+
     m_transform.rotate += m_velocity.rotate;
     m_pModel->SetTransform(m_transform);
 
@@ -148,16 +166,23 @@ void Player::Update()
         m_pModel->SetTransform(m_firstTransform);
     }
 
-    m_pModel->Update();
+    m_pDrawModel->SetTransform(m_transform);
+    Vector3 modelRotate = m_cameraTransform.rotate;
+    modelRotate.x = 0.0f;
+    m_pDrawModel->SetRotate(modelRotate);
     ApplyCameraEffect();
+    m_pModel->Update();
     m_pCamera->SetTransform(m_cameraTransform);
     UpdateCameraParent();
+}
 
+void Player::UpdateModel() {
+    m_pDrawModel->Update();
 }
 
 void Player::Draw()
 {
-    m_pModel->Draw();
+    //m_pDrawModel->Draw();
 }
 
 void Player::UpdateState()
@@ -177,14 +202,14 @@ void Player::UpdateState()
     }
 
     // 入力が入ったら最初の入力フラグを立てる
-    if (m_moveInput.x != 0.0f || m_moveInput.y != 0.0f)
+    if (m_command.move.x != 0.0f || m_command.move.y != 0.0f)
     {
         m_isFirstInput = true;
     }
 
     if (m_onGround)
     {
-        int statePoint = static_cast<int>(Sign((Sign(m_moveInput.x) * m_moveInput.x) + (Sign(m_moveInput.y) * m_moveInput.y)));
+        int statePoint = static_cast<int>(Sign((Sign(m_command.move.x) * m_command.move.x) + (Sign(m_command.move.y) * m_command.move.y)));
         m_state = static_cast<PlayerState>(statePoint);
     }
     // よじ登りができるかの確認
@@ -206,40 +231,19 @@ void Player::UpdateState()
         m_wallRunningObjectAABB = AABB::Zero;
     }
 
-    // コントロールモードに応じた入力処理
-    switch (m_controlMode)
+    // Run入力があり、かつ前回の状態がWalkであればRunにする
+    if (m_command.run && (m_velocity.translate.z != 0.0f || m_velocity.translate.x != 0.0f))
     {
-    case Player::ControlMode::KeyboardMouse: // キーボード・マウス
-        // ダッシュ入力
-        if (m_pInput->PushKeyInt(DIK_LSHIFT))
-        {
-            m_walkState = PlayerWalkState::Run;
-        }
-        // しゃがみ入力
-        if (m_pInput->PushKeyInt(DIK_LCONTROL))
-        {
-            m_walkState = PlayerWalkState::Crouch;
-        }
-
-        break;
-    case Player::ControlMode::Gamepad: // ゲームパッド
-        // ダッシュ入力
-        if (Input::GetInstance()->PushButton(Controller::LeftStick))
-        {
-            m_walkState = PlayerWalkState::Run;
-        }
-
-        // しゃがみ入力
-        if (Input::GetInstance()->PushButton(Controller::RightStick))
-        {
-            m_walkState = PlayerWalkState::Crouch;
-        }
-
-        break;
+        m_walkState = PlayerWalkState::Run;
+    }
+    // しゃがみ入力
+    if (m_command.crouch)
+    {
+        m_walkState = PlayerWalkState::Crouch;
     }
 
     // crouchを解除しようとしたときに可能かを確認する
-    if (m_walkStatePre == PlayerWalkState::Crouch)
+    if (m_walkStatePre == PlayerWalkState::Crouch && m_walkState != PlayerWalkState::Crouch)
     {
         CanUncrouch();
     }
@@ -271,7 +275,7 @@ void Player::UpdateParkourState()
         pAABB += m_wallPenetration;
         // 現在の位置(AABB)からウォールラン中の壁の方向に移動させ衝突しているかを判定する
         // 判定していなければウォールランを終了する
-        if (m_wallRunning && m_isStartWallRun && (!CollisionManager::GetInstance()->IsCollisionObjectForAABB(pAABB, true) || m_jumpInput == 1.0f))
+        if (m_wallRunning && m_isStartWallRun && (!CollisionManager::GetInstance()->IsCollisionObjectForAABB(pAABB, true) || m_command.jump == 1.0f))
         {
             m_wallRunning = false;
             m_isStartWallRun = false;
@@ -280,7 +284,7 @@ void Player::UpdateParkourState()
     }
 
     // よじ登りの開始を確認する
-    if ((m_pInput->TriggerKey(DIK_SPACE) || m_pInput->PushButton(Controller::A)) && m_canClimbing && !m_isClimbingMotion)
+    if (m_command.jump && m_canClimbing && !m_isClimbingMotion)
     {
         StartClimbing();
         m_walkState = PlayerWalkState::Climbing;
@@ -361,8 +365,7 @@ const bool Player::CanClimbing()
 void Player::HandleInput()
 {
     // 移動入力のリセット
-    m_moveInput = Vector2::Zero;
-    m_jumpInput = 0.0f;
+    m_command.move = Vector2::Zero;
 
     if (!m_IsFreeze)
     {
@@ -370,18 +373,27 @@ void Player::HandleInput()
         {
         case Player::ControlMode::KeyboardMouse:
             // キー入力による移動
-            m_moveInput.y += Input::GetInstance()->PushKeyInt(DIK_W);
-            m_moveInput.y += -Input::GetInstance()->PushKeyInt(DIK_S);
-            m_moveInput.x += -Input::GetInstance()->PushKeyInt(DIK_A);
-            m_moveInput.x += Input::GetInstance()->PushKeyInt(DIK_D);
-            m_jumpInput += Input::GetInstance()->TriggerKeyInt(DIK_SPACE);
+            m_command.move.y += Input::GetInstance()->PushKeyInt(DIK_W);
+            m_command.move.y += -Input::GetInstance()->PushKeyInt(DIK_S);
+            m_command.move.x += -Input::GetInstance()->PushKeyInt(DIK_A);
+            m_command.move.x += Input::GetInstance()->PushKeyInt(DIK_D);
 
+            m_command.jump = Input::GetInstance()->TriggerKeyInt(DIK_SPACE) != 0;
+            m_command.crouch = Input::GetInstance()->PushKeyInt(DIK_LCONTROL) != 0;
+            m_command.run = Input::GetInstance()->PushKeyInt(DIK_LSHIFT) != 0;
+
+            m_command.eye = Input::GetInstance()->GetMouseVel3() * 0.001f;
             break;
         case Player::ControlMode::Gamepad:
             // ジョイスティック入力による移動
-            m_moveInput = m_pInput->GetJoyStickVelocity();
-            m_moveInput.y *= -1.0f;
-            m_jumpInput += Input::GetInstance()->TriggerButton(Controller::A);
+            m_command.move = m_pInput->GetJoyStickVelocity();
+            m_command.move.y *= -1.0f;
+
+            m_command.jump = Input::GetInstance()->TriggerButton(Controller::A) != 0;
+            m_command.crouch = Input::GetInstance()->PushButton(Controller::RightStick) != 0;
+            m_command.run = Input::GetInstance()->PushButton(Controller::LeftStick) != 0;
+
+            m_command.eye = Input::GetInstance()->GetRightJoyStickPos3(0.0f) * 0.00005f;
 
             break;
         }
@@ -391,25 +403,10 @@ void Player::HandleInput()
 }
 
 void Player::Rotate() {
-    Vector3 rotate = Vector3::Zero;
-    if (!m_IsFreeze)
-    {
-        m_cameraTransform.rotate = m_pCamera->GetTransform().rotate;
-        // カメラ処理の実装
-        // マウスの移動量に基づいてカメラの回転を更新    演出実装時に加速度を付けるなどの調整を行う予定
-        switch (m_controlMode)
-        {
-        case Player::ControlMode::KeyboardMouse:
-            rotate = Input::GetInstance()->GetMouseVel3() * 0.001f;
-            break;
-        case Player::ControlMode::Gamepad:
-            rotate = Input::GetInstance()->GetRightJoyStickPos3(0.0f) * 0.00005f;
-            break;
-        }
-    }
-
-    m_cameraTransform.rotate.x += rotate.y;
-    m_cameraTransform.rotate.y += rotate.x;
+    m_cameraTransform.rotate = m_pCamera->GetTransform().rotate;
+    // 視点の回転
+    m_cameraTransform.rotate.x += m_command.eye.y;
+    m_cameraTransform.rotate.y += m_command.eye.x;
 
     m_cameraTransform.rotate.x = std::clamp(m_cameraTransform.rotate.x, SwapRadian(-90.0f), SwapRadian(90.0f));
 
@@ -448,12 +445,12 @@ void Player::Move() {
 void Player::Walk()
 {
     m_crouchHeight = 0.0f;
-    // m_moveInput(入力)に基づいてプレイヤーの移動方向を決定
-    if (m_moveInput.x != 0.0f || m_moveInput.y != 0.0f)
+    // m_command.move(入力)に基づいてプレイヤーの移動方向を決定
+    if (m_command.move.x != 0.0f || m_command.move.y != 0.0f)
     {
         // 入力中は移動量を上げる
-        m_moveAmount.x += Sign(m_moveInput.x) * (m_delta / m_maxSpeedTime * m_runSpeed);
-        m_moveAmount.y += Sign(m_moveInput.y) * (m_delta / m_maxSpeedTime * m_runSpeed);
+        m_moveAmount.x += Sign(m_command.move.x) * (m_delta / m_maxSpeedTime * m_runSpeed);
+        m_moveAmount.y += Sign(m_command.move.y) * (m_delta / m_maxSpeedTime * m_runSpeed);
     }
 
     m_moveSpeedPre = m_moveSpeed;
@@ -511,13 +508,13 @@ void Player::Walk()
         m_moveSpeedTimer = 0.0f;
     }
 
-    Vector2 fabsMoveInput = { fabs(m_moveInput.x), fabs(m_moveInput.y) };
+    Vector2 fabsMoveInput = { fabs(m_command.move.x), fabs(m_command.move.y) };
 
-    if (m_moveInput.x == 0.0f)
+    if (m_command.move.x == 0.0f)
     {
         fabsMoveInput.x = 1.0f;
     }
-    if (fabsMoveInput.y == 0.0f)
+    if (m_command.move.y == 0.0f)
     {
         fabsMoveInput.y = 1.0f;
     }
@@ -530,14 +527,14 @@ void Player::Walk()
 
     // 入力が無かったら一定速度で減速して0.0fにする
     // 減速は加速よりも早くする
-    if (m_moveInput.x == 0.0f) {
+    if (m_command.move.x == 0.0f) {
         m_moveAmount.x -= Sign(m_moveAmount.x) * (m_delta / m_decelTime * m_decelMoveSpeed);
         // オーバーシュート防止
         if (Sign(m_moveAmount.x) != Sign(m_moveAmount.x - Sign(m_moveAmount.x) * (m_delta / m_decelTime * m_decelMoveSpeed))) {
             m_moveAmount.x = 0.0f;
         }
     }
-    if (m_moveInput.y == 0.0f) {
+    if (m_command.move.y == 0.0f) {
         m_moveAmount.y -= Sign(m_moveAmount.y) * (m_delta / m_decelTime * m_decelMoveSpeed);
         // オーバーシュート防止
         if (Sign(m_moveAmount.y) != Sign(m_moveAmount.y - Sign(m_moveAmount.y) * (m_delta / m_decelTime * m_decelMoveSpeed))) {
@@ -545,14 +542,14 @@ void Player::Walk()
         }
     }
     // 反対入力があったら減速速度を上げる
-    if (Sign(m_moveInput.x) != Sign(m_moveAmount.x) && m_moveInput.x != 0.0f) {
+    if (Sign(m_command.move.x) != Sign(m_moveAmount.x) && m_command.move.x != 0.0f) {
         m_moveAmount.x -= Sign(m_moveAmount.x) * (m_delta / (m_decelTime / 2.0f) * m_walkSpeed);
         // オーバーシュート防止
         if (Sign(m_moveAmount.x) != Sign(m_moveAmount.x - Sign(m_moveAmount.x) * (m_delta / (m_decelTime / 2.0f) * m_walkSpeed))) {
             m_moveAmount.x = 0.0f;
         }
     }
-    if (Sign(m_moveInput.y) != Sign(m_moveAmount.y) && m_moveInput.y != 0.0f) {
+    if (Sign(m_command.move.y) != Sign(m_moveAmount.y) && m_command.move.y != 0.0f) {
         m_moveAmount.y -= Sign(m_moveAmount.y) * (m_delta / (m_decelTime / 2.0f) * m_walkSpeed);
         // オーバーシュート防止
         if (Sign(m_moveAmount.y) != Sign(m_moveAmount.y - Sign(m_moveAmount.y) * (m_delta / (m_decelTime / 2.0f) * m_walkSpeed))) {
@@ -625,7 +622,7 @@ void Player::WallRun()
         // ウォールラン用のオブジェクトとほぼ垂直の視点の場合直前の入力を使って移動方向を算出する
         if (std::fabs(cameraDirection.z) < 0.1f)
         {
-            Vector3 walkDirection = TransformNormal({ m_moveInput.x, 0.0f, m_moveInput.y }, cameraMatrix);
+            Vector3 walkDirection = TransformNormal({ m_command.move.x, 0.0f, m_command.move.y }, cameraMatrix);
 
             m_wallRunDirection.x = Sign(wallpenetration.z) * Sign(walkDirection.z);
             m_wallRunDirection.z = Sign(wallpenetration.x) * Sign(walkDirection.x);
@@ -677,9 +674,9 @@ void Player::Sliding()
         m_moveSpeedTimer = 0.0f;
     }
 
-    Vector2 fabsMoveInput = { fabs(m_moveInput.x), fabs(m_moveInput.y) };
+    Vector2 fabsMoveInput = { fabs(m_command.move.x), fabs(m_command.move.y) };
 
-    if (m_moveInput.x == 0.0f)
+    if (m_command.move.x == 0.0f)
     {
         fabsMoveInput.x = 1.0f;
     }
@@ -850,7 +847,7 @@ void Player::Climbing()
 void Player::Jump()
 {
     // ジャンプ入力があったらジャンプ処理
-    if (m_jumpInput > 0.0f)
+    if (m_command.jump)
     {
         // ジャンプ開始時の初速を計算
         float gravityPerFrame = max(-m_gravity.y * m_delta, 0.0f);
@@ -1005,6 +1002,63 @@ void Player::ApplyCameraEffect()
     m_cameraTransform.rotate.z = Lerp(0.0f, m_wallRunRotateAfter, m_wallRunTimer);
 
 }
+
+void Player::UpdateModelAnimation() {
+    std::string animName = "DefaultAnimation";
+
+    switch (m_walkState)
+    {
+    case Player::PlayerWalkState::Walk:
+        if (m_command.move.y < 0.0f)
+        {
+            animName = "walk_back";
+        }
+        else
+        {
+            animName = "walk";
+        }
+        break;
+    case Player::PlayerWalkState::Run:
+        animName = "dash";
+        break;
+    case Player::PlayerWalkState::Crouch:
+        if (m_state == PlayerState::Move)
+        {
+            animName = "sneak";
+        }
+        else
+        {
+            animName = "crouch";
+        }
+        break;
+    case Player::PlayerWalkState::WallRun:
+        animName = "wall_run";
+        break;
+    case Player::PlayerWalkState::Sliding:
+        animName = "slide";
+        break;
+    case Player::PlayerWalkState::Climbing:
+        animName = "climb";
+        break;
+    default:
+        break;
+    }
+
+    if (m_state == PlayerState::Falling)
+    {
+        animName = "fall";
+    }
+    else if (m_state == PlayerState::Idle)
+    {
+        animName = "DefaultAnimation";
+    }
+
+    if (m_pDrawModel->GetCurrentAnimationKey() != animName)
+    {
+        m_pDrawModel->ChangePlayAnimation(animName);
+    }
+}
+
 #ifndef NDEBUG
 void Player::UpdateDebugUI() {
 
@@ -1064,7 +1118,7 @@ void Player::UpdateDebugUI() {
 
     // --- Movement ---
     if (ImGui::CollapsingHeader("Movement")) {
-        ImGui::Text("Move Input: (%f, %f)", m_moveInput.x, m_moveInput.y);
+        ImGui::Text("Move Input: (%f, %f)", m_command.move.x, m_command.move.y);
         ImGui::Text("Move Amount: (%f, %f)", m_moveAmount.x, m_moveAmount.y);
 
         ImGui::Text("Gravity: (%.2f, %.2f, %.2f)",
@@ -1139,6 +1193,8 @@ void Player::UpdateDebugUI() {
 
     // --- Camera ---
     if (ImGui::CollapsingHeader("Camera")) {
+
+        ImGui::DragFloat("Camera Height", &m_cameraHeight, 0.01f);
 
         if (ImGui::TreeNode("Camera Transform")) {
             ImGui::Text("Pos:  (%.2f, %.2f, %.2f)",
