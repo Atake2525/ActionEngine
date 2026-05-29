@@ -293,7 +293,7 @@ private:
 
     // 移動速度
     const float m_walkSpeed = 6.0f;
-    const float m_runSpeed = 15.0f;
+    const float m_runSpeed = 12.0f;
     const float m_crounchSpeed = 4.0f;
     float m_moveSpeed = 1.0f;
     float m_decelMoveSpeed = 1.0f;
@@ -319,7 +319,7 @@ private:
     float m_fovChangeTimer = 0.0f;    // FOV補間用タイマー
     float m_fovChangeTime = 0.1f;     // FOV補間時間
     float m_fovDefault = 1.2f; // デフォルトFOV
-    float m_fovRun = 1.9f;    // ダッシュ時FOV
+    float m_fovRun = 1.5f;    // ダッシュ時FOV
 
 
     //==================================================
