@@ -102,10 +102,10 @@ void TextureManager::LoadTexture(const std::string& filePath) {
 		hr = DirectX::GenerateMipMaps(image.GetImages(), image.GetImageCount(), image.GetMetadata(), DirectX::TEX_FILTER_SRGB, 4, mipImages);
 		// テクスチャデータをtextureDatasの末尾に追加する
 		textureData.filePath = filePath;
-		textureData.metadata = image.GetMetadata();
+		textureData.metadata = SUCCEEDED(hr) ? mipImages.GetMetadata() : image.GetMetadata();
 		textureData.resource = DirectXBase::GetInstance()->CreateTextureResource(textureData.metadata);
 
-		textureData.intermediateResource = DirectXBase::GetInstance()->UploadTextureData(textureData.resource, image);
+		textureData.intermediateResource = DirectXBase::GetInstance()->UploadTextureData(textureData.resource, SUCCEEDED(hr) ? mipImages : image);
 	}
 
 	uint32_t srvIndex = SrvManager::GetInstance()->Allocate();
