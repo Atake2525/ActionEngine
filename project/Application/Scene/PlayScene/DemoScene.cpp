@@ -24,7 +24,6 @@ void DemoScene::Initialize() {
 	Object3dBase::GetInstance()->SetDefaultCamera(camera.get());
 
 	ParticleManager::GetInstance()->SetCamera(camera.get());
-
 }
 
 void DemoScene::Update() {
