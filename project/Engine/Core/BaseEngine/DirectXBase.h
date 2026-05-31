@@ -9,14 +9,36 @@
 #include <cstdint>
 #include <chrono>
 #include <thread>
-#include "externels/DirectXTex/DirectXTex.h"
-#include "externels/DirectXTex/d3dx12.h"
+#include "externals/DirectXTex/DirectXTex.h"
+#include "externals/DirectXTex/d3dx12.h"
 #include "Vector4.h"
 #include "Vector3.h"
-#include "OffScreenRnedering.h"
+#include <memory>
 
 class DirectXBase {
+private:
+	// シングルトンパターンを適用
+	static DirectXBase* instance;
+
+	// コンストラクタ、デストラクタの隠蔽
+	DirectXBase() = default;
+	~DirectXBase() = default;
+	// コピーコンストラクタ、コピー代入演算子の封印
+	DirectXBase(DirectXBase&) = delete;
+	DirectXBase& operator=(DirectXBase&) = delete;
+
 public:
+
+	/// <summary>
+	/// シングルトンインスタンスの取得
+	/// </summary>
+	/// <returns>Input* instance</returns>
+	static DirectXBase* GetInstance();
+
+	/// <summary>
+	/// 終了
+	/// </summary>
+	void Finalize();
 
 	void Update();
 	/// <summary>
@@ -25,6 +47,9 @@ public:
 	void Initialize();
 
 	void InitializePosteffect();
+
+	// 毎フレームで呼び出す
+	float GetElapsedTime();
 
 	// 描画前処理
 	void PreDraw();
@@ -38,9 +63,10 @@ public:
 	// 描画後処理
 	void PostDrawRenderTexture();
 
-
-	// 終了処理
-	void Finalize();
+	void SetSceneRenderArea(float left, float top, float width, float height);
+	void ApplyFullViewport();
+	void ApplySceneViewport();
+	float GetSceneAspectRatio() const;
 
 	const DXGI_SWAP_CHAIN_DESC1 GetSwapChainDesc() const { return swapChainDesc; }
 
@@ -68,6 +94,9 @@ public:
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(size_t sizeInBytes);
 
+	// StructuredBuffer の UAV として使う GPU リソースを作成
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateUAVBufferResource(size_t sizeInBytes);
+
 	// DirectX12のTextureResourceを作る
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateTextureResource(const DirectX::TexMetadata& metadata);
 
@@ -76,6 +105,8 @@ public:
 
 	[[nodiscard]]
 	Microsoft::WRL::ComPtr<ID3D12Resource> UploadTextureData(Microsoft::WRL::ComPtr<ID3D12Resource> texture, const DirectX::ScratchImage& mipImages);
+
+	float GetMaxFPS() const { return m_MaxFPS; }
 
 private:
 
@@ -92,6 +123,7 @@ private:
 
 	// 起動時間(FPS固定用)
 	std::chrono::steady_clock::time_point reference_;
+	float m_MaxFPS = 60.0f;
 
 	/// <summary>
 	/// デバイス初期化
@@ -176,8 +208,10 @@ private:
 	HANDLE fenceEvent;
 	// ビューポート矩形
 	D3D12_VIEWPORT viewPort{};
+	D3D12_VIEWPORT sceneViewPort{};
 	// シザー矩形
 	D3D12_RECT scissorRect{};
+	D3D12_RECT sceneScissorRect{};
 	// dxcCompilerを初期化
 	Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils = nullptr;
 	Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler = nullptr;
@@ -244,8 +278,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPilelineState = nullptr;
 
 	uint32_t textureIndex;
-
-	OffScreenRnedering* offscreen = nullptr;
 
 	float clearColor[4];
 

@@ -1,6 +1,6 @@
 #include "Object3d.h"
 #include "Object3dBase.h"
-#include "SpriteBase.h"
+#include "Render2DBase.h"
 #include "Camera.h"
 #include "ModelManager.h"
 #include "TextureManager.h"
@@ -14,6 +14,8 @@
 #include "BaseScene.h"
 #include "SceneManager.h"
 #include "SkyBox.h"
+#include <memory>
+#include <vector>
 
 #pragma once
 
@@ -42,11 +44,15 @@ public:
 
 	const bool& EndRequest() override { return finished; }
 
+
 private:
 	bool finished = false;
-	Camera* camera = nullptr;
+	std::unique_ptr<Camera> camera;
 	Input* input = nullptr;
+	std::vector<std::unique_ptr<Object3d>> pbrObjects;
+	std::vector<std::unique_ptr<Object3d>> normalMapObjects;
+	std::unique_ptr<Object3d> pointLightMarker;
+	float pointLightAngle = 0.0f;
 
-	Object3d* grid = nullptr;
 };
 

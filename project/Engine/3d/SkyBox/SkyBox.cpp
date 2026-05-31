@@ -6,6 +6,12 @@
 #include "TextureManager.h"
 #include "SrvManager.h"
 #include "Camera.h"
+#include "Light.h"
+
+#ifndef NDEBUG
+#include "ImGuiManager.h"
+#endif // !NDEBUG
+
 
 using namespace Logger;
 
@@ -32,11 +38,10 @@ void SkyBox::SetCamera(Camera* camera) {
 	camera_ = camera;
 }
 
-void SkyBox::Initialize(DirectXBase* directxBase) {
-	directxBase_ = directxBase;
+void SkyBox::Initialize() {
 	CreateGraphicsPipeLineState();
 
-	transformationMatrixResource = directxBase_->CreateBufferResource(sizeof(TransformationMatrix));
+	transformationMatrixResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(TransformationMatrix));
 	// 書き込むためのアドレスを取得
 	transformationMatrixResource->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrix));
 
@@ -44,25 +49,32 @@ void SkyBox::Initialize(DirectXBase* directxBase) {
 	transformationMatrix->WVP = MakeIdentity4x4();
 	transformationMatrix->World = MakeIdentity4x4();
 
-	materialResource = directxBase_->CreateBufferResource(sizeof(Material));
+	materialResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(Material));
 	//  書き込むためのアドレスを取得
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
 
-	materialData->color = { 1.0f, 1.0f, 1.0f, 1.0f };
-
-	//materialData->uvTransform = MakeIdentity4x4();
+	//materialData->color = { 1.0f, 1.0f, 1.0f, 1.0f };
+	materialData->color = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 	// 頂点リソースの作成
-	vertexResource = directxBase_->CreateBufferResource(sizeof(VertexData) * 24);
+	vertexResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(VertexData) * 24);
 
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
+
+	sunResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(Sun));
+	sunResource->Map(0, nullptr, reinterpret_cast<void**>(&sunData));
+
+	sunData->power = 0.0f;
+	sunData->topColor = { 0.45f, 0.65f, 1.0f };
+	sunData->bottomColor = { 0.02f, 0.05f, 0.15f };
+	sunData->sunDirection = { 0.0f, 1.0f, 0.0f };
 
 	// 頂点バッファビューを作成する
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
 	vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * 24);
 	vertexBufferView.StrideInBytes = sizeof(VertexData);
 
-	indexResource = directxBase_->CreateBufferResource(sizeof(uint32_t) * 36);
+	indexResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(uint32_t) * 36);
 
 	indexBufferView.BufferLocation = indexResource->GetGPUVirtualAddress();
 	indexBufferView.SizeInBytes = UINT(sizeof(uint32_t) * 36);
@@ -189,6 +201,9 @@ void SkyBox::CreateRootSignature() {
 	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;           // PixelShaderで使う
 	rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange;        // Tableの中身の配列を指定
 	rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange);
+	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;              // CBVを使う
+	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;           // PixelShaderで使う
+	rootParameters[3].Descriptor.ShaderRegister = 1;                              // レジスタ番号0とバインド
 	descriptionRootSignature.pParameters = rootParameters;              // ルートパラメータ配列へのポインタ
 	descriptionRootSignature.NumParameters = _countof(rootParameters);  // 配列の長さ
 
@@ -200,7 +215,7 @@ void SkyBox::CreateRootSignature() {
 		assert(false);
 	}
 	// バイナリをもとに作成
-	hr = directxBase_->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
+	hr = DirectXBase::GetInstance()->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
 	assert(SUCCEEDED(hr));
 
 
@@ -209,14 +224,6 @@ void SkyBox::CreateRootSignature() {
 	inputElementDescs[0].SemanticIndex = 0;
 	inputElementDescs[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	inputElementDescs[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-	/*inputElementDescs[1].SemanticName = "TEXCOORD";
-	inputElementDescs[1].SemanticIndex = 0;
-	inputElementDescs[1].Format = DXGI_FORMAT_R32G32_FLOAT;
-	inputElementDescs[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;*/
-	/*inputElementDescs[2].SemanticName = "NORMAL";
-	inputElementDescs[2].SemanticIndex = 0;
-	inputElementDescs[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-	inputElementDescs[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;*/
 	inputLayoutDesc.pInputElementDescs = inputElementDescs;
 	inputLayoutDesc.NumElements = _countof(inputElementDescs);
 	// BlendStateの設定
@@ -236,9 +243,9 @@ void SkyBox::CreateRootSignature() {
 	// 三角形の中を塗りつぶす
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 	// Shaderをコンパイルする
-	vertexShaderBlob = directxBase_->CompileShader(L"Resources/shaders/Skybox.VS.hlsl", L"vs_6_0");
+	vertexShaderBlob = DirectXBase::GetInstance()->CompileShader(L"Resources/shaders/SkyBox/Skybox.VS.hlsl", L"vs_6_0");
 	assert(vertexShaderBlob != nullptr);
-	pixelShaderBlob = directxBase_->CompileShader(L"Resources/shaders/Skybox.PS.hlsl", L"ps_6_0");
+	pixelShaderBlob = DirectXBase::GetInstance()->CompileShader(L"Resources/shaders/SkyBox/Skybox.PS.hlsl", L"ps_6_0");
 	assert(pixelShaderBlob != nullptr);
 
 	// DepthStencilStateの設定
@@ -272,7 +279,7 @@ void SkyBox::CreateGraphicsPipeLineState() {
 	graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc;
 	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	// 実際に生成
-	HRESULT hr = directxBase_->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPilelineState));
+	HRESULT hr = DirectXBase::GetInstance()->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPilelineState));
 	assert(SUCCEEDED(hr));
 }
 
@@ -302,30 +309,61 @@ void SkyBox::Update() {
 		worldViewProjectionMatrix = worldMatrix;
 	}
 
+	Vector3 sunDirection = Light::GetInstance()->GetDirectionDirectionalLight();
+	sunData->sunDirection = { sunDirection.x, -sunDirection.y, sunDirection.z };
+
 	transformationMatrix->WVP = worldViewProjectionMatrix;
 	transformationMatrix->World = worldMatrix;
+
+#ifndef NDEBUG
+	ImGui::Begin("Sun Settings");
+
+	// Power
+	ImGui::SliderFloat("Power", &sunData->power, 0.0f, 1.0f);
+
+	// Direction
+	ImGui::Text("Sun Direction");
+	ImGui::DragFloat3("Direction", &sunData->sunDirection.x, 0.01f);
+	// 正規化したい場合
+	if (ImGui::Button("Normalize Direction"))
+	{
+		sunData->sunDirection = Normalize(sunData->sunDirection);
+	}
+
+	// Top Color
+	ImGui::ColorEdit3("Top Color", &sunData->topColor.x);
+
+	// Bottom Color
+	ImGui::ColorEdit3("Bottom Color", &sunData->bottomColor.x);
+
+	ImGui::End();
+#endif // !NDEBUG
+
+
 }
 
 void SkyBox::Draw() {
 	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-	directxBase_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
+	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
 	// PSOを設定
-	directxBase_->GetCommandList()->SetPipelineState(graphicsPilelineState.Get());
+	DirectXBase::GetInstance()->GetCommandList()->SetPipelineState(graphicsPilelineState.Get());
 	// 形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけば良い
-	directxBase_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	DirectXBase::GetInstance()->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// wvp用のCBufferの場所を設定
-	directxBase_->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
+	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
 
 	// wvp用のCBufferの場所を設定
-	directxBase_->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
 
-	directxBase_->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView); // VBVを設定
+	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(3, sunResource->GetGPUVirtualAddress());
 
-	directxBase_->GetCommandList()->IASetIndexBuffer(&indexBufferView); // VBVを設定
+	DirectXBase::GetInstance()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView); // VBVを設定
+
+	DirectXBase::GetInstance()->GetCommandList()->IASetIndexBuffer(&indexBufferView); // VBVを設定
 
 	SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(2, srvIndex);
 
-	directxBase_->GetCommandList()->DrawIndexedInstanced(36, 1, 0, 0, 0);
+	DirectXBase::GetInstance()->GetCommandList()->DrawIndexedInstanced(36, 1, 0, 0, 0);
 
 }

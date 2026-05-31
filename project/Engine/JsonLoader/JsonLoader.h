@@ -6,6 +6,8 @@
 #include <fstream>
 #include <Windows.h>
 #include <map>
+#include <memory>
+#include "Vector2.h"
 
 struct Children
 {
@@ -18,12 +20,29 @@ struct Children
 	std::string	file_name;
 };
 
+struct TrapData
+{
+	bool move;
+
+	Transform velocity;
+
+	bool loop;
+	bool reverse;
+
+	float runTime;
+
+	bool spawner;
+	float spawnTime;
+	Vector2 spawnerTime;
+};
+
 struct JsonData
 {
 	std::string type;
 	std::string name;
 
 	Transform transform;
+	TrapData trap;
 
 	std::string	file_name;
 
@@ -77,7 +96,33 @@ public:
 	/// </summary>
 	void Initialize();
 
-	const LevelData LoadJsonTransform(const std::string& directoryPath, const std::string& fileName);
+    /// <summary>
+    /// 指定した名前のJSONが読み込まれているかを確認します。
+    /// </summary>
+    /// <param name="jsonName">確認対象のJSONの名前または識別子を表す文字列。</param>
+    /// <returns>指定したJSONが読み込まれている場合はtrue、そうでない場合はfalse。</returns>
+    bool CheckJsonLoaded(const std::string& jsonName);
+
+	/// <summary>
+	/// 指定したJSONの削除
+	/// </summary>
+    void DeleteJson(const std::string& jsonName);
+
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="path">Jsonのパス</param>
+	/// <param name="jsonName">保存するJson名</param>
+	/// <param name="Overwrite">上書きするか</param>
+	void LoadJson(const std::string& path, const std::string& jsonName, const bool Overwrite = false);
+
+	void SerchTransformFunctional(const std::string& jsonName, const std::string file_name, std::function<void(Transform transform)> function);
+
+	const std::vector<JsonData> GetJsonData(const std::string& jsonName, const std::string file_name);
+
+private:
+
+	std::map<std::string, LevelData> levelDatas;
 
 };
 

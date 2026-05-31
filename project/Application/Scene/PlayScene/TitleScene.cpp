@@ -1,378 +1,219 @@
 #include "TitleScene.h"
-#include "externels/imgui/imgui.h"
-#include "externels/imgui/imgui_impl_dx12.h"
-#include "externels/imgui/imgui_impl_win32.h"
+#include "ImGuiManager.h"
 #include "WinApp.h"
+#include "GameTime.h"
+#include "EasingUtility.h"
+#include "Light.h"
+#include "FadeManager.h"
+#include "Collision.h"
 
+using namespace std;
 
 void TitleScene::Initialize() {
 
-	//ModelManager::GetInstance()->LoadModel("Resources/Model/gltf/human", "walkMultiMaterial.gltf", true, true);
+    m_pCamera = make_unique<Camera>();
+    m_pCamera->SetRotate(Vector3(SwapRadian(11.5f), SwapRadian(1.5f), 0.0f));
+    m_pCamera->SetTranslate({ -1.0f, 1.6f, -3.4f });
+    m_screenChangeTransformPre = m_pCamera->GetTransform();
+    m_pCamera->Update();
 
-	camera = new Camera();
-	camera->SetRotate(Vector3(SwapRadian(10.0f), 0.0f, 0.0f));
-	camera->SetTranslate({ 0.0f, 2.8f, -8.0f });
+    TextureManager::GetInstance()->LoadTexture("Resources/white1x1.dds");
 
-	TextureManager::GetInstance()->LoadTexture("Resources/rostock_laage_airport_4k.dds");
+    SkyBox::GetInstance()->SetCamera(m_pCamera.get());
+    SkyBox::GetInstance()->SetTexture("Resources/white1x1.dds");
+    SkyBox::GetInstance()->SetSunPoewr(1.0f);
 
-	SkyBox::GetInstance()->SetCamera(camera);
-	SkyBox::GetInstance()->SetTexture("Resources/rostock_laage_airport_4k.dds");
+    m_pInput = Input::GetInstance();
 
-	input = Input::GetInstance();
-	input->ShowMouseCursor(true);
+    Object3dBase::GetInstance()->SetDefaultCamera(m_pCamera.get());
 
-	Object3dBase::GetInstance()->SetDefaultCamera(camera);
+    ParticleManager::GetInstance()->SetCamera(m_pCamera.get());
 
-	ParticleManager::GetInstance()->SetCamera(camera);
+    m_charModel = make_unique<Object3d>();
+    m_charModel->Initialize();
+    m_charModel->SetModel("Resources/Model/gltf", "TitleSceneChar.gltf", true, true);
+    m_charModel->AddAnimation("Resources/Model/gltf", "sceneChange_Animation.gltf", "TitleScreen");
+    m_charModel->ToggleStartAnimation();
+    m_charModel->SetRotate({ 0.0f, SwapRadian(180.0f), 0.0f});
+    m_charModel->Update();
 
-	playerModel = new Object3d();
-	playerModel->Initialize();
-	playerModel->SetModel("Resources/Model/gltf/char", "idle.gltf", true, true);
-	playerModel->ToggleStartAnimation();
-	playerModel->SetTranslate({ 0.0f, 0.1f, 0.0f });
+    m_bootScreen = make_unique<Object3d>();
+    m_bootScreen->Initialize();
+    m_bootScreen->SetModel("Resources/Model/obj/Title", "TitleScene_01.obj", true);
+    m_bootScreen->Update();
 
-	stageModel = new Object3d();
-	stageModel->Initialize();
-	stageModel->SetModel("Resources/Debug/gltf", "LandPlate.gltf", true);
+    Vector2 windowSize = { WinApp::GetInstance()->GetWindowSize() };
+    
+    m_gamePad = make_unique<Sprite>();
+    m_gamePad->Initialize("Resources/Sprite/UI/gamepad.png");
+    m_gamePad->SetPosition({ windowSize.x - m_gamePad->GetTextureSize().x - 10.0f, windowSize.y - m_gamePad->GetTextureSize().y - 10.0f });
+    // ゲームパッドが接続されている場合は、ゲームパッドのアイコンをAlpha1.0fで表示する
+    if (m_pInput->IsConnectedController())
+    {
+        m_gamePad->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+    }
+    else
+    {
+        m_gamePad->SetColor({ 1.0f, 1.0f, 1.0f, 0.5f });
+    }
 
-	startUI = new UI();
-	startUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f), float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) - 64.0f * 3.0f }, Origin::Center, "Resources/Sprite/UI/start.png");
-	startUI->function = [this]() {
-		Audio::GetInstance()->Play("enter");
-		start = true;
-	};
+    m_credit_sound = make_unique<Sprite>();
+    m_credit_sound->Initialize("Resources/Sprite/UI/credit_sound.png");
+    m_credit_sound->SetAnchorPoint({ 0.5f, 0.5f });
+    m_credit_sound->SetPosition({ windowSize.x / 4.0f, windowSize.y / 2.0f });
 
-	playUI = new UI();
-	playUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f) + 128.0f, float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) }, Origin::Center, "Resources/Sprite/UI/play.png");
-	playUI->function = []() {
-		Audio::GetInstance()->Play("enter");
-		SceneManager::GetInstance()->SetNextScene("GAMESCENE");
-	};
+    m_creditUI = make_unique<UI::Button>();
+    m_creditUI->Initialize("Resources/Sprite/UI/credit.png", *m_pInput);
+    m_creditUI->SetPosition({ windowSize.x * 0.05f, windowSize.y * 0.95f });
+    std::function<void()>creditFunc = [this]() {
+        m_showCredit = !m_showCredit;
+        Audio::GetInstance()->Play("select");
+        };
+    m_creditUI->SetActiveReaction(creditFunc);
+    m_creditUI->AddInteractBinding(UI::InputTrigger{ .key = DIK_SPACE, .mouseButton = 0, .controller = Controller::A });
+    m_creditUI->AddInteractBinding(UI::InputTrigger{ .key = DIK_RETURN });
+    m_creditUI->ShowThisFrame();
 
-	settingUI = new UI();
-	settingUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f) + 128.0f, float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) + 72.0f }, Origin::Center, "Resources/Sprite/UI/setting.png");
-	settingUI->function = [this]() {
-		Audio::GetInstance()->Play("enter");
-	};
+    m_titleSceneUI = make_unique<TitleSceneUI>();
 
-	exitUI = new UI();
-	exitUI->CreateButton({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f) + 128.0f, float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) + 72.0f * 2.0f }, Origin::Center, "Resources/Sprite/UI/exit.png");
-	exitUI->function = [this]() {
-		finished = true;
-	};
+    FadeManager::GetInstance()->FadeIn(1.0f);
 
-	creditUI = new UI();
-	creditUI->CreateButton({ 64.0f + 16.0f, float(WinApp::GetInstance()->GetkClientHeight() - 24.0f - 16.0f) }, Origin::Center, "Resources/Sprite/UI/credit.png");
-	creditUI->function = [this]() {
-		showCredit = !showCredit;
-		Audio::GetInstance()->Play("enter");
-	};
+    Light::GetInstance()->SetPositionPointLight({ 0.2f, 1.9f, 3.4f });
+    Light::GetInstance()->SetIntensityPointLight(1.0f);
+    Light::GetInstance()->SetRadiusPointLight(4.0f);
+    Light::GetInstance()->SetColorPointLight(Vector4{ 1.0f, 93.0f / 255.0f, 0.0f, 1.0f });
 
-	uiFrame = new Sprite();
-	uiFrame->Initialize("Resources/Sprite/UI/uiFrame.png");
-	uiFrame->SetAnchorPoint({ 0.5f, 0.5f });
-	uiFrame->SetPosition({playUI->GetTransform().translate.x, playUI->GetTransform().translate.y });
+    Light::GetInstance()->SetDirectionDirectionalLight({ 0.174f, -0.35f, 1.0f });
+    Light::GetInstance()->SetIntensityDirectionalLight(1.0f);
+    Light::GetInstance()->SetRadius(m_pCamera->GetFarClipDistance());
 
-	gamePad = new Sprite();
-	gamePad->Initialize("Resources/Sprite/UI/gamepad.png");
-	//gamePad->SetAnchorPoint({ 0.5f, 0.5f });
-	gamePad->SetPosition({ float(WinApp::GetInstance()->GetkClientWidth() - gamePad->GetTextureSize().x - 10.0f), float(WinApp::GetInstance()->GetkClientHeight() - gamePad->GetTextureSize().y - 10.0f) });
+    m_sceneScreen = TitleSceneScreen::BootScreen;
 
-	gamePadOnFrame = new Sprite();
-	gamePadOnFrame->Initialize("Resources/Sprite/UI/gamepadONFrame.png");
-	//gamePadOnFrame->SetAnchorPoint({ 0.5f, 0.5f });
-	gamePadOnFrame->SetPosition({ float(WinApp::GetInstance()->GetkClientWidth() - gamePad->GetTextureSize().x - 10.0f), float(WinApp::GetInstance()->GetkClientHeight() - gamePad->GetTextureSize().y - 10.0f) });
-
-	credit_sound = new Sprite();
-	credit_sound->Initialize("Resources/Sprite/UI/credit_sound.png");
-	credit_sound->SetAnchorPoint({ 0.5f, 0.5f });
-	credit_sound->SetPosition({ float(WinApp::GetInstance()->GetkClientWidth() / 2.0f), float(WinApp::GetInstance()->GetkClientHeight() / 2.0f) });
-
-	Audio::GetInstance()->LoadMP3("Resources/sound/select.mp3", "select", 1.0f);
-	Audio::GetInstance()->LoadMP3("Resources/sound/enter.mp3", "enter", 1.0f);
-	Audio::GetInstance()->LoadMP3("Resources/sound/Experimenta_Model_short.mp3", "bgm", 0.2f);
-
-	//Audio::GetInstance()->Play("bgm", true);
-
-	Audio::GetInstance()->SetMasterVolume(0.2f);
 }
 
 void TitleScene::Update() {
 
-	if (start)
-	{
-		Vector3 position;
+    if (FadeManager::GetInstance()->IsFade())
+    {
+        return;
+    }
 
-		if (input->TriggerKey(DIK_S) || input->TriggerKey(DIK_DOWN) || input->TriggerXButton(DPad::Down))
-		{
-			int selectNum = static_cast<int>(select);
-			selectNum++;
-			if (selectNum > maxSelectNum)
-			{
-				selectNum = 0;
-			}
-			select = static_cast<Select>(selectNum);
-			isUIFrameMove = true;
-			uiFrameMoveTimer = 0.0f;
-		}
-		if (input->TriggerKey(DIK_W) || input->TriggerKey(DIK_UP) || input->TriggerXButton(DPad::Up))
-		{
-			int selectNum = static_cast<int>(select);
-			selectNum--;
-			if (selectNum < 0)
-			{
-				selectNum = maxSelectNum;
-			}
-			select = static_cast<Select>(selectNum);
-			isUIFrameMove = true;
-			uiFrameMoveTimer = 0.0f;
-		}
-		
-		if (select != selectPre)
-		{
-			Audio::GetInstance()->Play("select");
-			switch (select)
-			{
-			case Select::Play:
-				uiFrameStartPoint = uiFrame->GetTransform().translate;
-				uiFrameEndPoint = playUI->GetTransform().translate;
-				break;
-			case Select::Setting:
-				uiFrameStartPoint = uiFrame->GetTransform().translate;
-				uiFrameEndPoint = settingUI->GetTransform().translate;
-				break;
-			case Select::Exit:
-				uiFrameStartPoint = uiFrame->GetTransform().translate;
-				uiFrameEndPoint = exitUI->GetTransform().translate;
-				break;
-			case Select::Credit:
-				uiFrameStartPoint = uiFrame->GetTransform().translate;
-				uiFrameEndPoint = creditUI->GetTransform().translate;
-				break;
-			}
-		}
+    if (m_pInput->TriggerKey(DIK_ESCAPE))
+    {
+        finished = true;
+    }
 
-		if (playUI->InCursor() && select != Select::Play)
-		{
-			select = Select::Play;
-			uiFrameStartPoint = uiFrame->GetTransform().translate;
-			uiFrameEndPoint = playUI->GetTransform().translate;
-			Audio::GetInstance()->Play("select");
-			isUIFrameMove = true;
-			uiFrameMoveTimer = 0.0f;
-		}
-		if (settingUI->InCursor() && select != Select::Setting)
-		{
-			select = Select::Setting;
-			uiFrameStartPoint = uiFrame->GetTransform().translate;
-			uiFrameEndPoint = settingUI->GetTransform().translate;
-			Audio::GetInstance()->Play("select");
-			isUIFrameMove = true;
-			uiFrameMoveTimer = 0.0f;
-		}
-		if (exitUI->InCursor() && select != Select::Exit)
-		{
-			select = Select::Exit;
-			uiFrameStartPoint = uiFrame->GetTransform().translate;
-			uiFrameEndPoint = exitUI->GetTransform().translate;
-			Audio::GetInstance()->Play("select");
-			isUIFrameMove = true;
-			uiFrameMoveTimer = 0.0f;
-		}
-		if (creditUI->InCursor() && select != Select::Credit)
-		{
-			select = Select::Credit;
-			uiFrameStartPoint = uiFrame->GetTransform().translate;
-			uiFrameEndPoint = creditUI->GetTransform().translate;
-			Audio::GetInstance()->Play("select");
-			isUIFrameMove = true;
-			uiFrameMoveTimer = 0.0f;
-		}
+    m_titleSceneUI->Update(m_sceneScreen);
 
-		
+    std::string pressUI = m_titleSceneUI->GetPressUI();
 
-		if (uiFrameMoveTimer >= 1.0f)
-		{
-			uiFrameMoveTimer = 0.0f;
-			uiFrameStartPoint = { 0.0f, 0.0f };
-			uiFrameEndPoint = { 0.0f, 0.0f };
-			isUIFrameMove = false;
-		}
-		if (isUIFrameMove)
-		{
-			uiFrameMoveTimer += 1.0f / 60.0f / uiFrameMoveLImitTime;
-			position = easeOutQuint(uiFrameMoveTimer, uiFrameStartPoint, uiFrameEndPoint);
-			uiFrame->SetPosition({ position.x, position.y });
-		}
-		
-		if (input->TriggerKey(DIK_RETURN) || input->TriggerKey(DIK_SPACE))
-		{
-			switch (select)
-			{
-			case TitleScene::Select::Play:
-				playUI->TriggerFunction();
-				break;
-			case TitleScene::Select::Setting:
-				settingUI->TriggerFunction();
-				break;
-			case TitleScene::Select::Exit:
-				exitUI->TriggerFunction();
-				break;
-			case TitleScene::Select::Credit:
-				creditUI->TriggerFunction();
-				break;
-			}
-		}
-		if (playUI->OnButton())
-		{
-			playUI->TriggerFunction();
-		}
-		else if (settingUI->OnButton())
-		{
-			settingUI->TriggerFunction();
-		}
-		else if (exitUI->OnButton())
-		{
-			exitUI->TriggerFunction();
-		}
-		else if (creditUI->OnButton())
-		{
-			creditUI->TriggerFunction();
-		}
+    if (pressUI == "bootScreen")
+    {
+        m_sceneScreen = TitleSceneScreen::TitleScreen;
+    }
+    else if (pressUI == "start" && !m_showCredit)
+    {
+        m_screenChange = true;
+        m_charModel->ChangePlayAnimation("TitleScreen");
+        m_charModel->ResetAnimationTime();
+    }
+    else if (pressUI == "exit" && !m_showCredit)
+    {
+        finished = true;
+    }
 
-	}
-	else
-	{
-		if (startUI->OnButton())
-		{
-			startUI->TriggerFunction();
-		}
-	}
+    switch (m_sceneScreen)
+    {
+    case TitleSceneScreen::TitleScreen:
+        
+        if (m_screenChange)
+        {
+            m_screenChangeTimer += GameTime::GetInstance()->GetDeltaTime() / m_screenChangeTime[m_changeNum];
+            m_screenChangeTimer = std::clamp(m_screenChangeTimer, 0.0f, 1.0f);
+            Transform cameraT = Transform::Default;
+            cameraT.rotate = Lerp(m_screenChangeTransformPre.rotate, m_screenChangeTransform[m_changeNum].rotate, m_screenChangeTimer);
+            cameraT.translate = Lerp(m_screenChangeTransformPre.translate, m_screenChangeTransform[m_changeNum].translate, m_screenChangeTimer);
+            m_pCamera->SetTransform(cameraT);
 
-	if (input->PushKey(DIK_ESCAPE))
-	{
-		finished = true;
-	}
+            if (m_screenChangeTimer == 1.0f && m_changeNum == 0)
+            {
+                m_screenChangeTimer = 0.0f;
+                m_screenChangeTransformPre = cameraT;
+                m_changeNum++;
+                FadeManager::GetInstance()->FadeOut(0.4f);
+                FadeManager::GetInstance()->SetColor({ 1.0f, 1.0f, 1.0f });
+            }
 
-	if (input->IsConnectedController())
-	{
-		gamePad->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
-	}
-	else
-	{
-		gamePad->SetColor({ 1.0f, 1.0f, 1.0f, 0.5f });
-	}
+            if (m_screenChangeTimer == 1.0f && m_changeNum == 1)
+            {
+                SceneManager::GetInstance()->SetNextScene("GAMESCENE");
+                m_screenChange = false;
+            }
+        }
 
-	uiFrame->Update();
+        // creditの表示
+        m_creditUI->Update();
 
-	gamePad->Update();
+        m_gamePad->Update();
+        m_credit_sound->Update();
 
-	gamePadOnFrame->Update();
+        break;
+    }
 
-	credit_sound->Update();
+    Vector2 mousePos = m_pInput->GetMousePos2();
 
-	stageModel->Update();
+    m_bootScreen->Update();
 
-	playerModel->Update();
+    m_charModel->Update();
 
-	camera->Update();
+    SkyBox::GetInstance()->Update();
 
-	SkyBox::GetInstance()->Update();
-
-	input->Update();
-
-	selectPre = select;
+    m_pCamera->Update();
 }
 
 void TitleScene::Draw() {
 
-	if (start)
-	{
-		SpriteBase::GetInstance()->ShaderDraw();
+    switch (m_sceneScreen)
+    {
+    case TitleSceneScreen::BootScreen:
 
+        Object3dBase::GetInstance()->ShaderDraw();
 
+        m_bootScreen->Draw();
+        m_charModel->Draw();
 
-		Object3dBase::GetInstance()->ShaderDraw();
+        Render2DBase::GetInstance()->ShaderDraw();
 
-		stageModel->Draw();
+        m_titleSceneUI->DrawBootScreen();
 
-		SkinningObject3dBase::GetInstance()->ShaderDraw();
+        break;
+    case TitleSceneScreen::TitleScreen:
 
-		playerModel->Draw();
+        Object3dBase::GetInstance()->ShaderDraw();
 
-		WireFrameObjectBase::GetInstance()->ShaderDraw();
+        m_bootScreen->Draw();
+        m_charModel->Draw();
 
+        SkinningObject3dBase::GetInstance()->ShaderDraw();
 
-		ParticleManager::GetInstance()->Draw();
+        Render2DBase::GetInstance()->ShaderDraw();
 
-		SpriteBase::GetInstance()->ShaderDraw();
+        Render2DBase::GetInstance()->ShaderDraw();
 
-		playUI->Draw();
-		settingUI->Draw();
-		exitUI->Draw();
-		creditUI->Draw();
+        m_gamePad->Draw();
+        m_creditUI->Draw();
+        m_titleSceneUI->DrawTitleScreen();
+        if (m_showCredit)
+        {
+            m_credit_sound->Draw();
+        }
 
-		uiFrame->Draw();
-		gamePad->Draw();
-		if (input->IsConnectedController())
-		{
-			gamePadOnFrame->Draw();
-		}
+        break;
+    }
 
-		if (showCredit)
-		{
-			credit_sound->Draw();
-		}
-	}
-	else
-	{
-		SpriteBase::GetInstance()->ShaderDraw();
-
-
-
-		Object3dBase::GetInstance()->ShaderDraw();
-
-		stageModel->Draw();
-
-		SkinningObject3dBase::GetInstance()->ShaderDraw();
-
-		playerModel->Draw();
-
-		WireFrameObjectBase::GetInstance()->ShaderDraw();
-
-
-		ParticleManager::GetInstance()->Draw();
-
-		SpriteBase::GetInstance()->ShaderDraw();
-
-		startUI->Draw();
-	}
-
+    Render2DBase::GetInstance()->ShaderDraw();
 }
 
 void TitleScene::Finalize() {
 
-	delete stageModel;
-
-	delete camera;
-
-	delete playerModel;
-
-	delete startUI;
-
-	delete playUI;
-
-	delete exitUI;
-
-	delete settingUI;
-
-	delete creditUI;
-
-	delete uiFrame;
-
-	delete gamePad;
-
-	delete gamePadOnFrame;
-
-	delete credit_sound;
 }

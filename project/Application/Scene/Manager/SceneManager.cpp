@@ -1,11 +1,13 @@
 #include "SceneManager.h"
+#include "GameTime.h"
+
+using namespace std;
 
 SceneManager* SceneManager::instance = nullptr;
 
 void SceneManager::Finalize() {
-    nextScene_ = nullptr;
-    scene_->Finalize();
-    delete scene_;
+    m_nextScene = nullptr;
+    m_scene->Finalize();
 
     SceneFactory::GetInstance()->Finalize();
     delete instance;
@@ -23,39 +25,49 @@ SceneManager* SceneManager::GetInstance() {
 
 void SceneManager::SetNextScene(const std::string& sceneName)
 {
-    nextScene_ = SceneFactory::GetInstance()->ChangeScene(sceneName);
+    m_sceneName = sceneName;
+    drawStart = false;
+    m_nextScene = SceneFactory::GetInstance()->ChangeScene(sceneName);
 }
 
 void SceneManager::Update() {
     // 次のシーン予約があるなら
-    if (nextScene_) {
+    if (m_nextScene) {
         // 旧シーンの終了
-        if (scene_)
+        if (m_scene)
         {
-            scene_->Finalize();
-            delete scene_;
+            m_scene->Finalize();
         }
 
         // シーン切り替え
-        scene_ = nextScene_;
-        nextScene_ = nullptr;
+        m_scene = move(m_nextScene);
+        m_nextScene = nullptr;
 
-        scene_->SetSceneManager(this);
+        m_scene->SetSceneManager(this);
 
         // 次のシーンを初期化する
-        scene_->Initialize();
+        m_scene->Initialize();
     }
-    scene_->Update();
+    m_scene->Update();
 
-    if (scene_->EndRequest())
+    if (m_scene->EndRequest())
     {
-        roopOut_ = true;
+        loopOut_ = true;
     }
 }
 
 void SceneManager::Draw() {
-    if (scene_)
+    if (m_scene)
     {
-        scene_->Draw();
+        m_scene->Draw();
+    }
+}
+
+void SceneManager::CallStart()
+{
+    if (m_scene && !drawStart)
+    {
+        drawStart = true;
+        GameTime::GetInstance()->SetDeltaPoint();
     }
 }

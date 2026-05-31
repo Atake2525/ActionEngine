@@ -3,9 +3,9 @@
 #include <wrl.h>
 #pragma once
 
-class DirectXBase;
 class Camera;
 
+// モデルのワイヤーフレーム用クラス
 class WireFrameObjectBase {
 private:
 	// シングルトンパターンを適用
@@ -29,14 +29,12 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(DirectXBase* directxBase);
+	void Initialize();
 
 	/// <summary>
 	/// 共通描画設定
 	/// </summary>
 	void ShaderDraw();
-
-	DirectXBase* GetDxBase() const { return directxBase_; }
 
 	// Getter(Camera)
 	Camera* GetDefaultCamera() const { return defaultCamera; }
@@ -45,7 +43,6 @@ public:
 	void SetDefaultCamera(Camera* camera) { defaultCamera = camera; }
 
 private:
-	DirectXBase* directxBase_ = nullptr;
 
 	Camera* defaultCamera = nullptr;
 
@@ -61,19 +58,19 @@ public:
 private:
 	/// Rootsignature
 	// DescriptorRange
-	D3D12_DESCRIPTOR_RANGE descriptorRange[2] = {};
+	D3D12_DESCRIPTOR_RANGE descriptorRange[5] = {};
 	// Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
 	// Resource作る度に配列を増やしす
 	// RootParameter作成、PixelShaderのMatrixShaderのTransform
-	D3D12_ROOT_PARAMETER rootParameters[9] = {};
+	D3D12_ROOT_PARAMETER rootParameters[15] = {};
 	// シリアライズしてバイナリにする
 	Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob = nullptr;
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
 	// バイナリをもとに作成
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature = nullptr;
 	// InputLayout
-	D3D12_INPUT_ELEMENT_DESC inputElementDescs[3] = {};
+	D3D12_INPUT_ELEMENT_DESC inputElementDescs[5] = {};
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
 	// BlendStateの設定
 	D3D12_BLEND_DESC blendDesc{};

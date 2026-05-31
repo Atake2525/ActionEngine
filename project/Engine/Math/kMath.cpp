@@ -1,58 +1,5 @@
-﻿#include "kMath.h"
+#include "kMath.h"
 #include <algorithm>
-
-const Vector3 operator*(const Vector3& v, const float f) {
-	Vector3 result;
-	result.x = v.x * f;
-	result.y = v.y * f;
-	result.z = v.z * f;
-	return result;
-}
-
-//Vector3& operator+=(Vector3& v1, const Vector3& v2) {
-//	v1.x += v2.x;
-//	v1.y += v2.y;
-//	v1.z += v2.z;
-//	return v1;
-//}
-
-//const Vector3 operator+(const Vector3& v1, const Vector3 v2) {
-//	Vector3 result;
-//	result.x = v1.x + v2.x;
-//	result.y = v1.y + v2.y;
-//	result.z = v1.z + v2.z;
-//	return result;
-//}
-
-//Vector3& operator-=(Vector3& v1, const Vector3& v2) {
-//	v1.x -= v2.x;
-//	v1.y -= v2.y;
-//	v1.z -= v2.z;
-//	return v1;
-//}
-
-//const Vector3 operator-(Vector3& v1, const Vector3 v2) {
-//	Vector3 result;
-//	result.x = v1.x - v2.x;
-//	result.y = v1.y - v2.y;
-//	result.z = v1.z - v2.z;
-//	return result;
-//}
-
-//Vector3& operator*=(Vector3& v1, const Vector3& v2) {
-//	v1.x *= v2.x;
-//	v1.y *= v2.y;
-//	v1.z *= v2.z;
-//	return v1;
-//}
-
-const Vector3 operator*(const Vector3& v1, const Vector3& v2) {
-	Vector3 result;
-	result.x = v1.x * v2.x;
-	result.y = v1.y * v2.y;
-	result.z = v1.z * v2.z;
-	return result;
-}
 
 Vector3& operator/=(Vector3& v1, const Vector3& v2) {
 	v1.x /= v2.x;
@@ -69,38 +16,12 @@ const Vector3 operator/(const Vector3& v1, const Vector3 v2) {
 	return result;
 }
 
-const Vector3 operator+(const Vector3& v1, const float f) {
-	Vector3 result;
-	result.x = v1.x / f;
-	result.y = v1.y / f;
-	result.z = v1.z / f;
-	return result;
-}
-
-const Vector3 operator-(const Vector3& v1, const float f) {
-	Vector3 result;
-	result.x = v1.x / f;
-	result.y = v1.y / f;
-	result.z = v1.z / f;
-	return result;
-}
-
 const Vector3 operator/(const Vector3& v1, const float f) {
 	Vector3 result;
 	result.x = v1.x / f;
 	result.y = v1.y / f;
 	result.z = v1.z / f;
 	return result;
-}
-
-//const Vector3 operator-(const Vector3& v1) {
-//	Vector3 v;
-//	v -= v1;
-//	return v;
-//}
-
-Vector3 Vector3::operator-(const Vector3& other) const {
-	return { x - other.x, y - other.y, z - other.z };
 }
 
 //単位行列の作成
@@ -332,7 +253,10 @@ Vector3 MatrixTransform(const Vector3& vector, const Matrix4x4& matrix) {
 	ans.y = vector.x * matrix.m[0][1] + vector.y * matrix.m[1][1] + vector.z * matrix.m[2][1] + 1.0f * matrix.m[3][1];
 	ans.z = vector.x * matrix.m[0][2] + vector.y * matrix.m[1][2] + vector.z * matrix.m[2][2] + 1.0f * matrix.m[3][2];
 	float w = vector.x * matrix.m[0][3] + vector.y * matrix.m[1][3] + vector.z * matrix.m[2][3] + 1.0f * matrix.m[3][3];
-	assert(w != 0.0f);
+	if (w == 0.0f)
+	{
+		w = 1.0f;
+	}
 	ans.x /= w;
 	ans.y /= w;
 	ans.z /= w;
@@ -383,8 +307,8 @@ Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Ve
 	Matrix4x4 R = { 0 };
 	Matrix4x4 ans = { 0 };
 
-	R = Multiply(MakeRotateXMatrix(rotate.x), Multiply(MakeRotateYMatrix(rotate.y), MakeRotateZMatrix(rotate.z)));
-
+	//R = Multiply(MakeRotateXMatrix(rotate.x), Multiply(MakeRotateYMatrix(rotate.y), MakeRotateZMatrix(rotate.z)));
+	R = Multiply(MakeRotateZMatrix(rotate.z), Multiply(MakeRotateXMatrix(rotate.x), MakeRotateYMatrix(rotate.y)));
 
 	ans.m[0][0] = scale.x * R.m[0][0];
 	ans.m[0][1] = scale.x * R.m[0][1];
@@ -603,6 +527,12 @@ float Length(const Vector3& v) {
 	return result;
 }
 
+float Length(const Vector2& v)
+{
+	float result = sqrtf((v.x * v.x) + (v.y * v.y));
+    return result;
+}
+
 float Distance(const Vector3& v1, const Vector3& v2) {
 	Vector3 dist = { v1.x - v2.x, v1.y - v2.y, v1.z - v2.z };
 	float result = Length(dist);
@@ -624,117 +554,7 @@ Vector3 TransformNormal(const Vector3& v, const Matrix4x4& m) {
 	return result;
 }
 
-// ease In-Out x1 : 開始点  x2 : 目標点
-float easeInOut(float time, float x1, float x2) {
-	float T = time;
-	T = std::clamp(T, 0.0f, 1.0f);
-	float x;
-	// easeOut
-	float easedT = -(cos(float(M_PI * T)) - 1.0f) / 2.0f;
-
-	x = (1.0f - easedT) * x1 + easedT * x2;
-	return x;
-};
-
-// ease In-Out x1 : 開始点  x2 : 目標点
-int easeInOut(float t, unsigned int x1, unsigned int x2) {
-	float T = t;
-	T = std::clamp(T, 0.0f, 1.0f);
-	int x;
-	// easeOut
-	int easedT = -int((cos(float(M_PI * int(T))) - 1.0f) / 2.0f);
-
-	x = (1 - easedT) * x1 + easedT * x2;
-	return x;
-};
-
-// easeOutQuint
-float easeOutQuint(float t, float x1, float x2) {
-	float T = t;
-	T = std::clamp(T, 0.0f, 1.0f);
-	float x;
-	// easeOut
-	float easedT = 1.0f - pow(1.0f - T, 5.0f);
-
-	x = (1.0f - easedT) * x1 + easedT * x2;
-	return x;
-};
-
-// easeInBack
-float easeInBack(float t, float x1, float x2) {
-	float T = t;
-	T = std::clamp(T, 0.0f, 1.0f);
-	float x;
-	const float c1 = 1.70158f;
-	const float c3 = c1 + 1;
-	// easeOut
-	float easedT = c3 * T * T * T - c1 * T * T;
-
-	x = (1.0f - easedT) * x1 + easedT * x2;
-	return x;
-};
-
-// ease In-Out x1 : 開始点  x2 : 目標点
-Vector3 easeInOut(float time, Vector3 x1, Vector3 x2) {
-
-	Vector3 result;
-
-	result.x = easeInOut(time, x1.x, x2.x);
-	result.y = easeInOut(time, x1.y, x2.y);
-	result.z = easeInOut(time, x1.z, x2.z);
-
-	return result;;
-};
-
-// easeOutQuint
-Vector3 easeOutQuint(float t, Vector3 x1, Vector3 x2) {
-
-	Vector3 result;
-
-	result.x = easeOutQuint(t, x1.x, x2.x);
-	result.y = easeOutQuint(t, x1.y, x2.y);
-	result.z = easeOutQuint(t, x1.z, x2.z);
-
-	return result;;
-};
-
-// easeInBack
-Vector3 easeInBack(float t, Vector3 x1, Vector3 x2) {
-	Vector3 result;
-
-	result.x = easeInBack(t, x1.x, x2.x);
-	result.y = easeInBack(t, x1.y, x2.y);
-	result.z = easeInBack(t, x1.z, x2.z);
-
-	return result;;
-};
-
 Quaternion Slerp(const Quaternion& befor, const Quaternion& after, float t) {
-	//float dot = Dot(q0, q1);
-	//
-	//Quaternion quat1 = q1;
-
-	//// 最短経路補正（反転処理）
-	////Quaternion q1Mod = (dot < 0.0f) ? -q1 : q1;
-	//if (dot < 0.0f)
-	//{
-	//	quat1 = -quat1;
-	//}
-	//dot = std::clamp(dot, -1.0f, 1.0f); // acosの定義域に収める
-
-	//const float epsilon = 1e-6f;
-	//if (dot > 1.0f - epsilon) {
-	//	// ほぼ同じ方向なら線形補間で近似
-	//	return QuaternionNormalize(q0 * (1.0f - t) + quat1 * t);
-	//}
-
-	//float theta = std::acos(dot);
-	//float sinTheta = std::sin(theta);
-	//float scale0 = std::sin((1.0f - t) * theta) / sinTheta;
-	//float scale1 = std::sin(t * theta) / sinTheta;
-
-	//Quaternion result = q0 * scale0 + quat1 * scale1;
-	//return QuaternionNormalize(result);
 
 	Quaternion quat0 = befor;
 	Quaternion quat1 = after;
@@ -764,44 +584,6 @@ Quaternion Slerp(const Quaternion& befor, const Quaternion& after, float t) {
 
 	return QuaternionNormalize(scale0 * quat0 + scale1 * quat1);
 
-
-	//float time = t;
-
-	//Quaternion q = q0;
-	//Quaternion result;
-	//float dot = Dot(q0, q1);
-
-	//if (dot > 0.0f) { // 符号逆にしているからどこかで問題が起こる可能性あり
-	//	q = Inverse(q0);
-	//	dot = -dot;
-	//}
-
-	//dot = std::clamp(dot, -1.0f, 1.0f);
-
-
-	//// なす角を求める
-	//float theta = std::acos(dot);
-
-	//float scale0 = sin((1 - time) * theta) / sin(theta);
-	//float scale1 = sin(time * theta) / sin(theta);
-
-	//result.x = scale0 * q.x + scale1 * q1.x;
-	//result.y = scale0 * q.y + scale1 * q1.y;
-	//result.z = scale0 * q.z + scale1 * q1.z;
-	//result.w = scale0 * q.w + scale1 * q1.w;
-
-	//assert(!std::isnan(result.x));
-	//assert(!std::isnan(result.y));
-	//assert(!std::isnan(result.z));
-	//assert(!std::isnan(result.w));
-
-	//if (result.w > 1.0f || result.w < -1.0f)
-	//{
-	//	assert(false);
-	//}
-
-	//return result;
-
 }
 
 Quaternion QuaternionNormalize(const Quaternion q) {
@@ -826,9 +608,28 @@ Vector3 Lerp(const Vector3& befor, const Vector3& after, float t) {
 }
 
 float Lerp(const float& befor, const float& after, float t) {
+	float time = std::clamp(t, 0.0f, 1.0f);
 	float ans = 0.0f;
-	ans = t * after + (1.0f - t) * befor;
+	ans = time * after + (1.0f - time) * befor;
 	return ans;
+}
+
+float LerpInverse(float start, float end, float now)
+{
+	if (fabs(end - start) < 1e-6f) {
+		return 0.0f; // 分母が0になるのを防ぐ
+	}
+	return (now - start) / (end - start);
+
+}
+
+Vector3 LerpInverse(Vector3 start, Vector3 end, Vector3 now)
+{
+	return {
+		LerpInverse(start.x, end.x, now.x),
+		LerpInverse(start.y, end.y, now.y),
+		LerpInverse(start.z, end.z, now.z)
+	};
 }
 
 float Dot(const Quaternion& v1, const Quaternion& v2) { return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z + v1.w * v2.w; }
@@ -866,14 +667,44 @@ float LengthSquared(const Vector3& v)
 	return v.x * v.x + v.y * v.y + v.z * v.z;
 }
 
+// -----------------------------
+// 3. ビット演算（完全分岐なし）
+// -----------------------------
 float Sign(float value)
 {
-	if (value < 0.0f)
-	{
-		return -1.0f;
-	}
-	else
-	{
-		return 1.0f;
-	}
+	uint32_t bits = *(uint32_t*)&value;
+	float s = 1.0f - ((bits >> 31) << 1);
+	return s * (!!value);
+}
+
+Vector2 Sign(const Vector2& value)
+{
+	return { Sign(value.x), Sign(value.y) };
+}
+
+Vector3 Sign(const Vector3& value)
+{
+	return { Sign(value.x), Sign(value.y), Sign(value.z) };
+}
+
+const Vector2 Vector2::Clamp(Vector2 target, Vector2 min, Vector2 max) {
+	target.x = std::clamp(target.x, min.x, max.x);
+	target.y = std::clamp(target.y, min.y, max.y);
+	return target;
+}
+
+const Vector2 Vector2::Clamp(Vector2 target, float min, float max) {
+	target.x = std::clamp(target.x, min, max);
+	target.y = std::clamp(target.y, min, max);
+	return target;
+}
+
+int GetDigitCount(float value)
+{
+	value = std::fabs(value);
+
+	if (value < 1.0f)
+		return 1; // 0.x の場合は 1 桁として扱う
+
+	return static_cast<int>(std::floor(std::log10(value))) + 1;
 }

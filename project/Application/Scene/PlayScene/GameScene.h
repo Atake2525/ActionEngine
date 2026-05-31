@@ -1,7 +1,7 @@
 #include "BaseScene.h"
 #include "Object3d.h"
 #include "Object3dBase.h"
-#include "SpriteBase.h"
+#include "Render2DBase.h"
 #include "Camera.h"
 #include "ModelManager.h"
 #include "TextureManager.h"
@@ -13,12 +13,18 @@
 #include "ParticleManager.h"
 #include "Audio.h"
 #include "SceneManager.h"
-#include "Player.h"
 #include "SkyBox.h"
 #include "CollisionManager.h"
+#include <memory>
+#include "Player.h"
+#include "BaseStage.h"
+#include "Pause.h"
+#include "PlayerUI.h"
+#include "MouseCursor.h"
 
 #pragma once
 
+// ゲームシーン
 class GameScene : public BaseScene
 {
 public:
@@ -42,33 +48,45 @@ public:
 	/// </summary>
 	void Draw() override;
 
-	const bool& EndRequest() override { return finished; }
+	// 終了処理
+	const bool& EndRequest() override { return m_finished; }
 
 private:
-	float speed = 0.25f;
+	std::unique_ptr<Camera> m_pCamera = nullptr;
 
-	bool sneak = false;
+	bool m_finished = false;
 
-	Object3d* land = nullptr;
+	Input* m_pInput = nullptr;
+	std::unique_ptr<MouseCursor> m_mouseCursor = nullptr;
 
-	Camera* camera = nullptr;
+	bool m_cursorShow = false;
 
-	bool finished = false;
 
-	Transform cameraTransform;
-	Transform modelTransform;
+	std::unique_ptr<Player> m_pPlayer = nullptr;
+	std::unique_ptr<PlayerUI> m_pPlayerUI = nullptr;
 
-	Input* input = nullptr;
+	std::unique_ptr<BaseStage> m_pStage;
+	std::unique_ptr<Pause> m_pPause;
 
-	AABB aabb;
+	/// <summary>
+	/// ここからスタート演出用系
+	/// </summary>
 
-	bool enableLighting = true;
+	float m_startTimer = 0.0f;
+	float m_startTime = 1.5f;
 
-	bool cursorshow = true;
+	float m_finalScanRadius = 0.0f;
+	float m_finalFarClipDistance = 100.0f;
 
-	Vector2 leftTop;
-	Transform transformSprite;
+	int m_readyNumber = 0;
 
-	Player* player_ = nullptr;
+	enum class ScenePhase : int {
+		FadeIn = 0,
+		Ready = 1,
+		Game = 2,
+		FadeOut = 3,
+	};
+	ScenePhase m_scenePhase = ScenePhase::FadeIn;
+
 };
 

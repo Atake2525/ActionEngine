@@ -14,7 +14,8 @@ using namespace Logger;
 using namespace StringUtility;
 
 // 最大テクスチャ枚数
-const uint32_t SrvManager::kMaxSRVCount = 512;
+const uint32_t SrvManager::maxSRVCount = 512;
+const uint32_t SrvManager::maxUAVCount = 512;
 
 SrvManager* SrvManager::instance = nullptr;
 
@@ -30,21 +31,20 @@ void SrvManager::Finalize() {
 	instance = nullptr;
 }
 
-void SrvManager::Initialize(DirectXBase* directxBase) {
-	directxBase_ = directxBase;
+void SrvManager::Initialize() {
 	CreateDescriptorHeap();
 }
 
 void SrvManager::CreateDescriptorHeap() {
 	// でスクリプタヒープの生成
-	descriptorHeap = directxBase_->CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, kMaxSRVCount, true);
+	descriptorHeap = DirectXBase::GetInstance()->CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, maxSRVCount, true);
 	// デスクリプタ1個分のサイズを取得して記録
-	descriptorSize = directxBase_->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	descriptorSize = DirectXBase::GetInstance()->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 }
 
 uint32_t SrvManager::Allocate() {
 	// 上限に達していないかチェックしてassert
-	assert(useIndex < kMaxSRVCount);
+	assert(useIndex < maxSRVCount);
 
 	// returnする番号を一旦記録しておく
 	int index = useIndex;
@@ -56,7 +56,7 @@ uint32_t SrvManager::Allocate() {
 
 bool SrvManager::CheckAllocate()
 {
-	if (useIndex > kMaxSRVCount)
+	if (useIndex > maxSRVCount)
 	{
 		return false;
 	}
@@ -98,7 +98,7 @@ void SrvManager::CreateSRVforTexture2D(uint32_t srvIndex, Microsoft::WRL::ComPtr
 		srvDesc.Texture2D.MipLevels = UINT(metadata.mipLevels);
 	}
 
-	directxBase_->GetDevice()->CreateShaderResourceView(pResource.Get(), &srvDesc, GetCPUDescriptorHandle(srvIndex));
+	DirectXBase::GetInstance()->GetDevice()->CreateShaderResourceView(pResource.Get(), &srvDesc, GetCPUDescriptorHandle(srvIndex));
 
 }
 
@@ -123,20 +123,57 @@ void SrvManager::CreateSRVforTexture2D(uint32_t srvIndex, Microsoft::WRL::ComPtr
 		srvDesc.Texture2D.MipLevels = UINT(metaData.mipLevels);
 	}
 
-	directxBase_->GetDevice()->CreateShaderResourceView(pResource.Get(), &srvDesc, GetCPUDescriptorHandle(srvIndex));
+	DirectXBase::GetInstance()->GetDevice()->CreateShaderResourceView(pResource.Get(), &srvDesc, GetCPUDescriptorHandle(srvIndex));
 }
 
 void SrvManager::CreateSRVforStructuredBuffer(uint32_t srvIndex, Microsoft::WRL::ComPtr<ID3D12Resource> pResource, UINT numElements, UINT structureByteStride)
 {
+	assert(pResource != nullptr);
+	assert(numElements > 0);
+	assert(structureByteStride > 0);
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+	srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+	srvDesc.Buffer.FirstElement = 0;
+	srvDesc.Buffer.NumElements = numElements;
+	srvDesc.Buffer.StructureByteStride = structureByteStride;
+	srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+
+	DirectXBase::GetInstance()->GetDevice()->CreateShaderResourceView(pResource.Get(), &srvDesc, GetCPUDescriptorHandle(srvIndex));
+}
+
+void SrvManager::CreateUAVforStructuredBuffer(uint32_t uavIndex, Microsoft::WRL::ComPtr<ID3D12Resource> pResource, UINT numElements, UINT structureByteStride) {
+	assert(pResource != nullptr);
+	assert(numElements > 0);
+	assert(structureByteStride > 0);
+
+	D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc{};
+	uavDesc.Format = DXGI_FORMAT_UNKNOWN;
+	uavDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
+	uavDesc.Buffer.FirstElement = 0;
+	uavDesc.Buffer.NumElements = numElements;
+	uavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
+	uavDesc.Buffer.StructureByteStride = structureByteStride;
+
+	// 第二引数は今はnullptrにしておく
+	DirectXBase::GetInstance()->GetDevice()->CreateUnorderedAccessView(pResource.Get(), nullptr, &uavDesc, GetCPUDescriptorHandle(uavIndex));
 }
 
 void SrvManager::SetGraphicsRootDescriptorTable(UINT RootParameterIndex, uint32_t srvIndex)
 {
-	directxBase_->GetCommandList()->SetGraphicsRootDescriptorTable(RootParameterIndex, GetGPUDescriptorHandle(srvIndex));
+	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootDescriptorTable(RootParameterIndex, GetGPUDescriptorHandle(srvIndex));
+}
+
+void SrvManager::SetComputeRootDescriptorTable(UINT RootParameterIndex, uint32_t srvIndex)
+{
+	DirectXBase::GetInstance()->GetCommandList()->SetComputeRootDescriptorTable(RootParameterIndex, GetGPUDescriptorHandle(srvIndex));
 }
 
 void SrvManager::PreDraw() {
 	// 描画用のDescriptorHeapの設定
 	ID3D12DescriptorHeap* descriptorHeaps[] = { descriptorHeap.Get() };
-	directxBase_->GetCommandList()->SetDescriptorHeaps(1, descriptorHeaps);
+	DirectXBase::GetInstance()->GetCommandList()->SetDescriptorHeaps(1, descriptorHeaps);
 }
+

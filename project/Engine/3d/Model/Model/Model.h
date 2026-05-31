@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <cstdint>
 #include "Vector2.h"
 #include "Vector3.h"
 #include "Vector4.h"
@@ -19,12 +20,16 @@
 
 #pragma once
 
+// 頂点情報を格納するための構造体
 struct VertexData {
 	Vector4 position;
 	Vector2 texcoord;
 	Vector3 normal;
+	Vector3 tangent;
+	Vector3 binormal;
 };
 
+// マルチメッシュ、マルチマテリアル用の各種情報を格納するための構造体
 struct MaterialVertexData {
 	std::vector<VertexData> vertices;
 	std::vector<uint32_t> indices;
@@ -32,6 +37,7 @@ struct MaterialVertexData {
 	size_t materialIndex;
 };
 
+// マテリアル
 struct Material {
 	Vector4 color;
 
@@ -51,15 +57,26 @@ struct Material {
 	float pad2[2];
 };
 
+// マテリアル
 struct MaterialTemplate
 {
 	float metallic;
-	float padding[3];
+	float roughness;
+	float padding[2];
 };
 
 struct MaterialData {
 	std::string textureFilePath;
 	uint32_t textureIndex = 0;
+
+	std::string normalMapFilePath;
+	uint32_t normalMapIndex = 0;
+
+	std::string metallicMapFilePath;
+	uint32_t metallicMapIndex = 0;
+
+	std::string roughnessMapFilePath;
+	uint32_t roughnessMapIndex = 0;
 };
 
 
@@ -67,7 +84,7 @@ struct ModelData {
 	std::map<std::string, JointWeightData> skinClusterData;
 	std::vector<uint32_t> indices;
 	std::vector<VertexData> vertices;
-	std::vector<MaterialVertexData> matVertexData;
+	std::map<std::wstring, MaterialVertexData> matVertexData;
 	std::vector<MaterialData> material;
 	std::vector<MaterialTemplate> materialTemplate;
 	Node rootNode;
@@ -75,9 +92,15 @@ struct ModelData {
 
 class Model {
 public:
+	struct SkinningInformation
+	{
+		uint32_t numVertices;
+	};
 
 	// 初期化
 	void Initialize(std::string directoryPath, std::string filename, bool enableLighting, bool isAnimation);
+
+    void SkinningUpdate(const Skeleton& skeleton);
 
 	// 更新
 	void Draw();
@@ -116,9 +139,12 @@ public:
 	void DebugMode(bool debugMode) { useWireFrameTexture = debugMode; }
 	// SkinClusterのセット(通常使うものではないため気にしないで良い)
 	void SetSkinCluster(const std::vector<SkinCluster> skinCluster);
+	void CreateSkinningResources(const Skeleton& skeleton);
 
 	// アニメーションの追加
 	void AddAnimation(std::string directoryPath, std::string filename, std::string animationName);
+
+	void AddAnimationsThreaded(const std::string& directoryPath, const std::vector<std::string>& filenames);
 
 
 	void SetEnvironmentCoefficient(const float amount) { materialData->environmentCoefficient = amount; }
@@ -126,6 +152,12 @@ public:
 	void SetEnableMetallic(const bool flag) { materialData->enableMetallic = flag; }
 
 	const bool GetEnableMetallic() const { return materialData->enableMetallic; }
+
+	void SetPBRMaterial(const float metallic, const float roughness);
+
+	// AABBの取得
+	const AABB& GetMeshAABB() const { return meshAABB; }
+	const std::map<std::wstring, AABB>& GetMultiMeshAABB() const { return multiMeshAABB; }
 
 private:
 
@@ -162,6 +194,24 @@ private:
 	// マテリアルバッファリソース内のデータを指すポインタ
 	std::vector<MaterialTemplate*> materialTemplateData;
 
+	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> paletteResource;
+	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> inputVertexResource;
+	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> influenceResource;
+	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> outputVertexResource;
+	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> skinningInformationResource;
+
+	std::vector<WellForGPU*> mappedPalette;
+	std::vector<VertexData*> mappedInputVertex;
+	std::vector<VertexInfluence*> mappedInfluence;
+	std::vector<SkinningInformation*> mappedSkinningInformation;
+
+	std::vector<D3D12_VERTEX_BUFFER_VIEW> outputVertexBufferView{};
+
+	std::vector<uint32_t> paletteSrvIndex;
+	std::vector<uint32_t> inputVertexSrvIndex;
+	std::vector<uint32_t> influenceSrvIndex;
+	std::vector<uint32_t> outputVertexUavIndex;
+
 private:
 	// .mtlファイルの読み取り
 	static MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& fileName);
@@ -179,6 +229,13 @@ private:
 	void CreateMaterialResouce();
 	// VertexBufferViewを作成する(値を設定するだけ)
 	void CreateVertexBufferView();
+
+	// ModelのAABBを作成する
+	void CreateAABB();
+	
+
+	AABB meshAABB;
+	std::map<std::wstring, AABB> multiMeshAABB;
 
 	bool useWireFrameTexture;
 	uint32_t whiteTextureIndex;

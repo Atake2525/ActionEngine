@@ -1,10 +1,11 @@
 #include "SceneFactory.h"
 #include "TitleScene.h"
 #include "GameScene.h"
-#include "TestScene.h"
+#include "DemoScene.h"
 #include "Logger.h"
 
 using namespace Logger;
+using namespace std;
 
 SceneFactory* SceneFactory::instance = nullptr;
 
@@ -21,30 +22,31 @@ SceneFactory* SceneFactory::GetInstance() {
     return instance;
 }
 
-BaseScene* SceneFactory::ChangeScene(const std::string& sceneName)
+unique_ptr<BaseScene> SceneFactory::ChangeScene(const std::string& sceneName)
 {
     // 次のシーンを生成
-    BaseScene* newScene = nullptr;
+    unique_ptr<BaseScene> newScene = nullptr;
 
     if (sceneName == "TITLE")
     {
         Log("タイトルシーンに切り替えます\n");
-        newScene = new TitleScene();
+        newScene = make_unique<TitleScene>();
+        
     }
     else if (sceneName == "GAMESCENE")
     {
         Log("ゲームシーンに切り替えます\n");
-        newScene = new GameScene();
+        newScene = make_unique<GameScene>();
     }
-    else if (sceneName == "TEST") {
+    else if (sceneName == "TEST")
+    {
         Log("テストシーンに切り替えます\n");
-        newScene = new TestScene();
+        newScene = make_unique<DemoScene>();
     }
     else
     {
         Log("指定されたシーン名は見つかりませんでした\n");
     }
-
 
     return newScene;
 }

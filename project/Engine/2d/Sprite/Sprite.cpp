@@ -1,8 +1,9 @@
 #include "Sprite.h"
-#include "SpriteBase.h"
+#include "Render2DBase.h"
 #include "DirectXBase.h"
 #include "TextureManager.h"
 #include "SrvManager.h"
+#include "AABB.h"
 
 void Sprite::SetTransform(const Transform& transform){ 
 	position.x = transform.translate.x;
@@ -38,8 +39,8 @@ void Sprite::SetTransform(const Vector2& position, const float& rotation, const 
 }
 
 void Sprite::SetTexture(const std::string& textureFilePath) {
-	textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(textureFilePath);
 	texturefilePath = textureFilePath;
+	textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(textureFilePath);
 	AdjustTextureSize();
 }
 
@@ -76,7 +77,6 @@ void Sprite::Initialize(std::string textureFilePath) {
 	// テクスチャサイズの計算
 	AdjustTextureSize();
 
-	Update();
 }
 
 void Sprite::Update() {
@@ -87,19 +87,7 @@ void Sprite::Update() {
 	float top = 0.0f - anchorPoint.y;
 	float bottom = 1.0f - anchorPoint.y;
 
-	// 左右上下フリップの設定
-
-	// 左右反転
-	if (isFlipX) {
-		left = -left;
-		right = -right;
-	}
-	// 上下反転
-	if (isFlipY) {
-		top = -top;
-		bottom = -bottom;
-	}
-
+	
 	// テクスチャ範囲指定の設定
 	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(texturefilePath);
 	float tex_left = textureLeftTop.x / metadata.width;
@@ -164,34 +152,34 @@ void Sprite::ChangeTexture(std::string textureFilePath) {
 
 void Sprite::Draw() {
 	// Spriteの描画。変更が必要なものだけ変更する
-	SpriteBase::GetInstance()->GetDxBase()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView); // VBVを設定
+	DirectXBase::GetInstance()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView); // VBVを設定
 
-	SpriteBase::GetInstance()->GetDxBase()->GetCommandList()->IASetIndexBuffer(&indexbufferView); // IBVを設定
+	DirectXBase::GetInstance()->GetCommandList()->IASetIndexBuffer(&indexbufferView); // IBVを設定
 
 	// マテリアルCBufferの場所を設定
-	SpriteBase::GetInstance()->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
 	// TransformationMatrixCBBufferの場所を設定
-	SpriteBase::GetInstance()->GetDxBase()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
+	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
 	//SpriteBase::GetInstance()->GetDxBase()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(textureIndex));
 	SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(2, textureIndex);
 	// 描画
-	SpriteBase::GetInstance()->GetDxBase()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
+	DirectXBase::GetInstance()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
 
 void Sprite::CreateIndexResource() { 
-	indexResource = SpriteBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(uint32_t) * 6);
+	indexResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(uint32_t) * 6);
 }
 
 void Sprite::CreateVertexResource() { 
-	vertexResource = SpriteBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(VertexData) * 6); 
+	vertexResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(VertexData) * 6);
 }
 
 void Sprite::CreateMaterialResource() { 
-	materialResource = SpriteBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(Material)); 
+	materialResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(Material));
 }
 
 void Sprite::CreateTransformationMatrixResource() { 
-	transformationMatrixResource = SpriteBase::GetInstance()->GetDxBase()->CreateBufferResource(sizeof(TransformationMatrix)); 
+	transformationMatrixResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(TransformationMatrix));
 }
 
 void Sprite::CreateIndexBufferView() {
@@ -222,11 +210,6 @@ void Sprite::SetTransformatinMatrix() {
 	// 単位行列を書き込んでおく
 	transformationMatrixData->WVP = MakeIdentity4x4();
 	transformationMatrixData->World = MakeIdentity4x4();
-}
-
-void Sprite::SetIsFlip(const bool& FlipX, const bool& FlipY) {
-	isFlipX = FlipX;
-	isFlipY = FlipY;
 }
 
 void Sprite::AdjustTextureSize() {

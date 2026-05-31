@@ -1,11 +1,9 @@
 #include <d3d12.h>
-#include "externels/DirectXTex/DirectXTex.h"
+#include "externals/DirectXTex/DirectXTex.h"
 #include <string>
 #include <wrl.h>
 #include <vector>
 #include <unordered_map>
-
-class DirectXBase;
 
 #pragma once
 class TextureManager {
@@ -31,13 +29,23 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(DirectXBase* directxBase);
+	void Initialize();
 
 	/// <summary>
 	/// テクスチャファイルの読み込み
 	/// </summary>
 	/// <param name="filePath">テクスチャファイルのパス</param>
 	void LoadTexture(const std::string& filePath);
+
+	void SetNormalMapTexture(const std::string& targetTextureFilePath, const std::string& filePath);
+
+	void SetMetallicMapTexture(const std::string& targetTextureFilePath, const std::string& filePath);
+
+	void SetRoughnessMapTexture(const std::string& targetTextureFilePath, const std::string& filePath);
+
+	uint32_t GetnormalMapSrvIndex(const std::string& filePath);
+	uint32_t GetmetallicMapSrvIndex(const std::string& filePath);
+	uint32_t GetroughnessMapSrvIndex(const std::string& filePath);
 
 	// SRVインデックスの開始番号
 	uint32_t GetTextureIndexByFilePath(const std::string& filePath);
@@ -69,6 +77,10 @@ private:
 		D3D12_CPU_DESCRIPTOR_HANDLE srvHandleCPU; // SRV作成時に必要なCPUハンドル
 		D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU; // 描画コマンドに必要なGPUハンドル
 		Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource;
+
+		uint32_t normalMapSrvIndex; // 法線マップ用SRVインデックス
+		uint32_t metallicMapSrvIndex; // メタリックマップ用SRVインデックス
+		uint32_t roughnessMapSrvIndex; // ラフネスマップ用SRVインデックス
 	};
 	// テクスチャデータ
 	std::unordered_map<std::string, TextureData> textureDatas;
@@ -78,7 +90,5 @@ private:
 
 	// SRVインデックスの開始番号
 	static uint32_t kSRVIndexTop;
-
-	DirectXBase* directxBase_ = nullptr;
 
 };

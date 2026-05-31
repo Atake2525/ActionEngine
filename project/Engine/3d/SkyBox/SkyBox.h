@@ -5,16 +5,16 @@
 #include <dxcapi.h>
 #include "Model.h"
 
-
-class DirectXBase;
 class Camera;
 
+// SkyBoxのhlslに送るデータ用の構造体
 struct SkyBoXData
 {
 	std::vector<uint32_t> indices;
 	std::vector<Vector4> positions;
 };
 
+// SkyBox Class
 class SkyBox {
 private:
 	// シングルトンパターンを適用
@@ -42,11 +42,15 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(DirectXBase* directxBase);
+	void Initialize();
 
 	void SetTexture(const std::string& filePath);
 
 	void SetCamera(Camera* camera);
+
+	void SetColor(const Vector4& color) { materialData->color = color; }
+
+	void SetSunPoewr(const float& power) { sunData->power = power; }
 
 	const uint32_t& GetSrvIndex() const { return srvIndex; }
 
@@ -70,15 +74,12 @@ private:
 
 private:
 
-	DirectXBase* directxBase_ = nullptr;
-
-
 	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
 	// Samplerの設定
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
 	// Resource作る度に配列を増やしす
-	D3D12_ROOT_PARAMETER rootParameters[3] = {};
+	D3D12_ROOT_PARAMETER rootParameters[4] = {};
 	// シリアライズしてバイナリにする
 	Microsoft::WRL::ComPtr<ID3DBlob> signatureBlob = nullptr;
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
@@ -129,6 +130,19 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource;
 	// マテリアルバッファリソース内のデータを指すポインタ
 	Material* materialData = nullptr;
+
+	struct Sun
+	{
+		float power;
+		Vector3 sunDirection;
+		Vector3 topColor;
+		float pad1;
+		Vector3 bottomColor;
+		float pad2;
+	};
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> sunResource;
+	Sun* sunData = nullptr;
 
 	Camera* camera_ = nullptr;
 

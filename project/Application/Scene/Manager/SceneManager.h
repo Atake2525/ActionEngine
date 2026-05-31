@@ -1,5 +1,6 @@
 #include "BaseScene.h"
 #include "SceneFactory.h"
+#include <memory>
 
 #pragma once
 class SceneManager {
@@ -24,18 +25,25 @@ public:
     // 次シーン予約
     void SetNextScene(const std::string& sceneName);
 
+    const std::string& GetSceneName() const { return m_sceneName; }
+
     void Update();
 
     void Draw();
 
-    const bool& EndRequest() { return roopOut_; }
+    void CallStart();
+
+    const bool& EndRequest() { return loopOut_; }
 
 private:
+    bool drawStart = false;
     // 実行中のシーン
-    BaseScene* scene_ = nullptr;
+    std::unique_ptr<BaseScene> m_scene = nullptr;
     // 次のシーン
-    BaseScene* nextScene_ = nullptr;
+    std::unique_ptr<BaseScene> m_nextScene = nullptr;
 
-    bool roopOut_ = false;
+    std::string m_sceneName = "0";
+
+    bool loopOut_ = false;
 };
 

@@ -15,6 +15,5 @@ void ModelBase::Finalize() {
 	instance = nullptr;
 }
  
-void ModelBase::Initialize(DirectXBase* directxBase) { 
-	directxBase_ = directxBase;
+void ModelBase::Initialize() { 
 }

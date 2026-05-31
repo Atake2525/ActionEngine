@@ -21,8 +21,7 @@ void SkinningObject3dBase::Finalize() {
 	instance = nullptr;
 }
 
-void SkinningObject3dBase::Initialize(DirectXBase* directxBase) {
-	directxBase_ = directxBase;
+void SkinningObject3dBase::Initialize() {
 	CreateGraphicsPipeLineState();
 }
 
@@ -39,6 +38,21 @@ void SkinningObject3dBase::CreateRootSignature() {
 	descriptorRange[1].NumDescriptors = 1;                                                       // 数は1つ
 	descriptorRange[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;                              // SRVを使う
 	descriptorRange[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; // Offsetを自動計算
+
+	descriptorRange[2].BaseShaderRegister = 2;                                                   // 0から始まる
+	descriptorRange[2].NumDescriptors = 1;                                                       // 数は1つ
+	descriptorRange[2].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;                              // SRVを使う
+	descriptorRange[2].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; // Offsetを自動計算
+
+	descriptorRange[3].BaseShaderRegister = 3;                                                   // 0から始まる
+	descriptorRange[3].NumDescriptors = 1;                                                       // 数は1つ
+	descriptorRange[3].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;                              // SRVを使う
+	descriptorRange[3].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; // Offsetを自動計算
+
+	descriptorRange[4].BaseShaderRegister = 4;                                                   // 0から始まる
+	descriptorRange[4].NumDescriptors = 1;                                                       // 数は1つ
+	descriptorRange[4].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;                              // SRVを使う
+	descriptorRange[4].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; // Offsetを自動計算
 
 	// Samplerの設定
 	staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;   // バイナリフィルタ
@@ -85,11 +99,29 @@ void SkinningObject3dBase::CreateRootSignature() {
 	rootParameters[7].DescriptorTable.NumDescriptorRanges = 1;
 	rootParameters[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;    // ConstantBufferView
 	rootParameters[8].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShader
-	rootParameters[8].Descriptor.ShaderRegister = 5;                    // b4
+	rootParameters[8].Descriptor.ShaderRegister = 5;                    // b5
 	rootParameters[9].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う
 	rootParameters[9].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX; // PixelShaderで使う
 	rootParameters[9].DescriptorTable.pDescriptorRanges = &descriptorRange[0];            // Tableの中身の配列を指定
 	rootParameters[9].DescriptorTable.NumDescriptorRanges = 1;
+	rootParameters[10].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う
+	rootParameters[10].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;           // PixelShaderで使う
+	rootParameters[10].DescriptorTable.pDescriptorRanges = &descriptorRange[2];        // Tableの中身の配列を指定
+	rootParameters[10].DescriptorTable.NumDescriptorRanges = 1;
+	rootParameters[11].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う
+	rootParameters[11].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;           // PixelShaderで使う
+	rootParameters[11].DescriptorTable.pDescriptorRanges = &descriptorRange[3];        // Tableの中身の配列を指定
+	rootParameters[11].DescriptorTable.NumDescriptorRanges = 1;
+	rootParameters[12].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う
+	rootParameters[12].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;           // PixelShaderで使う
+	rootParameters[12].DescriptorTable.pDescriptorRanges = &descriptorRange[4];        // Tableの中身の配列を指定
+	rootParameters[12].DescriptorTable.NumDescriptorRanges = 1;
+	rootParameters[13].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;    // ConstantBufferView
+	rootParameters[13].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShader
+	rootParameters[13].Descriptor.ShaderRegister = 7;                    // b7
+	rootParameters[14].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;    // ConstantBufferView
+	rootParameters[14].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShader
+	rootParameters[14].Descriptor.ShaderRegister = 8;                    // b7
 	descriptionRootSignature.pParameters = rootParameters;              // ルートパラメータ配列へのポインタ
 	descriptionRootSignature.NumParameters = _countof(rootParameters);  // 配列の長さ
 
@@ -100,7 +132,7 @@ void SkinningObject3dBase::CreateRootSignature() {
 		assert(false);
 	}
 	// バイナリをもとに作成
-	hr = directxBase_->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
+	hr = DirectXBase::GetInstance()->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
 	assert(SUCCEEDED(hr));
 	// InputLayout
 	inputElementDescs[0].SemanticName = "POSITION";
@@ -125,6 +157,14 @@ void SkinningObject3dBase::CreateRootSignature() {
 	inputElementDescs[4].Format = DXGI_FORMAT_R32G32B32A32_SINT; // int4
 	inputElementDescs[4].InputSlot = 1; // 1番目のslotのVBVのことだと伝える
 	inputElementDescs[4].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDescs[5].SemanticName = "TANGENT";
+	inputElementDescs[5].SemanticIndex = 0;
+	inputElementDescs[5].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	inputElementDescs[5].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+	inputElementDescs[6].SemanticName = "BITANGENT";
+	inputElementDescs[6].SemanticIndex = 0;
+	inputElementDescs[6].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	inputElementDescs[6].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 	inputLayoutDesc.pInputElementDescs = inputElementDescs;
 	inputLayoutDesc.NumElements = _countof(inputElementDescs);
 	// BlendStateの設定
@@ -144,9 +184,9 @@ void SkinningObject3dBase::CreateRootSignature() {
 	// 三角形の中を塗りつぶす
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 	// Shaderをコンパイルする
-	vertexShaderBlob = directxBase_->CompileShader(L"Resources/shaders/SkinningObject3D.VS.hlsl", L"vs_6_0");
+	vertexShaderBlob = DirectXBase::GetInstance()->CompileShader(L"Resources/shaders/Model/SkinningObject3D.VS.hlsl", L"vs_6_0");
 	assert(vertexShaderBlob != nullptr);
-	pixelShaderBlob = directxBase_->CompileShader(L"Resources/shaders/Object3D.PS.hlsl", L"ps_6_0");
+	pixelShaderBlob = DirectXBase::GetInstance()->CompileShader(L"Resources/shaders/Model/Object3D.PS.hlsl", L"ps_6_0");
 	assert(pixelShaderBlob != nullptr);
 
 	// DepthStencilStateの設定
@@ -179,21 +219,23 @@ void SkinningObject3dBase::CreateGraphicsPipeLineState() {
 	graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc;
 	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	// 実際に生成
-	HRESULT hr = directxBase_->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPilelineState));
+	HRESULT hr = DirectXBase::GetInstance()->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPilelineState));
 	assert(SUCCEEDED(hr));
 }
 
 void SkinningObject3dBase::ShaderDraw() {
 	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-	directxBase_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
+	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
 	// PSOを設定
-	directxBase_->GetCommandList()->SetPipelineState(graphicsPilelineState.Get());
+	DirectXBase::GetInstance()->GetCommandList()->SetPipelineState(graphicsPilelineState.Get());
 	// 形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけば良い
-	directxBase_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	DirectXBase::GetInstance()->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	directxBase_->GetCommandList()->SetGraphicsRootConstantBufferView(4, Light::GetInstance()->GetDirectionalLightResource()->GetGPUVirtualAddress());
+	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(4, Light::GetInstance()->GetDirectionalLightResource()->GetGPUVirtualAddress());
 
-	directxBase_->GetCommandList()->SetGraphicsRootConstantBufferView(5, Light::GetInstance()->GetPointlLightResource()->GetGPUVirtualAddress());
+	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(5, Light::GetInstance()->GetPointlLightResource()->GetGPUVirtualAddress());
 
-	directxBase_->GetCommandList()->SetGraphicsRootConstantBufferView(6, Light::GetInstance()->GetSpotLightResource()->GetGPUVirtualAddress());
+	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(6, Light::GetInstance()->GetSpotLightResource()->GetGPUVirtualAddress());
+
+	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(14, Light::GetInstance()->GetScanResource()->GetGPUVirtualAddress());
 }

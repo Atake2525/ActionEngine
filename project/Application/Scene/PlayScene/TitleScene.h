@@ -1,6 +1,6 @@
 #include "Object3d.h"
 #include "Object3dBase.h"
-#include "SpriteBase.h"
+#include "Render2DBase.h"
 #include "Camera.h"
 #include "ModelManager.h"
 #include "TextureManager.h"
@@ -15,86 +15,95 @@
 #include "SceneManager.h"
 #include "SkyBox.h"
 #include <map>
-#include "UI.h"
+#include <memory>
+#include "MouseCursor.h"
+#include "TitleSceneUI.h"
+#include "UIButton.h"
 
 #pragma once
 
+// タイトルシーン
 class TitleScene : public BaseScene
 {
 public:
-	/// <summary>
-	/// 初期化
-	/// </summary>
-	void Initialize() override;
+    /// <summary>
+    /// 初期化
+    /// </summary>
+    void Initialize() override;
 
-	/// <summary>
-	/// 終了処理
-	/// </summary>
-	void Finalize() override;
+    /// <summary>
+    /// 終了処理
+    /// </summary>
+    void Finalize() override;
 
-	/// <summary>
-	/// 更新
-	/// </summary>
-	void Update() override;
+    /// <summary>
+    /// 更新
+    /// </summary>
+    void Update() override;
 
-	/// <summary>
-	/// 描画
-	/// </summary>
-	void Draw() override;
+    /// <summary>
+    /// 描画
+    /// </summary>
+    void Draw() override;
 
-	const bool& EndRequest() override { return finished; }
+    const bool& EndRequest() override { return finished; }
 
 private:
-	bool finished = false;
-	Camera* camera = nullptr;
-	Input* input = nullptr;
+    bool finished = false;
 
-	bool start = false;
+    TitleSceneScreen m_sceneScreen = TitleSceneScreen::BootScreen;
+    enum class Select {
+        Play = 0,
+        Setting = 1,
+        Exit = 2,
+        Credit = 3,
+    };
 
-	Object3d* stageModel = nullptr;
+    bool m_screenChange = false;
+    float m_screenChangeTimer = 0.0f;
+    float m_screenChangeTime[2] = {1.3f, 1.0f };
+    int m_changeNum = 0;
 
-	Object3d* playerModel = nullptr;
+    Transform m_screenChangeTransformPre = Transform::Default;
+    Transform m_screenChangeTransform[2] = {
+        {
+            {1.0f, 1.0f, 1.0f},
+            {SwapRadian(11.5f), SwapRadian(1.5f), 0.0f},
+            {0.0f, 2.1f, 1.6f},
+        },
+        {
+            {1.0f, 1.0f, 1.0f},
+            {SwapRadian(11.5f), SwapRadian(1.5f), 0.0f},
+            {0.0f, 2.1f, 3.1f},
+        }
+    };
 
-	enum class Select {
-		Play = 0,
-		Setting = 1,
-		Exit = 2,
-		Credit = 3,
-	};
-	int maxSelectNum = 3;
+    std::unique_ptr<Camera> m_pCamera;
+    Input* m_pInput = nullptr;
 
-	Select select = Select::Play;
-	Select selectPre = Select::Play;
+    // BootScreen
 
-	UI* startUI = nullptr;
+    std::unique_ptr<Object3d> m_bootScreen = nullptr;
 
-	UI* playUI = nullptr;
+    std::unique_ptr<Object3d> m_charModel = nullptr;
 
-	UI* exitUI = nullptr;
 
-	UI* settingUI = nullptr;
+    // TitleScreen 
 
-	UI* creditUI = nullptr;
+    std::unique_ptr<TitleSceneUI> m_titleSceneUI = nullptr;
 
-	Sprite* uiFrame = nullptr;
+    int m_maxSelectNum = 3;
 
-	Sprite* gamePad = nullptr;
+    Select m_select = Select::Play;
+    Select m_selectPre = Select::Play;
 
-	Sprite* gamePadOnFrame = nullptr;
+    std::unique_ptr<Sprite> m_gamePad = nullptr;
 
-	Sprite* credit_sound = nullptr;
+    std::unique_ptr<Sprite> m_credit_sound = nullptr;
+    std::unique_ptr<UI::Element> m_creditUI = nullptr;
 
-	Vector3 uiFrameStartPoint = { 0.0f, 0.0f, 0.0f };
-
-	Vector3 uiFrameEndPoint = { 0.0f, 0.0f, 0.0f };
-
-	float uiFrameMoveTimer = 0.0f;
-
-	float uiFrameMoveLImitTime = 0.6f;
-
-	bool isUIFrameMove = false;
-
-	bool showCredit = false;
+    bool m_showCredit = false;
+    bool m_start = false;
 
 };
 

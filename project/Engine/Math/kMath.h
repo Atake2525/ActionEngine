@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Matrix3x3.h"
 #include "Matrix4x4.h"
 #include "Vector2.h"
@@ -13,31 +13,11 @@
 #include <numbers>
 #include "Transform.h"
 
-const Vector3 operator*(const Vector3& v, const float f);
-
-//Vector3& operator+=(Vector3& v1, const Vector3& v2);
-
-//Vector3& operator-=(Vector3& v1, const Vector3& v2);
-
-//Vector3& operator*=(Vector3& v1, const Vector3& v2);
-
 Vector3& operator/=(Vector3& v1, const Vector3& v2);
-
-//const Vector3 operator+(const Vector3& v1, const Vector3 v2);
-
-//const Vector3 operator-(const Vector3& v1, const Vector3 v2);
-
-const Vector3 operator*(const Vector3& v1, const Vector3& v2);
 
 const Vector3 operator/(const Vector3& v1, const Vector3 v2);
 
-const Vector3 operator+(const Vector3& v1, const float f);
-
-const Vector3 operator-(const Vector3& v1, const float f);
-
 const Vector3 operator/(const Vector3& v1, const float f);
-
-//const Vector3 operator-(const Vector3& v1);
 
 //単位行列の作成
 Matrix4x4 MakeIdentity4x4();
@@ -126,9 +106,6 @@ Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float botto
 // 3, ビューポート変換行列
 Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, float minDepth, float maxDepth);
 
-// 球体描画
-//void DrawSphere(const Sphere& sphere, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color);
-
 Vector3 SwapDegree(Vector3 radian);
 
 Vector3 SwapRadian(Vector3 degree);
@@ -143,6 +120,8 @@ float SwapRadian(float degree);
 
 float Length(const Vector3& v);
 
+float Length(const Vector2& v);
+
 float Distance(const Vector3& v1, const Vector3& v2);
 
 // AABBから中心座標を計算
@@ -151,32 +130,15 @@ const Vector3 CenterAABB(const AABB& aabb);
 // ベクトル変換
 Vector3 TransformNormal(const Vector3& v, const Matrix4x4& m);
 
-// ease In-Out x1 : 開始点  x2 : 目標点
-float easeInOut(float time, float x1, float x2);
-
-// ease In-Out x1 : 開始点  x2 : 目標点
-int easeInOut(float t, unsigned int x1, unsigned int x2);
-
-// easeOutQuint
-float easeOutQuint(float t, float x1, float x2);
-
-// easeInBack
-float easeInBack(float t, float x1, float x2);
-
-// ease In-Out x1 : 開始点  x2 : 目標点
-Vector3 easeInOut(float time, Vector3 x1, Vector3 x2);
-
-// easeOutQuint
-Vector3 easeOutQuint(float t, Vector3 x1, Vector3 x2);
-
-// easeInBack
-Vector3 easeInBack(float t, Vector3 x1, Vector3 x2);
-
 Quaternion Slerp(const Quaternion& befor, const Quaternion& after, float t);
 
 Vector3 Lerp(const Vector3& v1, const Vector3& v2, float t);
 
 float Lerp(const float& v1, const float& v2, float t);
+
+float LerpInverse(float start, float end, float now);
+
+Vector3 LerpInverse(Vector3 start, Vector3 end, Vector3 now);
 
 float Dot(const Quaternion& v1, const Quaternion& v2);
 
@@ -192,3 +154,10 @@ Vector3 ClosestPoint(const AABB& aabb, const Vector3& segment);
 float LengthSquared(const Vector3& v);
 
 float Sign(float value);
+
+Vector2 Sign(const Vector2& value);
+
+Vector3 Sign(const Vector3& value);
+
+// 桁数の計算
+int GetDigitCount(float value);

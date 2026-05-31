@@ -2,152 +2,241 @@
 
 void MyGame::Initialize() {
 
-	FrameWork::Initialize();
+    FrameWork::Initialize();
 
 #pragma region 基盤システムの初期化
 
-	//WinApp::GetInstance()->Initialize(1920, 1080, WindowMode::FullScreen, L"Engine");
-	WinApp::GetInstance()->Initialize();
+    GameTime::GetInstance()->Initialize();
 
-	directxBase = new DirectXBase();
-	directxBase->Initialize();
+#ifndef NDEBUG
+    WinApp::GetInstance()->Initialize();
+#else
+    WinApp::GetInstance()->Initialize(1920, 1080, WindowMode::FullScreen, L"走快");
+#endif // !NDEBUG
 
-	SrvManager::GetInstance()->Initialize(directxBase);
+    DirectXBase::GetInstance()->Initialize();
 
-	directxBase->InitializePosteffect();
+    SrvManager::GetInstance()->Initialize();
 
-	ImGuiManager::GetInstance()->Initialize(directxBase);
+    DirectXBase::GetInstance()->InitializePosteffect();
 
-	SpriteBase::GetInstance()->Initialize(directxBase);
+    ImGuiManager::GetInstance()->Initialize();
 
-	Object3dBase::GetInstance()->Initialize(directxBase);
+    Render2DBase::GetInstance()->Initialize();
 
-	SkinningObject3dBase::GetInstance()->Initialize(directxBase);
+    Object3dBase::GetInstance()->Initialize();
 
-	WireFrameObjectBase::GetInstance()->Initialize(directxBase);
+    SkinningObject3dBase::GetInstance()->Initialize();
 
-	SkyBox::GetInstance()->Initialize(directxBase);
+    WireFrameObjectBase::GetInstance()->Initialize();
 
-	ModelBase::GetInstance()->Initialize(directxBase);
+    DebugLineBase::GetInstance()->Initialize();
 
-	TextureManager::GetInstance()->Initialize(directxBase);
+    SkyBox::GetInstance()->Initialize();
 
-	ModelManager::GetInstance()->Initialize(directxBase);
+    ModelBase::GetInstance()->Initialize();
 
-	ParticleManager::GetInstance()->Initialize(directxBase);
+    TextureManager::GetInstance()->Initialize();
 
-	CollisionManager::GetInstance()->Initialize();
+    ModelManager::GetInstance()->Initialize();
 
-	JsonLoader::GetInstance()->Initialize();
+    ParticleManager::GetInstance()->Initialize();
 
-	Light::GetInstance()->Initialize(directxBase);
+    CollisionManager::GetInstance()->Initialize();
 
-	Input::GetInstance()->Initialize();
+    JsonLoader::GetInstance()->Initialize();
 
-	Audio::GetInstance()->Initialize();
+    Light::GetInstance()->Initialize();
 
-	//// ↓---- シーンの初期化 ----↓ ////
+    Input::GetInstance()->Initialize();
 
-	SceneManager::GetInstance();
-	
-	SceneManager::GetInstance()->SetNextScene("TITLE");
+    Audio::GetInstance()->Initialize();
+    Audio::GetInstance()->LoadMP3("Resources/sound/select.mp3", "select");
+    Audio::GetInstance()->LoadMP3("Resources/sound/enter.mp3", "select_enter");
+    Audio::GetInstance()->LoadMP3("Resources/sound/cancel.mp3", "select_cancel");
 
-	//gameScene->Initialize();
+    FadeManager::GetInstance()->Initialize();
 
-	//// ↑---- シーンの初期化 ----↑ ////
+    //// ↓---- シーンの初期化 ----↓ ////
+
+    ActionEngine::Stage::StageCount::GetInstance()->Initialize();
+
+    SceneManager::GetInstance();
+
+    SceneManager::GetInstance()->SetNextScene("TITLE");
+
+    //gameScene->Initialize();
+
+    //// ↑---- シーンの初期化 ----↑ ////
+
+    WinApp::GetInstance()->OpenWindow();
 }
 
 void MyGame::Update() {
-	FrameWork::Update();
+    FrameWork::Update();
 
-	if (WinApp::GetInstance()->ProcessMessage()) {
-		finished = true;
-	}
+    GameTime::GetInstance()->Update();
 
-	ImGui_ImplDX12_NewFrame();
-	ImGui_ImplWin32_NewFrame();
-	ImGui::NewFrame();
+    Input::GetInstance()->Update();
 
-	directxBase->Update();
-	Light::GetInstance()->Update();
-	SceneManager::GetInstance()->Update();
-	ParticleManager::GetInstance()->Update();
-	Audio::GetInstance()->Update();
-	//JsonLoader::GetInstance()->Update();
+    if (WinApp::GetInstance()->ProcessMessage()) {
+        finished = true;
+    }
 
-	if (SceneManager::GetInstance()->EndRequest())
-	{
-		finished = true;
-	}
+    ImGui_ImplDX12_NewFrame();
+    ImGui_ImplWin32_NewFrame();
+    ImGui::NewFrame();
+#ifndef NDEBUG
+    ImGuiManager::GetInstance()->BeginDockSpace();
+#endif // !NDEBUG
+
+    DirectXBase::GetInstance()->Update();
+#ifndef NDEBUG
+    GameTime::GetInstance()->DrawImGui();
+#endif // !NDEBUG
+    Light::GetInstance()->Update();
+    /*if (WinApp::GetInstance()->IsWindowActive())
+    {
+        SceneManager::GetInstance()->Update();
+    }*/
+    SceneManager::GetInstance()->Update();
+    ParticleManager::GetInstance()->Update();
+    Audio::GetInstance()->Update();
+    FadeManager::GetInstance()->Update();
+
+#ifndef NDEBUG
+
+    ImGui::SetNextWindowPos(ImVec2{ float(WinApp::GetInstance()->GetkClientWidth()) - 300.0f, 128.0f * 1 }, ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2{ 300.0f, 245.0f }, ImGuiCond_FirstUseEver);
+    ImGui::Begin("シーン");
+    if (ImGui::Button("TITLE", { 280, 40 }))
+    {
+        SceneManager::GetInstance()->SetNextScene("TITLE");
+    }
+    if (ImGui::Button("GAMESCENE", { 280, 40 }))
+    {
+        SceneManager::GetInstance()->SetNextScene("GAMESCENE");
+    }
+    if (ImGui::Button("TEST", { 280, 40 }))
+    {
+        SceneManager::GetInstance()->SetNextScene("TEST");
+    }
+    ImGui::End();
+
+    ImGui::SetNextWindowPos(ImVec2{ float(WinApp::GetInstance()->GetkClientWidth()) - 300.0f, 128.0f + 245.0f }, ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2{ 300.0f, 82.5f }, ImGuiCond_FirstUseEver);
+    ImGui::Begin("パフォーマンス");
+    float fps = 1.0f / GameTime::GetInstance()->GetDeltaTime();
+    fps = std::round(fps);
+    ImGui::Text("FPS:");
+    ImGui::SameLine();
+    if (fps > fps * 0.75f)
+    {
+        ImGui::TextColored({ 0.0f, 1.0f, 0.0f, 1.0f }, "%.1f", fps);
+    }
+    else if (fps > fps * 0.5f && fps < fps * 0.75f)
+    {
+        ImGui::TextColored({ 1.0f, 1.0f, 0.0f, 1.0f }, "%.1f", fps);
+    }
+    else
+    {
+        ImGui::TextColored({ 1.0f, 0.0f, 0.0f, 1.0f }, "%.1f", fps);
+    }
+    float cpuusage = GameTime::GetInstance()->GetCPUUsagePDH();
+    ImGui::Text("CPU使用率:");
+    ImGui::SameLine();
+    if (cpuusage < 40)
+    {
+        ImGui::TextColored({ 0.0f, 1.0f, 0.0f, 1.0f }, "%.1f %%", cpuusage);
+    }
+    else if (cpuusage > 40 && cpuusage < 79)
+    {
+        ImGui::TextColored({ 1.0f, 1.0f, 0.0f, 1.0f }, "%.1f %%", cpuusage);
+    }
+    else
+    {
+        ImGui::TextColored({ 1.0f, 0.0f, 0.0f, 1.0f }, "%.1f %%", cpuusage);
+    }
+    ImGui::End();
+
+#endif // _SceneDEBUG
+
+    if (SceneManager::GetInstance()->EndRequest())
+    {
+        finished = true;
+    }
 }
 
 void MyGame::Draw() {
 
-	// ImGuiの内部コマンドを生成する
-	ImGui::Render();
+    // ImGuiの内部コマンドを生成する
+    ImGui::Render();
 
-	directxBase->PreDrawRenderTexture();
+    DirectXBase::GetInstance()->PreDrawRenderTexture();
 
-	//gameScene->Draw();
-	SkyBox::GetInstance()->Draw();
-	SceneManager::GetInstance()->Draw();
+    SkyBox::GetInstance()->Draw();
+    SceneManager::GetInstance()->Draw();
+    FadeManager::GetInstance()->Draw();
 
-	directxBase->PostDrawRenderTexture();
+    DirectXBase::GetInstance()->PostDrawRenderTexture();
 
-	directxBase->PreDraw();
+    DirectXBase::GetInstance()->PreDraw();
 
-	ParticleManager::GetInstance()->Draw();
+    ParticleManager::GetInstance()->Draw();
 
-	// 実際のcommandListのImGuiの描画コマンドを積む
-	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), directxBase->GetCommandList().Get());
+    DirectXBase::GetInstance()->ApplyFullViewport();
 
-	directxBase->PostDraw();
+    // 実際のcommandListのImGuiの描画コマンドを積む
+    ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), DirectXBase::GetInstance()->GetCommandList().Get());
+
+    DirectXBase::GetInstance()->PostDraw();
+
+    SceneManager::GetInstance()->CallStart();
 }
 
 void MyGame::Finalize() {
 
-	WinApp::GetInstance()->Finalize();
+    WinApp::GetInstance()->Finalize();
 
-	directxBase->Finalize();
-	delete directxBase;
+    DirectXBase::GetInstance()->Finalize();
 
-	SrvManager::GetInstance()->Finalize();
+    SrvManager::GetInstance()->Finalize();
 
-	ImGuiManager::GetInstance()->Finalize();
+    ImGuiManager::GetInstance()->Finalize();
 
-	SpriteBase::GetInstance()->Finalize();
+    Render2DBase::GetInstance()->Finalize();
 
-	Object3dBase::GetInstance()->Finalize();
+    Object3dBase::GetInstance()->Finalize();
 
-	SkinningObject3dBase::GetInstance()->Finalize();
+    SkinningObject3dBase::GetInstance()->Finalize();
 
-	WireFrameObjectBase::GetInstance()->Finalize();
+    WireFrameObjectBase::GetInstance()->Finalize();
 
-	SkyBox::GetInstance()->Finalize();
+    DebugLineBase::GetInstance()->Finalize();
 
-	ModelBase::GetInstance()->Finalize();
+    SkyBox::GetInstance()->Finalize();
 
-	TextureManager::GetInstance()->Finalize();
+    ModelBase::GetInstance()->Finalize();
 
-	ModelManager::GetInstance()->Finalize();
+    TextureManager::GetInstance()->Finalize();
 
-	ParticleManager::GetInstance()->Finalize();
+    ModelManager::GetInstance()->Finalize();
 
-	CollisionManager::GetInstance()->Finalize();
+    ParticleManager::GetInstance()->Finalize();
 
-	JsonLoader::GetInstance()->Finalize();
+    CollisionManager::GetInstance()->Finalize();
 
-	Light::GetInstance()->Finalize();
+    JsonLoader::GetInstance()->Finalize();
 
-	Input::GetInstance()->Finalize();
+    Light::GetInstance()->Finalize();
 
-	Audio::GetInstance()->Finalize();
+    Input::GetInstance()->Finalize();
 
-	//// ↓---- シーンの解放 ----↓ ////
+    Audio::GetInstance()->Finalize();
 
-	//SceneManager::GetInstance()->Finalize();
+    GameTime::GetInstance()->Finalize();
 
-	//// ↑---- シーンの解放 ----↑ ////
+    FadeManager::GetInstance()->Finalize();
 
-	FrameWork::Finalize();
+    FrameWork::Finalize();
 }

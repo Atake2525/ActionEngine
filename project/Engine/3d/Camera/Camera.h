@@ -2,13 +2,16 @@
 #include "Matrix4x4.h"
 #include "kMath.h"
 
+// hlslに送るための構造体
 struct CameraForGPU {
 	Vector3 worldPosition;
 };
 
 #pragma once
+// カメラ
 class Camera {
 public:
+	// コンストラクタ
 	Camera();
 
 	/// <summary>
@@ -34,8 +37,12 @@ public:
 	const Vector3& GetTranslate() const { return transform.translate; }
 	// Getter(Direction)
 	const Vector3& GetDirection() const { return direction; }
+    // Getter(nearClipDistance)
+    const float& GetNearClipDistance() const { return nearClipDistance; }
 	// Getter(farClipDistance)
 	const float& GetFarClipDistance() const { return farClipDistance; }
+    // Getter(drawHeihgt)
+    const float& GetDrawHeihgt() const { return drawHeihgt; }
 	// Getter(fovY)
 	const float& GetfovY() const { return fovY; }
 	// Getter(Transform)
@@ -106,6 +113,7 @@ private:
 	float nearClipDistance;
 	float farClipDistance;
 
+    float drawHeihgt;
 
 	Matrix4x4 viewProjectionMatrix;
 };

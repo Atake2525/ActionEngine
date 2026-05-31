@@ -1,158 +1,155 @@
 #include "GameScene.h"
-#include "externels/imgui/imgui.h"
-#include "externels/imgui/imgui_impl_dx12.h"
-#include "externels/imgui/imgui_impl_win32.h"
-
+#include "externals/imgui/imgui.h"
+#include "externals/imgui/imgui_impl_dx12.h"
+#include "externals/imgui/imgui_impl_win32.h"
+#include "GameTime.h"
 #include "JsonLoader.h"
+#include "StageCount.h"
+#include "TutorialStage.h"
+#include "EasingUtility.h"
+#include "Light.h"
+
+using namespace std;
+using namespace ActionEngine::Stage;
 
 void GameScene::Initialize() {
 
-	TextureManager::GetInstance()->LoadTexture("Resources/rostock_laage_airport_4k.dds");
+    TextureManager::GetInstance()->LoadTexture("Resources/white1x1.dds");
 
-	camera = new Camera();
+    m_pCamera = make_unique<Camera>();
+    m_pCamera->SetTranslate({ 0.0f, 1.8f, 0.0f });
+    m_pCamera->SetFarClipDistance(0.0f);
 
-	SkyBox::GetInstance()->SetCamera(camera);
-	SkyBox::GetInstance()->SetTexture("Resources/rostock_laage_airport_4k.dds");
+    SkyBox::GetInstance()->SetCamera(m_pCamera.get());
+    SkyBox::GetInstance()->SetTexture("Resources/white1x1.dds");
+    SkyBox::GetInstance()->SetSunPoewr(0.0f);
 
-	input = Input::GetInstance();
-	input->ShowMouseCursor(true);
+    m_pInput = Input::GetInstance();
+    m_mouseCursor = std::make_unique<MouseCursor>();
+    m_mouseCursor->Initialize("Resources/Sprite/Cursor_Hover.png", "Resources/Sprite/Cursor_Press.png");
+    m_mouseCursor->SetShowCursor(false);
 
-	ParticleManager::GetInstance()->SetCamera(camera);
+    Object3dBase::GetInstance()->SetDefaultCamera(m_pCamera.get());
 
-	ParticleManager::GetInstance()->CreateParticleGroupFromOBJ("Resources/Debug/obj", "plane.obj", "plane");
+    m_pPlayer = make_unique<Player>();
+    m_pStage = make_unique<TutorialStage>();
+    m_pStage->Initialize(m_pPlayer.get(), m_pCamera.get());
+    m_pPlayer->Initialize(m_pCamera.get(), m_pStage->GetJsonName());
+    m_pCamera->Update();
+    m_pPlayer->UpdateModel();
 
-	ParticleManager::GetInstance()->CreateParticleGroup(ParticleType::plane, "Resources/Particle/circle2.png", "circle");
+    m_pPlayerUI = make_unique<PlayerUI>();
+    m_pPlayerUI->Initialize(m_pPlayer.get());
 
-	Object3dBase::GetInstance()->SetDefaultCamera(camera);
+    Light::GetInstance()->SetRadius(0.1f);
+    GameTime::GetInstance()->SetDeltaPoint();
+    FadeManager::GetInstance()->FadeIn(1.0f);
+    m_pPause = make_unique<Pause>();
+    m_pPause->Initialize();
 
-	Transform pl = {
-		{1.0f, 1.0f, 1.0f},
-		{0.0f, 0.0f, 0.0f},
-		{0.0f, 0.01f, 0.0f}
-	};
-	player_ = new Player();
-	player_->Initialize(camera, input, pl, true);
-
-	land = new Object3d();
-	land->Initialize();
-	land->SetModel("Resources/Debug/gltf", "LandPlate.gltf", true);
-	//land->SetEnvironmentCoefficient(1.0f);
-
-	CollisionManager::GetInstance()->AddCollision(land, "land");
-
-	Audio::GetInstance()->LoadMP3("Resources/sekiranun.mp3", "bgm", 0.1f);
-
-	LevelData levelData = JsonLoader::GetInstance()->LoadJsonTransform("Resources/Debug/json", "PlayerStartPoint.json");
-
+    m_scenePhase = ScenePhase::FadeIn;
+    m_pInput->ShowMouseCursor(m_cursorShow);
 }
 
 void GameScene::Update() {
 
-	//ImGui::ShowDemoWindow();
-	cameraTransform = camera->GetTransform();
-	//sprite->Update();
+    // ポーズはどのフェーズでも行えるようにする
+    m_pPause->Update();
+    // ポーズ時にマウスカーソルを使うため前の方で更新
+    m_mouseCursor->Update();
+    if (m_pPause->IsPause())
+    {
+        return;
+    }
 
-#ifdef _DEBUG
-	ImGui::Begin("State");
-	ImGui::SetWindowPos(ImVec2{ 0.0f, 0.0f });
-	ImGui::SetWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) });
-	if (ImGui::TreeNode("Camera")) {
-		ImGui::DragFloat3("Tranlate", &cameraTransform.translate.x, 0.1f);
-		ImGui::DragFloat3("Rotate", &cameraTransform.rotate.x, 0.1f);
-		ImGui::DragFloat3("Scale", &cameraTransform.scale.x, 0.1f);
-		ImGui::TreePop();
-	}
-	float landEnvironment = land->GetEnvironmentCoefficient();
-	bool landMetalFlag = land->GetEnableMetallic();
-	if (ImGui::TreeNode("環境マップ")) {
-		ImGui::DragFloat("land", &landEnvironment, 0.01f);
-		ImGui::Checkbox("landメタリック読み込み", &landMetalFlag);
-		ImGui::TreePop();
-	}
-	land->SetEnvironmentCoefficient(landEnvironment);
-	land->SetEnableMetallic(landMetalFlag);
-	if (ImGui::Button("デバイス更新"))
-	{
-		input->UpdateDevice();
-	}
-	ImGui::DragFloat("カメラ速度", &speed, 0.01f);
-	ImGuiIO& io = ImGui::GetIO();
-	if (io.Framerate > 45)
-	{
-		ImGui::TextColored({ 0.0f, 1.0f, 0.0f, 1.0f }, "FPS: %.1f", io.Framerate);
-	}
-	else if (io.Framerate > 30 && io.Framerate < 45)
-	{
-		ImGui::TextColored({ 1.0f, 1.0f, 0.0f, 1.0f }, "FPS: %.1f", io.Framerate);
-	}
-	else
-	{
-		ImGui::TextColored({ 1.0f, 0.0f, 0.0f, 1.0f }, "FPS: %.1f", io.Framerate);
-	}
-	ImGui::Checkbox("マウスカーソル表示", &cursorshow);
-	if (ImGui::Button("タイトルへ"))
-	{
-		SceneManager::GetInstance()->SetNextScene("TITLE");
-	}
-	ImGui::End();
+    float farClipDist = 0.0f;
+    float radius = 0.0f;
+    // フェーズ管理
+    switch (m_scenePhase)
+    {
+    case ScenePhase::FadeIn: // シーン遷移演出フェーズ(入)
+        if (FadeManager::GetInstance()->CompleteFade() || !FadeManager::GetInstance()->IsFade())
+        {
+            m_scenePhase = ScenePhase::Ready;
+            m_finalScanRadius = m_finalFarClipDistance + Light::GetInstance()->GetScanWidth() * 3.0f;
+        }
+        break;
+    case ScenePhase::Ready: // スタート演出フェーズ
+        m_startTimer += GameTime::GetInstance()->GetDeltaTime() / m_startTime;
+        m_startTimer = clamp(m_startTimer, 0.0f, 1.0f);
 
-#endif // _DEBUG
+        
+        switch (m_readyNumber)
+        {
+        case 0:
+            farClipDist = EaseOutExpo(0.0f, m_finalFarClipDistance, m_startTimer);
+            m_pCamera->SetFarClipDistance(farClipDist);
+            break;
+        case 1:
+            radius = EaseOutExpo(0.0f, m_finalScanRadius, m_startTimer);
+            Light::GetInstance()->SetRadius(radius);
 
-	if (input->TriggerKey(DIK_ESCAPE))
-	{
-		finished = true;
-	}
+            SkyBox::GetInstance()->SetSunPoewr(m_startTimer);
+            
+            break;
+        }
 
-	if (input->TriggerKey(DIK_F11))
-	{
-		cursorshow = !cursorshow;
-	}
-	input->ShowMouseCursor(cursorshow);
+        if (m_readyNumber == 1 && m_startTimer == 1.0f)
+        {
+            m_scenePhase = ScenePhase::Game;
+            m_readyNumber = 0;
+        }
 
-	if (input->TriggerKey(DIK_1))
-	{
-		Audio::GetInstance()->Play2D("bgm", { 0.0f, 0.0f }, false);
-	}
+        if (m_startTimer == 1.0f)
+        {
+            m_readyNumber++;
+            m_startTimer = 0.0f;
+        }
+        break;
+    case ScenePhase::Game: // プレイフェーズ
+        m_pPlayer->Update();
+        m_pPlayerUI->Update();
+        break;
+    }
 
-	camera->SetTranslate(cameraTransform.translate);
-	camera->SetRotate(cameraTransform.rotate);
-	camera->Update();
+    m_pCamera->Update();
+    m_pPlayer->UpdateModel();
 
-	SkyBox::GetInstance()->Update();
+    m_pStage->Update();
 
-	player_->Update();
+#ifndef NDEBUG
+    if (m_pInput->TriggerKey(DIK_F11))
+    {
+        m_cursorShow = !m_cursorShow;
+        m_pInput->ShowMouseCursor(m_cursorShow);
+    }
+#else
 
-	land->Update();
+#endif // !NDEBUG
 
-	input->Update();
+    
 
+    SkyBox::GetInstance()->Update();
 }
 
 void GameScene::Draw() {
 
-	SpriteBase::GetInstance()->ShaderDraw();
+    Render2DBase::GetInstance()->ShaderDraw();
 
 
-	Object3dBase::GetInstance()->ShaderDraw();
+    Object3dBase::GetInstance()->ShaderDraw();
 
-	land->Draw();
+    m_pStage->DrawObject3d();
+    m_pPlayer->Draw();
 
-	SkinningObject3dBase::GetInstance()->ShaderDraw();
+    Render2DBase::GetInstance()->ShaderDraw();
 
-	player_->Draw();
-
-	SpriteBase::GetInstance()->ShaderDraw();
-
+    m_pStage->DrawBackSprite();
+    m_pPlayerUI->Draw();
+    m_pPause->Draw();
+    m_mouseCursor->Draw();
 }
 
 void GameScene::Finalize() {
-
-	delete camera;
-
-	delete player_;
-
-	delete land;
-
-	CollisionManager::GetInstance()->DeleteCollision("land");
-
+    m_pStage->Finalize();
 }

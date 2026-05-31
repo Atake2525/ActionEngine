@@ -4,7 +4,7 @@
 #include "WinApp.h"
 #include "DirectXBase.h"
 #include "Input.h"
-#include "SpriteBase.h"
+#include "Render2DBase.h"
 #include "Object3dBase.h"
 #include "ModelBase.h"
 #include "TextureManager.h"
@@ -19,18 +19,23 @@
 #include "SkyBox.h"
 #include "JsonLoader.h"
 #include "CollisionManager.h"
+#include "FadeManager.h"
+#include "GameTime.h"
+#include "StageCount.h"
+#include "DebugLineBase.h"
 
 #include "algorithm"
-#include "externels/imgui/imgui.h"
-#include "externels/imgui/imgui_impl_dx12.h"
-#include "externels/imgui/imgui_impl_win32.h"
-#include "externels/DirectXTex/DirectXTex.h"
+#include "externals/imgui/imgui.h"
+#include "externals/imgui/imgui_impl_dx12.h"
+#include "externals/imgui/imgui_impl_win32.h"
+#include "externals/DirectXTex/DirectXTex.h"
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 //#include "GameScene.h"
 
 #pragma once
 
+// ゲームループ
 class MyGame : public FrameWork {
 public:
 	// 初期化
@@ -46,7 +51,7 @@ public:
 	void Draw() override;
 
 	// ループ終了
-	bool RoopOut() override { return finished; }
+	bool LoopOut() override { return finished; }
 	
 
 	// ↑までシーンの作成に必須
@@ -57,8 +62,6 @@ private:
 	// メンバ変数宣言
 
 #pragma region 基盤システム
-
-	DirectXBase* directxBase = nullptr;
 
 	bool finished = false;
 

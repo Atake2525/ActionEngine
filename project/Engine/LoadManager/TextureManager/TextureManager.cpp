@@ -26,10 +26,13 @@ void TextureManager::Finalize() {
 	instance = nullptr;
 }
 
-void TextureManager::Initialize(DirectXBase* directxBase) {
-	directxBase_ = directxBase;
+void TextureManager::Initialize() {
 	// SRVの数と同数
-	textureDatas.reserve(SrvManager::GetInstance()->kMaxSRVCount);
+	textureDatas.reserve(SrvManager::GetInstance()->maxSRVCount);
+
+	LoadTexture("Resources/Sprite/black1x1.png");
+    LoadTexture("Resources/Sprite/noise0.png");
+
 }
 
 void TextureManager::LoadTexture(const std::string& filePath) {
@@ -60,7 +63,6 @@ void TextureManager::LoadTexture(const std::string& filePath) {
 	}
 
 	// テクスチャ枚数上限チェック
-	//assert(textureDatas.size() + kSRVIndexTop < SrvManager::GetInstance()->kMaxSRVCount);
 	assert(SrvManager::GetInstance()->CheckAllocate());
 
 
@@ -69,7 +71,7 @@ void TextureManager::LoadTexture(const std::string& filePath) {
 	std::wstring filePathW = ConvertString(filePath);
 	HRESULT hr;
 	// .ddsかそうでないかを判定する
-	if (filePathW.ends_with(L".dds")) // .ddsで終わって居tらddsとみなす。より安全な方法はいくらでもあるので余裕があれば対応させる
+	if (filePathW.ends_with(L".dds")) // .ddsで終わって居たらddsとみなす。より安全な方法はいくらでもあるので余裕があれば対応させる
 	{
 		hr = DirectX::LoadFromDDSFile(filePathW.c_str(), DirectX::DDS_FLAGS_NONE, nullptr, image);
 	}
@@ -77,7 +79,6 @@ void TextureManager::LoadTexture(const std::string& filePath) {
 	{
 		hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
 	}
-	//HRESULT hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
 	assert(SUCCEEDED(hr));
 
 	// DirectXTexでは直接的に圧縮フォーマットのMipMap生成に対応していないので、圧縮されていたらそのままimageを使うように変更する。リンク先にあるようにDecompress/Compressで対応しても良い
@@ -92,48 +93,223 @@ void TextureManager::LoadTexture(const std::string& filePath) {
 		// テクスチャデータをtextureDatasの末尾に追加する
 		textureData.filePath = filePath;
 		textureData.metadata = mipImages.GetMetadata();
-		textureData.resource = directxBase_->CreateTextureResource(textureData.metadata);
+		textureData.resource = DirectXBase::GetInstance()->CreateTextureResource(textureData.metadata);
 
-		textureData.intermediateResource = directxBase_->UploadTextureData(textureData.resource, mipImages);
+		textureData.intermediateResource = DirectXBase::GetInstance()->UploadTextureData(textureData.resource, mipImages);
 	}
 	else
 	{
 		hr = DirectX::GenerateMipMaps(image.GetImages(), image.GetImageCount(), image.GetMetadata(), DirectX::TEX_FILTER_SRGB, 4, mipImages);
 		// テクスチャデータをtextureDatasの末尾に追加する
 		textureData.filePath = filePath;
-		textureData.metadata = image.GetMetadata();
-		textureData.resource = directxBase_->CreateTextureResource(textureData.metadata);
+		textureData.metadata = SUCCEEDED(hr) ? mipImages.GetMetadata() : image.GetMetadata();
+		textureData.resource = DirectXBase::GetInstance()->CreateTextureResource(textureData.metadata);
 
-		textureData.intermediateResource = directxBase_->UploadTextureData(textureData.resource, image);
+		textureData.intermediateResource = DirectXBase::GetInstance()->UploadTextureData(textureData.resource, SUCCEEDED(hr) ? mipImages : image);
 	}
 
-	// テクスチャデータを追加
-	//textureDatas.resize(textureDatas.size() + 1);
-
-		// テクスチャデータの要素番号をSRVのインデックスとする
-	//uint32_t srvIndex = static_cast<uint32_t>(textureDatas.size() - 1) + kSRVIndexTop;
 	uint32_t srvIndex = SrvManager::GetInstance()->Allocate();
 	textureData.srvIndex = srvIndex;
 
 	textureData.srvHandleCPU = SrvManager::GetInstance()->GetCPUDescriptorHandle(textureData.srvIndex);
 	textureData.srvHandleGPU = SrvManager::GetInstance()->GetGPUDescriptorHandle(textureData.srvIndex);
 
-	// SRVの作成
-	//D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+	uint32_t mapIndex = GetTextureIndexByFilePath("Resources/Sprite/black1x1.png");
 
-	//// SRVの設定を行う
-	//srvDesc.Format = textureData.metadata.format;
-	//srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	//srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // 2Dテクスチャ
-	//srvDesc.Texture2D.MipLevels = UINT(textureData.metadata.mipLevels);
+	textureData.normalMapSrvIndex = mapIndex;
+	textureData.metallicMapSrvIndex = mapIndex;
+	textureData.roughnessMapSrvIndex = mapIndex;
 
 	SrvManager::GetInstance()->CreateSRVforTexture2D(srvIndex, textureData.resource, textureData.metadata);
+}
 
-	// 設定をもとにSRVの生成
-	//directxBase_->GetDevice()->CreateShaderResourceView(textureData.resource.Get(), &srvDesc, textureData.srvHandleCPU);
+void TextureManager::SetNormalMapTexture(const std::string& targetTextureFilePath, const std::string& filePath)
+{
+	std::string path;
+	size_t pathLen = targetTextureFilePath.size();
+	size_t pathNum = 0;
+	// Pathを*.pngのみにする
+	for (size_t i = targetTextureFilePath.size(); i > 1; --i)
+	{
+		char c = targetTextureFilePath[i - 1];
+		if (c == '/')
+		{
+			pathNum = i;
+			pathLen = targetTextureFilePath.size() - i;
+			break;
+		}
+	}
+	for (size_t i = 0; i < pathLen; i++)
+	{
+		path += targetTextureFilePath[pathNum + i];
+	}
+	// 読み込み済テクスチャを検索
+	if (textureDatas.contains(path))
+	{
+		// 早期return
+		LoadTexture(filePath);
+		textureDatas[path].normalMapSrvIndex = GetTextureIndexByFilePath(filePath);
+		return;
+	}
+}
 
-	// MipMap(ミニマップ) : 元画像より小さなテクスチャ群
+void TextureManager::SetMetallicMapTexture(const std::string& targetTextureFilePath, const std::string& filePath)
+{
+	std::string path;
+	size_t pathLen = targetTextureFilePath.size();
+	size_t pathNum = 0;
+	// Pathを*.pngのみにする
+	for (size_t i = targetTextureFilePath.size(); i > 1; --i)
+	{
+		char c = targetTextureFilePath[i - 1];
+		if (c == '/')
+		{
+			pathNum = i;
+			pathLen = targetTextureFilePath.size() - i;
+			break;
+		}
+	}
+	for (size_t i = 0; i < pathLen; i++)
+	{
+		path += targetTextureFilePath[pathNum + i];
+	}
+	// 読み込み済テクスチャを検索
+	if (textureDatas.contains(path))
+	{
+		// 早期return
+		LoadTexture(filePath);
+		textureDatas[path].metallicMapSrvIndex = GetTextureIndexByFilePath(filePath);
+		return;
+	}
+}
 
+void TextureManager::SetRoughnessMapTexture(const std::string& targetTextureFilePath, const std::string& filePath)
+{
+	std::string path;
+	size_t pathLen = targetTextureFilePath.size();
+	size_t pathNum = 0;
+	// Pathを*.pngのみにする
+	for (size_t i = targetTextureFilePath.size(); i > 1; --i)
+	{
+		char c = targetTextureFilePath[i - 1];
+		if (c == '/')
+		{
+			pathNum = i;
+			pathLen = targetTextureFilePath.size() - i;
+			break;
+		}
+	}
+	for (size_t i = 0; i < pathLen; i++)
+	{
+		path += targetTextureFilePath[pathNum + i];
+	}
+	// 読み込み済テクスチャを検索
+	if (textureDatas.contains(path))
+	{
+		// 早期return
+		LoadTexture(filePath);
+		textureDatas[path].roughnessMapSrvIndex = GetTextureIndexByFilePath(filePath);
+		return;
+	}
+}
+
+uint32_t TextureManager::GetnormalMapSrvIndex(const std::string& filePath)
+{
+	std::string path;
+	size_t pathLen = filePath.size();
+	size_t pathNum = 0;
+	// Pathを*.pngのみにする
+	for (size_t i = filePath.size(); i > 1; --i)
+	{
+		char c = filePath[i - 1];
+		if (c == '/')
+		{
+			pathNum = i;
+			pathLen = filePath.size() - i;
+			break;
+		}
+	}
+	for (size_t i = 0; i < pathLen; i++)
+	{
+		path += filePath[pathNum + i];
+	}
+	// 読み込み済テクスチャを検索
+	if (textureDatas.contains(path))
+	{
+		// 読み込み済なら要素番号を返す
+		uint32_t textureIndex = textureDatas[path].normalMapSrvIndex;
+		return textureIndex;
+	}
+
+
+	assert(0);
+	return 0;
+}
+
+uint32_t TextureManager::GetmetallicMapSrvIndex(const std::string& filePath)
+{
+	std::string path;
+	size_t pathLen = filePath.size();
+	size_t pathNum = 0;
+	// Pathを*.pngのみにする
+	for (size_t i = filePath.size(); i > 1; --i)
+	{
+		char c = filePath[i - 1];
+		if (c == '/')
+		{
+			pathNum = i;
+			pathLen = filePath.size() - i;
+			break;
+		}
+	}
+	for (size_t i = 0; i < pathLen; i++)
+	{
+		path += filePath[pathNum + i];
+	}
+	// 読み込み済テクスチャを検索
+	if (textureDatas.contains(path))
+	{
+		// 読み込み済なら要素番号を返す
+		uint32_t textureIndex = textureDatas[path].metallicMapSrvIndex;
+		return textureIndex;
+	}
+
+
+	assert(0);
+	return 0;
+}
+
+uint32_t TextureManager::GetroughnessMapSrvIndex(const std::string& filePath)
+{
+	std::string path;
+	size_t pathLen = filePath.size();
+	size_t pathNum = 0;
+	// Pathを*.pngのみにする
+	for (size_t i = filePath.size(); i > 1; --i)
+	{
+		char c = filePath[i - 1];
+		if (c == '/')
+		{
+			pathNum = i;
+			pathLen = filePath.size() - i;
+			break;
+		}
+	}
+	for (size_t i = 0; i < pathLen; i++)
+	{
+		path += filePath[pathNum + i];
+	}
+	// 読み込み済テクスチャを検索
+	if (textureDatas.contains(path))
+	{
+		// 読み込み済なら要素番号を返す
+		uint32_t textureIndex = textureDatas[path].roughnessMapSrvIndex;
+		return textureIndex;
+	}
+
+
+	assert(0);
+	return 0;
 }
 
 uint32_t TextureManager::GetTextureIndexByFilePath(const std::string& filePath) {
@@ -252,3 +428,4 @@ const DirectX::TexMetadata& TextureManager::GetMetaData(const std::string& fileP
 	TextureData& textureData = textureDatas[path];
 	return textureData.metadata;
 }
+
