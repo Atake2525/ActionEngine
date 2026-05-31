@@ -28,6 +28,5 @@ private:
 
     Setting::KeyConfig m_keyConfig;
 
-
 };
 

@@ -1,0 +1,37 @@
+{
+    "type" : "KEYCONFIG",
+    "main" : {
+    },
+    "default" : {
+        "MoveForward" : {
+            "keyboard" : "W",
+            "mouse" : null,
+            "gamepad" : "LEFTSTICKUP"
+        },
+        "MoveBack" : {
+            "keyboard" : "S",
+            "mouse" : null,
+            "gamepad" : "LEFTSTICKDOWN"
+        },
+        "MoveLeft" : {
+            "keyboard" : "A",
+            "mouse" : null,
+            "gamepad" : "LEFTSTICKLEFT"
+        },
+        "MoveRight" : {
+            "keyboard" : "D",
+            "mouse" : null,
+            "gamepad" : "LEFTSTICKRIGHT"
+        },
+        "Crouch" : {
+            "keyboard" : "LCONTROL",
+            "mouse" : null,
+            "gamepad" : "RIGHTSTICK"
+        },
+        "Run" : {
+            "keyboard" : "LSHIFT",
+            "mouse" : null,
+            "gamepad" : "LEFTSTICK"
+        }
+    }
+}
