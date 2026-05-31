@@ -5,6 +5,7 @@ Texture2D<float4> albedoTexture : register(t0);
 Texture2D<float4> normalTexture : register(t2);
 Texture2D<float4> metallicTexture : register(t3);
 Texture2D<float4> roughnessTexture : register(t4);
+TextureCube<float4> gEnvironmentTexture : register(t1);
 SamplerState gSampler : register(s0);
 
 struct Material
@@ -139,6 +140,26 @@ static float3 TorranceSparrow(float3 lightDir, float3 viewDir, float3 normal, fl
     return (D * G * F) / (4.0f * (NdotL * NdotV) + 0.001f);
 }
 
+static float3 FresnelSchlickRoughness(float cosTheta, float3 f0, float roughness)
+{
+    // IBL用のフレネル近似。roughnessが高い素材では斜め方向の反射が強くなりすぎないよう、F90側をroughnessで抑える。
+    // UE系のsplit-sum IBLでよく使われる形で、BRDF LUTなしでも粗さ別の環境反射を自然に見せやすい。
+    float3 f90 = max(float3(1.0f - roughness, 1.0f - roughness, 1.0f - roughness), f0);
+    return f0 + (f90 - f0) * pow(1.0f - saturate(cosTheta), 5.0f);
+}
+
+static float2 ApproximateEnvironmentBRDF(float nDotV, float roughness)
+{
+    // 本来のPBR IBLではBRDF LUTを参照し、スペキュラー環境光のスケール/バイアスを得る。
+    // ここではLUTテクスチャを増やさず、Epic/UE4系で使われる近似式で同じ役割を持たせる。
+    // 戻り値xがF0に掛かるscale、戻り値yがgrazing反射のbiasに相当する。
+    float4 c0 = float4(-1.0f, -0.0275f, -0.572f, 0.022f);
+    float4 c1 = float4(1.0f, 0.0425f, 1.04f, -0.04f);
+    float4 r = roughness * c0 + c1;
+    float a004 = min(r.x * r.x, exp2(-9.28f * nDotV)) * r.x + r.y;
+    return float2(-1.04f, 1.04f) * a004 + r.zw;
+}
+
 static float3 EvaluatePBRLight(
     float3 baseColor,
     float metallic,
@@ -180,6 +201,32 @@ static float3 EvaluatePBRLight(
     return (diffuse + specular) * lightColor * intensity * attenuation * nDotL;
 }
 
+static float3 EvaluateEnvironment(float3 baseColor, float metallic, float roughness, float3 normal, float3 viewDir)
+{
+    // split-sum IBLの近似。
+    // 1) roughnessに応じて環境CubeMapのmipを選ぶことで、prefiltered environment mapの「粗いほど反射がぼける」挙動を近似する。
+    // 2) BRDF LUTの代わりにApproximateEnvironmentBRDF()でscale/biasを計算する。
+    // これにより、金属や滑らかな素材が環境を反射し、粗い素材では反射が弱く広がる。
+    float3 reflectedVector = normalize(reflect(-viewDir, normal));
+    float3 diffuseDirection = normal;
+    float maxReflectionMip = 5.0f;
+    float specularMip = roughness * maxReflectionMip;
+
+    float3 irradiance = gEnvironmentTexture.SampleLevel(gSampler, diffuseDirection, maxReflectionMip).rgb;
+    float3 prefilteredColor = gEnvironmentTexture.SampleLevel(gSampler, reflectedVector, specularMip).rgb;
+    float3 f0 = lerp(float3(0.04f, 0.04f, 0.04f), baseColor, metallic);
+    float nDotV = saturate(dot(normal, viewDir));
+    float3 fresnel = FresnelSchlickRoughness(nDotV, f0, roughness);
+    float2 envBRDF = ApproximateEnvironmentBRDF(nDotV, roughness);
+
+    // 環境拡散光は非金属にだけ強く出す。金属は拡散反射をほぼ持たず、環境スペキュラーが主になる。
+    float3 kD = (float3(1.0f, 1.0f, 1.0f) - fresnel) * (1.0f - metallic);
+    float3 diffuseAmbient = irradiance * baseColor * kD;
+    // BRDF近似のscale/biasを使って、F0だけでは不足するgrazing反射やroughness依存を補う。
+    float3 specularAmbient = prefilteredColor * (f0 * envBRDF.x + envBRDF.y) * gMaterial.environmentCoefficient;
+    return diffuseAmbient + specularAmbient;
+}
+
 PixelShaderOutput main(VertexShaderOutput input)
 {
     PixelShaderOutput output;
@@ -207,8 +254,8 @@ PixelShaderOutput main(VertexShaderOutput input)
         float metallic = SampleMetallic(uv);
         float roughness = SampleRoughness(uv);
 
-        // 直接光が届かない面も完全な黒にならないよう、従来の弱い固定アンビエントを置く。
-        float3 color = float3(0.05f, 0.05f, 0.06f) * baseColor;
+        // まず環境光をベースに置き、その上に各ライトの直接光を足す。
+        float3 color = EvaluateEnvironment(baseColor, metallic, roughness, normal, viewDir);
 
         // DirectionalLightは距離減衰なし。ライト方向は「面からライトへ向かう方向」に揃えるため符号を反転する。
         float3 directionalLightDir = normalize(-gDirectionalLight.direction);
