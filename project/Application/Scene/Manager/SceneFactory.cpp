@@ -1,6 +1,7 @@
 #include "SceneFactory.h"
 #include "TitleScene.h"
 #include "GameScene.h"
+#include "DemoScene.h"
 #include "Logger.h"
 
 using namespace Logger;
@@ -36,6 +37,11 @@ unique_ptr<BaseScene> SceneFactory::ChangeScene(const std::string& sceneName)
     {
         Log("ゲームシーンに切り替えます\n");
         newScene = make_unique<GameScene>();
+    }
+    else if (sceneName == "TEST")
+    {
+        Log("テストシーンに切り替えます\n");
+        newScene = make_unique<DemoScene>();
     }
     else
     {

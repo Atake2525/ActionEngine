@@ -153,6 +153,8 @@ public:
 
 	const bool GetEnableMetallic() const { return materialData->enableMetallic; }
 
+	void SetPBRMaterial(const float metallic, const float roughness);
+
 	// AABBの取得
 	const AABB& GetMeshAABB() const { return meshAABB; }
 	const std::map<std::wstring, AABB>& GetMultiMeshAABB() const { return multiMeshAABB; }
