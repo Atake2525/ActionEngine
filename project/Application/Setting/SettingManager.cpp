@@ -1,4 +1,5 @@
 #include "SettingManager.h"
+#include "JsonLoader.h"
 #include <fstream>
 #include <sstream>
 #include "Logger.h"
@@ -18,25 +19,9 @@ SettingManager* SettingManager::GetInstance()
 }
 
 void SettingManager::Load(const std::string filename) {
-	// フルパスを作成
-	std::string fullPath = "Resources/Json/" + filename;
-
-	// ファイルストリーム
-	std::fstream file;
-	// ファイル展開
-	file.open(fullPath);
-	// 展開失敗のチェック
-	if (file.fail())
-	{
-		Log("ファイル展開に失敗しました。正しい位置にファイルがあるか確認してください。/nファイルの位置 : " + fullPath);
-		return;
-	}
-
-	// Json文字列から解凍したデータ
-	nlohmann::json deserialized;
-
-	// 解凍
-	file >> deserialized;
+	
+	// jsonを読んでデータを取得する
+	nlohmann::json deserialized = JsonLoader::GetInstance()->LoadJson("Resources/Json/" + filename);
 
 	// 正しいレベルデータファイルかチェック
 	if (!deserialized.is_object())
