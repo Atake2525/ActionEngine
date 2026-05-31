@@ -1,7 +1,5 @@
 #include "TitleScene.h"
-#include "externals/imgui/imgui.h"
-#include "externals/imgui/imgui_impl_dx12.h"
-#include "externals/imgui/imgui_impl_win32.h"
+#include "ImGuiManager.h"
 #include "WinApp.h"
 #include "GameTime.h"
 #include "EasingUtility.h"
@@ -86,7 +84,7 @@ void TitleScene::Initialize() {
     Light::GetInstance()->SetColorPointLight(Vector4{ 1.0f, 93.0f / 255.0f, 0.0f, 1.0f });
 
     Light::GetInstance()->SetDirectionDirectionalLight({ 0.174f, -0.35f, 1.0f });
-    Light::GetInstance()->SetIntensityDirectionalLight(0.5f);
+    Light::GetInstance()->SetIntensityDirectionalLight(1.0f);
     Light::GetInstance()->SetRadius(m_pCamera->GetFarClipDistance());
 
     m_sceneScreen = TitleSceneScreen::BootScreen;

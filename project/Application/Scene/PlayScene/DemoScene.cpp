@@ -54,7 +54,6 @@ void DemoScene::Initialize() {
 		object->SetScale({ 0.8f, 0.8f, 0.8f });
 		object->SetColor(material.color);
 		object->SetPBRMaterial(material.metallic, material.roughness);
-		object->SetEnvironmentCoefficient(0.75f);
 		pbrObjects.push_back(std::move(object));
 	}
 
@@ -79,37 +78,7 @@ void DemoScene::Initialize() {
 		object->SetScale({ 1.2f, 1.2f, 0.12f });
 		object->SetColor({ 1.0f, 1.0f, 1.0f, 1.0f });
 		object->SetPBRMaterial(0.0f, 0.55f);
-		object->SetEnvironmentCoefficient(0.25f);
 		normalMapObjects.push_back(std::move(object));
-	}
-
-	struct IBLCompareModel
-	{
-		const char* fileName;
-		Vector3 translate;
-		Vector4 color;
-		float roughness;
-		float environmentCoefficient;
-	};
-
-	const IBLCompareModel iblCompareModels[] = {
-		{ "PBR_IBL_OFF.obj", { -2.4f, -1.75f, 1.2f }, { 0.86f, 0.88f, 0.9f, 1.0f }, 0.08f, 0.0f },
-		{ "PBR_IBL_Rough.obj", { 0.0f, -1.75f, 1.2f }, { 0.86f, 0.88f, 0.9f, 1.0f }, 0.82f, 1.0f },
-		{ "PBR_IBL_Smooth.obj", { 2.4f, -1.75f, 1.2f }, { 0.86f, 0.88f, 0.9f, 1.0f }, 0.08f, 1.0f },
-	};
-
-	iblObjects.reserve(_countof(iblCompareModels));
-	for (const IBLCompareModel& model : iblCompareModels)
-	{
-		auto object = make_unique<Object3d>();
-		object->Initialize();
-		object->SetModel("Resources/Debug/obj", model.fileName, true, false);
-		object->SetTranslate(model.translate);
-		object->SetScale({ 0.7f, 0.7f, 0.7f });
-		object->SetColor(model.color);
-		object->SetPBRMaterial(1.0f, model.roughness);
-		object->SetEnvironmentCoefficient(model.environmentCoefficient);
-		iblObjects.push_back(std::move(object));
 	}
 
 	pointLightMarker = make_unique<Object3d>();
@@ -153,19 +122,10 @@ void DemoScene::Update() {
 		object->Update();
 	}
 
-	for (auto& object : iblObjects)
-	{
-		Vector3 rotate = object->GetRotate();
-		rotate.y -= GameTime::GetInstance()->GetDeltaTime() * 0.45f;
-		object->SetRotate(rotate);
-		object->Update();
-	}
-
 #ifndef NDEBUG
-	ImGui::Begin("PBR / IBL Test");
+	ImGui::Begin("PBR Test");
 	ImGui::Text("Top: normal map OFF / ON");
 	ImGui::Text("Center: base PBR roughness and metallic");
-	ImGui::Text("Bottom IBL: OFF / rough blurred / smooth sharp");
 	ImGui::End();
 #endif
 
@@ -198,11 +158,6 @@ void DemoScene::Draw() {
 	}
 
 	for (auto& object : normalMapObjects)
-	{
-		object->Draw();
-	}
-
-	for (auto& object : iblObjects)
 	{
 		object->Draw();
 	}

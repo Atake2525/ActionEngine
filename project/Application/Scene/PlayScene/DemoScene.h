@@ -51,7 +51,6 @@ private:
 	Input* input = nullptr;
 	std::vector<std::unique_ptr<Object3d>> pbrObjects;
 	std::vector<std::unique_ptr<Object3d>> normalMapObjects;
-	std::vector<std::unique_ptr<Object3d>> iblObjects;
 	std::unique_ptr<Object3d> pointLightMarker;
 	float pointLightAngle = 0.0f;
 
