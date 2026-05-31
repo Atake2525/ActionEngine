@@ -836,7 +836,3 @@ const float Object3d::GetEnvironmentCoefficient() const {
 void Object3d::SetEnvironmentCoefficient(const float amount) {
     model_->SetEnvironmentCoefficient(amount);
 }
-
-void Object3d::SetPBRMaterial(const float metallic, const float roughness) {
-    model_->SetPBRMaterial(metallic, roughness);
-}
