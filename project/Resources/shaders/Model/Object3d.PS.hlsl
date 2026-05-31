@@ -5,7 +5,6 @@ Texture2D<float4> albedoTexture : register(t0);
 Texture2D<float4> normalTexture : register(t2);
 Texture2D<float4> metallicTexture : register(t3);
 Texture2D<float4> roughnessTexture : register(t4);
-TextureCube<float4> gEnvironmentTexture : register(t1);
 SamplerState gSampler : register(s0);
 
 struct Material
@@ -140,11 +139,45 @@ static float3 TorranceSparrow(float3 lightDir, float3 viewDir, float3 normal, fl
     return (D * G * F) / (4.0f * (NdotL * NdotV) + 0.001f);
 }
 
-static float3 Flusnel(float3 viewDir, float3 halfVector, float3 F0)
+static float3 EvaluatePBRLight(
+    float3 baseColor,
+    float metallic,
+    float roughness,
+    float3 normal,
+    float3 viewDir,
+    float3 lightDir,
+    float3 lightColor,
+    float intensity,
+    float attenuation)
 {
-    float VdotH = saturate(dot(viewDir, halfVector));
-    float3 F = F0 + (1.0f - F0) * pow(1.0f - VdotH, 5.0f); // Schlickの近似
-    return F;
+    // 1つのライトからのPBR寄与を計算する共通関数。
+    // Directional/Point/Spotで距離減衰や方向は違うが、BRDF計算自体は同じなのでここに集約している。
+    float nDotL = saturate(dot(normal, lightDir));
+    float nDotV = saturate(dot(normal, viewDir));
+    if (nDotL <= 0.0f || nDotV <= 0.0f || intensity <= 0.0f || attenuation <= 0.0f)
+    {
+        // ライトが裏側、視線が裏側、強度0、減衰0の場合は寄与なし。無駄なBRDF計算とゼロ除算リスクを避ける。
+        return float3(0.0f, 0.0f, 0.0f);
+    }
+
+    float3 halfVector = normalize(viewDir + lightDir);
+    // F0をmetallicで補間する。非金属は0.04程度の白い反射、金属はbaseColor自体が反射色になる。
+    float3 f0 = lerp(float3(0.04f, 0.04f, 0.04f), baseColor, metallic);
+
+    // Cook-Torrance BRDFの主要3項。D=法線分布、G=幾何減衰、F=フレネル。
+    float d = DistributionGGX(normal, halfVector, roughness);
+    float g = GeometrySmith(normal, viewDir, lightDir, roughness);
+    float3 f = FresnelSchlick(dot(halfVector, viewDir), f0);
+
+    // specularはCook-Torranceの鏡面反射項。分母のmaxはNdotL/NdotVが極小の時の発散防止。
+    float3 specular = (d * g * f) / max(4.0f * nDotV * nDotL, 0.001f);
+    // エネルギー保存のため、フレネルで反射した分をdiffuseから引く。
+    // 金属は拡散反射を持たないので、metallicが1に近いほどdiffuseを消す。
+    float3 kD = (float3(1.0f, 1.0f, 1.0f) - f) * (1.0f - metallic);
+    float3 diffuse = kD * baseColor / PI;
+
+    // 最後にライト色、ライト強度、距離/スポット減衰、LambertのNdotLを掛けて、このライト1つ分の色にする。
+    return (diffuse + specular) * lightColor * intensity * attenuation * nDotL;
 }
 
 PixelShaderOutput main(VertexShaderOutput input)
@@ -167,108 +200,69 @@ PixelShaderOutput main(VertexShaderOutput input)
     normal = normalize(mul(normal, TBN));
     
     if (gMaterial.enableLighting != 0)
-    { // Lightingする場合
-        // Half lambert
-        float NdotL = dot(normalize(input.normal), -gDirectionalLight.direction);
-        float cos = pow(NdotL * 0.5f + 0.5f, 2.0f);
-        
-        // Phong Reflection Model
-        // 計算式 R = reflect(L,N) specular = (V.R)n
-        float3 toEye = normalize(gCamera.worldPosition - input.worldPosition);
-    
-        // HalfVectorを求めて計算する
-        float3 halfVector = normalize(-gDirectionalLight.direction + toEye);
-        float NDotH = dot(normalize(input.normal), halfVector);
-        
-        float specularPow = pow(saturate(NDotH), gMaterial.shininess); // 反射強度
-        
-        // pointLight
-        float3 pointLightDirection = normalize(input.worldPosition - gPointLight.position);
-        
-        float NdotLPointLight = dot(normalize(input.normal), -pointLightDirection);
-        float cosPointLight = pow(NdotLPointLight * 0.5f + 0.5f, 2.0f);
-        
-        float3 halfVectorPointLight = normalize(-pointLightDirection + toEye);
-        float NDotHPointLight = dot(normalize(input.normal), halfVectorPointLight);
-        
-        float specularPowPointLight = pow(saturate(NDotH), gMaterial.shininess);
-        
-        float distance = length(gPointLight.position - input.worldPosition); // ポイントライトへの距離
-        float factor = pow(saturate(-distance / gPointLight.radius + 1.0f), gPointLight.dacay); // 逆に上による減衰係数
-        
-        // spotLight
-        float3 spotLightDirectionOnSurFace = normalize(input.worldPosition - gSpotLight.position);
-        
-        float cosAngle = dot(spotLightDirectionOnSurFace, gSpotLight.direction);
-        float falloffFactor = saturate((cosAngle - gSpotLight.cosAngle) / (gSpotLight.cosFalloffStart - gSpotLight.cosAngle));
-        
-        float NdotLSpotLight = dot(normalize(input.normal), -spotLightDirectionOnSurFace);
-        float cosSpotLight = pow(NdotLSpotLight * 0.5f + 0.5f, 2.0f);
-        
-        float3 halfVectorSpotLight = normalize(-gSpotLight.direction + toEye);
-        float NDotHSpotLight = dot(normalize(input.normal), halfVectorSpotLight);
-        
-        float specularPowSpotLight = pow(saturate(NDotHSpotLight), gMaterial.shininess);
-        
-        float spotLightdistance = length(gSpotLight.position - input.worldPosition); // ポイントライトへの距離
-        float attenuationFactor = pow(saturate(-spotLightdistance / gSpotLight.distance + 1.0f), gSpotLight.dacay); // 逆に上による減衰係数
-        
-         // 環境マップ
-        float3 cameraToPosition = normalize(input.worldPosition - gCamera.worldPosition);
-        float3 reflectedVector = reflect(cameraToPosition, normalize(input.normal));
-        float4 environmentColor = gEnvironmentTexture.Sample(gSampler, reflectedVector);
-        
-        
-        
-        // baseColor はアルベドから取得したカラー（通常は sRGB → linear 変換済み）
-        float3 baseColor = gMaterial.color.rgb * textureColor.rgb;
-        float3 dielectricF0 = float3(0.04f, 0.04f, 0.04f); // 非金属のスペキュラー反射率
+    {
+        // ライティングON時は、法線、視線方向、metallic、roughnessを先に確定して全ライトで共有する。
+        float3 normal = SampleWorldNormal(input, uv);
+        float3 viewDir = normalize(gCamera.worldPosition - input.worldPosition);
+        float metallic = SampleMetallic(uv);
+        float roughness = SampleRoughness(uv);
 
-        // metallic によって補間：金属なら baseColor、非金属なら 0.04
-        float3 metal = lerp(dielectricF0, baseColor, metallic);
-        
-        // DirectionalLight
-        // 拡散反射
-        float3 diffuseDirectionalLight = gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity;
-        
-        float3 environmentColorDirectionalLight = (environmentColor.rgb * metallic) * diffuseDirectionalLight;
-        
-        // 鏡面反射                                                                                      ↓ 物体の鏡面反射の色。ここでは白にしている materialで設定できたりすると良い
-        float3 specularDirectionalLight = TorranceSparrow(-gDirectionalLight.direction, toEye, normal, roughness, gDirectionalLight.specularColor) * gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity;
-        
-        float3 directionalLight = environmentColorDirectionalLight + diffuseDirectionalLight + specularDirectionalLight;
-        
-        // PointLight
-        // 拡散反射
-        float3 diffusePointLight = gMaterial.color.rgb * textureColor.rgb * gPointLight.color.rgb * cos * gPointLight.intensity * factor;
-        
-        // 鏡面反射                                                                                      ↓ 物体の鏡面反射の色。ここでは白にしている materialで設定できたりすると良い
-        float3 specularPointLight = TorranceSparrow(-pointLightDirection, toEye, normal, roughness, gPointLight.specularColor) * gMaterial.color.rgb * textureColor.rgb * gPointLight.color.rgb * cosPointLight * gPointLight.intensity * factor;
-        
-        float3 environmentColorPointLight = (environmentColor.rgb * metallic) * diffusePointLight;
-        
-        float3 pointLight = environmentColorPointLight + diffusePointLight + specularPointLight;
-        
-        // SpotLight
-         // 拡散反射
-        float3 diffuseSpotLight = gMaterial.color.rgb * textureColor.rgb * gSpotLight.color.rgb * cosSpotLight * gSpotLight.intensity * falloffFactor * attenuationFactor;
-        
-        // 鏡面反射                                                                                      ↓ 物体の鏡面反射の色。ここでは白にしている materialで設定できたりすると良い
-        float3 specularSpotLight = TorranceSparrow(-gSpotLight.direction, toEye, normal, roughness, gSpotLight.specularColor) * gMaterial.color.rgb * textureColor.rgb * gSpotLight.color.rgb * cosSpotLight * gSpotLight.intensity * falloffFactor * attenuationFactor;
-        
-        float3 environmentColorSpotLight = (environmentColor.rgb * metallic) * diffuseSpotLight;
-        
-        float3 spotLight = environmentColorSpotLight + diffuseSpotLight + specularSpotLight;
-        
-        float3 ambient = float3(0.05f, 0.05f, 0.06f);
-        
-        ambient = ambient * gMaterial.color.rgb * textureColor.rgb;
-        
-        
-        // 拡散反射 + 鏡面反射
-        output.color.rgb = ambient + directionalLight + pointLight + spotLight;
-        // アルファは今まで通り
-        output.color.a = gMaterial.color.a * textureColor.a;
+        // 直接光が届かない面も完全な黒にならないよう、従来の弱い固定アンビエントを置く。
+        float3 color = float3(0.05f, 0.05f, 0.06f) * baseColor;
+
+        // DirectionalLightは距離減衰なし。ライト方向は「面からライトへ向かう方向」に揃えるため符号を反転する。
+        float3 directionalLightDir = normalize(-gDirectionalLight.direction);
+        color += EvaluatePBRLight(
+            baseColor,
+            metallic,
+            roughness,
+            normal,
+            viewDir,
+            directionalLightDir,
+            gDirectionalLight.color.rgb,
+            gDirectionalLight.intensity,
+            1.0f);
+
+        // PointLightはワールド位置からライト位置へのベクトルを使い、radius内で距離減衰させる。
+        float3 pointLightVector = gPointLight.position - input.worldPosition;
+        float pointDistance = length(pointLightVector);
+        float3 pointLightDir = pointLightVector / max(pointDistance, 0.001f);
+        // 既存Light構造体のdacay値を尊重し、radius端で0になる滑らかな減衰にしている。
+        float pointAttenuation = pow(saturate(1.0f - pointDistance / max(gPointLight.radius, 0.001f)), max(gPointLight.dacay, 0.0f));
+        color += EvaluatePBRLight(
+            baseColor,
+            metallic,
+            roughness,
+            normal,
+            viewDir,
+            pointLightDir,
+            gPointLight.color.rgb,
+            gPointLight.intensity,
+            pointAttenuation);
+
+        // SpotLightはPointLightの距離減衰に加えて、ライトの向きと角度によるfalloffを掛ける。
+        float3 spotLightVector = gSpotLight.position - input.worldPosition;
+        float spotDistance = length(spotLightVector);
+        float3 spotLightDir = spotLightVector / max(spotDistance, 0.001f);
+        float3 lightToSurfaceDir = -spotLightDir;
+        float spotCos = dot(lightToSurfaceDir, normalize(gSpotLight.direction));
+        // cosAngleからcosFalloffStartまでの範囲で滑らかに弱くする。maxで角度差0による除算を避ける。
+        float spotFalloff = saturate((spotCos - gSpotLight.cosAngle) / max(gSpotLight.cosFalloffStart - gSpotLight.cosAngle, 0.001f));
+        float spotAttenuation = pow(saturate(1.0f - spotDistance / max(gSpotLight.distance, 0.001f)), max(gSpotLight.dacay, 0.0f)) * spotFalloff;
+        color += EvaluatePBRLight(
+            baseColor,
+            metallic,
+            roughness,
+            normal,
+            viewDir,
+            spotLightDir,
+            gSpotLight.color.rgb,
+            gSpotLight.intensity,
+            spotAttenuation);
+
+        output.color.rgb = color;
+        output.color.a = alpha;
+
     }
     else
     { // Lightingしない場合。前回までと同じ計算
