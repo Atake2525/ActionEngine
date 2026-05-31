@@ -93,9 +93,6 @@
     <ClCompile Include="Engine\3d\Object\WireFrame\WireFrameObjectBase.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Application\Scene\PlayScene\DemoScene.cpp">
-      <Filter>Scene</Filter>
-    </ClCompile>
     <ClCompile Include="Engine\Core\Timer\GameTime.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
@@ -213,9 +210,6 @@
       <Filter>Scene</Filter>
     </ClInclude>
     <ClInclude Include="Application\Scene\PlayScene\GameScene.h">
-      <Filter>Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\Scene\PlayScene\DemoScene.h">
       <Filter>Scene</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Core\Input\Input.h">

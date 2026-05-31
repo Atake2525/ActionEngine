@@ -10,7 +10,6 @@
 #include "Object3dBase.h"
 #include "SrvManager.h"
 #include <thread>
-#include <algorithm>
 
 using namespace Logger;
 
@@ -70,9 +69,9 @@ void Model::Initialize(std::string directoryPath, std::string filename, bool ena
 		indexResource.at(num)->Map(0, nullptr, reinterpret_cast<void**>(&mappedIndex));
 		std::memcpy(mappedIndex, matData.second.indices.data(), sizeof(uint32_t) * matData.second.indices.size());
 
-		materialTemplateResource.at(matData.second.materialIndex) = DirectXBase::GetInstance()->CreateBufferResource(sizeof(MaterialTemplate));
+		materialTemplateResource.at(matData.second.materialIndex) = DirectXBase::GetInstance()->CreateBufferResource(sizeof(MaterialTemplate) * modelData.materialTemplate.size());
 		materialTemplateResource.at(matData.second.materialIndex)->Map(0, nullptr, reinterpret_cast<void**>(&materialTemplateData[matData.second.materialIndex]));
-		std::memcpy(materialTemplateData[matData.second.materialIndex], &modelData.materialTemplate.at(matData.second.materialIndex), sizeof(MaterialTemplate));
+		std::memcpy(materialTemplateData[matData.second.materialIndex], &modelData.materialTemplate.at(matData.second.materialIndex), sizeof(MaterialTemplate) * modelData.materialTemplate.size());
 		num++;
 	}
 
@@ -440,14 +439,14 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 			modelData.vertices[vertexIndex].position = { -position.x, position.y, position.z, 1.0f };
 			modelData.vertices[vertexIndex].normal = { -normal.x, normal.y, normal.z };
 			modelData.vertices[vertexIndex].texcoord = { texcoord.x, texcoord.y };
-			modelData.vertices[vertexIndex].tangent = { -tangent.x, tangent.y, tangent.z };
-			modelData.vertices[vertexIndex].binormal = { -bitangent.x, bitangent.y, bitangent.z };
+			modelData.vertices[vertexIndex].tangent = { tangent.x, tangent.y, tangent.z };
+			modelData.vertices[vertexIndex].binormal = { bitangent.x, bitangent.y, bitangent.z };
 
 			modelData.matVertexData[meshName].vertices[vertexIndex].position = { -position.x, position.y, position.z, 1.0f };
 			modelData.matVertexData[meshName].vertices[vertexIndex].normal = { -normal.x, normal.y, normal.z };
 			modelData.matVertexData[meshName].vertices[vertexIndex].texcoord = { texcoord.x, texcoord.y };
-			modelData.matVertexData[meshName].vertices[vertexIndex].tangent = { -tangent.x, tangent.y, tangent.z };
-			modelData.matVertexData[meshName].vertices[vertexIndex].binormal = { -bitangent.x, bitangent.y, bitangent.z };
+			modelData.matVertexData[meshName].vertices[vertexIndex].tangent = { tangent.x, tangent.y, tangent.z };
+			modelData.matVertexData[meshName].vertices[vertexIndex].binormal = { bitangent.x, bitangent.y, bitangent.z };
 		}
 		// Indexの解析
 		for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; ++faceIndex)
@@ -516,7 +515,6 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 		MaterialTemplate matTempData;
 		// メタリックの数値
 		matTempData.metallic = 0.0f;
-		matTempData.roughness = 1.0f;
 
 		modelData.materialTemplate.push_back(matTempData);
 		modelData.material.push_back(matData);
@@ -524,6 +522,12 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 	// マテリアルを設定されている数読み込む
 	for (uint32_t materialIndex = 0; materialIndex < scene->mNumMaterials; ++materialIndex)
 	{
+		// gltfは最後のマテリアルに何も入っていないのでcontinueする
+		if (materialIndex == scene->mNumMaterials - 1)
+		{
+			continue;
+		}
+
 		aiMaterial* material = scene->mMaterials[materialIndex];
 		if (material->GetTextureCount(aiTextureType_DIFFUSE) != 0)
 		{
@@ -540,8 +544,7 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 
 
 			// ノーマルマップ、メタリックマップ、ラフネスマップの読み込み
-			if (material->GetTexture(aiTextureType_NORMALS, 0, &textureFilePath) == AI_SUCCESS ||
-				material->GetTexture(aiTextureType_HEIGHT, 0, &textureFilePath) == AI_SUCCESS) {
+			if (material->GetTexture(aiTextureType_NORMALS, 0, &textureFilePath) == AI_SUCCESS) {
 				TextureManager::GetInstance()->LoadTexture(directoryPath + "/" + textureFilePath.C_Str());
 				matData.normalMapFilePath = directoryPath + "/" + textureFilePath.C_Str();
 				matData.normalMapIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(matData.normalMapFilePath);
@@ -617,7 +620,6 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 
 			// メタリックの数値
 			float metallic = 0.0f;
-			float roughness = 1.0f;
 			MaterialTemplate matTempData;
 
 			if (material->Get(AI_MATKEY_METALLIC_FACTOR, metallic) == AI_SUCCESS) {
@@ -626,13 +628,6 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 			else
 			{
 				matTempData.metallic = 0.0f;
-			}
-			if (material->Get(AI_MATKEY_ROUGHNESS_FACTOR, roughness) == AI_SUCCESS) {
-				matTempData.roughness = roughness;
-			}
-			else
-			{
-				matTempData.roughness = 1.0f;
 			}
 
 			modelData.materialTemplate.push_back(matTempData);
@@ -785,14 +780,14 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 			modelData.vertices[vertexIndex].position = { -position.x, position.y, position.z, 1.0f };
 			modelData.vertices[vertexIndex].normal = { -normal.x, normal.y, normal.z };
 			modelData.vertices[vertexIndex].texcoord = { texcoord.x, texcoord.y };
-			modelData.vertices[vertexIndex].tangent = { -tangent.x, tangent.y, tangent.z };
-			modelData.vertices[vertexIndex].binormal = { -bitangent.x, bitangent.y, bitangent.z };
+			modelData.vertices[vertexIndex].tangent = { tangent.x, tangent.y, tangent.z };
+			modelData.vertices[vertexIndex].binormal = { bitangent.x, bitangent.y, bitangent.z };
 
 			modelData.matVertexData[meshName].vertices[vertexIndex].position = { -position.x, position.y, position.z, 1.0f };
 			modelData.matVertexData[meshName].vertices[vertexIndex].normal = { -normal.x, normal.y, normal.z };
 			modelData.matVertexData[meshName].vertices[vertexIndex].texcoord = { texcoord.x, texcoord.y };
-			modelData.matVertexData[meshName].vertices[vertexIndex].tangent = { -tangent.x, tangent.y, tangent.z };
-			modelData.matVertexData[meshName].vertices[vertexIndex].binormal = { -bitangent.x, bitangent.y, bitangent.z };
+			modelData.matVertexData[meshName].vertices[vertexIndex].tangent = { tangent.x, tangent.y, tangent.z };
+			modelData.matVertexData[meshName].vertices[vertexIndex].binormal = { bitangent.x, bitangent.y, bitangent.z };
 		}
 		// Indexの解析
 		for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; faceIndex++)
@@ -837,7 +832,6 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 		MaterialTemplate matTempData;
 		// メタリックの数値		
 		matTempData.metallic = 0.0f;
-		matTempData.roughness = 1.0f;
 
 		modelData.materialTemplate.push_back(matTempData);
 		modelData.material.push_back(matData);
@@ -864,8 +858,7 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 			matData.textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(matData.textureFilePath);
 
 			// ノーマルマップ、メタリックマップ、ラフネスマップの読み込み
-			if (material->GetTexture(aiTextureType_NORMALS, 0, &textureFilePath) == AI_SUCCESS ||
-				material->GetTexture(aiTextureType_HEIGHT, 0, &textureFilePath) == AI_SUCCESS) {
+			if (material->GetTexture(aiTextureType_NORMALS, 0, &textureFilePath) == AI_SUCCESS) {
 				TextureManager::GetInstance()->LoadTexture(directoryPath + "/" + textureFilePath.C_Str());
 				matData.normalMapFilePath = directoryPath + "/" + textureFilePath.C_Str();
 				matData.normalMapIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(matData.normalMapFilePath);
@@ -939,7 +932,6 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 			MaterialTemplate matTempData;
 			// メタリックの数値		
 			matTempData.metallic = 0.0f;
-			matTempData.roughness = 1.0f;
 
 			modelData.materialTemplate.push_back(matTempData);
 			modelData.material.push_back(matData);
@@ -987,23 +979,6 @@ void Model::CreateVertexBufferView() {
 
 void Model::CreateMaterialResouce() {
 	materialResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(Material));
-}
-
-void Model::SetPBRMaterial(const float metallic, const float roughness) {
-	const float clampedMetallic = std::clamp(metallic, 0.0f, 1.0f);
-	const float clampedRoughness = std::clamp(roughness, 0.04f, 1.0f);
-
-	for (size_t i = 0; i < modelData.materialTemplate.size(); ++i)
-	{
-		modelData.materialTemplate[i].metallic = clampedMetallic;
-		modelData.materialTemplate[i].roughness = clampedRoughness;
-
-		if (i < materialTemplateData.size() && materialTemplateData[i])
-		{
-			materialTemplateData[i]->metallic = clampedMetallic;
-			materialTemplateData[i]->roughness = clampedRoughness;
-		}
-	}
 }
 
 void Model::CreateAABB() {
