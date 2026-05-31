@@ -222,22 +222,22 @@ void Object3dBase::CreateCSPipeLineState() {
 	descriptionRootSignatureCS.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 
-    descriptorRangeCS[0].BaseShaderRegister = 0;                                                   // 0から始まる
-    descriptorRangeCS[0].NumDescriptors = 1;                                                       // 数は1つ
-    descriptorRangeCS[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;                              // SRVを使う
-    descriptorRangeCS[1].BaseShaderRegister = 1;                                                   // 1から始まる
-    descriptorRangeCS[1].NumDescriptors = 1;                                                       // 数は1つ
-    descriptorRangeCS[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;                              // SRVを使う
-    descriptorRangeCS[2].BaseShaderRegister = 2;                                                   // 2から始まる
-    descriptorRangeCS[2].NumDescriptors = 1;                                                       // 数は1つ
-    descriptorRangeCS[2].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;                              // SRVを使う
-    descriptorRangeCS[3].BaseShaderRegister = 0;                                                   // 3から始まる
-    descriptorRangeCS[3].NumDescriptors = 1;                                                       // 数は1つ
-    descriptorRangeCS[3].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;                              // UAVを使う
+	descriptorRangeCS[0].BaseShaderRegister = 0;                                                   // 0から始まる
+	descriptorRangeCS[0].NumDescriptors = 1;                                                       // 数は1つ
+	descriptorRangeCS[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;                              // SRVを使う
+	descriptorRangeCS[1].BaseShaderRegister = 1;                                                   // 1から始まる
+	descriptorRangeCS[1].NumDescriptors = 1;                                                       // 数は1つ
+	descriptorRangeCS[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;                              // SRVを使う
+	descriptorRangeCS[2].BaseShaderRegister = 2;                                                   // 2から始まる
+	descriptorRangeCS[2].NumDescriptors = 1;                                                       // 数は1つ
+	descriptorRangeCS[2].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;                              // SRVを使う
+	descriptorRangeCS[3].BaseShaderRegister = 0;                                                   // 3から始まる
+	descriptorRangeCS[3].NumDescriptors = 1;                                                       // 数は1つ
+	descriptorRangeCS[3].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;                              // UAVを使う
 
-    rootParametersCS[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う
-    rootParametersCS[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;           // 全てのシェーダーで使う
-    rootParametersCS[0].DescriptorTable.pDescriptorRanges = &descriptorRangeCS[0];        // Tableの中身の配列を指定
+	rootParametersCS[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う
+	rootParametersCS[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;           // 全てのシェーダーで使う
+	rootParametersCS[0].DescriptorTable.pDescriptorRanges = &descriptorRangeCS[0];        // Tableの中身の配列を指定
 	rootParametersCS[0].DescriptorTable.NumDescriptorRanges = 1;
 	rootParametersCS[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE; // DescriptorTableを使う
 	rootParametersCS[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;           // 全てのシェーダーで使う
@@ -269,17 +269,17 @@ void Object3dBase::CreateCSPipeLineState() {
 	hr = DirectXBase::GetInstance()->GetDevice()->CreateRootSignature(0, signatureBlobCS->GetBufferPointer(), signatureBlobCS->GetBufferSize(), IID_PPV_ARGS(&rootSignatureCS));
 	assert(SUCCEEDED(hr));
 
-    // シェーダーのコンパイル
-    computeShaderBlob = DirectXBase::GetInstance()->CompileShader(L"Resources/shaders/Model/Skinning.CS.hlsl", L"cs_6_5");
-    assert(computeShaderBlob != nullptr);
+	// シェーダーのコンパイル
+	computeShaderBlob = DirectXBase::GetInstance()->CompileShader(L"Resources/shaders/Model/Skinning.CS.hlsl", L"cs_6_5");
+	assert(computeShaderBlob != nullptr);
 
-    // PSOを作成する
+	// PSOを作成する
 	computePipelineStateDesc.CS = {
-        .pShaderBytecode = computeShaderBlob->GetBufferPointer(),
-        .BytecodeLength = computeShaderBlob->GetBufferSize()
+		.pShaderBytecode = computeShaderBlob->GetBufferPointer(),
+		.BytecodeLength = computeShaderBlob->GetBufferSize()
 	};
 	computePipelineStateDesc.pRootSignature = rootSignatureCS.Get();
-    hr = DirectXBase::GetInstance()->GetDevice()->CreateComputePipelineState(&computePipelineStateDesc, IID_PPV_ARGS(&computePipelineState));
+	hr = DirectXBase::GetInstance()->GetDevice()->CreateComputePipelineState(&computePipelineStateDesc, IID_PPV_ARGS(&computePipelineState));
 }
 
 void Object3dBase::ShaderDraw() {

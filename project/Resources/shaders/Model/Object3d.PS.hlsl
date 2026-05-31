@@ -8,23 +8,20 @@ Texture2D<float4> roughnessTexture : register(t4);
 TextureCube<float4> gEnvironmentTexture : register(t1);
 SamplerState gSampler : register(s0);
 
+static const float PI = 3.14159265f;
+
 struct Material
 {
     float4 color;
-    
     int enableLighting;
-    
     float4x4 uvTransform;
-    
     float shininess;
-    
     float3 specularColor;
-    
     int enableMetallic;
-    
     float environmentCoefficient;
 };
 ConstantBuffer<Material> gMaterial : register(b0);
+
 struct PixelShaderOutput
 {
     float4 color : SV_TARGET0;
@@ -40,34 +37,34 @@ ConstantBuffer<Camera> gCamera : register(b1);
 
 struct DirectionalLight
 {
-    float4 color; //!< ライトの色
-    float3 direction; //!< ライトの向き
-    float intensity; //!< 輝度
+    float4 color;
+    float3 direction;
+    float intensity;
     float3 specularColor;
 };
 ConstantBuffer<DirectionalLight> gDirectionalLight : register(b2);
 
 struct PointLight
 {
-    float4 color; //!< ライトの色
-    float3 position; //!< ライトの位置
-    float intensity; //!< 輝度
-    float radius; //!< ライトの届く最大距離
-    float dacay; //!< 減衰率
+    float4 color;
+    float3 position;
+    float intensity;
+    float radius;
+    float dacay;
     float3 specularColor;
 };
 ConstantBuffer<PointLight> gPointLight : register(b3);
 
 struct SpotLight
 {
-    float4 color; //!< ライトの色
-    float3 position; //!< ライトの位置
-    float intensity; //!< 輝度
-    float3 direction; //!< スポットライトの方向
-    float distance; //!< ライトの届く最大距離
-    float dacay; //!< 減衰率
-    float cosAngle; //!< スポットライトの余弦
-    float cosFalloffStart; // falloffが開始される角度
+    float4 color;
+    float3 position;
+    float intensity;
+    float3 direction;
+    float distance;
+    float dacay;
+    float cosAngle;
+    float cosFalloffStart;
     float3 specularColor;
 };
 ConstantBuffer<SpotLight> gSpotLight : register(b4);
@@ -76,6 +73,7 @@ struct MaterialTemplate
 {
     float metallic;
     float roughness;
+    float2 padding;
 };
 ConstantBuffer<MaterialTemplate> gMaterialTemplate : register(b5);
 
@@ -102,42 +100,99 @@ struct ScanParam
 };
 ConstantBuffer<ScanParam> gScanParam : register(b8);
 
-static PixelShaderOutput RoadMaterialTemplate(PixelShaderOutput output, VertexShaderOutput input)
+static float Max3(float3 value)
 {
-    // 環境マップ
-    float3 cameraToPosition = normalize(input.worldPosition - gCamera.worldPosition);
-    float3 reflectedVector = reflect(cameraToPosition, normalize(input.normal));
-    float4 environmentColor = gEnvironmentTexture.Sample(gSampler, reflectedVector);
-    
-    output.color.rgb += environmentColor.rgb * gMaterialTemplate.metallic * float(gMaterial.enableMetallic);
-    
-    return output;
+    // RGBのうち最大値を取る小さな補助関数。
+    // metallic mapやnormal mapのフォールバック判定では、1チャンネルだけに依存すると素材によって誤判定しやすいため、全チャンネルを見て「何か値が入っているか」を判断する。
+    return max(value.r, max(value.g, value.b));
 }
 
-static float3 TorranceSparrow(float3 lightDir, float3 viewDir, float3 normal, float roughness, float3 F0)
+static float3 SampleWorldNormal(VertexShaderOutput input, float2 uv)
 {
-    float3 halfVector = normalize(lightDir + viewDir);
-    
-    // 法線分布関数
-    float NdotH = saturate(dot(normal, halfVector));
+    // PBRでは法線方向がライティング結果に強く影響するため、normal mapがある場合はここでワールド空間法線へ変換する。
+    float3 vertexNormal = normalize(input.normal);
+    float3 normalSample = normalTexture.Sample(gSampler, uv).rgb;
+
+    if (Max3(normalSample) <= 0.01f)
+    {
+        // 現状のフォールバックnormal mapは黒テクスチャを使うことがある。
+        // 黒(0,0,0)をそのまま -1..1 に展開すると不正な法線になり、全面が暗くなるため、値がほぼ無い場合は頂点法線を使う。
+        return vertexNormal;
+    }
+
+    // normal mapは接線空間で保存されているため、0..1 の値を -1..1 に戻してからTBN行列でワールド空間へ変換する。
+    float3 tangentNormal = normalize(normalSample * 2.0f - 1.0f);
+
+    float3 tangent = normalize(input.tangent);
+    // tangentを法線に対して再直交化する。モデル由来のtangentが少し歪んでいても、TBNの破綻を抑えるため。
+    tangent = normalize(tangent - vertexNormal * dot(tangent, vertexNormal));
+    float3 sourceBitangent = normalize(input.bitangent);
+    // bitangentをそのまま使うと、tangent再直交化後にTBNが直交しない場合がある。
+    // tangentとnormalから再生成し、元bitangentとの向き比較で左右反転だけ引き継ぐ。
+    float bitangentSign = dot(cross(vertexNormal, tangent), sourceBitangent) < 0.0f ? -1.0f : 1.0f;
+    float3 bitangent = normalize(cross(vertexNormal, tangent)) * bitangentSign;
+
+    float3x3 tbn = float3x3(tangent, bitangent, vertexNormal);
+    return normalize(mul(tangentNormal, tbn));
+}
+
+static float SampleMetallic(float2 uv)
+{
+    // metallicは「マテリアル定数」と「metallic map」の両方を扱う。
+    // テストシーンのようにテクスチャ無しで係数だけ変えたいケースがあるので、map値と定数の大きい方を採用している。
+    float metallicMap = Max3(metallicTexture.Sample(gSampler, uv).rgb);
+    // saturateで0..1に丸め、入力ミスやテクスチャ値の揺れがBRDFを壊さないようにする。
+    return saturate(max(gMaterialTemplate.metallic, metallicMap));
+}
+
+static float SampleRoughness(float2 uv)
+{
+    // roughnessは鏡面反射の広がりを決める値。0に近いほど鋭いハイライト、1に近いほど鈍いハイライトになる。
+    float roughnessMap = roughnessTexture.Sample(gSampler, uv).r;
+    // フォールバックroughness mapが黒の場合に粗さ0扱いになると、GGXの分母が極端になり白飛びしやすい。
+    // そのためmapが実質未設定ならMaterialTemplate側のroughnessをそのまま使う。
+    // mapがある場合は「テクスチャの模様」x「素材全体のroughness係数」として扱う。
+    float roughness = roughnessMap > 0.001f ? roughnessMap * max(gMaterialTemplate.roughness, 0.001f) : gMaterialTemplate.roughness;
+    // roughnessを0.04未満にしない。完全な0に近い粗さはリアルタイム描画でノイズや過剰な輝度を出しやすいため。
+    return clamp(roughness, 0.04f, 1.0f);
+}
+
+static float DistributionGGX(float3 normal, float3 halfVector, float roughness)
+{
+    // GGX/Trowbridge-Reitzの法線分布関数(D)。
+    // マイクロファセットがhalfVector方向を向いている割合を表し、roughnessが低いほど鋭いスペキュラーになる。
     float alpha = roughness * roughness;
     float alpha2 = alpha * alpha;
-    float denom = (NdotH * NdotH) * (alpha2 - 1.0f) + 1.0f;
-    float D = alpha2 / (3.14159f * denom * denom);
-    
-    // 幾何学的減衰関数
-    float NdotV = saturate(dot(normal, viewDir));
-    float NdotL = saturate(dot(normal, lightDir));
-    float k = (roughness + 1.0f) * (roughness + 1.0f) / 8.0f; // Schlickの近似
-    float G_V = NdotV / (NdotV * (1.0f - k) + k);
-    float G_L = NdotL / (NdotL * (1.0f - k) + k);
-    float G = G_V * G_L;
-    
-    // フレネル反射率
-    float VdotH = saturate(dot(viewDir, halfVector));
-    float3 F = F0 + (1.0f - F0) * pow(1.0f - VdotH, 5.0f); // Schlickの近似
-    
-    return (D * G * F) / (4.0f * (NdotL * NdotV) + 0.001f);
+    float nDotH = saturate(dot(normal, halfVector));
+    float nDotH2 = nDotH * nDotH;
+    float denom = nDotH2 * (alpha2 - 1.0f) + 1.0f;
+    return alpha2 / max(PI * denom * denom, 0.0001f);
+}
+
+static float GeometrySchlickGGX(float nDotV, float roughness)
+{
+    // Schlick-GGXの幾何減衰項の片側分。
+    // 視線方向またはライト方向から見て、微細面が互いに隠し合う効果を近似する。
+    float r = roughness + 1.0f;
+    float k = (r * r) / 8.0f;
+    return nDotV / max(nDotV * (1.0f - k) + k, 0.0001f);
+}
+
+static float GeometrySmith(float3 normal, float3 viewDir, float3 lightDir, float roughness)
+{
+    // Smith法で視線側とライト側の幾何減衰を合成する。
+    // 斜め方向ほど反射が弱くなるため、金属や低roughnessの見え方が自然になる。
+    float nDotV = saturate(dot(normal, viewDir));
+    float nDotL = saturate(dot(normal, lightDir));
+    return GeometrySchlickGGX(nDotV, roughness) * GeometrySchlickGGX(nDotL, roughness);
+}
+
+static float3 FresnelSchlick(float cosTheta, float3 f0)
+{
+    // Schlick近似のフレネル項(F)。
+    // 物体を浅い角度で見た時に反射が強くなる現象を安価に再現する。
+    // f0は正面から見た反射率で、非金属は約0.04、金属はbaseColor寄りにする。
+    return f0 + (1.0f - f0) * pow(1.0f - saturate(cosTheta), 5.0f);
 }
 
 static float3 FresnelSchlickRoughness(float cosTheta, float3 f0, float roughness)
@@ -230,22 +285,15 @@ static float3 EvaluateEnvironment(float3 baseColor, float metallic, float roughn
 PixelShaderOutput main(VertexShaderOutput input)
 {
     PixelShaderOutput output;
-    output.color = gMaterial.color;
+
     float4 transformedUV = mul(float4(input.texcoord, 0.0f, 1.0f), gMaterial.uvTransform);
-    float4 textureColor = albedoTexture.Sample(gSampler, transformedUV.xy);
-    float3 normal = normalTexture.Sample(gSampler, transformedUV.xy).rgb;
-    float metallic = metallicTexture.Sample(gSampler, transformedUV.xy).b;
-   
-    float roughness = roughnessTexture.Sample(gSampler, transformedUV.xy).r;
-    
-    float3 tangent = normalize(input.tangent);
-    float3 bitangent = normalize(input.bitangent);
-    normal = normalize(normal * 2.0f - 1.0f);
-    
-    float3x3 TBN = float3x3(tangent, bitangent, normalize(input.normal));
-    
-    normal = normalize(mul(normal, TBN));
-    
+    float2 uv = transformedUV.xy;
+    float4 textureColor = albedoTexture.Sample(gSampler, uv);
+    // baseColorはマテリアルカラーとアルベドテクスチャの積。
+    // PBRではこの値が非金属の拡散色、金属の反射色(F0)として使われる。
+    float3 baseColor = saturate(gMaterial.color.rgb * textureColor.rgb);
+    float alpha = gMaterial.color.a * textureColor.a;
+
     if (gMaterial.enableLighting != 0)
     {
         // ライティングON時は、法線、視線方向、metallic、roughnessを先に確定して全ライトで共有する。
@@ -309,28 +357,27 @@ PixelShaderOutput main(VertexShaderOutput input)
 
         output.color.rgb = color;
         output.color.a = alpha;
-
     }
     else
-    { // Lightingしない場合。前回までと同じ計算
-        output.color = gMaterial.color * textureColor;
+    {
+        // ライティングOFF時は従来通り、マテリアルカラーxアルベドだけを出す。UI的な単色表示やデバッグ表示用。
+        output.color = float4(baseColor, alpha);
     }
-    output.color.rgb = RoadMaterialTemplate(output, input).color.rgb;
 
-    output.color.a = HeightCulling(input.worldPosition, gCullingTemplate.drawHeight);
+    // ここから下は既存の描画後処理。PBRで作ったRGBは維持し、アルファだけ高さ/距離カリングで調整する。
+    output.color.a *= HeightCulling(input.worldPosition, gCullingTemplate.drawHeight);
     output.color.a *= DistanceCulling(input.worldPosition, gCamera.worldPosition, gCamera.nearClipDistance, gCamera.farClipDistance);
-    
+
     output.color.rgb = ScanEffect(output.color.rgb, gScanParam.color, input.worldPosition, gCamera.worldPosition, gScanParam.width, gScanParam.radius);
-    
+
     float dist = length(input.worldPosition - gCamera.worldPosition);
     float t = smoothstep(gScanParam.radius, gScanParam.radius * 0.999f, dist);
-    
     output.color.rgb = lerp(float3(1.0f, 1.0f, 1.0f), output.color.rgb, t);
-    
+
     if (output.color.a < 0.2f)
     {
         discard;
     }
-    
+
     return output;
 }
