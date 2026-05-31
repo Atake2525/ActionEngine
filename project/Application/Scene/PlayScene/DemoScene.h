@@ -15,7 +15,6 @@
 #include "SceneManager.h"
 #include "SkyBox.h"
 #include <memory>
-#include <vector>
 
 #pragma once
 
@@ -49,10 +48,6 @@ private:
 	bool finished = false;
 	std::unique_ptr<Camera> camera;
 	Input* input = nullptr;
-	std::vector<std::unique_ptr<Object3d>> pbrObjects;
-	std::vector<std::unique_ptr<Object3d>> normalMapObjects;
-	std::unique_ptr<Object3d> pointLightMarker;
-	float pointLightAngle = 0.0f;
 
 };
 

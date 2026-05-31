@@ -131,7 +131,6 @@ public:
     void DebugMode(const bool debugMode);
     void SetEnableMetallic(const bool flag) { model_->SetEnableMetallic(flag); }
     const bool GetEnableMetallic() { return model_->GetEnableMetallic(); }
-    void SetPBRMaterial(const float metallic, const float roughness);
 
     // ============================
     //  Culling
