@@ -100,7 +100,7 @@ public:
 	// 初期化
 	void Initialize(std::string directoryPath, std::string filename, bool enableLighting, bool isAnimation);
 
-    void SkinningUpdate(const Skeleton& skeleton);
+	void SkinningUpdate(const Skeleton& skeleton);
 
 	// 更新
 	void Draw();
@@ -152,6 +152,8 @@ public:
 	void SetEnableMetallic(const bool flag) { materialData->enableMetallic = flag; }
 
 	const bool GetEnableMetallic() const { return materialData->enableMetallic; }
+
+	void SetPBRMaterial(const float metallic, const float roughness);
 
 	// AABBの取得
 	const AABB& GetMeshAABB() const { return meshAABB; }
@@ -230,7 +232,7 @@ private:
 
 	// ModelのAABBを作成する
 	void CreateAABB();
-	
+
 
 	AABB meshAABB;
 	std::map<std::wstring, AABB> multiMeshAABB;
