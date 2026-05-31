@@ -93,6 +93,9 @@
     <ClCompile Include="Engine\3d\Object\WireFrame\WireFrameObjectBase.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
+    <ClCompile Include="Application\Scene\PlayScene\DemoScene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
     <ClCompile Include="Engine\Core\Timer\GameTime.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
@@ -140,7 +143,6 @@
     <ClCompile Include="Engine\2d\UI\UIButton.cpp" />
     <ClCompile Include="Engine\2d\UI\UISlider.cpp" />
     <ClCompile Include="Engine\2d\UI\UISelectionGroup.cpp" />
-    <ClCompile Include="Application\Scene\PlayScene\DemoScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Math\EasingUtility.h" />
@@ -211,6 +213,9 @@
       <Filter>Scene</Filter>
     </ClInclude>
     <ClInclude Include="Application\Scene\PlayScene\GameScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Scene\PlayScene\DemoScene.h">
       <Filter>Scene</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Core\Input\Input.h">
@@ -329,7 +334,6 @@
     <ClInclude Include="Engine\2d\UI\UIButton.h" />
     <ClInclude Include="Engine\2d\UI\UISlider.h" />
     <ClInclude Include="Engine\2d\UI\UISelectionGroup.h" />
-    <ClInclude Include="Application\Scene\PlayScene\DemoScene.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\PostEffect\BoxFilter.PS.hlsl" />
