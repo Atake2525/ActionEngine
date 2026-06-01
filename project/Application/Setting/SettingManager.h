@@ -24,7 +24,7 @@ public:
 
 private:
 
-    void SetKeyConfig(nlohmann::json json);
+    void LoadKeyConfig(nlohmann::json json);
 
     Setting::KeyConfig m_keyConfig;
 

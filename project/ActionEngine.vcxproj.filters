@@ -141,7 +141,7 @@
     <ClCompile Include="Engine\2d\UI\UISlider.cpp" />
     <ClCompile Include="Engine\2d\UI\UISelectionGroup.cpp" />
     <ClCompile Include="Application\Setting\SettingManager.cpp" />
-    <ClCompile Include="Application\Setting\KeyConfig.cpp" />
+    <ClCompile Include="Application\Setting\KeyboardConfig.cpp" />
     <ClCompile Include="Application\Setting\ControllerConfig.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -332,7 +332,7 @@
     <ClInclude Include="Engine\2d\UI\UISlider.h" />
     <ClInclude Include="Engine\2d\UI\UISelectionGroup.h" />
     <ClInclude Include="Application\Setting\SettingManager.h" />
-    <ClInclude Include="Application\Setting\KeyConfig.h" />
+    <ClInclude Include="Application\Setting\KeyboardConfig.h" />
     <ClInclude Include="Application\Setting\ControllerConfig.h" />
     <ClInclude Include="Application\Setting\SettingUtility.h" />
   </ItemGroup>
