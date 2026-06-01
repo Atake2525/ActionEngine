@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include "Logger.h"
+#include "SettingUtility.h"
 
 using namespace Setting;
 using namespace Logger;
@@ -45,7 +46,7 @@ void SettingManager::Load(const std::string filename) {
 
 	if (type == "KEYCONFIG")
 	{
-		SetKeyConfig(deserialized);
+		LoadKeyConfig(deserialized);
 	}
 }
 
@@ -53,6 +54,6 @@ void SettingManager::Save(const std::string filename) {
 
 }
 
-void SettingManager::SetKeyConfig(nlohmann::json) {
+void SettingManager::LoadKeyConfig(nlohmann::json) {
 
 }
