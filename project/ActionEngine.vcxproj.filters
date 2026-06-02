@@ -36,6 +36,9 @@
     <ClCompile Include="Application\Scene\PlayScene\GameScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
+    <ClCompile Include="Application\Scene\PlayScene\GameSceneReadyState.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
     <ClCompile Include="Engine\Core\Input\Input.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
@@ -213,6 +216,9 @@
       <Filter>Scene</Filter>
     </ClInclude>
     <ClInclude Include="Application\Scene\PlayScene\GameScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Scene\PlayScene\GameSceneReadyState.h">
       <Filter>Scene</Filter>
     </ClInclude>
     <ClInclude Include="Application\Scene\PlayScene\DemoScene.h">
