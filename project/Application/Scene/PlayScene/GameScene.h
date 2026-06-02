@@ -21,7 +21,6 @@
 #include "Pause.h"
 #include "PlayerUI.h"
 #include "MouseCursor.h"
-#include "GameSceneReadyState.h"
 
 #pragma once
 
@@ -52,12 +51,6 @@ public:
 	// 終了処理
 	const bool& EndRequest() override { return m_finished; }
 
-	void ChangeReadyState(std::unique_ptr<IGameSceneReadyState> state);
-	float AdvanceReadyPresentationTimer();
-	void ExpandReadyCameraRange(float progress);
-	void ExpandReadyScanEffect(float progress);
-	void CompleteReadyPresentation();
-
 private:
 	std::unique_ptr<Camera> m_pCamera = nullptr;
 
@@ -85,7 +78,7 @@ private:
 	float m_finalScanRadius = 0.0f;
 	float m_finalFarClipDistance = 100.0f;
 
-	std::unique_ptr<IGameSceneReadyState> m_readyState;
+	int m_readyNumber = 0;
 
 	enum class ScenePhase : int {
 		FadeIn = 0,

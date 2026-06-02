@@ -143,7 +143,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\3d\Object\WireFrame\WireFrameObjectBase.cpp" />
     <ClCompile Include="Application\Scene\PlayScene\DemoScene.cpp" />
     <ClCompile Include="Application\Scene\PlayScene\GameScene.cpp" />
-    <ClCompile Include="Application\Scene\PlayScene\GameSceneReadyState.cpp" />
     <ClCompile Include="Application\Scene\MyGame.cpp" />
     <ClCompile Include="Engine\Lighting\Light.cpp" />
     <ClCompile Include="Engine\Core\SrvManager\SrvManager.cpp" />
@@ -233,7 +232,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\3d\Object\WireFrame\WireFrameObjectBase.h" />
     <ClInclude Include="Application\Scene\PlayScene\DemoScene.h" />
     <ClInclude Include="Application\Scene\PlayScene\GameScene.h" />
-    <ClInclude Include="Application\Scene\PlayScene\GameSceneReadyState.h" />
     <ClInclude Include="Engine\Math\Quaternion.h" />
     <ClInclude Include="Application\Scene\MyGame.h" />
     <ClInclude Include="Engine\Lighting\Light.h" />
