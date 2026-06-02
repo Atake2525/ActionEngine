@@ -8,6 +8,7 @@
 #include "TutorialStage.h"
 #include "EasingUtility.h"
 #include "Light.h"
+#include <algorithm>
 
 using namespace std;
 using namespace ActionEngine::Stage;
@@ -48,6 +49,7 @@ void GameScene::Initialize() {
     m_pPause->Initialize();
 
     m_scenePhase = ScenePhase::FadeIn;
+    ChangeReadyState(CreateInitialGameSceneReadyState());
     m_pInput->ShowMouseCursor(m_cursorShow);
 }
 
@@ -62,8 +64,6 @@ void GameScene::Update() {
         return;
     }
 
-    float farClipDist = 0.0f;
-    float radius = 0.0f;
     // フェーズ管理
     switch (m_scenePhase)
     {
@@ -75,36 +75,7 @@ void GameScene::Update() {
         }
         break;
     case ScenePhase::Ready: // スタート演出フェーズ
-        m_startTimer += GameTime::GetInstance()->GetDeltaTime() / m_startTime;
-        m_startTimer = clamp(m_startTimer, 0.0f, 1.0f);
-
-        
-        switch (m_readyNumber)
-        {
-        case 0:
-            farClipDist = EaseOutExpo(0.0f, m_finalFarClipDistance, m_startTimer);
-            m_pCamera->SetFarClipDistance(farClipDist);
-            break;
-        case 1:
-            radius = EaseOutExpo(0.0f, m_finalScanRadius, m_startTimer);
-            Light::GetInstance()->SetRadius(radius);
-
-            SkyBox::GetInstance()->SetSunPoewr(m_startTimer);
-            
-            break;
-        }
-
-        if (m_readyNumber == 1 && m_startTimer == 1.0f)
-        {
-            m_scenePhase = ScenePhase::Game;
-            m_readyNumber = 0;
-        }
-
-        if (m_startTimer == 1.0f)
-        {
-            m_readyNumber++;
-            m_startTimer = 0.0f;
-        }
+        m_readyState->Update(*this);
         break;
     case ScenePhase::Game: // プレイフェーズ
         m_pPlayer->Update();
@@ -130,6 +101,46 @@ void GameScene::Update() {
     
 
     SkyBox::GetInstance()->Update();
+}
+
+void GameScene::ChangeReadyState(std::unique_ptr<IGameSceneReadyState> state)
+{
+    if (m_readyState)
+    {
+        m_readyState->Exit(*this);
+    }
+
+    m_readyState = std::move(state);
+    m_startTimer = 0.0f;
+
+    if (m_readyState)
+    {
+        m_readyState->Enter(*this);
+    }
+}
+
+float GameScene::AdvanceReadyPresentationTimer()
+{
+    m_startTimer += GameTime::GetInstance()->GetDeltaTime() / m_startTime;
+    return std::clamp(m_startTimer, 0.0f, 1.0f);
+}
+
+void GameScene::ExpandReadyCameraRange(float progress)
+{
+    const float farClipDistance = EaseOutExpo(0.0f, m_finalFarClipDistance, progress);
+    m_pCamera->SetFarClipDistance(farClipDistance);
+}
+
+void GameScene::ExpandReadyScanEffect(float progress)
+{
+    const float radius = EaseOutExpo(0.0f, m_finalScanRadius, progress);
+    Light::GetInstance()->SetRadius(radius);
+    SkyBox::GetInstance()->SetSunPoewr(progress);
+}
+
+void GameScene::CompleteReadyPresentation()
+{
+    m_scenePhase = ScenePhase::Game;
 }
 
 void GameScene::Draw() {
