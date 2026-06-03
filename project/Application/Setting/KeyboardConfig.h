@@ -7,11 +7,11 @@
 
 namespace Setting {
 
-	class KeyConfig
+	class KeyboardConfig
 	{
 	public:
-		KeyConfig();
-		~KeyConfig();
+		KeyboardConfig();
+		~KeyboardConfig();
 
 		bool Push(Action action) const;
 		bool Trigger(Action action) const;

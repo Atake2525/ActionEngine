@@ -19,10 +19,20 @@ SettingManager* SettingManager::GetInstance()
 	return instance;
 }
 
+std::optional<Action> SettingManager::ToAction(const std::string& name) {
+	const auto it = ActionNameToEnum.find(name);
+	if (it == ActionNameToEnum.end())
+	{
+		return std::nullopt;
+	}
+
+	return it->second;
+}
+
 void SettingManager::Load(const std::string filename) {
 	
 	// jsonを読んでデータを取得する
-	nlohmann::json deserialized = JsonLoader::GetInstance()->LoadJson("Resources/Json/" + filename);
+	nlohmann::json deserialized = JsonLoader::GetInstance()->LoadJson("Settings/" + filename);
 
 	// 正しいレベルデータファイルかチェック
 	if (!deserialized.is_object())
@@ -54,6 +64,16 @@ void SettingManager::Save(const std::string filename) {
 
 }
 
-void SettingManager::LoadKeyConfig(nlohmann::json) {
+void SettingManager::LoadKeyConfig(nlohmann::json json) {
+	// mainキーコンフィグの確認
+	// mainキーがnullだったらdefaultのキーコンフィグを使用する
+    std::string keyConfigKey = "main";
+	if (json[keyConfigKey].is_null()) {
+		Log("mainキーコンフィグがnullのため、defaultのキーコンフィグを使用します\n");
+        keyConfigKey = "default";
+	}
+
+
 
 }
+

@@ -2,7 +2,7 @@
 
 using namespace Setting;
 
-bool Setting::KeyConfig::Push(Action action) const
+bool Setting::KeyboardConfig::Push(Action action) const
 {
     for (int i = 0; i < 2; i++)
     {
@@ -20,7 +20,7 @@ bool Setting::KeyConfig::Push(Action action) const
     return false;
 }
 
-bool Setting::KeyConfig::Trigger(Action action) const
+bool Setting::KeyboardConfig::Trigger(Action action) const
 {
     for (int i = 0; i < 2; i++)
     {
@@ -38,7 +38,7 @@ bool Setting::KeyConfig::Trigger(Action action) const
     return false;
 }
 
-bool Setting::KeyConfig::Return(Action action) const
+bool Setting::KeyboardConfig::Return(Action action) const
 {
     for (int i = 0; i < 2; i++)
     {
