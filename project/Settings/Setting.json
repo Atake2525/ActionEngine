@@ -1,7 +1,6 @@
 {
     "type" : "KEYCONFIG",
-    "main" : {
-    },
+    "main" : null,
     "default" : {
         "MoveForward" : {
             "keyboard" : "W",
@@ -23,15 +22,31 @@
             "mouse" : null,
             "gamepad" : "LEFTSTICKRIGHT"
         },
+        "Jump" : {
+            "keyboard" : "SPACE",
+            "mouse" : null,
+            "gamepad" : "A"
+        },
         "Crouch" : {
             "keyboard" : "LCONTROL",
             "mouse" : null,
-            "gamepad" : "RIGHTSTICK"
+            "gamepad" : "RIGHTSTICKPUSH"
         },
         "Run" : {
             "keyboard" : "LSHIFT",
             "mouse" : null,
-            "gamepad" : "LEFTSTICK"
+            "gamepad" : "LEFTSTICKPUSH"
+        },
+        "Interact" : {
+            "keyboard" : "F",
+            "mouse" : null,
+            "gamepad" : "B"
+        },
+        "sensitivity" : {
+            "mouse" : 1.5,
+            "controller" : 1.5, 
+            "invertY" : false,
+            "invertX" : false
         }
     }
 }
