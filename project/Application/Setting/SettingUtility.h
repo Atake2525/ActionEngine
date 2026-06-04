@@ -15,7 +15,7 @@ namespace Setting {
 		Run,
 		Interact,
 	};
-	const std::unordered_map<std::string, Action> ActionNameToEnum = {
+	inline const std::unordered_map<std::string, Action> ActionNameToEnum = {
 				{ "MoveForward", Action::MoveForward },
 				{ "MoveBack",    Action::MoveBack },
 				{ "MoveLeft",    Action::MoveLeft },
@@ -26,7 +26,7 @@ namespace Setting {
 				{ "Interact",    Action::Interact },
 	};
 
-	std::optional<Action> ToAction(const std::string name) {
+	inline std::optional<Action> ToAction(const std::string name) {
 		const auto it = ActionNameToEnum.find(name);
 		if (it == ActionNameToEnum.end())
 		{

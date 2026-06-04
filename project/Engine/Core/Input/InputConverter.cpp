@@ -5,7 +5,7 @@ namespace InputConverter {
     const BYTE ConvertKeyToDIK(const std::string& keyName) {
         if (m_dikTable.contains(keyName))
         {
-            return m_dikTable[keyName];
+            return m_dikTable.at(keyName);
         }
         return -1;
     }
@@ -22,7 +22,7 @@ namespace InputConverter {
     const Controller ConvertKeyToController(const std::string& keyName) {
         if (m_controllerTable.contains(keyName))
         {
-            return m_controllerTable[keyName];
+            return m_controllerTable.at(keyName);
         }
         return Controller::None;
     }
@@ -33,13 +33,13 @@ namespace InputConverter {
             {
                 return pair.first;
             }
-            return "null";
         }
+        return "null";
     }
     const DPad ConvertKeyToDPad(const std::string& keyName) {
         if (m_DPadTable.contains(keyName))
         {
-            return m_DPadTable[keyName];
+            return m_DPadTable.at(keyName);
         }
         return DPad::None;
     }
@@ -50,7 +50,7 @@ namespace InputConverter {
             {
                 return pair.first;
             }
-            return "null";
         }
+        return "null";
     }
 } // namespace InputConverter

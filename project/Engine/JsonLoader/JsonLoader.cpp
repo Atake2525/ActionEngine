@@ -313,15 +313,14 @@ nlohmann::json JsonLoader::LoadJson(const std::string fullPath) {
     std::fstream file;
     // ファイル展開
     file.open(fullPath);
+    // Json文字列から解凍したデータ
+    nlohmann::json deserialized;
     // 展開失敗のチェック
     if (file.fail())
     {
-        Log("ファイル展開に失敗しました。正しい位置にファイルがあるか確認してください。/nファイルの位置 : " + fullPath);
-        return ;
+        Log("ファイル展開に失敗しました。正しい位置にファイルがあるか確認してください。\nファイルの位置 : " + fullPath);
+        return nlohmann::json{};
     }
-
-    // Json文字列から解凍したデータ
-    nlohmann::json deserialized;
 
     // 解凍
     file >> deserialized;

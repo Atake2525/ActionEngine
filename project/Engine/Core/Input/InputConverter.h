@@ -13,7 +13,7 @@ namespace InputConverter {
     const DPad ConvertKeyToDPad(const std::string& keyName);
     const std::string ConvertDPadToKey(const DPad dPad);
 
-    std::unordered_map<std::string, BYTE> m_dikTable = {
+    inline const std::unordered_map<std::string, BYTE> m_dikTable = {
         {"A", DIK_A},
         {"B", DIK_B},
         {"C", DIK_C},
@@ -83,7 +83,7 @@ namespace InputConverter {
         {"LeftBracket", DIK_LBRACKET },
         {"RightBracket", DIK_RBRACKET },
     };
-    std::unordered_map<std::string, Controller> m_controllerTable = {
+    inline const std::unordered_map<std::string, Controller> m_controllerTable = {
         {"None", Controller::None},
         {"A", Controller::A},
         {"B", Controller::B},
@@ -98,7 +98,7 @@ namespace InputConverter {
         {"LeftStick", Controller::LeftStick},
         {"RightStick", Controller::RightStick},
     };
-    std::unordered_map<std::string, DPad> m_DPadTable = {
+    inline const std::unordered_map<std::string, DPad> m_DPadTable = {
         {"None", DPad::None},
         {"Up", DPad::Up},
         {"UpRight", DPad::UpRight},
