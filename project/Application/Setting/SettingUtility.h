@@ -15,6 +15,19 @@ namespace Setting {
 		Run,
 		Interact,
 	};
+
+	enum class StickDirection
+	{
+		None,
+		LeftStickUp,
+		LeftStickDown,
+		LeftStickLeft,
+		LeftStickRight,
+		RightStickUp,
+		RightStickDown,
+		RightStickLeft,
+		RightStickRight,
+	};
 	inline const std::unordered_map<std::string, Action> ActionNameToEnum = {
 				{ "MoveForward", Action::MoveForward },
 				{ "MoveBack",    Action::MoveBack },

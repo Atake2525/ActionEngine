@@ -53,4 +53,23 @@ namespace InputConverter {
         }
         return "null";
     }
+
+    const Setting::StickDirection ConvertKeyToStickDirection(const std::string& keyName) {
+        if (m_stickDirectionTable.contains(keyName))
+        {
+            return m_stickDirectionTable.at(keyName);
+        }
+        return Setting::StickDirection::None;
+    }
+
+    const std::string ConvertStickDirectionToKey(const Setting::StickDirection stickDirection) {
+        for (const auto& pair : m_stickDirectionTable)
+        {
+            if (pair.second == stickDirection)
+            {
+                return pair.first;
+            }
+        }
+        return "null";
+    }
 } // namespace InputConverter

@@ -10,8 +10,8 @@ namespace Setting {
 	class KeyboardConfig
 	{
 	public:
-		KeyboardConfig();
-		~KeyboardConfig();
+		KeyboardConfig() = default;
+		~KeyboardConfig() = default;
 
 		void SetMainAction(Action action, BYTE key) { m_keyboard[0][action] = key; }
 		const int GetMainAction(Action action) const;
