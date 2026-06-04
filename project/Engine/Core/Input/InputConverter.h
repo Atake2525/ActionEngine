@@ -1,4 +1,5 @@
 #include "Input.h"
+#include "SettingUtility.h"
 #include <string>
 #include <unordered_map>
 #pragma once
@@ -12,6 +13,9 @@ namespace InputConverter {
 
     const DPad ConvertKeyToDPad(const std::string& keyName);
     const std::string ConvertDPadToKey(const DPad dPad);
+
+    const Setting::StickDirection ConvertKeyToStickDirection(const std::string& keyName);
+    const std::string ConvertStickDirectionToKey(const Setting::StickDirection stickDirection);
 
     inline const std::unordered_map<std::string, BYTE> m_dikTable = {
         {"A", DIK_A},
@@ -97,6 +101,8 @@ namespace InputConverter {
         {"Menu", Controller::Menu},
         {"LeftStick", Controller::LeftStick},
         {"RightStick", Controller::RightStick},
+        {"LEFTSTICKPUSH", Controller::LeftStick},
+        {"RIGHTSTICKPUSH", Controller::RightStick},
     };
     inline const std::unordered_map<std::string, DPad> m_DPadTable = {
         {"None", DPad::None},
@@ -108,5 +114,16 @@ namespace InputConverter {
         {"DownLeft", DPad::DownLeft},
         {"Left", DPad::Left},
         {"Right", DPad::Right},
+    };
+    inline const std::unordered_map<std::string, Setting::StickDirection> m_stickDirectionTable = {
+        {"None", Setting::StickDirection::None},
+        {"LEFTSTICKUP", Setting::StickDirection::LeftStickUp},
+        {"LEFTSTICKDOWN", Setting::StickDirection::LeftStickDown},
+        {"LEFTSTICKLEFT", Setting::StickDirection::LeftStickLeft},
+        {"LEFTSTICKRIGHT", Setting::StickDirection::LeftStickRight},
+        {"RIGHTSTICKUP", Setting::StickDirection::RightStickUp},
+        {"RIGHTSTICKDOWN", Setting::StickDirection::RightStickDown},
+        {"RIGHTSTICKLEFT", Setting::StickDirection::RightStickLeft},
+        {"RIGHTSTICKRIGHT", Setting::StickDirection::RightStickRight},
     };
 }

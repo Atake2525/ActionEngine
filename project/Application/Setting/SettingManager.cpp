@@ -56,43 +56,65 @@ void SettingManager::LoadKeyConfig(nlohmann::json json) {
 	// mainキーコンフィグの確認
 	// mainキーがnullだったらdefaultのキーコンフィグを使用する
     std::string keyConfigKey = "main";
-	if (json[keyConfigKey].is_null()) {
+	if (!json.contains(keyConfigKey) || json[keyConfigKey].is_null()) {
 		Log("mainキーコンフィグがnullのため、defaultのキーコンフィグを使用します\n");
         keyConfigKey = "default";
 	}
 
-	for (nlohmann::json& bind : json[keyConfigKey])
+	if (!json.contains(keyConfigKey) || !json[keyConfigKey].is_object())
 	{
-		for (auto key : ActionNameToEnum)
-		{
-			for (nlohmann::json& keyType : bind[key.first])
-			{
-				if (keyType.is_null()) // キーが未設定だったらスキップ
-				{
-					continue;
-				}
-                std::string keyTypeStr = keyType.get<std::string>();
-				// キーボード,コントローラー,DPadの順で確認する
-				if (keyTypeStr == "keyboard")
-				{
-					m_keyboardConfig.SetMainAction(key.second, ConvertKeyToDIK(bind[key.first].get<std::string>()));
-				}
-				if (keyTypeStr == "gamepad")
-				{
-                    // コントローラーのキーコンフィグは、コントローラーのキーコンフィグとDPadのキーコンフィグの両方を確認する
-					if (ConvertKeyToController(bind[key.first].get<std::string>()) != Controller::None)
-					{
-						m_controllerConfig.SetAction(key.second, ConvertKeyToController(bind[key.first].get<std::string>()));
-					}
-					else
-					{
-						m_controllerConfig.SetAction(key.second, ConvertKeyToDPad(bind[key.first].get<std::string>()));
-					}
-				}
-				/*if (keyTypeStr == "mouse") マウスのキーコンフィグは未実装
-				{
+		Log("キーコンフィグがJsonオブジェクト型ではありません。\n");
+		return;
+	}
 
-				}*/
+	const nlohmann::json& keyConfig = json[keyConfigKey];
+	for (auto bind : keyConfig)
+	{
+		std::optional<Action> action = ToAction(bind.get<std::string>());
+		if (!action.has_value())
+		{
+			continue;
+		}
+	}
+	for (auto it = keyConfig.begin(); it != keyConfig.end(); ++it)
+	{
+		std::optional<Action> action = ToAction(it.key());
+		if (!action.has_value())
+		{
+			continue;
+		}
+
+		const nlohmann::json& bind = it.value();
+		if (!bind.is_object())
+		{
+			continue;
+		}
+
+		if (bind.contains("keyboard") && bind["keyboard"].is_string())
+		{
+			m_keyboardConfig.SetMainAction(action.value(), ConvertKeyToDIK(bind["keyboard"].get<std::string>()));
+		}
+
+		if (bind.contains("gamepad") && bind["gamepad"].is_string())
+		{
+			const std::string gamepadKey = bind["gamepad"].get<std::string>();
+
+			Controller controller = ConvertKeyToController(gamepadKey);
+			if (controller != Controller::None)
+			{
+				m_controllerConfig.SetAction(action.value(), controller);
+			}
+
+			DPad dpad = ConvertKeyToDPad(gamepadKey);
+			if (dpad != DPad::None)
+			{
+				m_controllerConfig.SetAction(action.value(), dpad);
+			}
+
+			StickDirection stickDirection = ConvertKeyToStickDirection(gamepadKey);
+			if (stickDirection != StickDirection::None)
+			{
+				m_controllerConfig.SetAction(action.value(), stickDirection);
 			}
 		}
 	}
