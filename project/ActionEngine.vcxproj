@@ -178,6 +178,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\2d\UI\UISlider.cpp" />
     <ClCompile Include="Engine\2d\UI\UISelectionGroup.cpp" />
     <ClCompile Include="Application\Setting\SettingManager.cpp" />
+    <ClCompile Include="Engine\Core\Input\InputConverter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Setting\KeyboardConfig.h" />
@@ -273,6 +274,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\2d\UI\UISlider.h" />
     <ClInclude Include="Engine\2d\UI\UISelectionGroup.h" />
     <ClInclude Include="Application\Setting\SettingManager.h" />
+    <ClInclude Include="Engine\Core\Input\InputConverter.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="externals\assimp\lib\Release\assimp-vc143-mtd.lib">

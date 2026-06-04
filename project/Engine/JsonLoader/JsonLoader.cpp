@@ -317,7 +317,7 @@ nlohmann::json JsonLoader::LoadJson(const std::string fullPath) {
     if (file.fail())
     {
         Log("ファイル展開に失敗しました。正しい位置にファイルがあるか確認してください。/nファイルの位置 : " + fullPath);
-        return;
+        return ;
     }
 
     // Json文字列から解凍したデータ
