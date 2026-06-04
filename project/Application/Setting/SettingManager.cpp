@@ -68,14 +68,14 @@ void SettingManager::LoadKeyConfig(nlohmann::json json) {
 	}
 
 	const nlohmann::json& keyConfig = json[keyConfigKey];
-	for (auto bind : keyConfig)
+	/*for (auto bind : keyConfig)
 	{
 		std::optional<Action> action = ToAction(bind.get<std::string>());
 		if (!action.has_value())
 		{
 			continue;
 		}
-	}
+	}*/
 	for (auto it = keyConfig.begin(); it != keyConfig.end(); ++it)
 	{
 		std::optional<Action> action = ToAction(it.key());
