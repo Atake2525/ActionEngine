@@ -120,6 +120,8 @@ public:
 
 	const std::vector<JsonData> GetJsonData(const std::string& jsonName, const std::string file_name);
 
+	nlohmann::json LoadJson(const std::string fullPath);
+
 private:
 
 	std::map<std::string, LevelData> levelDatas;
