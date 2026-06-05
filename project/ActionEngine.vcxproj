@@ -143,6 +143,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Core\WinApp\WinApp.cpp" />
     <ClCompile Include="Application\FrameWork\FrameWork.cpp" />
     <ClCompile Include="Engine\3d\Object\WireFrame\WireFrameObjectBase.cpp" />
+    <ClCompile Include="Application\Scene\PlayScene\DemoScene.cpp" />
     <ClCompile Include="Application\Scene\PlayScene\GameScene.cpp" />
     <ClCompile Include="Application\Scene\MyGame.cpp" />
     <ClCompile Include="Engine\Lighting\Light.cpp" />
@@ -236,6 +237,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Core\WinApp\WinApp.h" />
     <ClInclude Include="Application\FrameWork\FrameWork.h" />
     <ClInclude Include="Engine\3d\Object\WireFrame\WireFrameObjectBase.h" />
+    <ClInclude Include="Application\Scene\PlayScene\DemoScene.h" />
     <ClInclude Include="Application\Scene\PlayScene\GameScene.h" />
     <ClInclude Include="Engine\Math\Quaternion.h" />
     <ClInclude Include="Application\Scene\MyGame.h" />
