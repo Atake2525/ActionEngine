@@ -9,6 +9,8 @@
 #include <algorithm>
 #include "EasingUtility.h"
 #include <thread>
+#include "SettingManager.h"
+#include "SceneManager.h"
 
 
 using namespace std;
@@ -364,6 +366,8 @@ const bool Player::CanClimbing()
 
 void Player::HandleInput()
 {
+    auto keyboard = SceneManager::GetInstance()->GetSettingManager().GetKeyConfig();
+    auto gamepad = SceneManager::GetInstance()->GetSettingManager().GetControllerConfig();
     // 移動入力のリセット
     m_command.move = Vector2::Zero;
 
@@ -373,14 +377,14 @@ void Player::HandleInput()
         {
         case Player::ControlMode::KeyboardMouse:
             // キー入力による移動
-            m_command.move.y += Input::GetInstance()->PushKeyInt(DIK_W);
-            m_command.move.y += -Input::GetInstance()->PushKeyInt(DIK_S);
-            m_command.move.x += -Input::GetInstance()->PushKeyInt(DIK_A);
-            m_command.move.x += Input::GetInstance()->PushKeyInt(DIK_D);
+            m_command.move.y += Input::GetInstance()->PushKeyInt(keyboard.GetMainAction(Setting::Action::MoveForward));
+            m_command.move.y += -Input::GetInstance()->PushKeyInt(keyboard.GetMainAction(Setting::Action::MoveBack));
+            m_command.move.x += -Input::GetInstance()->PushKeyInt(keyboard.GetMainAction(Setting::Action::MoveLeft));
+            m_command.move.x += Input::GetInstance()->PushKeyInt(keyboard.GetMainAction(Setting::Action::MoveRight));
 
-            m_command.jump = Input::GetInstance()->TriggerKeyInt(DIK_SPACE) != 0;
-            m_command.crouch = Input::GetInstance()->PushKeyInt(DIK_LCONTROL) != 0;
-            m_command.run = Input::GetInstance()->PushKeyInt(DIK_LSHIFT) != 0;
+            m_command.jump = Input::GetInstance()->TriggerKeyInt(keyboard.GetMainAction(Setting::Action::Jump)) != 0;
+            m_command.crouch = Input::GetInstance()->PushKeyInt(keyboard.GetMainAction(Setting::Action::Crouch)) != 0;
+            m_command.run = Input::GetInstance()->PushKeyInt(keyboard.GetMainAction(Setting::Action::Run)) != 0;
 
             m_command.eye = Input::GetInstance()->GetMouseVel3() * 0.001f;
             break;
@@ -389,9 +393,11 @@ void Player::HandleInput()
             m_command.move = m_pInput->GetJoyStickVelocity();
             m_command.move.y *= -1.0f;
 
-            m_command.jump = Input::GetInstance()->TriggerButton(Controller::A) != 0;
-            m_command.crouch = Input::GetInstance()->PushButton(Controller::RightStick) != 0;
-            m_command.run = Input::GetInstance()->PushButton(Controller::LeftStick) != 0;
+            // gamepadはDPadやスティックの入力の可能性もあるので対応する
+
+            m_command.jump = Input::GetInstance()->TriggerButton(gamepad.GetControllerAction(Setting::Action::Jump)) != 0;
+            m_command.crouch = Input::GetInstance()->PushButton(gamepad.GetControllerAction(Setting::Action::Crouch)) != 0;
+            m_command.run = Input::GetInstance()->PushButton(gamepad.GetControllerAction(Setting::Action::Run)) != 0;
 
             m_command.eye = Input::GetInstance()->GetRightJoyStickPos3(0.0f) * 0.00005f;
 

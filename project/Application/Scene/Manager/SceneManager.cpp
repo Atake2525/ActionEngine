@@ -52,7 +52,7 @@ void SceneManager::Update() {
 
     if (m_scene->EndRequest())
     {
-        loopOut_ = true;
+        m_loopOut = true;
     }
 }
 
