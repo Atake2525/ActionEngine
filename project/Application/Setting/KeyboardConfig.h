@@ -7,18 +7,14 @@
 
 namespace Setting {
 
-	class KeyConfig
+	class KeyboardConfig
 	{
 	public:
-		KeyConfig();
-		~KeyConfig();
+		KeyboardConfig() = default;
+		~KeyboardConfig() = default;
 
-		bool Push(Action action) const;
-		bool Trigger(Action action) const;
-		bool Return(Action action) const;
-
-		void SetInput(Input* input) { m_pInput = input; }
 		void SetMainAction(Action action, BYTE key) { m_keyboard[0][action] = key; }
+		const int GetMainAction(Action action) const;
 		void SetSubAction(Action action, BYTE key) { m_keyboard[1][action] = key; }
 	private:
 		Input* m_pInput = nullptr;

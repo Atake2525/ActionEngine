@@ -111,7 +111,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Application\Setting\KeyConfig.cpp" />
+    <ClCompile Include="Application\Setting\KeyboardConfig.cpp" />
     <ClCompile Include="Application\StageManager\TutorialStage.cpp" />
     <ClCompile Include="Application\Setting\ControllerConfig.cpp" />
     <ClCompile Include="Engine\2d\UI\UIElement.cpp" />
@@ -179,9 +179,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\2d\UI\UISlider.cpp" />
     <ClCompile Include="Engine\2d\UI\UISelectionGroup.cpp" />
     <ClCompile Include="Application\Setting\SettingManager.cpp" />
+    <ClCompile Include="Engine\Core\Input\InputConverter.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Application\Setting\KeyConfig.h" />
+    <ClInclude Include="Application\Setting\KeyboardConfig.h" />
     <ClInclude Include="Application\Scene\Manager\AbstractSceneFactory.h" />
     <ClInclude Include="Application\Scene\Manager\BaseScene.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -275,6 +276,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\2d\UI\UISlider.h" />
     <ClInclude Include="Engine\2d\UI\UISelectionGroup.h" />
     <ClInclude Include="Application\Setting\SettingManager.h" />
+    <ClInclude Include="Engine\Core\Input\InputConverter.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="externals\assimp\lib\Release\assimp-vc143-mtd.lib">
