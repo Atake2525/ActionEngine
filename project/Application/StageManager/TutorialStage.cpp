@@ -8,6 +8,7 @@
 #include "FadeManager.h"
 #include <functional>
 #include "SceneManager.h"
+#include "ModelManager.h"
 
 using namespace std;
 
@@ -20,13 +21,17 @@ void TutorialStage::Initialize(Player* player, Camera* camera)
     // ステージオブジェクトの初期化
     stageObject = make_unique<Object3d>();
     stageObject->Initialize();
-    stageObject->SetModel("Resources/Model/obj/Stage/TutorialStage", "Model.obj", true);
+    Model* model = ModelManager::GetInstance()->LoadModel("Resources/Model/obj/Stage/TutorialStage", "Model.obj");
+    stageObject->SetModel(model);
+    stageObject->SetEnableLighting(true);
     stageObject->Update();
 
     collisionObject = make_unique<Object3d>();
     collisionObject->Initialize();
-    collisionObject->SetModel("Resources/Model/obj/Stage/TutorialStage", "Collision.obj", false);
+    model = ModelManager::GetInstance()->LoadModel("Resources/Model/obj/Stage/TutorialStage", "Collision.obj", false);
+    collisionObject->SetModel(model);
     collisionObject->Update();
+    
     CollisionManager::GetInstance()->AddCollision(collisionObject.get());
 
     // トラップの初期化

@@ -674,10 +674,8 @@ ModelData ParticleManager::LoadModelFile(const std::string& directoryPath, const
 		MaterialData matData;
 		matData.textureFilePath = "Resources/Debug/white1x1.png";
 
-		// テクスチャ読み込み
-		TextureManager::GetInstance()->LoadTexture(matData.textureFilePath);
 		// 読み込んだテクスチャの番号尾を取得
-		matData.textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(matData.textureFilePath);
+		matData.textureIndex = TextureManager::GetInstance()->LoadTexture(matData.textureFilePath);
 
 		modelData.material.push_back(matData);
 	}
@@ -697,10 +695,8 @@ ModelData ParticleManager::LoadModelFile(const std::string& directoryPath, const
 			MaterialData matData;
 			matData.textureFilePath = directoryPath + "/" + textureFilePath.C_Str();
 
-			// テクスチャ読み込み
-			TextureManager::GetInstance()->LoadTexture(matData.textureFilePath);
 			// 読み込んだテクスチャの番号尾を取得
-			matData.textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(matData.textureFilePath);
+			matData.textureIndex = TextureManager::GetInstance()->LoadTexture(matData.textureFilePath);
 
 			modelData.material.push_back(matData);
 		}
@@ -709,10 +705,8 @@ ModelData ParticleManager::LoadModelFile(const std::string& directoryPath, const
 			MaterialData matData;
 			matData.textureFilePath = "Resources/Debug/white1x1.png";
 
-			// テクスチャ読み込み
-			TextureManager::GetInstance()->LoadTexture(matData.textureFilePath);
 			// 読み込んだテクスチャの番号尾を取得
-			matData.textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(matData.textureFilePath);
+			matData.textureIndex = TextureManager::GetInstance()->LoadTexture(matData.textureFilePath);
 
 			modelData.material.push_back(matData);
 		}

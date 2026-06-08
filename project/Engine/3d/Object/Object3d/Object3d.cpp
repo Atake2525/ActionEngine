@@ -72,6 +72,7 @@ void Object3d::Initialize() {
     cullingTemplateData->drawHeight = -1.0f;
     privateCullingData.drawHeight = 100.0f;
 
+    InitializeMaterial();
 }
 
 void Object3d::Update() {
@@ -198,6 +199,8 @@ void Object3d::Draw() {
 
     // 3Dモデルが割り当てられていれば描画する
     if (model_) {
+        // wvp用のCBufferの場所を設定
+        DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
         model_->Draw();
     }
 }
@@ -210,59 +213,9 @@ void Object3d::CreateCameraResource() {
     cameraResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(CameraForGPU));
 }
 
-void Object3d::SetModel(const std::string& filePath) {
+void Object3d::SetModel(Model* model) {
     // モデルを検索してセットする
-    model_ = ModelManager::GetInstance()->FindModel(filePath);
-    first = model_->GetMeshAABB();
-    aabb = first;
-    auto multimeshAABBData = model_->GetMultiMeshAABB();
-    multiMeshAABB.resize(model_->GetMultiMeshAABB().size());
-    for (const auto data : multimeshAABBData)
-    {
-        firstMultiMeshAABB.push_back(data.second);
-    }
-    CreateCapsule();
-    if (model_->IsAnimation())
-    {
-        animation = model_->GetAnimation();
-        skeleton = CreateSkelton(model_->GetModelData().rootNode);
-        skinCluster.resize(model_->GetModelData().matVertexData.size());
-        skinCluster = CreateSkinCluster(skeleton, model_->GetModelData());
-        model_->SetSkinCluster(skinCluster);
-        // GPUskinning用リソースはModel側でメッシュ数に合わせて確保する。
-        model_->CreateSkinningResources(skeleton);
-        ApplyAnimation(skeleton, animation[animationKey], animationTime);
-        UpdateSkelton(skeleton);
-        UpdateSkinCluster(skinCluster, skeleton);
-    }
-}
-
-void Object3d::SetModel(const std::string& directoryPath, const std::string& filePath, const bool& enableLighting, const bool isAnimation) {
-    ModelManager::GetInstance()->LoadModel(directoryPath, filePath, enableLighting, isAnimation);
-
-    // ディレクトリの最後の名前もモデルのkeyに入れる
-    size_t pathLen = directoryPath.size();
-    size_t pathNum = 0;
-    for (size_t i = directoryPath.size(); i > 0; --i)
-    {
-        char c = directoryPath[i - 1];
-        if (c == '/') {
-            pathNum = i;
-            pathLen = directoryPath.size() - i;
-            break;
-        }
-    }
-    std::string filename;
-    for (size_t i = 0; i < pathLen; i++)
-    {
-        char c = directoryPath[pathNum + i];
-        filename += c;
-    }
-
-    filename = filename + '/' + filePath;
-
-    // モデルを検索してセットする
-    model_ = ModelManager::GetInstance()->FindModel(filename);
+    model_ = model;
     first = model_->GetMeshAABB();
     aabb = first;
     auto multimeshAABBData = model_->GetMultiMeshAABB();
@@ -313,10 +266,10 @@ void Object3d::ChangePlayAnimation(const std::string key)
 
 }
 
-void Object3d::AddAnimation(std::string directoryPath, std::string filename, std::string animationName) {
+void Object3d::AddAnimation(std::string directoryPath, std::string fileName, std::string animationName) {
     if (model_->IsAnimation())
     {
-        model_->AddAnimation(directoryPath, filename, animationName);
+        model_->AddAnimation(directoryPath, fileName, animationName);
         animation = model_->GetAnimation();
         Log("アニメーションの読み込み完了\n");
     }
@@ -356,19 +309,19 @@ void Object3d::PlayDefaultAnimation() {
 }
 
 void Object3d::SetColor(const Vector4 color) {
-    model_->SetColor(color);
+    materialData->color = color;
 }
 
 const Vector4& Object3d::GetColor() const {
-    return model_->GetColor();
+    return materialData->color;
 }
 
 const bool Object3d::GetEnableLighting() const {
-    return model_->GetEnableLighting();
+    return materialData->enableLighting;
 }
 
 void Object3d::SetEnableLighting(const bool enableLighting) {
-    model_->SetEnableLighting(enableLighting);
+    materialData->enableLighting = enableLighting;
 }
 
 const Vector3 Object3d::GetRotateInDegree() const {
@@ -386,11 +339,11 @@ void Object3d::SetTransform(const Vector3& translate, const Vector3& scale, cons
 }
 
 const float& Object3d::GetShininess() const {
-    return model_->GetShininess();
+    return materialData->shininess;
 }
 
 void Object3d::SetShininess(const float& shininess) {
-    model_->SetShininess(shininess);
+    materialData->shininess = shininess;
 }
 
 void Object3d::CreateCapsule() {
@@ -615,7 +568,7 @@ void Object3d::UpdateOBB()
     }
 }
 
-const std::vector<AABB> Object3d::GetAABBMultiMeshed()
+const std::vector<AABB>& Object3d::GetAABBMultiMeshed()
 {
     return multiMeshAABB;
 }
@@ -830,13 +783,31 @@ std::vector<SkinCluster> Object3d::CreateSkinCluster(const Skeleton& skeleton, c
 }
 
 const float Object3d::GetEnvironmentCoefficient() const {
-    return model_->GetEnvironmentCoefficient();
+    return materialData->environmentCoefficient;
 }
 
 void Object3d::SetEnvironmentCoefficient(const float amount) {
-    model_->SetEnvironmentCoefficient(amount);
+    materialData->environmentCoefficient = amount;
 }
 
 void Object3d::SetPBRMaterial(const float metallic, const float roughness) {
     model_->SetPBRMaterial(metallic, roughness);
+}
+
+void Object3d::InitializeMaterial() {
+    materialResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(Material));
+    //  書き込むためのアドレスを取得
+    materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
+
+    // データを書き込む
+    // 今回は赤を書き込んでみる
+    materialData->color = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+    materialData->uvTransform = MakeIdentity4x4();
+
+    materialData->enableLighting = false;
+    materialData->shininess = 70.0f;
+    materialData->specularColor = { 1.0f, 1.0f, 1.0f };
+    materialData->environmentCoefficient = 0.0f;
+    materialData->enableMetallic = false;
 }
