@@ -4,6 +4,7 @@
 #include "ImGuiManager.h"
 #include "StageCount.h"
 #include "CollisionManager.h"
+#include "ModelManager.h"
 
 using namespace Logger;
 using namespace std;
@@ -47,12 +48,13 @@ void Trap::Initialize(std::string jsonName) {
 		// スタート地点が設定されていない又はjsonが読み込めなかった場合はデフォルト位置を使用
 		if (!json.empty())
 		{
+            Model* trapModel = ModelManager::GetInstance()->LoadModel("Resources/Model/obj", "trap.obj", true);
 			for (auto data : json) {
 				Traps trap;
 				trap.object = make_unique<Object3d>();
 				trap.object->Initialize();
 				trap.object->SetTransform(data.transform);
-				trap.object->SetModel("Resources/Model/obj", "trap.obj", true);
+				trap.object->SetModel(trapModel);
 				trap.start = data.transform;
 				trap.trapData = data.trap;
 				trap.startFrame = m_gameTimer;
@@ -250,7 +252,7 @@ void Trap::MakeTrap(Traps& data) {
 	trap.object = make_unique<Object3d>();
 	trap.object->Initialize();
 	trap.object->SetTransform(data.start);
-	trap.object->SetModel("Resources/Model/obj", "trap.obj", true);
+    trap.object->SetModel(ModelManager::GetInstance()->FindModel("trap.obj"));
 	trap.start = data.start;
 	trap.trapData = data.trapData;
 	trap.startFrame = m_gameTimer;

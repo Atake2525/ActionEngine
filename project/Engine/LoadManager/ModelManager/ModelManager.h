@@ -34,17 +34,17 @@ public:
 	/// モデルファイルの読み込み
 	/// </summary>
 	/// <param name="directoryPath"> : ディレクトリ(元ファイル)のパス</param>
-	/// <param name="filePath"> : モデルファイルのパス</param>
+	/// <param name="fileName"> : モデルファイルの名前</param>
 	/// <param name="enableLighting"> : ライティングを適用するかどうか</param>
 	/// enableLightingは何も入力しなければfalse
-	void LoadModel(const std::string& directoryPath, const std::string& filePath, const bool isAnimation = false);
+	Model* LoadModel(const std::string& directoryPath, const std::string& fileName, const bool isAnimation = false);
 
 	/// <summary>
 	/// モデルの検索
 	/// </summary>
-	/// <param name="filePath">モデルファイルのパス</param>
+	/// <param name="fileName">モデルファイルの名前</param>
 	/// <returns>モデル</returns>
-	Model* FindModel(const std::string& filePath);
+	Model* FindModel(const std::string& fileName);
 
 private:
 	// モデレータ

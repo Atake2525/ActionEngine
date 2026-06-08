@@ -44,10 +44,7 @@ public:
     // ============================
     //  Model
     // ============================
-    void SetModel(const std::string& filePath);
-    void SetModel(const std::string& directoryPath, const std::string& filePath,
-        const bool& enableLighting = false, const bool isAnimation = false);
-
+    void SetModel(Model* model);
     // ============================
     //  Camera
     // ============================
@@ -59,8 +56,8 @@ public:
     void ToggleStartAnimation() { startAnimation = !startAnimation; }
     void SetStartAnimation(bool start) { startAnimation = start; }
     void ResetAnimationTime();
-    void AddAnimation(std::string directoryPath, std::string filename, std::string animationName);
-    void AddAnimationsThreaded(const std::string& directoryPath, const std::vector<std::string>& filenames);
+    void AddAnimation(std::string directoryPath, std::string fileName, std::string animationName);
+    void AddAnimationsThreaded(const std::string& directoryPath, const std::vector<std::string>& fileNames);
     void PlayDefaultAnimation();
     void ChangePlayAnimation(const std::string key = "DefaultAnimation");
     const std::string& GetCurrentAnimationKey() const { return animationKey; }

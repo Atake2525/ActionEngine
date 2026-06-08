@@ -35,7 +35,8 @@ public:
 	/// テクスチャファイルの読み込み
 	/// </summary>
 	/// <param name="filePath">テクスチャファイルのパス</param>
-	void LoadTexture(const std::string& filePath);
+	/// <returns>SRVインデックス</returns>
+	uint32_t LoadTexture(const std::string& filePath);
 
 	void SetNormalMapTexture(const std::string& targetTextureFilePath, const std::string& filePath);
 
@@ -46,12 +47,6 @@ public:
 	uint32_t GetnormalMapSrvIndex(const std::string& filePath);
 	uint32_t GetmetallicMapSrvIndex(const std::string& filePath);
 	uint32_t GetroughnessMapSrvIndex(const std::string& filePath);
-
-	// SRVインデックスの開始番号
-	uint32_t GetTextureIndexByFilePath(const std::string& filePath);
-
-	// SRVインデックスからファイルパスを取得
-	//std::string GetfilePathByTextureIndex(uint32_t textureIndex);
 
 	// テクスチャ番号からGPUハンドルを取得
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSrvHandleGPU(const std::string& filePath);
