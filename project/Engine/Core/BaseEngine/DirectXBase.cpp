@@ -6,7 +6,6 @@
 #include "TextureManager.h"
 #include "SrvManager.h"
 #include "OffScreenRendering.h"
-#include <algorithm>
 
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -258,7 +257,7 @@ void DirectXBase::PreDraw() {
 
     SrvManager::GetInstance()->PreDraw();
 
-    ApplySceneViewport();
+    ApplyFullViewport();
 
     OffScreenRendering::GetInstance()->Draw();
 
@@ -341,12 +340,6 @@ void DirectXBase::PreDrawRenderTexture() {
     commandList->ClearRenderTargetView(rtvTextureHandle, clearColor, 0, nullptr);
 
     SrvManager::GetInstance()->PreDraw();
-    /*ComPtr<ID3D12DescriptorHeap> descriptorHeaps[] = { SrvManager::GetInstance()->GetDescriptorHeap() };
-    commandList->SetDescriptorHeaps(1, descriptorHeaps->GetAddressOf());*/
-
-    //// 描画用のDescriptorHeapの設定
-    //ComPtr<ID3D12DescriptorHeap> descriptorHeaps[] = { srvDescriptorHeap };
-    //commandList->SetDescriptorHeaps(1, descriptorHeaps->GetAddressOf());
 
     commandList->RSSetViewports(1, &viewPort);       // Viewportを設定
     commandList->RSSetScissorRects(1, &scissorRect); // Scirssorを設定
@@ -414,7 +407,6 @@ void DirectXBase::InitializeViewPortRect() {
     viewPort.MinDepth = 0.0f;
     viewPort.MaxDepth = 1.0f;
 
-    SetSceneRenderArea(0.0f, 0.0f, viewPort.Width, viewPort.Height);
 }
 
 void DirectXBase::InitializeScissorRect() {
@@ -425,43 +417,9 @@ void DirectXBase::InitializeScissorRect() {
     scissorRect.bottom = WinApp::GetInstance()->GetkClientHeight();
 }
 
-void DirectXBase::SetSceneRenderArea(float left, float top, float width, float height) {
-    const float clientWidth = float(WinApp::GetInstance()->GetkClientWidth());
-    const float clientHeight = float(WinApp::GetInstance()->GetkClientHeight());
-
-    left = std::clamp(left, 0.0f, clientWidth - 1.0f);
-    top = std::clamp(top, 0.0f, clientHeight - 1.0f);
-    width = std::clamp(width, 1.0f, clientWidth - left);
-    height = std::clamp(height, 1.0f, clientHeight - top);
-
-    sceneViewPort.TopLeftX = left;
-    sceneViewPort.TopLeftY = top;
-    sceneViewPort.Width = width;
-    sceneViewPort.Height = height;
-    sceneViewPort.MinDepth = 0.0f;
-    sceneViewPort.MaxDepth = 1.0f;
-
-    sceneScissorRect.left = LONG(left);
-    sceneScissorRect.top = LONG(top);
-    sceneScissorRect.right = LONG(left + width);
-    sceneScissorRect.bottom = LONG(top + height);
-}
-
 void DirectXBase::ApplyFullViewport() {
     commandList->RSSetViewports(1, &viewPort);
     commandList->RSSetScissorRects(1, &scissorRect);
-}
-
-void DirectXBase::ApplySceneViewport() {
-    commandList->RSSetViewports(1, &sceneViewPort);
-    commandList->RSSetScissorRects(1, &sceneScissorRect);
-}
-
-float DirectXBase::GetSceneAspectRatio() const {
-    if (sceneViewPort.Height <= 0.0f) {
-        return 1.0f;
-    }
-    return sceneViewPort.Width / sceneViewPort.Height;
 }
 
 void DirectXBase::CreateDXCCompiler() {
@@ -701,8 +659,6 @@ ComPtr<ID3D12Resource> DirectXBase::CreateTextureResource(const DirectX::TexMeta
     // 利用するHeapの設定。非常に特殊な運用。02_04exで一般的なケースがある
     D3D12_HEAP_PROPERTIES heapProperties{};
     heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;                        // 細かい設定を行う
-    //heapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK; // WriteBackポリシーでCPUアクセス可能
-    //heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;          // プロセッサの近くに配置
 
     // Resourceを生成してReturnする
     // Resourceを生成する
@@ -746,27 +702,6 @@ void DirectXBase::InitializeFixFPS() {
 }
 
 void DirectXBase::UpdateFixFPS() {
-    //// 1/60秒ピッタリの時間
-    //const std::chrono::microseconds kMinTime(uint64_t(1000000.0f / 60.0f));
-    //// 1/60秒よりわずかに短い時間
-    //const std::chrono::microseconds KMinCheckTime(uint64_t(1000000.0f / 65.0f));
-
-    //// 現在時間を取得する
-    //std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
-    //// 前回記録からの経過時間を取得する
-    //std::chrono::microseconds elapsed = std::chrono::duration_cast<std::chrono::microseconds>(now - reference_);
-
-    //// 1/60秒(よりわずかに短い時間)立っていない場合
-    //if (elapsed < KMinCheckTime) {
-    //	// 1/60秒経過するまで微小なスリープを繰り返す
-    //	while (std::chrono::steady_clock::now() - reference_ < kMinTime) {
-    //		// 1マイクロ病スリープ
-    //		std::this_thread::sleep_for(std::chrono::microseconds(1));
-    //	}
-    //}
-    //// 現在の時間を記録する
-    //reference_ = std::chrono::steady_clock::now();
-
 
     if (m_MaxFPS <= 0.0) { return; } // 無制限
 
