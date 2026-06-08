@@ -219,17 +219,13 @@ void DirectXBase::InitializePosteffect() {
     clearColor[1] = col.y;
     clearColor[2] = col.z;
     clearColor[3] = col.w;
+
+    device->CreateRenderTargetView(OffScreenRendering::GetInstance()->GetRenderTextureResource().Get(), &rtvDesc, GetCPUDescriptorHandle(rtvDescriptorHeap, device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV), 2));
+    rtvTextureHandle = GetCPUDescriptorHandle(rtvDescriptorHeap, device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV), 2);
 }
 
 // 描画前処理
 void DirectXBase::PreDraw() {
-
-
-    for (uint32_t i = 0; i < 2; i++) {
-        rtvHandles[i] = GetCPUDescriptorHandle(rtvDescriptorHeap, device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV), i);
-        device->CreateRenderTargetView(swapChainResources[i].Get(), &rtvDesc, rtvHandles[i]);
-
-    }
 
     //// これから書き込むバックバッファのインデックスを取得
     backBufferIndex = swapChain->GetCurrentBackBufferIndex();
@@ -310,8 +306,6 @@ void DirectXBase::PostDraw() {
 }
 
 void DirectXBase::PreDrawRenderTexture() {
-    device->CreateRenderTargetView(OffScreenRendering::GetInstance()->GetRenderTextureResource().Get(), &rtvDesc, GetCPUDescriptorHandle(rtvDescriptorHeap, device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV), 2));
-    rtvTextureHandle = GetCPUDescriptorHandle(rtvDescriptorHeap, device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV), 2);
 
     // TransitionのBarrierの設定
     // 今回のバリアはTransition
@@ -505,9 +499,7 @@ void DirectXBase::InitializeRenderTargetView() {
     for (uint32_t i = 0; i < 2; i++) {
         rtvHandles[i] = GetCPUDescriptorHandle(rtvDescriptorHeap, device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV), i);
         device->CreateRenderTargetView(swapChainResources[i].Get(), &rtvDesc, rtvHandles[i]);
-
     }
-
 }
 
 Microsoft::WRL::ComPtr<IDxcBlob> DirectXBase::CompileShader(

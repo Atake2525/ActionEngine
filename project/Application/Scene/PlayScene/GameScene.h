@@ -20,7 +20,6 @@
 #include "BaseStage.h"
 #include "Pause.h"
 #include "PlayerUI.h"
-#include "MouseCursor.h"
 
 #pragma once
 
@@ -57,7 +56,6 @@ private:
 	bool m_finished = false;
 
 	Input* m_pInput = nullptr;
-	std::unique_ptr<MouseCursor> m_mouseCursor = nullptr;
 
 	bool m_cursorShow = false;
 
