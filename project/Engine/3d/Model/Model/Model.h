@@ -33,7 +33,7 @@ struct VertexData {
 struct MaterialVertexData {
 	std::vector<VertexData> vertices;
 	std::vector<uint32_t> indices;
-	std::map<std::string, JointWeightData> skinClusterData;
+	std::unordered_map<std::string, JointWeightData> skinClusterData;
 	size_t materialIndex;
 };
 
@@ -81,10 +81,10 @@ struct MaterialData {
 
 
 struct ModelData {
-	std::map<std::string, JointWeightData> skinClusterData;
+	std::unordered_map<std::string, JointWeightData> skinClusterData;
 	std::vector<uint32_t> indices;
 	std::vector<VertexData> vertices;
-	std::map<std::wstring, MaterialVertexData> matVertexData;
+	std::unordered_map<std::wstring, MaterialVertexData> matVertexData;
 	std::vector<MaterialData> material;
 	std::vector<MaterialTemplate> materialTemplate;
 	Node rootNode;
@@ -98,43 +98,22 @@ public:
 	};
 
 	// 初期化
-	void Initialize(std::string directoryPath, std::string filename, bool enableLighting, bool isAnimation);
+	void Initialize(std::string directoryPath, std::string fileName, bool isAnimation);
 
 	void SkinningUpdate(const Skeleton& skeleton);
 
 	// 更新
 	void Draw();
 
-
-	// Getter(Color)
-	const Vector4& GetColor() const { return materialData->color; }
-	// Getter(EnableLighting)
-	const bool GetEnableLighting() const { return materialData->enableLighting; }
-	const float& GetEnvironmentCoefficient() const { return materialData->environmentCoefficient; }
-	// Getter(SpecularColor)
-	const Vector3& GetSpecularColor() const { return materialData->specularColor; }
-	// Getter(Shininess)
-	const float& GetShininess() const { return materialData->shininess; }
-	// Getter(ModelData)
-	const ModelData& GetModelData() const { return modelData; }
 	// Getter(Animation)
-	const std::map<std::string, Animation>& GetAnimation() const { return animation; }
+	const std::unordered_map<std::string, Animation>& GetAnimation() const { return animation; }
 	const Animation& GetDefaultAnimation() const { return animation.at("DefaultAnimation"); }
 	const bool& IsAnimation() const { return isAnimation; }
 
+	const ModelData& GetModelData() const { return modelData; }
 	// Getter(ModelData vertices)
 	const std::vector<VertexData>& GetVertices() const { return modelData.vertices; }
 
-	// Setter(Color)
-	void SetColor(const Vector4 color) {
-		materialData->color = color;
-	}
-	// Setter(EnableLighting)
-	void SetEnableLighting(const bool enableLighting) {
-		materialData->enableLighting = enableLighting;
-	}
-	// Setter(Shininess)
-	void SetShininess(const float& shininess) { materialData->shininess = shininess; }
 	// DebugModeを有効化
 	void DebugMode(bool debugMode) { useWireFrameTexture = debugMode; }
 	// SkinClusterのセット(通常使うものではないため気にしないで良い)
@@ -146,22 +125,15 @@ public:
 
 	void AddAnimationsThreaded(const std::string& directoryPath, const std::vector<std::string>& filenames);
 
-
-	void SetEnvironmentCoefficient(const float amount) { materialData->environmentCoefficient = amount; }
-
-	void SetEnableMetallic(const bool flag) { materialData->enableMetallic = flag; }
-
-	const bool GetEnableMetallic() const { return materialData->enableMetallic; }
-
 	void SetPBRMaterial(const float metallic, const float roughness);
 
 	// AABBの取得
 	const AABB& GetMeshAABB() const { return meshAABB; }
-	const std::map<std::wstring, AABB>& GetMultiMeshAABB() const { return multiMeshAABB; }
+	const std::unordered_map<std::wstring, AABB>& GetMultiMeshAABB() const { return multiMeshAABB; }
 
 private:
 
-	std::map<std::string, Animation> animation;
+	std::unordered_map<std::string, Animation> animation;
 	bool isAnimation = false;
 
 	std::vector<SkinCluster> skinCluster;
@@ -183,11 +155,6 @@ private:
 
 	// Objファイルのデータ
 	ModelData modelData;
-
-	// マテリアルのバッファリソース
-	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource;
-	// マテリアルバッファリソース内のデータを指すポインタ
-	Material* materialData = nullptr;
 
 	// マテリアルのバッファリソース
 	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> materialTemplateResource;
@@ -225,8 +192,6 @@ private:
 	static ModelData LoadModelFileOBJ(const std::string& directoryPath, const std::string& fileName);
 	// VertexResourceを作成する
 	void CreateVertexResource();
-	// MaterialResourceを作成する
-	void CreateMaterialResouce();
 	// VertexBufferViewを作成する(値を設定するだけ)
 	void CreateVertexBufferView();
 
@@ -235,7 +200,7 @@ private:
 
 
 	AABB meshAABB;
-	std::map<std::wstring, AABB> multiMeshAABB;
+	std::unordered_map<std::wstring, AABB> multiMeshAABB;
 
 	bool useWireFrameTexture;
 	uint32_t whiteTextureIndex;
