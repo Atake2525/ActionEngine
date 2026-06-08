@@ -130,7 +130,6 @@
     <ClCompile Include="Application\Player.cpp" />
     <ClCompile Include="Engine\3d\DebugLine\DebugLineBase.cpp" />
     <ClCompile Include="Engine\3d\DebugLine\DebugLine.cpp" />
-    <ClCompile Include="Engine\3d\Model\Model\DebugModel.cpp" />
     <ClCompile Include="Engine\3d\Object\Object3dBase\DebugObject3d.cpp" />
     <ClCompile Include="Engine\Collision\PhysicsCorrection.cpp" />
     <ClCompile Include="Application\Pause.cpp" />
@@ -323,7 +322,6 @@
     <ClInclude Include="Application\Player.h" />
     <ClInclude Include="Engine\3d\DebugLine\DebugLineBase.h" />
     <ClInclude Include="Engine\3d\DebugLine\DebugLine.h" />
-    <ClInclude Include="Engine\3d\Model\Model\DebugModel.h" />
     <ClInclude Include="Engine\3d\Object\Object3dBase\DebugObject3d.h" />
     <ClInclude Include="Engine\Collision\PhysicsCorrection.h" />
     <ClInclude Include="Application\Pause.h" />

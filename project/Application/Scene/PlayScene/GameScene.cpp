@@ -25,9 +25,6 @@ void GameScene::Initialize() {
     SkyBox::GetInstance()->SetSunPoewr(0.0f);
 
     m_pInput = Input::GetInstance();
-    m_mouseCursor = std::make_unique<MouseCursor>();
-    m_mouseCursor->Initialize("Resources/Sprite/Cursor_Hover.png", "Resources/Sprite/Cursor_Press.png");
-    m_mouseCursor->SetShowCursor(false);
 
     Object3dBase::GetInstance()->SetDefaultCamera(m_pCamera.get());
 
@@ -55,8 +52,6 @@ void GameScene::Update() {
 
     // ポーズはどのフェーズでも行えるようにする
     m_pPause->Update();
-    // ポーズ時にマウスカーソルを使うため前の方で更新
-    m_mouseCursor->Update();
     if (m_pPause->IsPause())
     {
         return;
@@ -147,7 +142,6 @@ void GameScene::Draw() {
     m_pStage->DrawBackSprite();
     m_pPlayerUI->Draw();
     m_pPause->Draw();
-    m_mouseCursor->Draw();
 }
 
 void GameScene::Finalize() {

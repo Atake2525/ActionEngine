@@ -78,7 +78,7 @@ void TitleSceneUI::Update(const TitleSceneScreen& screen) {
     {
     case TitleSceneScreen::BootScreen:
         m_pressAnyKeySprite->Update();
-        if (m_pInput->PressAnyKey() || m_pInput->PressAnyButton() || m_pInput->TriggerMouse(0) || m_pInput->TriggerMouse(1))
+        if (m_pInput->PressAnyKey() || m_pInput->PressAnyButton() || m_pInput->TriggerMouse(MOUSE_LEFT) || m_pInput->TriggerMouse(MOUSE_RIGHT))
         {
             m_pressUI = "bootScreen";
             Audio::GetInstance()->Play("select_enter");

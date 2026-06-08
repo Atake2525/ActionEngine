@@ -80,6 +80,7 @@ void OffScreenRendering::Initialize() {
     dissolveResource->Map(0, nullptr, reinterpret_cast<void**>(&dissolve));
     dissolve->edgeColor = { 1.0f, 1.0f, 1.0f };
     dissolve->threshold = 0.0f;
+	noiseSrvIndex = TextureManager::GetInstance()->LoadTexture("Resources/Sprite/noise0.png");
 }
 
 void OffScreenRendering::Update() {
@@ -270,7 +271,7 @@ void OffScreenRendering::Draw() {
 	// dissolve
 	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(5, dissolveResource->GetGPUVirtualAddress());
 
-	SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(6, TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/Sprite/noise0.png"));
+	SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(6, noiseSrvIndex);
 	// srvGPUHandleの設定
 	SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(1, srvIndex);
 
