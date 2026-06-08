@@ -106,8 +106,14 @@ void TutorialStage::DrawBackSprite()
 
 void TutorialStage::Finalize()
 {
-    CollisionManager::GetInstance()->DeleteCollision(stageObject.get());
-    CollisionManager::GetInstance()->DeleteCollision(wallRunObject.get());
-    CollisionManager::GetInstance()->DeleteWallDashCollision(wallRunObject.get());
+    if (collisionObject)
+    {
+        CollisionManager::GetInstance()->DeleteCollision(collisionObject.get());
+    }
+    if (wallRunObject)
+    {
+        CollisionManager::GetInstance()->DeleteCollision(wallRunObject.get());
+        CollisionManager::GetInstance()->DeleteWallDashCollision(wallRunObject.get());
+    }
     JsonLoader::GetInstance()->DeleteJson("TutorialStage");
 }
