@@ -129,8 +129,8 @@ public:
     void SetShininess(const float& shininess);
     const float& GetShininess() const;
     void DebugMode(const bool debugMode);
-    void SetEnableMetallic(const bool flag) { model_->SetEnableMetallic(flag); }
-    const bool GetEnableMetallic() { return model_->GetEnableMetallic(); }
+    void SetEnableMetallic(const bool flag) { materialData->enableMetallic = flag; }
+    const bool GetEnableMetallic() { return materialData->enableMetallic; }
     void SetPBRMaterial(const float metallic, const float roughness);
 
     // ============================

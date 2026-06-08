@@ -37,12 +37,15 @@ void TitleScene::Initialize() {
     m_charModel->AddAnimation("Resources/Model/gltf", "sceneChange_Animation.gltf", "TitleScreen");
     m_charModel->ToggleStartAnimation();
     m_charModel->SetRotate({ 0.0f, SwapRadian(180.0f), 0.0f});
+    m_charModel->SetEnableLighting(true);
+    m_charModel->SetEnvironmentCoefficient(0.5f);
     m_charModel->Update();
 
     m_bootScreen = make_unique<Object3d>();
     m_bootScreen->Initialize();
     m_bootScreen->SetModel("Resources/Model/obj/Title", "TitleScene_01.obj", true);
     m_bootScreen->Update();
+    m_bootScreen->SetEnableLighting(true);
 
     Vector2 windowSize = { WinApp::GetInstance()->GetWindowSize() };
     
