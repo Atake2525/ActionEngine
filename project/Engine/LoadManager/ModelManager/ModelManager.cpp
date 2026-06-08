@@ -21,7 +21,7 @@ void ModelManager::Initialize() {
 	ModelBase::GetInstance()->Initialize(); 
 }
 
-void ModelManager::LoadModel(const std::string& directoryPath, const std::string& filePath, const bool& enableLighting, const bool isAnimation) {
+void ModelManager::LoadModel(const std::string& directoryPath, const std::string& filePath, const bool isAnimation) {
 	// ディレクトリの最後の名前もモデルのkeyに入れる
 	// Pathの長さ
 	size_t pathLen = directoryPath.size();
@@ -53,7 +53,7 @@ void ModelManager::LoadModel(const std::string& directoryPath, const std::string
 
 	// モデルの生成と読み込み、初期化
 	std::unique_ptr<Model> model = std::make_unique<Model>();
-	model->Initialize(directoryPath, filePath, enableLighting, isAnimation);
+	model->Initialize(directoryPath, filePath, isAnimation);
 
 	// モデルをmapコンテナに格納する
 	models.insert(std::make_pair(filename, std::move(model)));

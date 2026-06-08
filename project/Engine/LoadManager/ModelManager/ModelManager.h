@@ -1,6 +1,7 @@
 #include <map>
 #include <string>
 #include <memory>
+#include <unordered_map>
 
 #pragma once
 
@@ -36,7 +37,7 @@ public:
 	/// <param name="filePath"> : モデルファイルのパス</param>
 	/// <param name="enableLighting"> : ライティングを適用するかどうか</param>
 	/// enableLightingは何も入力しなければfalse
-	void LoadModel(const std::string& directoryPath, const std::string& filePath, const bool& enableLighting = false, const bool isAnimation = false);
+	void LoadModel(const std::string& directoryPath, const std::string& filePath, const bool isAnimation = false);
 
 	/// <summary>
 	/// モデルの検索
@@ -47,7 +48,7 @@ public:
 
 private:
 	// モデレータ
-	std::map<std::string, std::unique_ptr<Model>> models;
+	std::unordered_map<std::string, std::unique_ptr<Model>> models;
 
 	ModelBase* modelBase = nullptr;
 };

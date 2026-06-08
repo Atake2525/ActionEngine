@@ -71,7 +71,6 @@ void Object3d::Initialize() {
 
     cullingTemplateData->drawHeight = -1.0f;
     privateCullingData.drawHeight = 100.0f;
-
 }
 
 void Object3d::Update() {
@@ -198,6 +197,8 @@ void Object3d::Draw() {
 
     // 3Dモデルが割り当てられていれば描画する
     if (model_) {
+        // wvp用のCBufferの場所を設定
+        DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
         model_->Draw();
     }
 }
@@ -238,7 +239,7 @@ void Object3d::SetModel(const std::string& filePath) {
 }
 
 void Object3d::SetModel(const std::string& directoryPath, const std::string& filePath, const bool& enableLighting, const bool isAnimation) {
-    ModelManager::GetInstance()->LoadModel(directoryPath, filePath, enableLighting, isAnimation);
+    ModelManager::GetInstance()->LoadModel(directoryPath, filePath, isAnimation);
 
     // ディレクトリの最後の名前もモデルのkeyに入れる
     size_t pathLen = directoryPath.size();
@@ -356,11 +357,11 @@ void Object3d::PlayDefaultAnimation() {
 }
 
 void Object3d::SetColor(const Vector4 color) {
-    model_->SetColor(color);
+    materialData->color = color;
 }
 
 const Vector4& Object3d::GetColor() const {
-    return model_->GetColor();
+    return materialData->color;
 }
 
 const bool Object3d::GetEnableLighting() const {
@@ -615,7 +616,7 @@ void Object3d::UpdateOBB()
     }
 }
 
-const std::vector<AABB> Object3d::GetAABBMultiMeshed()
+const std::vector<AABB>& Object3d::GetAABBMultiMeshed()
 {
     return multiMeshAABB;
 }
@@ -839,4 +840,22 @@ void Object3d::SetEnvironmentCoefficient(const float amount) {
 
 void Object3d::SetPBRMaterial(const float metallic, const float roughness) {
     model_->SetPBRMaterial(metallic, roughness);
+}
+
+void Object3d::InitializeMaterial() {
+    materialResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(Material));
+    //  書き込むためのアドレスを取得
+    materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
+
+    // データを書き込む
+    // 今回は赤を書き込んでみる
+    materialData->color = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+    materialData->uvTransform = MakeIdentity4x4();
+
+    materialData->enableLighting = enableLighting;
+    materialData->shininess = 70.0f;
+    materialData->specularColor = { 1.0f, 1.0f, 1.0f };
+    materialData->environmentCoefficient = 0.0f;
+    materialData->enableMetallic = false;
 }
