@@ -33,7 +33,8 @@ void TitleScene::Initialize() {
 
     m_charModel = make_unique<Object3d>();
     m_charModel->Initialize();
-    m_charModel->SetModel("Resources/Model/gltf", "TitleSceneChar.gltf", true, true);
+    Model* charModel = ModelManager::GetInstance()->LoadModel("Resources/Model/gltf", "TitleSceneChar.gltf", true);
+    m_charModel->SetModel(charModel);
     m_charModel->AddAnimation("Resources/Model/gltf", "sceneChange_Animation.gltf", "TitleScreen");
     m_charModel->ToggleStartAnimation();
     m_charModel->SetRotate({ 0.0f, SwapRadian(180.0f), 0.0f});
@@ -43,7 +44,8 @@ void TitleScene::Initialize() {
 
     m_bootScreen = make_unique<Object3d>();
     m_bootScreen->Initialize();
-    m_bootScreen->SetModel("Resources/Model/obj/Title", "TitleScene_01.obj", true);
+    Model* bootScreenModel = ModelManager::GetInstance()->LoadModel("Resources/Model/obj/Title", "TitleScene_01.obj");
+    m_bootScreen->SetModel(bootScreenModel);
     m_bootScreen->Update();
     m_bootScreen->SetEnableLighting(true);
 

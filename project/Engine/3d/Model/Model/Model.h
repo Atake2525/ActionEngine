@@ -98,7 +98,7 @@ public:
 	};
 
 	// 初期化
-	void Initialize(std::string directoryPath, std::string filename, bool isAnimation);
+	void Initialize(std::string directoryPath, std::string fileName, bool isAnimation);
 
 	void SkinningUpdate(const Skeleton& skeleton);
 

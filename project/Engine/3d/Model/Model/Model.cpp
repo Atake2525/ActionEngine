@@ -14,23 +14,23 @@
 
 using namespace Logger;
 
-void Model::Initialize(std::string directoryPath, std::string filename, bool isAnimation) {
+void Model::Initialize(std::string directoryPath, std::string fileName, bool isAnimation) {
 	bool enableAnimationLoad = isAnimation;
 
-	if (filename.ends_with(".obj"))
+	if (fileName.ends_with(".obj"))
 	{
 		// モデル読み込み
-		modelData = LoadModelFileOBJ(directoryPath, filename);
+		modelData = LoadModelFileOBJ(directoryPath, fileName);
 	}
-	else if (filename.ends_with(".gltf"))
+	else if (fileName.ends_with(".gltf"))
 	{// モデル読み込み
-		modelData = LoadModelFileGLTF(directoryPath, filename);
+		modelData = LoadModelFileGLTF(directoryPath, fileName);
 	}
 
 	if (isAnimation)
 	{
 		this->isAnimation = enableAnimationLoad;
-		Animation anim = LoadAnimationFile(directoryPath, filename);
+		Animation anim = LoadAnimationFile(directoryPath, fileName);
 		animation["DefaultAnimation"] = anim;
 	}
 	CreateAABB();
@@ -84,7 +84,7 @@ void Model::Initialize(std::string directoryPath, std::string filename, bool isA
 
 	useWireFrameTexture = false;
 	TextureManager::GetInstance()->LoadTexture("Resources/Debug/white1x1.png");
-	whiteTextureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/Debug/white1x1.png");
+	whiteTextureIndex = TextureManager::GetInstance()->LoadTexture("Resources/Debug/white1x1.png");
 
 }
 
@@ -473,7 +473,7 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 			modelData.matVertexData[meshName].skinClusterData[JointName] = jointWeightData;
 		}
 	}
-	uint32_t texIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/Sprite/black1x1.png");
+	uint32_t texIndex = TextureManager::GetInstance()->LoadTexture("Resources/Sprite/black1x1.png");
 	// テクスチャが無い場合white1x1を張るようにする
 	if (scene->mNumMaterials == 0)
 	{
@@ -487,10 +487,8 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 		matData.roughnessMapFilePath = "Resources/Sprite/black1x1.png";
 		matData.roughnessMapIndex = texIndex;
 
-		// テクスチャ読み込み
-		TextureManager::GetInstance()->LoadTexture(matData.textureFilePath);
 		// 読み込んだテクスチャの番号尾を取得
-		matData.textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(matData.textureFilePath);
+		matData.textureIndex = TextureManager::GetInstance()->LoadTexture(matData.textureFilePath);
 
 		MaterialTemplate matTempData;
 		// メタリックの数値
@@ -515,7 +513,7 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 			// テクスチャ読み込み
 			TextureManager::GetInstance()->LoadTexture(matData.textureFilePath);
 			// 読み込んだテクスチャの番号尾を取得
-			matData.textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(matData.textureFilePath);
+			matData.textureIndex = TextureManager::GetInstance()->LoadTexture(matData.textureFilePath);
 
 
 			// ノーマルマップ、メタリックマップ、ラフネスマップの読み込み
@@ -523,7 +521,7 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 				material->GetTexture(aiTextureType_HEIGHT, 0, &textureFilePath) == AI_SUCCESS) {
 				TextureManager::GetInstance()->LoadTexture(directoryPath + "/" + textureFilePath.C_Str());
 				matData.normalMapFilePath = directoryPath + "/" + textureFilePath.C_Str();
-				matData.normalMapIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(matData.normalMapFilePath);
+				matData.normalMapIndex = TextureManager::GetInstance()->LoadTexture(matData.normalMapFilePath);
 			}
 			else
 			{
@@ -531,9 +529,8 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 				matData.normalMapIndex = texIndex;
 			}
 			if (material->GetTexture(aiTextureType_METALNESS, 0, &textureFilePath) == AI_SUCCESS) {
-				TextureManager::GetInstance()->LoadTexture(directoryPath + "/" + textureFilePath.C_Str());
 				matData.metallicMapFilePath = directoryPath + "/" + textureFilePath.C_Str();
-				matData.metallicMapIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(matData.metallicMapFilePath);
+				matData.metallicMapIndex = TextureManager::GetInstance()->LoadTexture(matData.metallicMapFilePath);
 			}
 			else
 			{
@@ -541,9 +538,8 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 				matData.metallicMapIndex = texIndex;
 			}
 			if (material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &textureFilePath) == AI_SUCCESS) {
-				TextureManager::GetInstance()->LoadTexture(directoryPath + "/" + textureFilePath.C_Str());
 				matData.roughnessMapFilePath = directoryPath + "/" + textureFilePath.C_Str();
-				matData.roughnessMapIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(matData.roughnessMapFilePath);
+				matData.roughnessMapIndex = TextureManager::GetInstance()->LoadTexture(matData.roughnessMapFilePath);
 			}
 			else
 			{
@@ -589,10 +585,8 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 			matData.roughnessMapFilePath = "Resources/Sprite/black1x1.png";
 			matData.roughnessMapIndex = texIndex;
 
-			// テクスチャ読み込み
-			TextureManager::GetInstance()->LoadTexture(matData.textureFilePath);
 			// 読み込んだテクスチャの番号尾を取得
-			matData.textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(matData.textureFilePath);
+			matData.textureIndex = TextureManager::GetInstance()->LoadTexture(matData.textureFilePath);
 
 			// メタリックの数値
 			float metallic = 0.0f;
@@ -794,7 +788,7 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 		}
 
 	}
-	uint32_t texIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath("Resources/Sprite/black1x1.png");
+	uint32_t texIndex = TextureManager::GetInstance()->LoadTexture("Resources/Sprite/black1x1.png");
 	// マテリアルが作成されていない場合はwhite1x1を使用
 	if (scene->mNumMaterials == 1 || scene->mNumMaterials == 0)
 	{
@@ -808,10 +802,8 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 		matData.roughnessMapFilePath = "Resources/Sprite/black1x1.png";
 		matData.roughnessMapIndex = texIndex;
 
-		// テクスチャ読み込み
-		TextureManager::GetInstance()->LoadTexture(matData.textureFilePath);
 		// 読み込んだテクスチャの番号尾を取得
-		matData.textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(matData.textureFilePath);
+		matData.textureIndex = TextureManager::GetInstance()->LoadTexture(matData.textureFilePath);
 
 		MaterialTemplate matTempData;
 		// メタリックの数値		
@@ -837,17 +829,14 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 			MaterialData matData;
 			matData.textureFilePath = directoryPath + "/" + textureFilePath.C_Str();
 
-			// テクスチャ読み込み
-			TextureManager::GetInstance()->LoadTexture(matData.textureFilePath);
 			// 読み込んだテクスチャの番号尾を取得
-			matData.textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(matData.textureFilePath);
+			matData.textureIndex = TextureManager::GetInstance()->LoadTexture(matData.textureFilePath);
 
 			// ノーマルマップ、メタリックマップ、ラフネスマップの読み込み
 			if (material->GetTexture(aiTextureType_NORMALS, 0, &textureFilePath) == AI_SUCCESS ||
 				material->GetTexture(aiTextureType_HEIGHT, 0, &textureFilePath) == AI_SUCCESS) {
-				TextureManager::GetInstance()->LoadTexture(directoryPath + "/" + textureFilePath.C_Str());
 				matData.normalMapFilePath = directoryPath + "/" + textureFilePath.C_Str();
-				matData.normalMapIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(matData.normalMapFilePath);
+				matData.normalMapIndex = TextureManager::GetInstance()->LoadTexture(matData.normalMapFilePath);
 			}
 			else
 			{
@@ -855,9 +844,8 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 				matData.normalMapIndex = texIndex;
 			}
 			if (material->GetTexture(aiTextureType_METALNESS, 0, &textureFilePath) == AI_SUCCESS) {
-				TextureManager::GetInstance()->LoadTexture(directoryPath + "/" + textureFilePath.C_Str());
 				matData.metallicMapFilePath = directoryPath + "/" + textureFilePath.C_Str();
-				matData.metallicMapIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(matData.metallicMapFilePath);
+				matData.metallicMapIndex = TextureManager::GetInstance()->LoadTexture(matData.metallicMapFilePath);
 			}
 			else
 			{
@@ -865,9 +853,8 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 				matData.metallicMapIndex = texIndex;
 			}
 			if (material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &textureFilePath) == AI_SUCCESS) {
-				TextureManager::GetInstance()->LoadTexture(directoryPath + "/" + textureFilePath.C_Str());
 				matData.roughnessMapFilePath = directoryPath + "/" + textureFilePath.C_Str();
-				matData.roughnessMapIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(matData.roughnessMapFilePath);
+				matData.roughnessMapIndex = TextureManager::GetInstance()->LoadTexture(matData.roughnessMapFilePath);
 			}
 			else
 			{
@@ -910,10 +897,8 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
 			matData.roughnessMapFilePath = "Resources/Sprite/black1x1.png";
 			matData.roughnessMapIndex = texIndex;
 
-			// テクスチャ読み込み
-			TextureManager::GetInstance()->LoadTexture(matData.textureFilePath);
 			// 読み込んだテクスチャの番号尾を取得
-			matData.textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(matData.textureFilePath);
+			matData.textureIndex = TextureManager::GetInstance()->LoadTexture(matData.textureFilePath);
 
 			MaterialTemplate matTempData;
 			// メタリックの数値		
@@ -1011,7 +996,7 @@ void Model::CreateAABB() {
 		firstMultimesh.max.y = matVData.second.vertices[0].position.y;
 		firstMultimesh.max.z = matVData.second.vertices[0].position.z;
 
-		for (VertexData vertices : matVData.second.vertices)
+		for (const auto& vertices : matVData.second.vertices)
 		{
 			firstMultimesh.min.x = std::min(firstMultimesh.min.x, vertices.position.x);
 			firstMultimesh.min.y = std::min(firstMultimesh.min.y, vertices.position.y);

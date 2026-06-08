@@ -36,7 +36,7 @@ void Sprite::SetTransform(const Vector2& position, const float& rotation, const 
 
 void Sprite::SetTexture(const std::string& textureFilePath) {
 	texturefilePath = textureFilePath;
-	textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(textureFilePath);
+	textureIndex = TextureManager::GetInstance()->LoadTexture(textureFilePath);
 	AdjustTextureSize();
 }
 
@@ -67,8 +67,7 @@ void Sprite::Initialize(std::string textureFilePath) {
 	SetTransformatinMatrix();
 
 	texturefilePath = textureFilePath;
-	TextureManager::GetInstance()->LoadTexture(textureFilePath);
-	textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(textureFilePath);
+	textureIndex = TextureManager::GetInstance()->LoadTexture(textureFilePath);
 
 	// テクスチャサイズの計算
 	AdjustTextureSize();
@@ -143,7 +142,7 @@ void Sprite::Update() {
 }
 
 void Sprite::ChangeTexture(std::string textureFilePath) { 
-	textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(textureFilePath);
+	textureIndex = TextureManager::GetInstance()->LoadTexture(textureFilePath);
 }
 
 void Sprite::Draw() {

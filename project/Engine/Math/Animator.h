@@ -111,7 +111,7 @@ struct Node
 {
     QuaternionTransform transform;
     Matrix4x4 localMatrix;
-    std::string name;
+    std::string name = "";
     std::vector<Node> children;
 };
 
@@ -119,7 +119,7 @@ struct Joint {
     QuaternionTransform transform; // Transform情報
     Matrix4x4 localMatrix; // localMatrix
     Matrix4x4 skeletonSpaceMatrix; // skeltonSpaceでの変換行列
-    std::string name; // 名前
+    std::string name = ""; // 名前
     std::vector<int32_t> children; // 子JointのIndexのリスト。居なければ空
     int32_t index; // 自分のindex
     std::optional<int32_t> parent; // 親JointのIndex。いなければnull
