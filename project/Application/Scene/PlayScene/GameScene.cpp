@@ -78,7 +78,7 @@ void GameScene::Update() {
         m_startTimer += GameTime::GetInstance()->GetDeltaTime() / m_startTime;
         m_startTimer = clamp(m_startTimer, 0.0f, 1.0f);
 
-        
+
         switch (m_readyNumber)
         {
         case 0:
@@ -90,7 +90,7 @@ void GameScene::Update() {
             Light::GetInstance()->SetRadius(radius);
 
             SkyBox::GetInstance()->SetSunPoewr(m_startTimer);
-            
+
             break;
         }
 
@@ -127,7 +127,7 @@ void GameScene::Update() {
 
 #endif // !NDEBUG
 
-    
+
 
     SkyBox::GetInstance()->Update();
 }
