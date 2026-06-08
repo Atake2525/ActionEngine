@@ -10,6 +10,7 @@
 #include <wrl.h>
 #include <span>
 #include <array>
+#include <unordered_map>
 
 #pragma once
 
@@ -59,7 +60,7 @@ struct Animation
 {
     float duration; // アニメーション全体の尺(単位は秒)
     // NodeAnimationの場合、Node名を弾けるようにしておく
-    std::map<std::string, NodeAnimation> nodeAnimations;
+    std::unordered_map<std::string, NodeAnimation> nodeAnimations;
 };
 
  inline Vector3 CalculateValue(const std::vector<KeyframeVector3>& keyframes, float time) {
@@ -126,7 +127,7 @@ struct Joint {
 
 struct Skeleton {
     int32_t root; // RootJointのIndex
-    std::map<std::string, int32_t> jointMap; // Joint名とIndexとの辞書
+    std::unordered_map<std::string, int32_t> jointMap; // Joint名とIndexとの辞書
     std::vector<Joint> joints; // 所属しているジョイント
 };
 

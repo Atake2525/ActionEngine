@@ -14,7 +14,7 @@
 
 using namespace Logger;
 
-void Model::Initialize(std::string directoryPath, std::string filename, bool enableLighting, bool isAnimation) {
+void Model::Initialize(std::string directoryPath, std::string filename, bool isAnimation) {
 	bool enableAnimationLoad = isAnimation;
 
 	if (filename.ends_with(".obj"))
@@ -76,22 +76,10 @@ void Model::Initialize(std::string directoryPath, std::string filename, bool ena
 		num++;
 	}
 
-	CreateMaterialResouce();
-	//  書き込むためのアドレスを取得
-	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
+	
 
 
-	// データを書き込む
-	// 今回は赤を書き込んでみる
-	materialData->color = { 1.0f, 1.0f, 1.0f, 1.0f };
-
-	materialData->uvTransform = MakeIdentity4x4();
-
-	materialData->enableLighting = enableLighting;
-	materialData->shininess = 70.0f;
-	materialData->specularColor = { 1.0f, 1.0f, 1.0f };
-	materialData->environmentCoefficient = 0.0f;
-	materialData->enableMetallic = false;
+	
 
 
 	useWireFrameTexture = false;
@@ -154,27 +142,18 @@ void Model::SkinningUpdate(const Skeleton& skeleton) {
 
 void Model::Draw() {
 
-	// wvp用のCBufferの場所を設定
-	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
-
 	int index = 0;
 	for (const auto& matData : modelData.matVertexData)
 	{
 		DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(8, materialTemplateResource[matData.second.materialIndex]->GetGPUVirtualAddress());
 		if (isAnimation)
 		{
-
-			//DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootDescriptorTable(9, skinCluster[index].paletteSrvHandle.second);
-			//DirectXBase::GetInstance()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView[0][index]); // VBVを設定
-			//DirectXBase::GetInstance()->GetCommandList()->IASetVertexBuffers(1, 1, &vertexBufferView[1][index]); // VBVを設定
 			DirectXBase::GetInstance()->GetCommandList()->IASetVertexBuffers(0, 1, &outputVertexBufferView[index]); // VBVを設定
-
 		}
 		else
 		{
 			DirectXBase::GetInstance()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView[0][index]); // VBVを設定
 		}
-		//DirectXBase::GetInstance()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView[0][index]); // VBVを設定
 
 		DirectXBase::GetInstance()->GetCommandList()->IASetIndexBuffer(&indexBufferView.at(index)); // VBVを設定
 
@@ -983,10 +962,6 @@ void Model::CreateVertexBufferView() {
 		vertexBufferView[0][index].StrideInBytes = sizeof(VertexData);
 		index++;
 	}
-}
-
-void Model::CreateMaterialResouce() {
-	materialResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(Material));
 }
 
 void Model::SetPBRMaterial(const float metallic, const float roughness) {

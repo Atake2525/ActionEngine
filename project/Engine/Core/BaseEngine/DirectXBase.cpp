@@ -224,13 +224,6 @@ void DirectXBase::InitializePosteffect() {
 // 描画前処理
 void DirectXBase::PreDraw() {
 
-
-    for (uint32_t i = 0; i < 2; i++) {
-        rtvHandles[i] = GetCPUDescriptorHandle(rtvDescriptorHeap, device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV), i);
-        device->CreateRenderTargetView(swapChainResources[i].Get(), &rtvDesc, rtvHandles[i]);
-
-    }
-
     //// これから書き込むバックバッファのインデックスを取得
     backBufferIndex = swapChain->GetCurrentBackBufferIndex();
 
@@ -505,7 +498,6 @@ void DirectXBase::InitializeRenderTargetView() {
     for (uint32_t i = 0; i < 2; i++) {
         rtvHandles[i] = GetCPUDescriptorHandle(rtvDescriptorHeap, device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV), i);
         device->CreateRenderTargetView(swapChainResources[i].Get(), &rtvDesc, rtvHandles[i]);
-
     }
 
 }

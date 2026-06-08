@@ -160,7 +160,7 @@ public:
     void UpdateCapsule();
     void UpdateOBB();;
 
-    const std::vector<AABB> GetAABBMultiMeshed();
+    const std::vector<AABB>& GetAABBMultiMeshed();
     void CreateCapsule();
 
     // ============================
@@ -202,6 +202,9 @@ private:
     Microsoft::WRL::ComPtr<ID3D12Resource> cameraResource;
     CameraForGPU* cameraData = nullptr;
 
+    Microsoft::WRL::ComPtr<ID3D12Resource> materialResource;
+    Material* materialData = nullptr;
+
     // ============================
     //  Rendering Data
     // ============================
@@ -220,7 +223,7 @@ private:
     // ============================
     //  Animation Data
     // ============================
-    std::map<std::string, Animation> animation;
+    std::unordered_map<std::string, Animation> animation;
     std::string beforAnimationKey = "DefaultAnimation";
     std::string animationKey = "DefaultAnimation";
 
@@ -254,6 +257,10 @@ private:
     std::vector<OBB> multiMeshOBB;
 
 private:
+
+    // MaterialResourceを作成する
+    void InitializeMaterial();
+
     // ============================
     //  Internal Methods
     // ============================
