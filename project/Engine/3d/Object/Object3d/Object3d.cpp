@@ -71,6 +71,8 @@ void Object3d::Initialize() {
 
     cullingTemplateData->drawHeight = -1.0f;
     privateCullingData.drawHeight = 100.0f;
+
+    InitializeMaterial();
 }
 
 void Object3d::Update() {
@@ -365,11 +367,11 @@ const Vector4& Object3d::GetColor() const {
 }
 
 const bool Object3d::GetEnableLighting() const {
-    return model_->GetEnableLighting();
+    return materialData->enableLighting;
 }
 
 void Object3d::SetEnableLighting(const bool enableLighting) {
-    model_->SetEnableLighting(enableLighting);
+    materialData->enableLighting = enableLighting;
 }
 
 const Vector3 Object3d::GetRotateInDegree() const {
@@ -387,11 +389,11 @@ void Object3d::SetTransform(const Vector3& translate, const Vector3& scale, cons
 }
 
 const float& Object3d::GetShininess() const {
-    return model_->GetShininess();
+    return materialData->shininess;
 }
 
 void Object3d::SetShininess(const float& shininess) {
-    model_->SetShininess(shininess);
+    materialData->shininess = shininess;
 }
 
 void Object3d::CreateCapsule() {
@@ -831,11 +833,11 @@ std::vector<SkinCluster> Object3d::CreateSkinCluster(const Skeleton& skeleton, c
 }
 
 const float Object3d::GetEnvironmentCoefficient() const {
-    return model_->GetEnvironmentCoefficient();
+    return materialData->environmentCoefficient;
 }
 
 void Object3d::SetEnvironmentCoefficient(const float amount) {
-    model_->SetEnvironmentCoefficient(amount);
+    materialData->environmentCoefficient = amount;
 }
 
 void Object3d::SetPBRMaterial(const float metallic, const float roughness) {
@@ -853,7 +855,7 @@ void Object3d::InitializeMaterial() {
 
     materialData->uvTransform = MakeIdentity4x4();
 
-    materialData->enableLighting = enableLighting;
+    materialData->enableLighting = false;
     materialData->shininess = 70.0f;
     materialData->specularColor = { 1.0f, 1.0f, 1.0f };
     materialData->environmentCoefficient = 0.0f;

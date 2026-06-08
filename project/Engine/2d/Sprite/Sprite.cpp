@@ -21,10 +21,6 @@ const Transform Sprite::GetTransform() const {
 	return result;
 }
 
-//void Sprite::SetMaterial(Material* material){ 
-//	materialData = material; 
-//}
-
 void Sprite::SetStatus(const Vector2& position, const float& rotation, const Vector2& scale, const Vector4& color){ 
 	this->position = position; 
 	this->rotation = rotation;

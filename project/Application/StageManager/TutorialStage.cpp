@@ -21,12 +21,14 @@ void TutorialStage::Initialize(Player* player, Camera* camera)
     stageObject = make_unique<Object3d>();
     stageObject->Initialize();
     stageObject->SetModel("Resources/Model/obj/Stage/TutorialStage", "Model.obj", true);
+    stageObject->SetEnableLighting(true);
     stageObject->Update();
 
     collisionObject = make_unique<Object3d>();
     collisionObject->Initialize();
     collisionObject->SetModel("Resources/Model/obj/Stage/TutorialStage", "Collision.obj", false);
     collisionObject->Update();
+    
     CollisionManager::GetInstance()->AddCollision(collisionObject.get());
 
     // トラップの初期化
