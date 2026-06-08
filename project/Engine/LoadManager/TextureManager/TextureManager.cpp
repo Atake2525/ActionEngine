@@ -4,6 +4,7 @@
 #include "Logger.h"
 #include "StringUtility.h"
 #include "SrvManager.h"
+#include <filesystem>
 
 using namespace Logger;
 using namespace StringUtility;
@@ -36,6 +37,9 @@ void TextureManager::Initialize() {
 }
 
 void TextureManager::LoadTexture(const std::string& filePath) {
+
+	std::string fn = std::filesystem::path(filePath).filename().string();
+	Log(fn + "を読み込みます\n");
 
 	std::string path;
 	size_t pathLen = filePath.size();
