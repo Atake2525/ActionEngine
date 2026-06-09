@@ -10,6 +10,7 @@
 #include <wrl.h>
 #include <span>
 #include <array>
+#include <unordered_map>
 
 #pragma once
 
@@ -59,7 +60,7 @@ struct Animation
 {
     float duration; // アニメーション全体の尺(単位は秒)
     // NodeAnimationの場合、Node名を弾けるようにしておく
-    std::map<std::string, NodeAnimation> nodeAnimations;
+    std::unordered_map<std::string, NodeAnimation> nodeAnimations;
 };
 
  inline Vector3 CalculateValue(const std::vector<KeyframeVector3>& keyframes, float time) {
@@ -110,7 +111,7 @@ struct Node
 {
     QuaternionTransform transform;
     Matrix4x4 localMatrix;
-    std::string name;
+    std::string name = "";
     std::vector<Node> children;
 };
 
@@ -118,7 +119,7 @@ struct Joint {
     QuaternionTransform transform; // Transform情報
     Matrix4x4 localMatrix; // localMatrix
     Matrix4x4 skeletonSpaceMatrix; // skeltonSpaceでの変換行列
-    std::string name; // 名前
+    std::string name = ""; // 名前
     std::vector<int32_t> children; // 子JointのIndexのリスト。居なければ空
     int32_t index; // 自分のindex
     std::optional<int32_t> parent; // 親JointのIndex。いなければnull
@@ -126,7 +127,7 @@ struct Joint {
 
 struct Skeleton {
     int32_t root; // RootJointのIndex
-    std::map<std::string, int32_t> jointMap; // Joint名とIndexとの辞書
+    std::unordered_map<std::string, int32_t> jointMap; // Joint名とIndexとの辞書
     std::vector<Joint> joints; // 所属しているジョイント
 };
 

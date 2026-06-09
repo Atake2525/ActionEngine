@@ -42,7 +42,7 @@ Audio* Audio::GetInstance() {
 }
 
 void Audio::Finalize() {
-	for (AudioList list : audioList)
+	for (const auto& list : audioList)
 	{
 		list.sourceVoice->Stop();
 		list.sourceVoice->DestroyVoice();
@@ -179,13 +179,6 @@ bool Audio::LoadWave(const std::string filePath, const std::string soundName, co
 void Audio::Play(const std::string soundName, const bool loop) {
 
 	// 存在しないサウンド名の場合は早期return
-	/*for (auto it = soundMap.begin(); it != soundMap.end(); it++)
-	{
-		if (soundMap.find(soundName))
-		{
-
-		}
-	}*/
 	if (!soundMap.contains(soundName))
 	{
 		Log("this name is not registered\n");
@@ -513,7 +506,7 @@ void Audio::SetVolume(const std::string soundName, const float volume) {
 	// 0.0f ~ 1.0fにclampする
 	float vol = std::clamp(volume, 0.0f, 1.0f);
 	soundMap[soundName].volume = vol;
-	for (AudioList list : audioList)
+	for (const auto& list : audioList)
 	{
 		if (list.soundData.filePath == soundMap[soundName].filePath)
 		{
@@ -532,7 +525,7 @@ void Audio::SetMasterVolume(const float volume){
 // 全ての音声停止
 void Audio::StopAll() {
 	// listに登録されているaudioSourceの全てを音声停止してlistをclearする
-	for (AudioList list : audioList)
+	for (const auto& list : audioList)
 	{
 		list.sourceVoice->Stop();
 		list.sourceVoice->DestroyVoice();
@@ -565,7 +558,7 @@ void Audio::Stop(const std::string soundName) {
 }
 
 void Audio::Pause(const std::string soundName) {
-	for (AudioList list : audioList)
+	for (const auto& list : audioList)
 	{
 		if (list.soundData.filePath == soundMap[soundName].filePath)
 		{
@@ -575,7 +568,7 @@ void Audio::Pause(const std::string soundName) {
 }
 
 void Audio::Resume(const std::string soundName) {
-	for (AudioList list : audioList)
+	for (const auto& list : audioList)
 	{
 		if (list.soundData.filePath == soundMap[soundName].filePath)
 		{

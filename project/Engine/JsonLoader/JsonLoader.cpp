@@ -298,7 +298,7 @@ void JsonLoader::SerchTransformFunctional(const std::string& jsonName, const std
 
 const std::vector<JsonData> JsonLoader::GetJsonData(const std::string& jsonName, const std::string file_name) {
     std::vector<JsonData> result;
-    for (auto data : levelDatas[jsonName].datas)
+    for (const auto& data : levelDatas[jsonName].datas)
     {
         if (data.second.file_name.find(file_name) == !std::string::npos)
         {
