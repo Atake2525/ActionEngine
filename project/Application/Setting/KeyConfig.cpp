@@ -82,17 +82,20 @@ namespace Setting {
             return keyBind;
         }
         bool Save(std::string fileName, KeyBind keyBind) {
-            
-            nlohmann::ordered_json json = JsonLoader::GetInstance()->LoadJson("Settings/" + fileName);
+            const nlohmann::json loaded = JsonLoader::GetInstance()->LoadJson("Settings/" + fileName);
 
-            if (!json.is_object())
-            {
-                json = nlohmann::ordered_json::object();
-            }
-
+            nlohmann::ordered_json json = nlohmann::ordered_json::object();
             json["type"] = "KEYCONFIG";
             json["main"] = nlohmann::ordered_json::object();
-            json["default"] = json["default"];
+
+            if (loaded.is_object() && loaded.contains("default"))
+            {
+                json["default"] = loaded["default"];
+            }
+            else
+            {
+                json["default"] = nlohmann::ordered_json::object();
+            }
 
             // 各 Action を main に書き込む
             // keyboard は ConvertDIKToKey()
@@ -122,7 +125,9 @@ namespace Setting {
                     gamepad = ConvertControllerToKey(controller);
                 }
 
+                // gamepadがnullでない場合は書き込む
                 bind["gamepad"] = gamepad == "null" ? nlohmann::ordered_json(nullptr) : nlohmann::ordered_json(gamepad);
+                // mainに書き込む
                 json["main"][action.first] = bind;
             }
 
