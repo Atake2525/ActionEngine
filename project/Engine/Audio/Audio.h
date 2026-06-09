@@ -2,7 +2,7 @@
 #include <fstream>
 #include <wrl.h>
 #include <vector>
-#include <map>
+#include <unordered_map>
 
 #include "Vector2.h"
 #include "Vector3.h"
@@ -131,10 +131,10 @@ private:
 
 	std::vector<AudioList> audioList;
 
-	std::map<std::string, SoundData> soundMap;
+	std::unordered_map<std::string, SoundData> soundMap;
 
 	// オーディオデータ
-	std::map<std::string, std::vector<BYTE>> mp3AudioData;
+	std::unordered_map<std::string, std::vector<BYTE>> mp3AudioData;
 	// WAVEフォーマット
 	WAVEFORMATEX mp3waveFormat;
 

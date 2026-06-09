@@ -6,6 +6,7 @@
 #include "OBB.h"
 #include <algorithm>
 #include "Object3d.h"
+#include <unordered_map>
 
 enum class CollisionType {
 	Sphere,
@@ -123,7 +124,7 @@ private:
 
 	std::vector<Object3d*> wallDashCollisionObject;
 
-	std::map<std::string, AABB> collisionTarget;
+	std::unordered_map<std::string, AABB> collisionTarget;
 
 	// 貫通量を示す変数
 	Vector3 m_penetration;

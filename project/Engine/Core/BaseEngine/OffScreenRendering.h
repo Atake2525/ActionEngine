@@ -155,5 +155,6 @@ private:
 
     Dissolve* dissolve = nullptr;
     Microsoft::WRL::ComPtr<ID3D12Resource> dissolveResource;
+    uint32_t noiseSrvIndex;
 
 };
