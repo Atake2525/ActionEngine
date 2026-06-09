@@ -36,7 +36,7 @@ void TextureManager::Initialize() {
 
 }
 
-uint32_t TextureManager::LoadTexture(const std::string& filePath) {
+uint32_t TextureManager::LoadTexture(const std::string& filePath, TextureColorSpace colorSpace) {
 
 	std::string fn = std::filesystem::path(filePath).filename().string();
 	Log(fn + "を読み込みます\n");
@@ -62,7 +62,15 @@ uint32_t TextureManager::LoadTexture(const std::string& filePath) {
 	}
 	else
 	{
-		hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
+		DirectX::WIC_FLAGS flags = DirectX::WIC_FLAGS_NONE;
+
+		if (colorSpace == TextureColorSpace::SRGB) {
+			flags = DirectX::WIC_FLAGS_FORCE_SRGB;
+		}
+		else {
+			flags = DirectX::WIC_FLAGS_IGNORE_SRGB; // normal/metallic/roughness 用
+		}
+		hr = DirectX::LoadFromWICFile(filePathW.c_str(), flags, nullptr, image);
 	}
 	assert(SUCCEEDED(hr));
 
@@ -107,87 +115,6 @@ uint32_t TextureManager::LoadTexture(const std::string& filePath) {
 
 	SrvManager::GetInstance()->CreateSRVforTexture2D(srvIndex, textureData.resource, textureData.metadata);
 	return mapIndex;
-}
-
-void TextureManager::SetNormalMapTexture(const std::string& targetTextureFilePath, const std::string& filePath)
-{
-	// 読み込み済テクスチャを検索
-	if (textureDatas.contains(filePath))
-	{
-		// 早期return
-		LoadTexture(filePath);
-		textureDatas[filePath].normalMapSrvIndex = textureDatas[filePath].srvIndex;
-		return;
-	}
-}
-
-void TextureManager::SetMetallicMapTexture(const std::string& targetTextureFilePath, const std::string& filePath)
-{
-	// 読み込み済テクスチャを検索
-	if (textureDatas.contains(filePath))
-	{
-		// 早期return
-		LoadTexture(filePath);
-		textureDatas[filePath].metallicMapSrvIndex = textureDatas[filePath].srvIndex;
-		return;
-	}
-}
-
-void TextureManager::SetRoughnessMapTexture(const std::string& targetTextureFilePath, const std::string& filePath)
-{
-	// 読み込み済テクスチャを検索
-	if (textureDatas.contains(filePath))
-	{
-		// 早期return
-		LoadTexture(filePath);
-		textureDatas[filePath].roughnessMapSrvIndex = textureDatas[filePath].srvIndex;
-		return;
-	}
-}
-
-uint32_t TextureManager::GetnormalMapSrvIndex(const std::string& filePath)
-{
-	// 読み込み済テクスチャを検索
-	if (textureDatas.contains(filePath))
-	{
-		// 読み込み済なら要素番号を返す
-		uint32_t textureIndex = textureDatas[filePath].normalMapSrvIndex;
-		return textureIndex;
-	}
-
-
-	assert(0);
-	return 0;
-}
-
-uint32_t TextureManager::GetmetallicMapSrvIndex(const std::string& filePath)
-{
-	// 読み込み済テクスチャを検索
-	if (textureDatas.contains(filePath))
-	{
-		// 読み込み済なら要素番号を返す
-		uint32_t textureIndex = textureDatas[filePath].metallicMapSrvIndex;
-		return textureIndex;
-	}
-
-
-	assert(0);
-	return 0;
-}
-
-uint32_t TextureManager::GetroughnessMapSrvIndex(const std::string& filePath)
-{
-	// 読み込み済テクスチャを検索
-	if (textureDatas.contains(filePath))
-	{
-		// 読み込み済なら要素番号を返す
-		uint32_t textureIndex = textureDatas[filePath].roughnessMapSrvIndex;
-		return textureIndex;
-	}
-
-
-	assert(0);
-	return 0;
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetSrvHandleGPU(const std::string& filePath) {
