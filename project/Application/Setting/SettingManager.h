@@ -19,6 +19,7 @@ public:
     // キーコンフィグとコントローラーコンフィグを取得する
     Setting::KeyboardConfig& GetKeyConfig() { return m_keyboardConfig; }
     Setting::ControllerConfig& GetControllerConfig() { return m_controllerConfig; }
+    Setting::Sensitivity& GetSensitivity() { return m_sensitivity; }
 
 private:
 
@@ -26,5 +27,6 @@ private:
 
     Setting::KeyboardConfig m_keyboardConfig;
     Setting::ControllerConfig m_controllerConfig;
+    Setting::Sensitivity m_sensitivity;
 };
 

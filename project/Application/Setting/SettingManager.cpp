@@ -49,6 +49,55 @@ bool SettingManager::Load(const std::string filename) {
 }
 
 bool SettingManager::Save(const std::string filename) {
+	nlohmann::json json = JsonLoader::GetInstance()->LoadJson("Settings/" + filename);
+
+	if (!json.is_object())
+	{
+		json = nlohmann::json::object();
+	}
+
+	json["type"] = "KEYCONFIG";
+	json["main"] = nlohmann::json::object();
+
+	// 各 Action を main に書き込む
+	// keyboard は ConvertDIKToKey()
+	// gamepad は Controller / DPad / StickDirection のどれかを文字列へ戻す
+	// mouse は現状ロードで使っていないので null
+	for (const auto& action : Setting::ActionNameToEnum)
+	{
+		nlohmann::json bind;
+		bind["keyboard"] = ConvertDIKToKey(
+			static_cast<BYTE>(m_keyboardConfig.GetMainAction(action.second))
+		);
+		bind["mouse"] = nullptr;
+
+		std::string gamepad = "null";
+
+		StickDirection stick = m_controllerConfig.GetStickAction(action.second);
+		DPad dpad = m_controllerConfig.GetDPadAction(action.second);
+		Controller controller = m_controllerConfig.GetControllerAction(action.second);
+
+		if (stick != StickDirection::None) {
+			gamepad = ConvertStickDirectionToKey(stick);
+		}
+		else if (dpad != DPad::None) {
+			gamepad = ConvertDPadToKey(dpad);
+		}
+		else if (controller != Controller::None) {
+			gamepad = ConvertControllerToKey(controller);
+		}
+
+		bind["gamepad"] = gamepad == "null" ? nlohmann::json(nullptr) : nlohmann::json(gamepad);
+		json["main"][action.first] = bind;
+	}
+
+	std::ofstream file("Settings/" + filename);
+	if (!file.is_open())
+	{
+		return false;
+	}
+
+	file << json.dump(4);
 	return true;
 }
 
@@ -68,28 +117,32 @@ void SettingManager::LoadKeyConfig(nlohmann::json json) {
 	}
 
 	const nlohmann::json& keyConfig = json[keyConfigKey];
-	/*for (auto bind : keyConfig)
-	{
-		std::optional<Action> action = ToAction(bind.get<std::string>());
-		if (!action.has_value())
-		{
-			continue;
-		}
-	}*/
+
 	for (auto it = keyConfig.begin(); it != keyConfig.end(); ++it)
 	{
+		if (it.key() == "sensitivity") // 感度設定
+		{
+			m_sensitivity.mouse = it.value()["mouse"].get<float>();
+			m_sensitivity.controller = it.value()["controller"].get<float>();
+			m_sensitivity.invertX = it.value()["invertX"].get<bool>();
+			m_sensitivity.invertY = it.value()["invertY"].get<bool>();
+			continue;
+		}
+        // キーコンフィグのキーがActionに変換できない場合はスキップする
 		std::optional<Action> action = ToAction(it.key());
 		if (!action.has_value())
 		{
 			continue;
 		}
 
+        // キーコンフィグの値がオブジェクト型でない場合はスキップする
 		const nlohmann::json& bind = it.value();
 		if (!bind.is_object())
 		{
 			continue;
 		}
 
+        // キーボードのキー設定
 		if (bind.contains("keyboard") && bind["keyboard"].is_string())
 		{
 			m_keyboardConfig.SetMainAction(action.value(), ConvertKeyToDIK(bind["keyboard"].get<std::string>()));

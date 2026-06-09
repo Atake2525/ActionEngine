@@ -371,6 +371,7 @@ void Player::HandleInput()
 {
     auto keyboard = SceneManager::GetInstance()->GetSettingManager().GetKeyConfig();
     auto gamepad = SceneManager::GetInstance()->GetSettingManager().GetControllerConfig();
+    auto sensitivity = SceneManager::GetInstance()->GetSettingManager().GetSensitivity();
     // 移動入力のリセット
     m_command.move = Vector2::Zero;
 
@@ -389,22 +390,29 @@ void Player::HandleInput()
             m_command.crouch = Input::GetInstance()->PushKeyInt(keyboard.GetMainAction(Setting::Action::Crouch)) != 0;
             m_command.run = Input::GetInstance()->PushKeyInt(keyboard.GetMainAction(Setting::Action::Run)) != 0;
 
-            m_command.eye = Input::GetInstance()->GetMouseVel3() * 0.001f;
+            m_command.eye = Input::GetInstance()->GetMouseVel3() * sensitivity.mouse * 0.01f;
             break;
         case Player::ControlMode::Gamepad:
             // ジョイスティック入力による移動
-            m_command.move = m_pInput->GetJoyStickVelocity();
+            m_command.move = m_pInput->GetLeftJoyStickVelocity();
             m_command.move.y *= -1.0f;
 
             // gamepadはDPadやスティックの入力の可能性もあるので対応する
+
 
             m_command.jump = Input::GetInstance()->TriggerButton(gamepad.GetControllerAction(Setting::Action::Jump)) != 0;
             m_command.crouch = Input::GetInstance()->PushButton(gamepad.GetControllerAction(Setting::Action::Crouch)) != 0;
             m_command.run = Input::GetInstance()->PushButton(gamepad.GetControllerAction(Setting::Action::Run)) != 0;
 
-            m_command.eye = Input::GetInstance()->GetRightJoyStickPos3(0.0f) * 0.00005f;
-
-            break;
+            m_command.eye = Input::GetInstance()->GetRightJoyStickVelocity() * sensitivity.controller * 0.1f;
+        }
+        if (sensitivity.invertX)
+        {
+            m_command.eye.x *= -1.0f;
+        }
+        if (sensitivity.invertY)
+        {
+            m_command.eye.y *= -1.0f;
         }
     }
 
