@@ -63,10 +63,7 @@ public:
 	// 描画後処理
 	void PostDrawRenderTexture();
 
-	void SetSceneRenderArea(float left, float top, float width, float height);
 	void ApplyFullViewport();
-	void ApplySceneViewport();
-	float GetSceneAspectRatio() const;
 
 	const DXGI_SWAP_CHAIN_DESC1 GetSwapChainDesc() const { return swapChainDesc; }
 
@@ -81,8 +78,6 @@ public:
 	// getter
 	Microsoft::WRL::ComPtr<ID3D12Device> GetDevice() const { return device.Get(); }
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> GetCommandList() const { return commandList.Get(); }
-	// SwapChainからResourceを引っ張ってくる
-	//Microsoft::WRL::ComPtr<ID3D12Resource> GetSwapChainResources(UINT i) const { return swapChainResources[i].Get(); };
 
 	/// <summary>
 	/// ディスクリプターヒープの作成関数
@@ -198,7 +193,6 @@ private:
 	// レンダーターゲットビュー
 	// スワップチェイン
 	// SwapChainからResourceを引っ張ってくる
-	//std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> swapChainResources;
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[2];
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvTextureHandle;
 
@@ -208,10 +202,8 @@ private:
 	HANDLE fenceEvent;
 	// ビューポート矩形
 	D3D12_VIEWPORT viewPort{};
-	D3D12_VIEWPORT sceneViewPort{};
 	// シザー矩形
 	D3D12_RECT scissorRect{};
-	D3D12_RECT sceneScissorRect{};
 	// dxcCompilerを初期化
 	Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils = nullptr;
 	Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler = nullptr;
