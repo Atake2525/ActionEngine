@@ -11,6 +11,7 @@
 #include <thread>
 #include "SettingManager.h"
 #include "SceneManager.h"
+#include "ModelManager.h"
 
 
 using namespace std;
@@ -45,16 +46,18 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
         }
     }
 
+    Model* model = ModelManager::GetInstance()->LoadModel("Resources/Model/obj/Player", "PlayerCollision.obj", false);
     // プレイヤーモデルの初期化
     m_pModel = make_unique<Object3d>();
     m_pModel->Initialize();
-    m_pModel->SetModel("Resources/Model/obj/Player", "PlayerCollision.obj", false);
+    m_pModel->SetModel(model);
     m_pModel->SetTransform(m_transform);
     //m_pModel->CreateCapsule();
 
+    model = ModelManager::GetInstance()->LoadModel("Resources/Model/gltf/char", "noHeadIdle.gltf", true);
     m_pDrawModel = make_unique<Object3d>();
     m_pDrawModel->Initialize();
-    m_pDrawModel->SetModel("Resources/Model/gltf/char", "noHeadIdle.gltf", true, true);
+    m_pDrawModel->SetModel(model);
     // 初期モデル以外の移動アニメーションも起動時にまとめて読み込んでおく。
     m_pDrawModel->AddAnimationsThreaded("Resources/Model/gltf/char", {
         "sneak.gltf",

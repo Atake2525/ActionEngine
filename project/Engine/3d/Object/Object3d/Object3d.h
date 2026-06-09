@@ -44,10 +44,7 @@ public:
     // ============================
     //  Model
     // ============================
-    void SetModel(const std::string& filePath);
-    void SetModel(const std::string& directoryPath, const std::string& filePath,
-        const bool& enableLighting = false, const bool isAnimation = false);
-
+    void SetModel(Model* model);
     // ============================
     //  Camera
     // ============================
@@ -59,8 +56,8 @@ public:
     void ToggleStartAnimation() { startAnimation = !startAnimation; }
     void SetStartAnimation(bool start) { startAnimation = start; }
     void ResetAnimationTime();
-    void AddAnimation(std::string directoryPath, std::string filename, std::string animationName);
-    void AddAnimationsThreaded(const std::string& directoryPath, const std::vector<std::string>& filenames);
+    void AddAnimation(std::string directoryPath, std::string fileName, std::string animationName);
+    void AddAnimationsThreaded(const std::string& directoryPath, const std::vector<std::string>& fileNames);
     void PlayDefaultAnimation();
     void ChangePlayAnimation(const std::string key = "DefaultAnimation");
     const std::string& GetCurrentAnimationKey() const { return animationKey; }
@@ -128,9 +125,8 @@ public:
     void SetEnvironmentCoefficient(const float amount);
     void SetShininess(const float& shininess);
     const float& GetShininess() const;
-    void DebugMode(const bool debugMode);
-    void SetEnableMetallic(const bool flag) { model_->SetEnableMetallic(flag); }
-    const bool GetEnableMetallic() { return model_->GetEnableMetallic(); }
+    void SetEnableMetallic(const bool flag) { materialData->enableMetallic = flag; }
+    const bool GetEnableMetallic() { return materialData->enableMetallic; }
     void SetPBRMaterial(const float metallic, const float roughness);
 
     // ============================
@@ -145,8 +141,7 @@ public:
     const AABB& GetAABB() const { return aabb; }
     const Matrix4x4& GetWorldMatrix() const { return worldMatrix; }
     const Capsule& GetCapsule() const { return capsule; }
-    const OBB& GetOBB() const { return obb; }
-    const std::vector<OBB>& GetMultiMeshOBB() const { return multiMeshOBB; }
+    const OBB& GetOBB() const { return obb; }    const std::vector<OBB>& GetMultiMeshOBB() const { return multiMeshOBB; }
 
     const bool CheckCollisionAABB(Object3d* object) const;
     const bool CheckCollisionAABBs(Object3d* object) const;
@@ -160,7 +155,7 @@ public:
     void UpdateCapsule();
     void UpdateOBB();;
 
-    const std::vector<AABB> GetAABBMultiMeshed();
+    const std::vector<AABB>& GetAABBMultiMeshed();
     void CreateCapsule();
 
     // ============================
@@ -202,6 +197,9 @@ private:
     Microsoft::WRL::ComPtr<ID3D12Resource> cameraResource;
     CameraForGPU* cameraData = nullptr;
 
+    Microsoft::WRL::ComPtr<ID3D12Resource> materialResource;
+    Material* materialData = nullptr;
+
     // ============================
     //  Rendering Data
     // ============================
@@ -220,7 +218,7 @@ private:
     // ============================
     //  Animation Data
     // ============================
-    std::map<std::string, Animation> animation;
+    std::unordered_map<std::string, Animation> animation;
     std::string beforAnimationKey = "DefaultAnimation";
     std::string animationKey = "DefaultAnimation";
 
@@ -254,6 +252,10 @@ private:
     std::vector<OBB> multiMeshOBB;
 
 private:
+
+    // MaterialResourceを作成する
+    void InitializeMaterial();
+
     // ============================
     //  Internal Methods
     // ============================

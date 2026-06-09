@@ -53,7 +53,7 @@ struct LevelData
 {
 	std::string name;
 
-	std::map<std::string, JsonData> datas;
+	std::unordered_map<std::string, JsonData> datas;
 };
 
 struct HotReload
@@ -124,7 +124,7 @@ public:
 
 private:
 
-	std::map<std::string, LevelData> levelDatas;
+	std::unordered_map<std::string, LevelData> levelDatas;
 
 };
 

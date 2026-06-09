@@ -90,9 +90,6 @@
     <ClCompile Include="Engine\Core\WinApp\WinApp.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\3d\Object\WireFrame\WireFrameObjectBase.cpp">
-      <Filter>Engine</Filter>
-    </ClCompile>
     <ClCompile Include="Application\Scene\PlayScene\DemoScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
@@ -114,9 +111,6 @@
     <ClCompile Include="Application\Scene\PlayScene\TitleScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\3d\Object\Skinning\SkinningObject3dBase.cpp">
-      <Filter>Engine</Filter>
-    </ClCompile>
     <ClCompile Include="Application\StageManager\StageCount.cpp" />
     <ClCompile Include="Application\StageManager\BaseStage.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp" />
@@ -130,7 +124,6 @@
     <ClCompile Include="Application\Player.cpp" />
     <ClCompile Include="Engine\3d\DebugLine\DebugLineBase.cpp" />
     <ClCompile Include="Engine\3d\DebugLine\DebugLine.cpp" />
-    <ClCompile Include="Engine\3d\Model\Model\DebugModel.cpp" />
     <ClCompile Include="Engine\3d\Object\Object3dBase\DebugObject3d.cpp" />
     <ClCompile Include="Engine\Collision\PhysicsCorrection.cpp" />
     <ClCompile Include="Application\Pause.cpp" />
@@ -279,9 +272,6 @@
     <ClInclude Include="Engine\Core\WinApp\WinApp.h">
       <Filter>Engine</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\3d\Object\WireFrame\WireFrameObjectBase.h">
-      <Filter>Engine</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Core\Timer\GameTime.h">
       <Filter>Engine</Filter>
     </ClInclude>
@@ -299,9 +289,6 @@
     </ClInclude>
     <ClInclude Include="Application\Scene\PlayScene\TitleScene.h">
       <Filter>Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\3d\Object\Skinning\SkinningObject3dBase.h">
-      <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Math\Culling.h" />
     <ClInclude Include="Engine\JsonLoader\JsonLoader.h" />
@@ -323,7 +310,6 @@
     <ClInclude Include="Application\Player.h" />
     <ClInclude Include="Engine\3d\DebugLine\DebugLineBase.h" />
     <ClInclude Include="Engine\3d\DebugLine\DebugLine.h" />
-    <ClInclude Include="Engine\3d\Model\Model\DebugModel.h" />
     <ClInclude Include="Engine\3d\Object\Object3dBase\DebugObject3d.h" />
     <ClInclude Include="Engine\Collision\PhysicsCorrection.h" />
     <ClInclude Include="Application\Pause.h" />

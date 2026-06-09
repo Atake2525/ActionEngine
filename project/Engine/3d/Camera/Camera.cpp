@@ -2,7 +2,6 @@
 #include "kMath.h"
 #include "WinApp.h"
 #include "ImGuiManager.h"
-#include "DirectXBase.h"
 
 Camera::Camera()
 	: transform({ {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} })
@@ -74,7 +73,7 @@ void Camera::Update() {
 	direction = TransformNormal({ 0.0f, 0.0f, 1.0f }, worldMatrix);
 
 	viewMatrix = Inverse(worldMatrix);
-	aspect = DirectXBase::GetInstance()->GetSceneAspectRatio();
+	aspect = float(WinApp::GetInstance()->GetkClientWidth()) / float(WinApp::GetInstance()->GetkClientHeight());
 	projectionMatrix = MakePrespectiveFovMatrix(fovY, aspect, nearClipDistance, farClipDistance);
 
 	viewProjectionMatrix = Multiply(viewMatrix, projectionMatrix);

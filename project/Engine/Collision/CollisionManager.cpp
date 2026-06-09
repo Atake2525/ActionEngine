@@ -21,6 +21,8 @@ void CollisionManager::Initialize() {
 	m_penetration = { 0.0f, 0.0f, 0.0f };
 	collisionTarget.clear();
 	collisionObject.clear();
+	wallDashCollisionObject.clear();
+	m_collisionObjectAABB.clear();
 }
 
 void CollisionManager::Update(const std::string& targetName, bool wallDashCollision) {
@@ -124,7 +126,10 @@ void CollisionManager::Update(const std::string& targetName, bool wallDashCollis
 }
 
 void CollisionManager::Finalize() {
+	collisionTarget.clear();
 	collisionObject.clear();
+	wallDashCollisionObject.clear();
+	m_collisionObjectAABB.clear();
 	delete instance;
 	instance = nullptr;
 }
