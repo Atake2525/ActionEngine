@@ -1,6 +1,7 @@
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <array>
 #pragma once
 
 namespace Setting {
@@ -37,7 +38,7 @@ namespace Setting {
 		RightStickLeft,
 		RightStickRight,
 	};
-	inline const std::unordered_map<std::string, Action> ActionNameToEnum = {
+	inline const std::array<std::pair<std::string, Action>, 8> ActionNameToEnum = { {
 				{ "MoveForward", Action::MoveForward },
 				{ "MoveBack",    Action::MoveBack },
 				{ "MoveLeft",    Action::MoveLeft },
@@ -46,10 +47,12 @@ namespace Setting {
 				{ "Crouch",      Action::Crouch },
 				{ "Run",         Action::Run },
 				{ "Interact",    Action::Interact },
-	};
+	} };
 
 	inline std::optional<Action> ToAction(const std::string name) {
-		const auto it = ActionNameToEnum.find(name);
+		const auto it = std::find_if(ActionNameToEnum.begin(), ActionNameToEnum.end(), [&name](const auto& pair) {
+			return pair.first == name;
+		});
 		if (it == ActionNameToEnum.end())
 		{
 			return std::nullopt;
