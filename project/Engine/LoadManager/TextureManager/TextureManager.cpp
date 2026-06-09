@@ -111,119 +111,47 @@ uint32_t TextureManager::LoadTexture(const std::string& filePath) {
 
 void TextureManager::SetNormalMapTexture(const std::string& targetTextureFilePath, const std::string& filePath)
 {
-	std::string path;
-	size_t pathLen = targetTextureFilePath.size();
-	size_t pathNum = 0;
-	// Pathを*.pngのみにする
-	for (size_t i = targetTextureFilePath.size(); i > 1; --i)
-	{
-		char c = targetTextureFilePath[i - 1];
-		if (c == '/')
-		{
-			pathNum = i;
-			pathLen = targetTextureFilePath.size() - i;
-			break;
-		}
-	}
-	for (size_t i = 0; i < pathLen; i++)
-	{
-		path += targetTextureFilePath[pathNum + i];
-	}
 	// 読み込み済テクスチャを検索
-	if (textureDatas.contains(path))
+	if (textureDatas.contains(filePath))
 	{
 		// 早期return
 		LoadTexture(filePath);
-		textureDatas[path].normalMapSrvIndex = textureDatas[filePath].srvIndex;
+		textureDatas[filePath].normalMapSrvIndex = textureDatas[filePath].srvIndex;
 		return;
 	}
 }
 
 void TextureManager::SetMetallicMapTexture(const std::string& targetTextureFilePath, const std::string& filePath)
 {
-	std::string path;
-	size_t pathLen = targetTextureFilePath.size();
-	size_t pathNum = 0;
-	// Pathを*.pngのみにする
-	for (size_t i = targetTextureFilePath.size(); i > 1; --i)
-	{
-		char c = targetTextureFilePath[i - 1];
-		if (c == '/')
-		{
-			pathNum = i;
-			pathLen = targetTextureFilePath.size() - i;
-			break;
-		}
-	}
-	for (size_t i = 0; i < pathLen; i++)
-	{
-		path += targetTextureFilePath[pathNum + i];
-	}
 	// 読み込み済テクスチャを検索
-	if (textureDatas.contains(path))
+	if (textureDatas.contains(filePath))
 	{
 		// 早期return
 		LoadTexture(filePath);
-		textureDatas[path].metallicMapSrvIndex = textureDatas[filePath].srvIndex;
+		textureDatas[filePath].metallicMapSrvIndex = textureDatas[filePath].srvIndex;
 		return;
 	}
 }
 
 void TextureManager::SetRoughnessMapTexture(const std::string& targetTextureFilePath, const std::string& filePath)
 {
-	std::string path;
-	size_t pathLen = targetTextureFilePath.size();
-	size_t pathNum = 0;
-	// Pathを*.pngのみにする
-	for (size_t i = targetTextureFilePath.size(); i > 1; --i)
-	{
-		char c = targetTextureFilePath[i - 1];
-		if (c == '/')
-		{
-			pathNum = i;
-			pathLen = targetTextureFilePath.size() - i;
-			break;
-		}
-	}
-	for (size_t i = 0; i < pathLen; i++)
-	{
-		path += targetTextureFilePath[pathNum + i];
-	}
 	// 読み込み済テクスチャを検索
-	if (textureDatas.contains(path))
+	if (textureDatas.contains(filePath))
 	{
 		// 早期return
 		LoadTexture(filePath);
-		textureDatas[path].roughnessMapSrvIndex = textureDatas[filePath].srvIndex;
+		textureDatas[filePath].roughnessMapSrvIndex = textureDatas[filePath].srvIndex;
 		return;
 	}
 }
 
 uint32_t TextureManager::GetnormalMapSrvIndex(const std::string& filePath)
 {
-	std::string path;
-	size_t pathLen = filePath.size();
-	size_t pathNum = 0;
-	// Pathを*.pngのみにする
-	for (size_t i = filePath.size(); i > 1; --i)
-	{
-		char c = filePath[i - 1];
-		if (c == '/')
-		{
-			pathNum = i;
-			pathLen = filePath.size() - i;
-			break;
-		}
-	}
-	for (size_t i = 0; i < pathLen; i++)
-	{
-		path += filePath[pathNum + i];
-	}
 	// 読み込み済テクスチャを検索
-	if (textureDatas.contains(path))
+	if (textureDatas.contains(filePath))
 	{
 		// 読み込み済なら要素番号を返す
-		uint32_t textureIndex = textureDatas[path].normalMapSrvIndex;
+		uint32_t textureIndex = textureDatas[filePath].normalMapSrvIndex;
 		return textureIndex;
 	}
 
@@ -234,29 +162,11 @@ uint32_t TextureManager::GetnormalMapSrvIndex(const std::string& filePath)
 
 uint32_t TextureManager::GetmetallicMapSrvIndex(const std::string& filePath)
 {
-	std::string path;
-	size_t pathLen = filePath.size();
-	size_t pathNum = 0;
-	// Pathを*.pngのみにする
-	for (size_t i = filePath.size(); i > 1; --i)
-	{
-		char c = filePath[i - 1];
-		if (c == '/')
-		{
-			pathNum = i;
-			pathLen = filePath.size() - i;
-			break;
-		}
-	}
-	for (size_t i = 0; i < pathLen; i++)
-	{
-		path += filePath[pathNum + i];
-	}
 	// 読み込み済テクスチャを検索
-	if (textureDatas.contains(path))
+	if (textureDatas.contains(filePath))
 	{
 		// 読み込み済なら要素番号を返す
-		uint32_t textureIndex = textureDatas[path].metallicMapSrvIndex;
+		uint32_t textureIndex = textureDatas[filePath].metallicMapSrvIndex;
 		return textureIndex;
 	}
 
@@ -267,29 +177,11 @@ uint32_t TextureManager::GetmetallicMapSrvIndex(const std::string& filePath)
 
 uint32_t TextureManager::GetroughnessMapSrvIndex(const std::string& filePath)
 {
-	std::string path;
-	size_t pathLen = filePath.size();
-	size_t pathNum = 0;
-	// Pathを*.pngのみにする
-	for (size_t i = filePath.size(); i > 1; --i)
-	{
-		char c = filePath[i - 1];
-		if (c == '/')
-		{
-			pathNum = i;
-			pathLen = filePath.size() - i;
-			break;
-		}
-	}
-	for (size_t i = 0; i < pathLen; i++)
-	{
-		path += filePath[pathNum + i];
-	}
 	// 読み込み済テクスチャを検索
-	if (textureDatas.contains(path))
+	if (textureDatas.contains(filePath))
 	{
 		// 読み込み済なら要素番号を返す
-		uint32_t textureIndex = textureDatas[path].roughnessMapSrvIndex;
+		uint32_t textureIndex = textureDatas[filePath].roughnessMapSrvIndex;
 		return textureIndex;
 	}
 
@@ -299,82 +191,28 @@ uint32_t TextureManager::GetroughnessMapSrvIndex(const std::string& filePath)
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetSrvHandleGPU(const std::string& filePath) {
-	// 範囲外指定チェック
-	std::string path;
-	size_t pathLen = filePath.size();
-	size_t pathNum = 0;
-	// Pathを*.pngのみにする
-	for (size_t i = filePath.size(); i > 1; --i)
-	{
-		char c = filePath[i - 1];
-		if (c == '/')
-		{
-			pathNum = i;
-			pathLen = filePath.size() - i;
-			break;
-		}
-	}
-	for (size_t i = 0; i < pathLen; i++)
-	{
-		path += filePath[pathNum + i];
-	}
-	assert(!textureDatas.contains(path));
 
-	TextureData& textureData = textureDatas[path];
+	assert(!textureDatas.contains(filePath));
+
+	TextureData& textureData = textureDatas[filePath];
 	return textureData.srvHandleGPU;
 }
 
 uint32_t TextureManager::GetSrvIndex(const std::string& filePath)
 {
-	std::string path;
-	size_t pathLen = filePath.size();
-	size_t pathNum = 0;
-	// Pathを*.pngのみにする
-	for (size_t i = filePath.size(); i > 1; --i)
-	{
-		char c = filePath[i - 1];
-		if (c == '/')
-		{
-			pathNum = i;
-			pathLen = filePath.size() - i;
-			break;
-		}
-	}
-	for (size_t i = 0; i < pathLen; i++)
-	{
-		path += filePath[pathNum + i];
-	}
 	// 範囲外指定チェック
-	if (!textureDatas.contains(path))
+	if (!textureDatas.contains(filePath))
 	{
 		Log("指定のtextureは見つかりませんでした");
 		TextureData& textureData = textureDatas["white1x1"];
 		return textureData.srvIndex;
 	}
 
-	TextureData& textureData = textureDatas[path];
+	TextureData& textureData = textureDatas[filePath];
 	return textureData.srvIndex;
 }
 
 const DirectX::TexMetadata& TextureManager::GetMetaData(const std::string& filePath) {
-	//std::string path;
-	//size_t pathLen = filePath.size();
-	//size_t pathNum = 0;
-	//// Pathを*.pngのみにする
-	//for (size_t i = filePath.size(); i > 1; --i)
-	//{
-	//	char c = filePath[i - 1];
-	//	if (c == '/')
-	//	{
-	//		pathNum = i;
-	//		pathLen = filePath.size() - i;
-	//		break;
-	//	}
-	//}
-	//for (size_t i = 0; i < pathLen; i++)
-	//{
-	//	path += filePath[pathNum + i];
-	//}
 	// 範囲外指定違反チェック
 	// 範囲外指定チェック
 	assert(textureDatas.contains(filePath));

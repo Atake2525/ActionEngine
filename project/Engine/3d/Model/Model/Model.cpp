@@ -519,7 +519,6 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
 			// ノーマルマップ、メタリックマップ、ラフネスマップの読み込み
 			if (material->GetTexture(aiTextureType_NORMALS, 0, &textureFilePath) == AI_SUCCESS ||
 				material->GetTexture(aiTextureType_HEIGHT, 0, &textureFilePath) == AI_SUCCESS) {
-				TextureManager::GetInstance()->LoadTexture(directoryPath + "/" + textureFilePath.C_Str());
 				matData.normalMapFilePath = directoryPath + "/" + textureFilePath.C_Str();
 				matData.normalMapIndex = TextureManager::GetInstance()->LoadTexture(matData.normalMapFilePath);
 			}
