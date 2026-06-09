@@ -5,8 +5,6 @@
 #include "ModelManager.h"
 #include "TextureManager.h"
 #include "Input.h"
-#include "WireFrameObjectBase.h"
-#include "SkinningObject3dBase.h"
 #include "Sprite.h"
 #include "AABB.h"
 #include "ParticleManager.h"
