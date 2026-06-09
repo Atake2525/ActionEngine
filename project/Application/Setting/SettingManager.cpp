@@ -8,10 +8,12 @@
 using namespace Setting;
 using namespace Logger;
 
-bool SettingManager::Load(const std::string filename) {
+bool SettingManager::Load(const std::string filename, SettingType type) {
 	
 	// jsonを読んでデータを取得する
 	nlohmann::json deserialized = JsonLoader::GetInstance()->LoadJson("Settings/" + filename);
+
+    m_settingFileNames[static_cast<int>(type)] = filename;
 
 	// 正しいレベルデータファイルかチェック
 	if (!deserialized.is_object())
@@ -31,11 +33,15 @@ bool SettingManager::Load(const std::string filename) {
 	}
 
 	// typeを参照してなんの設定項目なのかを判断する
-	std::string type = deserialized["type"].get<std::string>();
+	std::string typeKey = deserialized["type"].get<std::string>();
 
-	if (type == "KEYCONFIG")
+	if (typeKey == "KEYCONFIG")
 	{
 		m_keyBind = KeyConfig::Load(deserialized);
+	}
+	else if (typeKey == "AUDIOCONFIG")
+	{
+        m_audioSetting = AudioConfig::Load(deserialized);
 	}
 	else
 	{
@@ -47,8 +53,18 @@ bool SettingManager::Load(const std::string filename) {
 	return true;
 }
 
-bool SettingManager::Save(const std::string filename) {
+bool SettingManager::Save(SettingType type, std::variant<Setting::KeyBind, Setting::AudioSetting> setting) {
     bool result = false;
-    result = KeyConfig::Save(filename, m_keyBind);
+	switch (type)
+	{
+	case Setting::SettingType::KeyConfig:
+		result = KeyConfig::Save(m_settingFileNames[static_cast<int>(type)], std::get<Setting::KeyBind>(setting));
+		break;
+	case Setting::SettingType::AudioConfig:
+		result = AudioConfig::Save(m_settingFileNames[static_cast<int>(type)], std::get<Setting::AudioSetting>(setting));
+		break;
+	}
+
+
 	return result;
 }

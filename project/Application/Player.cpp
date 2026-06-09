@@ -369,9 +369,7 @@ const bool Player::CanClimbing()
 
 void Player::HandleInput()
 {
-    auto keyboard = SceneManager::GetInstance()->GetSettingManager().GetKeyConfig();
-    auto gamepad = SceneManager::GetInstance()->GetSettingManager().GetControllerConfig();
-    auto sensitivity = SceneManager::GetInstance()->GetSettingManager().GetSensitivity();
+    auto keyBind = SceneManager::GetInstance()->GetSettingManager().GetKeyConfig();
     // 移動入力のリセット
     m_command.move = Vector2::Zero;
 
@@ -381,16 +379,16 @@ void Player::HandleInput()
         {
         case Player::ControlMode::KeyboardMouse:
             // キー入力による移動
-            m_command.move.y += Input::GetInstance()->PushKeyInt(keyboard.GetMainAction(Setting::Action::MoveForward));
-            m_command.move.y += -Input::GetInstance()->PushKeyInt(keyboard.GetMainAction(Setting::Action::MoveBack));
-            m_command.move.x += -Input::GetInstance()->PushKeyInt(keyboard.GetMainAction(Setting::Action::MoveLeft));
-            m_command.move.x += Input::GetInstance()->PushKeyInt(keyboard.GetMainAction(Setting::Action::MoveRight));
+            m_command.move.y += Input::GetInstance()->PushKeyInt(keyBind.keyboardConfig.GetMainAction(Setting::Action::MoveForward));
+            m_command.move.y += -Input::GetInstance()->PushKeyInt(keyBind.keyboardConfig.GetMainAction(Setting::Action::MoveBack));
+            m_command.move.x += -Input::GetInstance()->PushKeyInt(keyBind.keyboardConfig.GetMainAction(Setting::Action::MoveLeft));
+            m_command.move.x += Input::GetInstance()->PushKeyInt(keyBind.keyboardConfig.GetMainAction(Setting::Action::MoveRight));
 
-            m_command.jump = Input::GetInstance()->TriggerKeyInt(keyboard.GetMainAction(Setting::Action::Jump)) != 0;
-            m_command.crouch = Input::GetInstance()->PushKeyInt(keyboard.GetMainAction(Setting::Action::Crouch)) != 0;
-            m_command.run = Input::GetInstance()->PushKeyInt(keyboard.GetMainAction(Setting::Action::Run)) != 0;
+            m_command.jump = Input::GetInstance()->TriggerKeyInt(keyBind.keyboardConfig.GetMainAction(Setting::Action::Jump)) != 0;
+            m_command.crouch = Input::GetInstance()->PushKeyInt(keyBind.keyboardConfig.GetMainAction(Setting::Action::Crouch)) != 0;
+            m_command.run = Input::GetInstance()->PushKeyInt(keyBind.keyboardConfig.GetMainAction(Setting::Action::Run)) != 0;
 
-            m_command.eye = Input::GetInstance()->GetMouseVel3() * sensitivity.mouse * 0.01f;
+            m_command.eye = Input::GetInstance()->GetMouseVel3() * keyBind.sensitivity.mouse * 0.01f;
             break;
         case Player::ControlMode::Gamepad:
             // ジョイスティック入力による移動
@@ -400,17 +398,17 @@ void Player::HandleInput()
             // gamepadはDPadやスティックの入力の可能性もあるので対応する
 
 
-            m_command.jump = Input::GetInstance()->TriggerButton(gamepad.GetControllerAction(Setting::Action::Jump)) != 0;
-            m_command.crouch = Input::GetInstance()->PushButton(gamepad.GetControllerAction(Setting::Action::Crouch)) != 0;
-            m_command.run = Input::GetInstance()->PushButton(gamepad.GetControllerAction(Setting::Action::Run)) != 0;
+            m_command.jump = Input::GetInstance()->TriggerButton(keyBind.controllerConfig.GetControllerAction(Setting::Action::Jump)) != 0;
+            m_command.crouch = Input::GetInstance()->PushButton(keyBind.controllerConfig.GetControllerAction(Setting::Action::Crouch)) != 0;
+            m_command.run = Input::GetInstance()->PushButton(keyBind.controllerConfig.GetControllerAction(Setting::Action::Run)) != 0;
 
-            m_command.eye = Input::GetInstance()->GetRightJoyStickVelocity() * sensitivity.controller * 0.1f;
+            m_command.eye = Input::GetInstance()->GetRightJoyStickVelocity() * keyBind.sensitivity.controller * 0.1f;
         }
-        if (sensitivity.invertX)
+        if (keyBind.sensitivity.invertX)
         {
             m_command.eye.x *= -1.0f;
         }
-        if (sensitivity.invertY)
+        if (keyBind.sensitivity.invertY)
         {
             m_command.eye.y *= -1.0f;
         }
