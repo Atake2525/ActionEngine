@@ -47,10 +47,6 @@ void DemoScene::Draw() {
 
 	Object3dBase::GetInstance()->ShaderDraw();
 
-	SkinningObject3dBase::GetInstance()->ShaderDraw();
-
-	WireFrameObjectBase::GetInstance()->ShaderDraw();
-
 	ParticleManager::GetInstance()->Draw();
 
 }

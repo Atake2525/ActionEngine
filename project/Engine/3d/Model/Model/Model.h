@@ -114,8 +114,6 @@ public:
 	// Getter(ModelData vertices)
 	const std::vector<VertexData>& GetVertices() const { return modelData.vertices; }
 
-	// DebugModeを有効化
-	void DebugMode(bool debugMode) { useWireFrameTexture = debugMode; }
 	// SkinClusterのセット(通常使うものではないため気にしないで良い)
 	void SetSkinCluster(const std::vector<SkinCluster> skinCluster);
 	void CreateSkinningResources(const Skeleton& skeleton);
@@ -202,8 +200,6 @@ private:
 	AABB meshAABB;
 	std::unordered_map<std::wstring, AABB> multiMeshAABB;
 
-	bool useWireFrameTexture;
-	uint32_t whiteTextureIndex;
 public:
 
 	Model() = default;
