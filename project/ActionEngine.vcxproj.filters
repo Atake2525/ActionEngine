@@ -90,9 +90,6 @@
     <ClCompile Include="Engine\Core\WinApp\WinApp.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\3d\Object\WireFrame\WireFrameObjectBase.cpp">
-      <Filter>Engine</Filter>
-    </ClCompile>
     <ClCompile Include="Application\Scene\PlayScene\DemoScene.cpp">
       <Filter>Scene</Filter>
     </ClCompile>
@@ -113,9 +110,6 @@
     </ClCompile>
     <ClCompile Include="Application\Scene\PlayScene\TitleScene.cpp">
       <Filter>Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\3d\Object\Skinning\SkinningObject3dBase.cpp">
-      <Filter>Engine</Filter>
     </ClCompile>
     <ClCompile Include="Application\StageManager\StageCount.cpp" />
     <ClCompile Include="Application\StageManager\BaseStage.cpp" />
@@ -278,9 +272,6 @@
     <ClInclude Include="Engine\Core\WinApp\WinApp.h">
       <Filter>Engine</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\3d\Object\WireFrame\WireFrameObjectBase.h">
-      <Filter>Engine</Filter>
-    </ClInclude>
     <ClInclude Include="Engine\Core\Timer\GameTime.h">
       <Filter>Engine</Filter>
     </ClInclude>
@@ -298,9 +289,6 @@
     </ClInclude>
     <ClInclude Include="Application\Scene\PlayScene\TitleScene.h">
       <Filter>Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\3d\Object\Skinning\SkinningObject3dBase.h">
-      <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Math\Culling.h" />
     <ClInclude Include="Engine\JsonLoader\JsonLoader.h" />

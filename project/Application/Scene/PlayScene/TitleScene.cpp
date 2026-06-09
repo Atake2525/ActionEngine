@@ -201,8 +201,6 @@ void TitleScene::Draw() {
         m_bootScreen->Draw();
         m_charModel->Draw();
 
-        SkinningObject3dBase::GetInstance()->ShaderDraw();
-
         Render2DBase::GetInstance()->ShaderDraw();
 
         Render2DBase::GetInstance()->ShaderDraw();

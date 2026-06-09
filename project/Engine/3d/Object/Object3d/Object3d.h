@@ -125,7 +125,6 @@ public:
     void SetEnvironmentCoefficient(const float amount);
     void SetShininess(const float& shininess);
     const float& GetShininess() const;
-    void DebugMode(const bool debugMode);
     void SetEnableMetallic(const bool flag) { materialData->enableMetallic = flag; }
     const bool GetEnableMetallic() { return materialData->enableMetallic; }
     void SetPBRMaterial(const float metallic, const float roughness);
@@ -142,8 +141,7 @@ public:
     const AABB& GetAABB() const { return aabb; }
     const Matrix4x4& GetWorldMatrix() const { return worldMatrix; }
     const Capsule& GetCapsule() const { return capsule; }
-    const OBB& GetOBB() const { return obb; }
-    const std::vector<OBB>& GetMultiMeshOBB() const { return multiMeshOBB; }
+    const OBB& GetOBB() const { return obb; }    const std::vector<OBB>& GetMultiMeshOBB() const { return multiMeshOBB; }
 
     const bool CheckCollisionAABB(Object3d* object) const;
     const bool CheckCollisionAABBs(Object3d* object) const;

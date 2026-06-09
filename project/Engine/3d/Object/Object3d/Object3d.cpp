@@ -442,13 +442,6 @@ const bool Object3d::ChangeAnimation(Animation& beforAnimation, Animation& after
     }
 }
 
-void Object3d::DebugMode(const bool debugMode) {
-    if (model_)
-    {
-        model_->DebugMode(debugMode);
-    }
-}
-
 const Vector3 Object3d::GetJointPosition(const std::string jointName)
 {
     size_t nameSize = jointName.size();
