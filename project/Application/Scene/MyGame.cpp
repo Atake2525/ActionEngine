@@ -59,6 +59,7 @@ void MyGame::Initialize() {
 
     SceneManager::GetInstance();
     SceneManager::GetInstance()->GetSettingManager().Load("KeyConfig.json");
+    SceneManager::GetInstance()->GetSettingManager().Save("KeyConfig.json");
 
     SceneManager::GetInstance()->SetNextScene("TITLE");
 

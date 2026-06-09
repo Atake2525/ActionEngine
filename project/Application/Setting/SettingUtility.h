@@ -4,6 +4,15 @@
 #pragma once
 
 namespace Setting {
+
+	struct Sensitivity
+	{
+		float mouse = 1.0f;
+        float controller = 1.0f;
+        bool invertX = false;
+        bool invertY = false;
+	};
+
 	enum class Action
 	{
 		MoveForward,
@@ -48,4 +57,15 @@ namespace Setting {
 
 		return it->second;
 	}
+
+    inline const std::string ToString(const Action action) {
+        for (const auto& pair : ActionNameToEnum)
+        {
+            if (pair.second == action)
+            {
+                return pair.first;
+            }
+        }
+        return "null";
+    }
 }
