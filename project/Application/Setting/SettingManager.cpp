@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include "Logger.h"
+#include <filesystem>
 
 
 using namespace Setting;
@@ -14,6 +15,20 @@ bool SettingManager::Load(const std::string filename, SettingType type) {
 	nlohmann::json deserialized = JsonLoader::GetInstance()->LoadJson("Settings/" + filename);
 
     m_settingFileNames[static_cast<int>(type)] = filename;
+    if (deserialized == nlohmann::json{}) // ファイルの展開に失敗、またはファイルが存在しないのでdefaultのkeyConfigを使用する
+    {
+        Log("ファイルの展開に失敗、またはファイルが存在しないため、defaultの設定を使用します\n");
+		for (const auto& action : Setting::ActionNameToEnum)
+		{
+			m_keyBind.keyboardConfig.SetAction(action.second, m_keyBind.keyboardConfig.GetDefaultAction(action.second));
+            m_keyBind.controllerConfig.SetAction(action.second, m_keyBind.controllerConfig.GetDefaultControllerAction(action.second));
+            m_keyBind.controllerConfig.SetAction(action.second, m_keyBind.controllerConfig.GetDefaultDPadAction(action.second));
+            m_keyBind.controllerConfig.SetAction(action.second, m_keyBind.controllerConfig.GetDefaultStickDirectionAction(action.second));
+			m_audioSetting = Setting::AudioSetting();
+		}
+        return false;
+    }
+
 
 	// 正しいレベルデータファイルかチェック
 	if (!deserialized.is_object())
@@ -55,6 +70,16 @@ bool SettingManager::Load(const std::string filename, SettingType type) {
 
 bool SettingManager::Save(SettingType type, std::variant<Setting::KeyBind, Setting::AudioSetting> setting) {
     bool result = false;
+
+    // Settingファイルが存在しない場合は新規作成する
+	std::filesystem::path settingsDir = "Settings";
+
+	// Settingsフォルダが無ければ作成
+	if (!std::filesystem::exists(settingsDir))
+	{
+		std::filesystem::create_directories(settingsDir);
+	}
+
 	switch (type)
 	{
 	case Setting::SettingType::KeyConfig:

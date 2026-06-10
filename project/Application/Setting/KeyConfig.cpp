@@ -2,6 +2,7 @@
 #include "InputConverter.h"
 #include "JsonLoader.h"
 #include "Logger.h"
+#include <filesystem>
 
 using namespace Logger;
 using namespace InputConverter;
@@ -53,7 +54,7 @@ namespace Setting {
                 // キーボードのキー設定
                 if (bind.contains("keyboard") && bind["keyboard"].is_string())
                 {
-                    keyBind.keyboardConfig.SetMainAction(action.value(), ConvertKeyToDIK(bind["keyboard"].get<std::string>()));
+                    keyBind.keyboardConfig.SetAction(action.value(), ConvertKeyToDIK(bind["keyboard"].get<std::string>()));
                 }
 
                 if (bind.contains("gamepad") && bind["gamepad"].is_string())
@@ -82,19 +83,24 @@ namespace Setting {
             return keyBind;
         }
         bool Save(std::string fileName, KeyBind keyBind) {
-            const nlohmann::json loaded = JsonLoader::GetInstance()->LoadJson("Settings/" + fileName);
 
             nlohmann::ordered_json json = nlohmann::ordered_json::object();
             json["type"] = "KEYCONFIG";
             json["main"] = nlohmann::ordered_json::object();
 
-            if (loaded.is_object() && loaded.contains("default"))
+            KeyBind bindKey = keyBind;
+            bool makedFile = false;
+            if (!std::filesystem::exists("Settings/" + fileName)) //ファイルが存在しないのでdefaultの値を保存する
             {
-                json["default"] = loaded["default"];
-            }
-            else
-            {
-                json["default"] = nlohmann::ordered_json::object();
+                makedFile = true;
+                for (const auto& action : Setting::ActionNameToEnum)
+                {
+                    bindKey.keyboardConfig.SetAction(action.second, bindKey.keyboardConfig.GetDefaultAction(action.second));
+                    bindKey.controllerConfig.SetAction(action.second, bindKey.controllerConfig.GetDefaultControllerAction(action.second));
+                    bindKey.controllerConfig.SetAction(action.second, bindKey.controllerConfig.GetDefaultDPadAction(action.second));
+                    bindKey.controllerConfig.SetAction(action.second, bindKey.controllerConfig.GetDefaultStickDirectionAction(action.second));
+                    bindKey.sensitivity = bindKey.sensitivity;
+                }
             }
 
             // 各 Action を main に書き込む
@@ -105,15 +111,15 @@ namespace Setting {
             {
                 nlohmann::ordered_json bind;
                 bind["keyboard"] = ConvertDIKToKey(
-                    static_cast<BYTE>(keyBind.keyboardConfig.GetMainAction(action.second))
+                    static_cast<BYTE>(bindKey.keyboardConfig.GetAction(action.second))
                 );
                 bind["mouse"] = nullptr;
 
                 std::string gamepad = "null";
 
-                StickDirection stick = keyBind.controllerConfig.GetStickAction(action.second);
-                DPad dpad = keyBind.controllerConfig.GetDPadAction(action.second);
-                Controller controller = keyBind.controllerConfig.GetControllerAction(action.second);
+                StickDirection stick = bindKey.controllerConfig.GetStickAction(action.second);
+                DPad dpad = bindKey.controllerConfig.GetDPadAction(action.second);
+                Controller controller = bindKey.controllerConfig.GetControllerAction(action.second);
 
                 if (stick != StickDirection::None) {
                     gamepad = ConvertStickDirectionToKey(stick);
@@ -132,7 +138,7 @@ namespace Setting {
             }
 
             std::ofstream file("Settings/" + fileName);
-            if (!file.is_open())
+            if (!file.is_open() && !makedFile)
             {
                 return false;
             }

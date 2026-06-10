@@ -379,14 +379,14 @@ void Player::HandleInput()
         {
         case Player::ControlMode::KeyboardMouse:
             // キー入力による移動
-            m_command.move.y += Input::GetInstance()->PushKeyInt(keyBind.keyboardConfig.GetMainAction(Setting::Action::MoveForward));
-            m_command.move.y += -Input::GetInstance()->PushKeyInt(keyBind.keyboardConfig.GetMainAction(Setting::Action::MoveBack));
-            m_command.move.x += -Input::GetInstance()->PushKeyInt(keyBind.keyboardConfig.GetMainAction(Setting::Action::MoveLeft));
-            m_command.move.x += Input::GetInstance()->PushKeyInt(keyBind.keyboardConfig.GetMainAction(Setting::Action::MoveRight));
+            m_command.move.y += Input::GetInstance()->PushKeyInt(keyBind.keyboardConfig.GetAction(Setting::Action::MoveForward));
+            m_command.move.y += -Input::GetInstance()->PushKeyInt(keyBind.keyboardConfig.GetAction(Setting::Action::MoveBack));
+            m_command.move.x += -Input::GetInstance()->PushKeyInt(keyBind.keyboardConfig.GetAction(Setting::Action::MoveLeft));
+            m_command.move.x += Input::GetInstance()->PushKeyInt(keyBind.keyboardConfig.GetAction(Setting::Action::MoveRight));
 
-            m_command.jump = Input::GetInstance()->TriggerKeyInt(keyBind.keyboardConfig.GetMainAction(Setting::Action::Jump)) != 0;
-            m_command.crouch = Input::GetInstance()->PushKeyInt(keyBind.keyboardConfig.GetMainAction(Setting::Action::Crouch)) != 0;
-            m_command.run = Input::GetInstance()->PushKeyInt(keyBind.keyboardConfig.GetMainAction(Setting::Action::Run)) != 0;
+            m_command.jump = Input::GetInstance()->TriggerKeyInt(keyBind.keyboardConfig.GetAction(Setting::Action::Jump)) != 0;
+            m_command.crouch = Input::GetInstance()->PushKeyInt(keyBind.keyboardConfig.GetAction(Setting::Action::Crouch)) != 0;
+            m_command.run = Input::GetInstance()->PushKeyInt(keyBind.keyboardConfig.GetAction(Setting::Action::Run)) != 0;
 
             m_command.eye = Input::GetInstance()->GetMouseVel3() * keyBind.sensitivity.mouse * 0.01f;
             break;

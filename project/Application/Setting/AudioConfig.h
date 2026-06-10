@@ -12,5 +12,6 @@ namespace Setting {
     namespace AudioConfig {
         AudioSetting Load(nlohmann::json json);
         bool Save(std::string fileName, AudioSetting audioSetting);
+
     };
 };
