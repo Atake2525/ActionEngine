@@ -24,35 +24,37 @@ namespace Setting {
             audioSetting.masterVolume = json[keyConfigKey]["master"].get<float>();
             audioSetting.musicVolume = json[keyConfigKey]["music"].get<float>();
             audioSetting.sfxVolume = json[keyConfigKey]["sfx"].get<float>();
-            audioSetting.monaural = json[keyConfigKey]["monoral"].get<bool>();
+            audioSetting.monaural = json[keyConfigKey]["monaural"].get<bool>();
             return audioSetting;
         }
         bool Save(std::string fileName, AudioSetting audioSetting) {
-            const nlohmann::json loaded = JsonLoader::GetInstance()->LoadJson("Settings/" + fileName);
+
+            AudioSetting settings = audioSetting;
+            bool makedFile = false;
+            if (!std::filesystem::exists("Settings/" + fileName)) //ファイルが存在しないのでdefaultの値を保存する
+            {
+                Log("ファイルの展開に失敗、またはファイルが存在しないため、defaultの設定を保存します\n");
+                settings = AudioSetting();
+                makedFile = true;
+            }
 
             nlohmann::ordered_json json = nlohmann::ordered_json::object();
             json["type"] = "AUDIOCONFIG";
             json["main"] = nlohmann::ordered_json::object();
 
-            if (loaded.is_object() && loaded.contains("default"))
-            {
-                json["default"] = loaded["default"];
-            }
-            else
-            {
-                json["default"] = nlohmann::ordered_json::object();
-            }
+           
 
-            json["main"]["master"] = audioSetting.masterVolume;
-            json["main"]["music"] = audioSetting.musicVolume;
-            json["main"]["sfx"] = audioSetting.sfxVolume;
-            json["main"]["monaural"] = audioSetting.monaural;
+            json["main"]["master"] = settings.masterVolume;
+            json["main"]["music"] = settings.musicVolume;
+            json["main"]["sfx"] = settings.sfxVolume;
+            json["main"]["monaural"] = settings.monaural;
 
             std::ofstream file("Settings/" + fileName);
-            if (!file.is_open()) // ファイルが開けなかった場合はエラーを返す
-            {
+
+            if (!file.is_open() && !makedFile) {
+                Log("ファイルの保存に失敗しました: " + fileName + "\n");
                 return false;
-            }
+            }       
 
             file << json.dump(4);
 
