@@ -2,10 +2,10 @@
 
 using namespace Setting;
 
-const int Setting::KeyboardConfig::GetMainAction(Action action) const
+const int Setting::KeyboardConfig::GetAction(Action action) const
 {
-    auto it = m_keyboard[0].find(action);
-    if (it == m_keyboard[0].end()) // 未設定の場合は-1を返す
+    auto it = m_keyboard.find(action);
+    if (it == m_keyboard.end()) // 未設定の場合は-1を返す
     {
         return -1;
     }
