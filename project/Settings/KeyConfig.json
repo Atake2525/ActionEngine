@@ -43,10 +43,10 @@
             "gamepad" : "B"
         },
         "sensitivity" : {
-            "mouse" : 1.5,
-            "controller" : 1.5, 
-            "invertY" : false,
-            "invertX" : false
+            "mouse" : 0.8,
+            "controller" : 0.8, 
+            "invertX" : false,
+            "invertY" : false
         }
     }
 }

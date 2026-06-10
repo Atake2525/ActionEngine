@@ -7,18 +7,26 @@
 
 namespace Setting {
 
-	class KeyboardConfig
-	{
-	public:
-		KeyboardConfig() = default;
-		~KeyboardConfig() = default;
+    class KeyboardConfig
+    {
+    public:
+        KeyboardConfig() = default;
+        ~KeyboardConfig() = default;
 
-		void SetMainAction(Action action, BYTE key) { m_keyboard[0][action] = key; }
-		const int GetMainAction(Action action) const;
-		void SetSubAction(Action action, BYTE key) { m_keyboard[1][action] = key; }
-	private:
-		Input* m_pInput = nullptr;
-		std::array<std::unordered_map<Action, int>, 2> m_keyboard;
-		std::unordered_map<std::string, int> KeyNameToDik;
-	};
+        void SetAction(Action action, BYTE key) { m_keyboard[action] = key; }
+        const int GetAction(Action action) const;
+        const int GetDefaultAction(Action action) const { return m_defaultKeyboard.at(action); }
+    private:
+        std::unordered_map<Action, int> m_keyboard;
+        std::unordered_map<Action, int> m_defaultKeyboard = {
+            {Action::MoveForward, DIK_W },
+            { Action::MoveBack, DIK_S },
+            { Action::MoveLeft, DIK_A },
+            { Action::MoveRight, DIK_D },
+            { Action::Jump, DIK_SPACE },
+            { Action::Crouch, DIK_LCONTROL },
+            { Action::Run, DIK_LSHIFT },
+            { Action::Interact, DIK_F },
+        };
+    };
 }
