@@ -140,6 +140,8 @@
     <ClCompile Include="Application\Setting\KeyboardConfig.cpp" />
     <ClCompile Include="Application\Setting\ControllerConfig.cpp" />
     <ClCompile Include="Engine\Core\Input\InputConverter.cpp" />
+    <ClCompile Include="Application\Setting\KeyConfig.cpp" />
+    <ClCompile Include="Application\Setting\AudioConfig.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Math\EasingUtility.h" />
@@ -329,6 +331,8 @@
     <ClInclude Include="Application\Setting\ControllerConfig.h" />
     <ClInclude Include="Application\Setting\SettingUtility.h" />
     <ClInclude Include="Engine\Core\Input\InputConverter.h" />
+    <ClInclude Include="Application\Setting\KeyConfig.h" />
+    <ClInclude Include="Application\Setting\AudioConfig.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\PostEffect\BoxFilter.PS.hlsl" />
