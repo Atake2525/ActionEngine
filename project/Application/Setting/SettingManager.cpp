@@ -26,6 +26,9 @@ bool SettingManager::Load(const std::string filename, SettingType type) {
             m_keyBind.controllerConfig.SetAction(action.second, m_keyBind.controllerConfig.GetDefaultStickDirectionAction(action.second));
 			m_audioSetting = Setting::AudioSetting();
 		}
+        // ファイルがない場合はdefaultの値を保存しておく
+		Save(SettingType::AudioConfig, m_audioSetting);
+        Save(SettingType::KeyConfig, m_keyBind);
         return false;
     }
 
