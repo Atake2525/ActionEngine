@@ -60,9 +60,7 @@ void MyGame::Initialize() {
     SceneManager::GetInstance();
     SceneManager::GetInstance()->GetSettingManager().Load("KeyConfig.json", Setting::SettingType::KeyConfig);
     SceneManager::GetInstance()->GetSettingManager().Load("Audio.json", Setting::SettingType::AudioConfig);
-    SceneManager::GetInstance()->GetSettingManager().Save(Setting::SettingType::KeyConfig, SceneManager::GetInstance()->GetSettingManager().GetKeyConfig());
-    SceneManager::GetInstance()->GetSettingManager().Save(Setting::SettingType::AudioConfig, SceneManager::GetInstance()->GetSettingManager().GetAudioSetting());
-
+    
     Audio::GetInstance()->SetMasterVolume(SceneManager::GetInstance()->GetSettingManager().GetAudioSetting().masterVolume);
     
 
