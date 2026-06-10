@@ -507,7 +507,7 @@ float Input::GetJoyStickDirection3(const Vector3 joyStickPos)
     return std::atan2(result.x, result.y);
 }
 
-Vector2 Input::GetJoyStickVelocity()
+Vector2 Input::GetLeftJoyStickVelocity()
 {
     constexpr float STICK_MAX = 1000.0f;
 
@@ -530,40 +530,38 @@ Vector2 Input::GetJoyStickVelocity()
     return { normX, normY };
 }
 
-Vector3 Input::GetJoyStickVelocity(const Vector3 joyStickPos, const Vector3 velocity, const bool acceleration)
+Vector3 Input::GetRightJoyStickVelocity()
 {
-    Vector3 joy = { std::fabs(joyStickPos.x), std::fabs(joyStickPos.y), std::fabs(joyStickPos.z) };
-    // スティックの傾きの合計が1000以上(上限速度)なら合計を1000になるようにする
-    if (acceleration)
-    {
-        float stick = joy.x + joy.y;
-        float overAmount;
-        if (stick > 1000.0f)
-        {
-            overAmount = stick - 1000.0f;
-            joy.x -= overAmount / 2.0f;
-            joy.y -= overAmount / 2.0f;
-        }
-    }
-    // 角度を求める
-    float rot = GetJoyStickDirection3(joyStickPos);
+    constexpr float STICK_MAX = 1000.0f;
+    constexpr float DEAD_ZONE = 0.15f;
 
-    Matrix4x4 rotateMatrix = Multiply(Multiply(MakeRotateXMatrix(0.0f), MakeRotateYMatrix(rot)), MakeRotateZMatrix(0.0f));
-    Vector3 vel = TransformNormal(velocity, rotateMatrix);
-    if (acceleration)
+    auto normalizeAxis = [&](LONG value) {
+        return static_cast<float>(value) / STICK_MAX;
+        };
+
+    auto applyDeadZone = [&](float v) {
+        return (std::fabs(v) < DEAD_ZONE) ? 0.0f : v;
+        };
+
+    float rx = applyDeadZone(normalizeAxis(gamePadState.lRx));
+    float ry = applyDeadZone(normalizeAxis(gamePadState.lRy));
+    float rz = applyDeadZone(normalizeAxis(gamePadState.lRz));
+    float z = applyDeadZone(normalizeAxis(gamePadState.lZ));
+
+    float normX = rx;
+    float normY = ry;
+
+    if (normY == 0.0f && rz != 0.0f)
     {
-        // xとyを絶対値に変換した状態で足す
-        float len = joy.x + joy.y;
-        // lenを1000(ジョイスティックの最大値)で割る
-        if (len > 1000.0f)
-        {
-            len = 1000.0f;
-        }
-        len = len / 1000.0f;
-        // lenをvelocityに掛ける
-        vel = vel * len;
+        normY = rz;
     }
-    return vel;
+
+    if (normX == 0.0f && z != 0.0f)
+    {
+        normX = z;
+    }
+
+    return { normX, normY, 0.0f };
 }
 
 float Input::GetJoyStickLength(const Vector2 joyStickPos)
