@@ -1,5 +1,6 @@
 #include <memory>
 #include <string>
+#include "LevelEditor.h"
 
 class Player;
 class Camera;
@@ -20,6 +21,9 @@ public:
     /// JsonNameの取得
     /// </summary>
     virtual std::string GetJsonName();
+
+    LevelEditor& GetLevelEditor();
+    const LevelEditor& GetLevelEditor() const;
 
     /// <summary>
     /// 更新処理
@@ -49,5 +53,8 @@ public:
 private:
     Player* m_player = nullptr;
     Camera* m_camera = nullptr;
+
+protected:
+    LevelEditor m_levelEditor;
 };
 

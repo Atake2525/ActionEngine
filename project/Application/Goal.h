@@ -2,7 +2,7 @@
 
 #include "Sprite.h"
 #include "Input.h"
-#include "JsonLoader.h"
+#include "LevelEditor.h"
 #include "Object3d.h"
 #include <memory>
 #include "AABB.h"
@@ -22,7 +22,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(const std::string jsonName, Player* player);
+	void Initialize(const LevelEditor& levelEditor, const std::string jsonName, Player* player);
 
 	/// <summary>
 	/// 更新処理
@@ -51,7 +51,7 @@ private:
 	// 全体で使うメンバ変数
 	Input* m_input = nullptr;
 	Player* m_player = nullptr;
-	std::vector<JsonData> m_jsonDatas;
+	std::vector<LevelEditorData> m_jsonDatas;
 	bool m_isGoal = false;
 
 	std::unique_ptr<Result> m_result;

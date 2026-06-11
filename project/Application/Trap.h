@@ -3,7 +3,7 @@
 #include <map>
 #include <memory>
 #include "Transform.h"
-#include "JsonLoader.h"
+#include "LevelEditor.h"
 #include <random>
 #pragma once
 
@@ -30,8 +30,8 @@ public:
     /// <summary>
     /// 初期化
     /// </summary>
-    /// <param name="jsonName">JsonLoaderに登録した名前</param>
-    void Initialize(std::string jsonName);
+    /// <param name="jsonName">LevelEditorに登録した名前</param>
+    void Initialize(const LevelEditor& levelEditor, std::string jsonName);
 
     /// <summary>
     /// 更新
@@ -56,6 +56,7 @@ private:
     void MakeTrap(Traps& data);
 
     std::string m_jsonName;
+    const LevelEditor* m_levelEditor = nullptr;
 
     std::vector<Traps> m_traps;
 

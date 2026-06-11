@@ -3,7 +3,6 @@
 #include "externals/imgui/imgui_impl_dx12.h"
 #include "externals/imgui/imgui_impl_win32.h"
 #include "GameTime.h"
-#include "JsonLoader.h"
 #include "StageCount.h"
 #include "TutorialStage.h"
 #include "EasingUtility.h"
@@ -31,7 +30,7 @@ void GameScene::Initialize() {
     m_pPlayer = make_unique<Player>();
     m_pStage = make_unique<TutorialStage>();
     m_pStage->Initialize(m_pPlayer.get(), m_pCamera.get());
-    m_pPlayer->Initialize(m_pCamera.get(), m_pStage->GetJsonName());
+    m_pPlayer->Initialize(m_pCamera.get(), m_pStage->GetLevelEditor(), m_pStage->GetJsonName());
     m_pCamera->Update();
     m_pPlayer->UpdateModel();
 

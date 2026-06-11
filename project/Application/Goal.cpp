@@ -18,7 +18,7 @@ Goal::~Goal() {
 
 }
 
-void Goal::Initialize(const std::string jsonName, Player* player) {
+void Goal::Initialize(const LevelEditor& levelEditor, const std::string jsonName, Player* player) {
 
 	m_isGoal = false;
 	m_input = Input::GetInstance();
@@ -26,10 +26,10 @@ void Goal::Initialize(const std::string jsonName, Player* player) {
 	m_result = std::make_unique<Result>();
 	m_result->Initialize();
 
-	if (JsonLoader::GetInstance()->CheckJsonLoaded(jsonName))
+	if (levelEditor.CheckJsonLoaded(jsonName))
 	{
 		// スタート地点の取得
-		vector<JsonData> m_jsonDatas = JsonLoader::GetInstance()->GetJsonData(jsonName, "goal");
+		vector<LevelEditorData> m_jsonDatas = levelEditor.GetJsonData(jsonName, "goal");
 		// スタート地点が設定されていない又はjsonが読み込めなかった場合はデフォルト位置を使用
 		if (!m_jsonDatas.empty())
 		{

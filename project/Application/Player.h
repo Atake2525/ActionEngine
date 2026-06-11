@@ -3,6 +3,7 @@
 #pragma once
 #include <string>
 #include "Capsule.h"
+#include "LevelEditor.h"
 
 class Camera;
 class Input;
@@ -53,8 +54,8 @@ public:
     /// 初期化処理
     /// </summary>
     /// <param name="camera">現在使用しているカメラ</param>
-    /// <param name="jsonName">ステージのJsonData</param>
-    void Initialize(Camera* camera, const std::string& jsonName);
+    /// <param name="jsonName">ステージのJson名</param>
+    void Initialize(Camera* camera, const LevelEditor& levelEditor, const std::string& jsonName);
 
     /// <summary>
     /// 更新処理

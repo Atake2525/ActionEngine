@@ -1,5 +1,4 @@
 #include "Player.h"
-#include "JsonLoader.h"
 #include "Camera.h"
 #include "Input.h"
 #include "ImGuiManager.h"
@@ -25,7 +24,7 @@ Player::~Player()
     CollisionManager::GetInstance()->DeleteCollisionTarget("Player");
 }
 
-void Player::Initialize(Camera* camera, const std::string& jsonName)
+void Player::Initialize(Camera* camera, const LevelEditor& levelEditor, const std::string& jsonName)
 {
     // カメラのセット
     m_pCamera = camera;
@@ -33,11 +32,11 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
     m_pCamera->SetFovY(m_fovDefault);
     m_fov = m_fovDefault;
 
-    // JsonDataからステージ情報を取得してプレイヤーの初期位置とゴールの位置を設定する処理
-    if (JsonLoader::GetInstance()->CheckJsonLoaded(jsonName))
+    // LevelEditorからステージ情報を取得してプレイヤーの初期位置を設定する処理
+    if (levelEditor.CheckJsonLoaded(jsonName))
     {
         // スタート地点の取得
-        vector<JsonData> data = JsonLoader::GetInstance()->GetJsonData(jsonName, "startpoint");
+        vector<LevelEditorData> data = levelEditor.GetJsonData(jsonName, "startpoint");
         // スタート地点が設定されていない又はjsonが読み込めなかった場合はデフォルト位置を使用
         if (!data.empty())
         {

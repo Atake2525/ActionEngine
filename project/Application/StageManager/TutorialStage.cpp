@@ -1,5 +1,5 @@
 #include "TutorialStage.h"
-#include "JsonLoader.h"
+#include "LevelEditor.h"
 #include "WinApp.h"
 #include "CollisionManager.h"
 #include "Light.h"
@@ -16,7 +16,7 @@ void TutorialStage::Initialize(Player* player, Camera* camera)
 {
     OffScreenRendering::GetInstance()->SetGrayscaleColor(GRAYSCALE_SEPIA);
 
-    JsonLoader::GetInstance()->LoadJson("Resources/Json/Stage/Tutorial.json", "TutorialStage", false);
+    m_levelEditor.LoadJson("Resources/Json/Stage/Tutorial.json", "TutorialStage", false);
 
     // ステージオブジェクトの初期化
     stageObject = make_unique<Object3d>();
@@ -36,11 +36,11 @@ void TutorialStage::Initialize(Player* player, Camera* camera)
 
     // トラップの初期化
     trap = make_unique<Trap>();
-    trap->Initialize("TutorialStage");
+    trap->Initialize(m_levelEditor, "TutorialStage");
 
     // ゴールの初期化
     goal = make_unique<Goal>();
-    goal->Initialize("TutorialStage", player);
+    goal->Initialize(m_levelEditor, "TutorialStage", player);
 
     float windowSizeX = float(WinApp::GetInstance()->GetkClientWidth());
     for (int i = 0; i < 4; i++)
@@ -120,5 +120,5 @@ void TutorialStage::Finalize()
         CollisionManager::GetInstance()->DeleteCollision(wallRunObject.get());
         CollisionManager::GetInstance()->DeleteWallDashCollision(wallRunObject.get());
     }
-    JsonLoader::GetInstance()->DeleteJson("TutorialStage");
+    m_levelEditor.DeleteJson("TutorialStage");
 }

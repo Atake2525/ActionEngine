@@ -153,6 +153,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Scene\Manager\SceneFactory.cpp" />
     <ClCompile Include="Engine\3d\SkyBox\SkyBox.cpp" />
     <ClCompile Include="Engine\JsonLoader\JsonLoader.cpp" />
+    <ClCompile Include="Application\LevelEditor.cpp" />
     <ClCompile Include="Engine\Presentation\Cinematic\FadeManager.cpp" />
     <ClCompile Include="Application\Goal.cpp" />
     <ClCompile Include="Application\Trap.cpp" />
@@ -201,6 +202,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Core\BaseEngine\OffScreenRendering.h" />
     <ClInclude Include="Engine\JsonLoader\json.hpp" />
     <ClInclude Include="Engine\JsonLoader\JsonLoader.h" />
+    <ClInclude Include="Application\LevelEditor.h" />
     <ClInclude Include="Engine\LoadManager\ParticleManager\ParticleManager.h" />
     <ClInclude Include="Engine\Math\AABB.h" />
     <ClInclude Include="Engine\Math\Animator.h" />

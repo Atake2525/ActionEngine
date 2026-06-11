@@ -27,9 +27,10 @@ Trap::~Trap() {
 	}
 }
 
-void Trap::Initialize(std::string jsonName) {
+void Trap::Initialize(const LevelEditor& levelEditor, std::string jsonName) {
+    m_levelEditor = &levelEditor;
 	// Jsonが読み込まれていなかったら早期return
-	if (!JsonLoader::GetInstance()->CheckJsonLoaded(jsonName)) {
+	if (!levelEditor.CheckJsonLoaded(jsonName)) {
 		return;
 	}
 	random_device seedGenerator;
@@ -39,12 +40,12 @@ void Trap::Initialize(std::string jsonName) {
 	m_gameTimer = 0.0f;
 	m_traps.clear();
 	string str;
-	vector<JsonData> json;
+	vector<LevelEditorData> json;
 	m_jsonName = jsonName;
-	if (JsonLoader::GetInstance()->CheckJsonLoaded(jsonName))
+	if (levelEditor.CheckJsonLoaded(jsonName))
 	{
 		// スタート地点の取得
-		json = JsonLoader::GetInstance()->GetJsonData(jsonName, "trap");
+		json = levelEditor.GetJsonData(jsonName, "trap");
 		// スタート地点が設定されていない又はjsonが読み込めなかった場合はデフォルト位置を使用
 		if (!json.empty())
 		{
@@ -137,7 +138,10 @@ void Trap::Update() {
             CollisionManager::GetInstance()->DeleteCollision(m_traps[i].object.get());
         }
         // JSON 再ロード
-        Initialize(m_jsonName);
+        if (m_levelEditor)
+        {
+            Initialize(*m_levelEditor, m_jsonName);
+        }
     }
     ImGui::End();
 #endif
