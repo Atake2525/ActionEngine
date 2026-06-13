@@ -3,16 +3,35 @@
 #include <fstream>
 #include <sstream>
 #include "Logger.h"
-#include "InputConverter.h"
+#include <filesystem>
+
 
 using namespace Setting;
 using namespace Logger;
-using namespace InputConverter;
 
-bool SettingManager::Load(const std::string filename) {
+bool SettingManager::Load(const std::string filename, SettingType type) {
 	
 	// jsonを読んでデータを取得する
 	nlohmann::json deserialized = JsonLoader::GetInstance()->LoadJson("Settings/" + filename);
+
+    m_settingFileNames[static_cast<int>(type)] = filename;
+    if (deserialized == nlohmann::json{}) // ファイルの展開に失敗、またはファイルが存在しないのでdefaultのkeyConfigを使用する
+    {
+        Log("ファイルの展開に失敗、またはファイルが存在しないため、defaultの設定を使用します\n");
+		for (const auto& action : Setting::ActionNameToEnum)
+		{
+			m_keyBind.keyboardConfig.SetAction(action.second, m_keyBind.keyboardConfig.GetDefaultAction(action.second));
+            m_keyBind.controllerConfig.SetAction(action.second, m_keyBind.controllerConfig.GetDefaultControllerAction(action.second));
+            m_keyBind.controllerConfig.SetAction(action.second, m_keyBind.controllerConfig.GetDefaultDPadAction(action.second));
+            m_keyBind.controllerConfig.SetAction(action.second, m_keyBind.controllerConfig.GetDefaultStickDirectionAction(action.second));
+			m_audioSetting = Setting::AudioSetting();
+		}
+        // ファイルがない場合はdefaultの値を保存しておく
+		Save(SettingType::AudioConfig, m_audioSetting);
+        Save(SettingType::KeyConfig, m_keyBind);
+        return false;
+    }
+
 
 	// 正しいレベルデータファイルかチェック
 	if (!deserialized.is_object())
@@ -32,11 +51,15 @@ bool SettingManager::Load(const std::string filename) {
 	}
 
 	// typeを参照してなんの設定項目なのかを判断する
-	std::string type = deserialized["type"].get<std::string>();
+	std::string typeKey = deserialized["type"].get<std::string>();
 
-	if (type == "KEYCONFIG")
+	if (typeKey == "KEYCONFIG")
 	{
-		LoadKeyConfig(deserialized);
+		m_keyBind = KeyConfig::Load(deserialized);
+	}
+	else if (typeKey == "AUDIOCONFIG")
+	{
+        m_audioSetting = AudioConfig::Load(deserialized);
 	}
 	else
 	{
@@ -48,75 +71,28 @@ bool SettingManager::Load(const std::string filename) {
 	return true;
 }
 
-bool SettingManager::Save(const std::string filename) {
-	return true;
+bool SettingManager::Save(SettingType type, std::variant<Setting::KeyBind, Setting::AudioSetting> setting) {
+    bool result = false;
+
+    // Settingファイルが存在しない場合は新規作成する
+	std::filesystem::path settingsDir = "Settings";
+
+	// Settingsフォルダが無ければ作成
+	if (!std::filesystem::exists(settingsDir))
+	{
+		std::filesystem::create_directories(settingsDir);
+	}
+
+	switch (type)
+	{
+	case Setting::SettingType::KeyConfig:
+		result = KeyConfig::Save(m_settingFileNames[static_cast<int>(type)], std::get<Setting::KeyBind>(setting));
+		break;
+	case Setting::SettingType::AudioConfig:
+		result = AudioConfig::Save(m_settingFileNames[static_cast<int>(type)], std::get<Setting::AudioSetting>(setting));
+		break;
+	}
+
+
+	return result;
 }
-
-void SettingManager::LoadKeyConfig(nlohmann::json json) {
-	// mainキーコンフィグの確認
-	// mainキーがnullだったらdefaultのキーコンフィグを使用する
-    std::string keyConfigKey = "main";
-	if (!json.contains(keyConfigKey) || json[keyConfigKey].is_null()) {
-		Log("mainキーコンフィグがnullのため、defaultのキーコンフィグを使用します\n");
-        keyConfigKey = "default";
-	}
-
-	if (!json.contains(keyConfigKey) || !json[keyConfigKey].is_object())
-	{
-		Log("キーコンフィグがJsonオブジェクト型ではありません。\n");
-		return;
-	}
-
-	const nlohmann::json& keyConfig = json[keyConfigKey];
-	/*for (auto bind : keyConfig)
-	{
-		std::optional<Action> action = ToAction(bind.get<std::string>());
-		if (!action.has_value())
-		{
-			continue;
-		}
-	}*/
-	for (auto it = keyConfig.begin(); it != keyConfig.end(); ++it)
-	{
-		std::optional<Action> action = ToAction(it.key());
-		if (!action.has_value())
-		{
-			continue;
-		}
-
-		const nlohmann::json& bind = it.value();
-		if (!bind.is_object())
-		{
-			continue;
-		}
-
-		if (bind.contains("keyboard") && bind["keyboard"].is_string())
-		{
-			m_keyboardConfig.SetMainAction(action.value(), ConvertKeyToDIK(bind["keyboard"].get<std::string>()));
-		}
-
-		if (bind.contains("gamepad") && bind["gamepad"].is_string())
-		{
-			const std::string gamepadKey = bind["gamepad"].get<std::string>();
-
-			Controller controller = ConvertKeyToController(gamepadKey);
-			if (controller != Controller::None)
-			{
-				m_controllerConfig.SetAction(action.value(), controller);
-			}
-
-			DPad dpad = ConvertKeyToDPad(gamepadKey);
-			if (dpad != DPad::None)
-			{
-				m_controllerConfig.SetAction(action.value(), dpad);
-			}
-
-			StickDirection stickDirection = ConvertKeyToStickDirection(gamepadKey);
-			if (stickDirection != StickDirection::None)
-			{
-				m_controllerConfig.SetAction(action.value(), stickDirection);
-			}
-		}
-	}
-}
-

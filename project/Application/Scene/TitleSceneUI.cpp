@@ -62,8 +62,8 @@ TitleSceneUI::TitleSceneUI() {
     m_selectionGroup->SetInput(m_pInput);
     m_selectionGroup->Add(std::move(m_startButton));
     m_selectionGroup->Add(std::move(m_exitButton));
-    m_selectionGroup->SetMoveUpBinding(UI::InputTrigger{ .key = DIK_W });
-    m_selectionGroup->SetMoveDownBinding(UI::InputTrigger{ .key = DIK_S });
+    m_selectionGroup->SetMoveUpBinding(UI::InputTrigger{ .key = DIK_W, .dpad = DPad::Up });
+    m_selectionGroup->SetMoveDownBinding(UI::InputTrigger{ .key = DIK_S, .dpad = DPad::Down });
     m_selectionGroup->SetInteractBinding(UI::InputTrigger{ .key = DIK_RETURN, .mouseButton = MOUSE_LEFT, .controller = Controller::A });
     m_selectionGroup->SetInteractBinding(UI::InputTrigger{ .key = DIK_SPACE });
     m_selectionGroup->SetUsableCount(1);

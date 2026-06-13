@@ -170,10 +170,10 @@ public:
     float GetJoyStickDirection3(const Vector3 joyStickPos);
 
     // ジョイスティックの移動移動量を計算
-    Vector2 GetJoyStickVelocity();
+    Vector2 GetLeftJoyStickVelocity();
 
     // ジョイスティックの移動移動量を計算
-    Vector3 GetJoyStickVelocity(const Vector3 joyStickPos, const Vector3 velocity, const bool acceleration = true);
+    Vector3 GetRightJoyStickVelocity();
 
     // ジョイスティックが中央からどれだけ離れているかを計算
     float GetJoyStickLength(const Vector2 joyStickPos);
