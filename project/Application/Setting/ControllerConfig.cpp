@@ -41,3 +41,33 @@ const DPad Setting::ControllerConfig::GetDPadAction(Action action) const
     }
     return it->second;
 }
+
+const Controller Setting::ControllerConfig::GetDefaultControllerAction(Action action) const
+{
+    auto it = m_defaultController.find(action);
+    if (it == m_defaultController.end()) // 未設定の場合は0を返す
+    {
+        return Controller::None;
+    }
+    return it->second;
+}
+
+const DPad Setting::ControllerConfig::GetDefaultDPadAction(Action action)
+{
+    auto it = m_defaultDPad.find(action);
+    if (it == m_defaultDPad.end()) // 未設定の場合は0を返す
+    {
+        return DPad::None;
+    }
+    return it->second;
+}
+
+const Setting::StickDirection Setting::ControllerConfig::GetDefaultStickDirectionAction(Action action)
+{
+    auto it = m_defaultStickDirection.find(action);
+    if (it == m_defaultStickDirection.end()) // 未設定の場合は0を返す
+    {
+        return StickDirection::None;
+    }
+    return it->second;
+}
