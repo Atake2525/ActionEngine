@@ -24,7 +24,7 @@ void Pause::Initialize() {
 
 void Pause::Update() {
 
-    if (m_input->TriggerKeyInt(DIK_ESCAPE))
+    if (m_input->TriggerKeyInt(DIK_ESCAPE) || m_input->TriggerButton(Controller::Menu))
     {
         // ポーズ移行処理を実行
         TogglePauseMenu();
