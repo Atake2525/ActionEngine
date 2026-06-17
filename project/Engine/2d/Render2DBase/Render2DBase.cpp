@@ -1,6 +1,7 @@
 #include "Render2DBase.h"
 #include "Logger.h"
 #include <cassert>
+#include <cstdint>
 #include "DirectXBase.h"
 
 using namespace Microsoft::WRL;
@@ -21,7 +22,57 @@ void Render2DBase::Finalize() {
 }
 
 void Render2DBase::Initialize() {
+	CreateSpriteVertexResource();
+	CreateSpriteIndexResource();
 	CreateGraphicsPipeLineState();
+}
+
+void Render2DBase::CreateSpriteVertexResource() {
+	vertexResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(VertexData) * 4);
+
+	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
+	vertexBufferView.SizeInBytes = sizeof(VertexData) * 4;
+	vertexBufferView.StrideInBytes = sizeof(VertexData);
+
+	VertexData* vertexData = nullptr;
+	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
+
+	vertexData[0].position = { 0.0f, 0.0f, 0.0f, 1.0f };
+	vertexData[0].texcoord = { 0.0f, 0.0f };
+	vertexData[0].normal = { 0.0f, 0.0f, 1.0f };
+
+	vertexData[1].position = { 1.0f, 0.0f, 0.0f, 1.0f };
+	vertexData[1].texcoord = { 1.0f, 0.0f };
+	vertexData[1].normal = { 0.0f, 0.0f, 1.0f };
+
+	vertexData[2].position = { 1.0f, 1.0f, 0.0f, 1.0f };
+	vertexData[2].texcoord = { 1.0f, 1.0f };
+	vertexData[2].normal = { 0.0f, 0.0f, 1.0f };
+
+	vertexData[3].position = { 0.0f, 1.0f, 0.0f, 1.0f };
+	vertexData[3].texcoord = { 0.0f, 1.0f };
+	vertexData[3].normal = { 0.0f, 0.0f, 1.0f };
+
+	vertexResource->Unmap(0, nullptr);
+}
+
+void Render2DBase::CreateSpriteIndexResource() {
+	indexResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(uint32_t) * 6);
+
+	indexBufferView.BufferLocation = indexResource->GetGPUVirtualAddress();
+	indexBufferView.SizeInBytes = sizeof(uint32_t) * 6;
+	indexBufferView.Format = DXGI_FORMAT_R32_UINT;
+
+	uint32_t* indexData = nullptr;
+	indexResource->Map(0, nullptr, reinterpret_cast<void**>(&indexData));
+	indexData[0] = 0;
+	indexData[1] = 1;
+	indexData[2] = 3;
+	indexData[3] = 3;
+	indexData[4] = 1;
+	indexData[5] = 2;
+
+	indexResource->Unmap(0, nullptr);
 }
 
 void Render2DBase::CreateRootSignature() {

@@ -43,21 +43,11 @@ void Sprite::SetTexture(const std::string& textureFilePath) {
 
 void Sprite::Initialize(std::string textureFilePath) { 
 
-	// VertexResourceの作成
-	CreateVertexResource();
-	// IndexResourceの作成
-	CreateIndexResource();
 	// MaterialResourceの作成
 	CreateMaterialResource();
 	// TransformationMatrixResourceの作成
 	CreateTransformationMatrixResource();
-	// VertexBufferViewの作成
-	CreateVertexBufferView();
-	// IndexBufferViewの作成
-	CreateIndexBufferView();
 
-	indexResource->Map(0, nullptr, reinterpret_cast<void**>(&indexData));
-	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
 	transformationMatrixResource->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixData));
 
@@ -75,37 +65,7 @@ void Sprite::Initialize(std::string textureFilePath) {
 }
 
 void Sprite::Update() {
-
-	// アンカーポイントの設定
-	float left = 0.0f - anchorPoint.x;
-	float right = 1.0f - anchorPoint.x;
-	float top = 0.0f - anchorPoint.y;
-	float bottom = 1.0f - anchorPoint.y;
-
-	
-	// テクスチャ範囲指定の設定
 	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(texturefilePath);
-	float tex_left = textureLeftTop.x / metadata.width;
-	float tex_right = (textureLeftTop.x + textureSize.x) / metadata.width;
-	float tex_top = textureLeftTop.y / metadata.height;
-	float tex_bottom = (textureLeftTop.y + textureSize.y) / metadata.height;
-
-	// sprite(頂点データ)の設定
-	vertexData[0].position = {left, top, 0.0f, 1.0f}; // 左上
-	vertexData[0].texcoord = {tex_left, tex_top};
-	vertexData[1].position = {right, top, 0.0f, 1.0f}; // 右上
-	vertexData[1].texcoord = {tex_right, tex_top};
-	vertexData[2].position = {right, bottom, 0.0f, 1.0f}; // 右下
-	vertexData[2].texcoord = {tex_right, tex_bottom};
-	vertexData[3].position = {left, bottom, 0.0f, 1.0f}; // 左下
-	vertexData[3].texcoord = {tex_left, tex_bottom};
-
-	indexData[0] = 0;
-	indexData[1] = 1;
-	indexData[2] = 3;
-	indexData[3] = 3;
-	indexData[4] = 1;
-	indexData[5] = 2;
 
 	Transform transform{
 		{1.0f, 1.0f, 1.0f},
@@ -123,7 +83,16 @@ void Sprite::Update() {
 	transform.rotate = {0.0f, 0.0f, rotation};
 	transform.scale = {scale.x, scale.y, 0.1f};
 
-
+	uvTransform.scale = {
+		textureSize.x / static_cast<float>(metadata.width),
+		textureSize.y / static_cast<float>(metadata.height),
+		1.0f
+	};
+	uvTransform.translate = {
+		textureLeftTop.x / static_cast<float>(metadata.width),
+		textureLeftTop.y / static_cast<float>(metadata.height),
+		0.0f
+	};
 
 	Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransform.scale);
 	uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransform.rotate.z));
@@ -133,7 +102,8 @@ void Sprite::Update() {
 	// ゲームの処理
 	//  Sprite用のWorldViewProjectionMatrixを作る
 	//  SpriteのTransform処理
-	Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
+	Matrix4x4 anchorMatrix = MakeTranslateMatrix({ -anchorPoint.x, -anchorPoint.y, 0.0f });
+	Matrix4x4 worldMatrix = Multiply(anchorMatrix, MakeAffineMatrix(transform.scale, transform.rotate, transform.translate));
 	Matrix4x4 viewMatrix = MakeIdentity4x4();
 	Matrix4x4 projectionMatrix = MakeOrthographicMatrix(0.0f, 0.0f, float(WinApp::GetInstance()->GetkClientWidth()), float(WinApp::GetInstance()->GetkClientHeight()), 0.0f, 100.0f);
 	Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
@@ -147,9 +117,11 @@ void Sprite::ChangeTexture(std::string textureFilePath) {
 
 void Sprite::Draw() {
 	// Spriteの描画。変更が必要なものだけ変更する
+	const D3D12_VERTEX_BUFFER_VIEW& vertexBufferView = Render2DBase::GetInstance()->GetSpriteVertexBufferView();
+	const D3D12_INDEX_BUFFER_VIEW& indexBufferView = Render2DBase::GetInstance()->GetSpriteIndexBufferView();
 	DirectXBase::GetInstance()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView); // VBVを設定
 
-	DirectXBase::GetInstance()->GetCommandList()->IASetIndexBuffer(&indexbufferView); // IBVを設定
+	DirectXBase::GetInstance()->GetCommandList()->IASetIndexBuffer(&indexBufferView); // IBVを設定
 
 	// マテリアルCBufferの場所を設定
 	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
@@ -161,37 +133,12 @@ void Sprite::Draw() {
 	DirectXBase::GetInstance()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
 
-void Sprite::CreateIndexResource() { 
-	indexResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(uint32_t) * 6);
-}
-
-void Sprite::CreateVertexResource() { 
-	vertexResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(VertexData) * 6);
-}
-
 void Sprite::CreateMaterialResource() { 
 	materialResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(Material));
 }
 
 void Sprite::CreateTransformationMatrixResource() { 
 	transformationMatrixResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(TransformationMatrix));
-}
-
-void Sprite::CreateIndexBufferView() {
-	// リソースの先頭のアドレスから使う
-	indexbufferView.BufferLocation = indexResource->GetGPUVirtualAddress();
-	// 使用するリソースのサイズはインデックス6つ分のサイズ
-	indexbufferView.SizeInBytes = sizeof(uint32_t) * 6;
-	// インデックスはuint32_tとする
-	indexbufferView.Format = DXGI_FORMAT_R32_UINT;
-}
-
-void Sprite::CreateVertexBufferView() {
-	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
-	// 使用するリソースのサイズは頂点6つ分のサイズ
-	vertexBufferView.SizeInBytes = sizeof(VertexData) * 6;
-	// 1頂点あたりのサイズ
-	vertexBufferView.StrideInBytes = sizeof(VertexData);
 }
 
 void Sprite::SetMaterial() {
