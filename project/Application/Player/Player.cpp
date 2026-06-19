@@ -283,6 +283,15 @@ void Player::UpdateState()
     {
         m_isMoveInput = false;
     }
+
+    if (m_command.crouch)
+    {
+        ChangeState(std::make_unique<CrouchState>());
+    }
+    else
+    {
+        ChangeState(std::make_unique<RunState>());
+    }
 }
 
 void Player::UpdateParkourState()
