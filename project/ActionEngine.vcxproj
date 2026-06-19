@@ -116,6 +116,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\StageManager\TutorialStage.cpp" />
     <ClCompile Include="Application\Setting\ControllerConfig.cpp" />
     <ClCompile Include="Application\Setting\AudioConfig.cpp" />
+    <ClCompile Include="Application\CrouchState.cpp" />
     <ClCompile Include="Engine\2d\UI\UIElement.cpp" />
     <ClCompile Include="Engine\3d\Object\Object3dBase\DebugObject3d.cpp" />
     <ClCompile Include="Engine\3d\DebugLine\DebugLine.cpp" />
@@ -180,7 +181,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Setting\SettingManager.cpp" />
     <ClCompile Include="Engine\Core\Input\InputConverter.cpp" />
     <ClCompile Include="Application\Player\PlayerState.cpp" />
-    <ClCompile Include="Application\Player\IdleState.cpp" />
     <ClCompile Include="Application\Player\JumpState.cpp" />
     <ClCompile Include="Application\Player\RunState.cpp" />
   </ItemGroup>
@@ -195,6 +195,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Setting\KeyConfig.h" />
     <ClInclude Include="Application\Setting\SettingUtility.h" />
     <ClInclude Include="Application\Setting\AudioConfig.h" />
+    <ClInclude Include="Application\CrouchState.h" />
     <ClInclude Include="Engine\2d\UI\UIElement.h" />
     <ClInclude Include="Engine\3d\Object\Object3dBase\DebugObject3d.h" />
     <ClInclude Include="Engine\3d\DebugLine\DebugLine.h" />
@@ -280,7 +281,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Setting\SettingManager.h" />
     <ClInclude Include="Engine\Core\Input\InputConverter.h" />
     <ClInclude Include="Application\Player\PlayerState.h" />
-    <ClInclude Include="Application\Player\IdleState.h" />
     <ClInclude Include="Application\Player\JumpState.h" />
     <ClInclude Include="Application\Player\RunState.h" />
   </ItemGroup>

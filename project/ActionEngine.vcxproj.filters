@@ -387,13 +387,13 @@
     <ClCompile Include="Application\Player\PlayerState.cpp">
       <Filter>Application\Player\State</Filter>
     </ClCompile>
-    <ClCompile Include="Application\Player\IdleState.cpp">
-      <Filter>Application\Player\State</Filter>
-    </ClCompile>
     <ClCompile Include="Application\Player\RunState.cpp">
       <Filter>Application\Player\State</Filter>
     </ClCompile>
     <ClCompile Include="Application\Player\JumpState.cpp">
+      <Filter>Application\Player\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\CrouchState.cpp">
       <Filter>Application\Player\State</Filter>
     </ClCompile>
   </ItemGroup>
@@ -677,10 +677,10 @@
     <ClInclude Include="Application\Player\RunState.h">
       <Filter>Application\Player\State</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Player\IdleState.h">
+    <ClInclude Include="Application\Player\JumpState.h">
       <Filter>Application\Player\State</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Player\JumpState.h">
+    <ClInclude Include="Application\CrouchState.h">
       <Filter>Application\Player\State</Filter>
     </ClInclude>
   </ItemGroup>

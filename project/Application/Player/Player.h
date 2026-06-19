@@ -2,7 +2,7 @@
 #include <memory>
 #pragma once
 #include <string>
-#include "Capsule.h"
+#include "PlayerState.h"
 
 class Camera;
 class Input;
@@ -19,7 +19,7 @@ class Player
 {
 private:
     // プレイヤーステート
-    enum class PlayerState : int {
+    enum class WalkState : int {
         Idle = 0,
         Move = 1,
         Falling = 2
@@ -60,6 +60,7 @@ public:
     /// 更新処理
     /// </summary>
     void Update();
+    void ChangeState(std::unique_ptr<PlayerState> nextState);
 
     void UpdateModel();
 
@@ -118,7 +119,7 @@ private: // プレイヤーステート管理
     /// <summary>
     /// 歩行処理
     /// </summary>
-    void Walk();
+    void GroundMove(const float speed);
 
     /// <summary>
     /// ウォールラン処理
@@ -216,9 +217,20 @@ private:
     //==================================================
     // プレイヤー状態管理
     //==================================================
+    std::unique_ptr<PlayerState> m_pCurrentState;
+    const float& GetRunSpeed() const { return m_runSpeed; }
+    const float& GetCrouchSpeed() const { return m_crounchSpeed; }
+    const bool& IsMoveInput() const { return m_isMoveInput; }
+    const bool& IsRunInput() const { return m_command.run; }
+    const bool& IsCrouchInput() const { return m_command.crouch; }
+
     bool m_isFirstInput = false;
-    PlayerState m_state = PlayerState::Idle;
-    PlayerState m_statePre = PlayerState::Idle;
+    WalkState m_state = WalkState::Idle;
+    WalkState m_statePre = WalkState::Idle;
+
+    friend class RunState;
+    friend class JumpState;
+    friend class CrouchState;
 
     PlayerWalkState m_walkState = PlayerWalkState::Walk;
     PlayerWalkState m_walkStatePre = PlayerWalkState::Walk;
@@ -246,6 +258,8 @@ private:
     float m_turnControlFactor = 1.8f;               // 地上での移動制御係数
     //float m_airControlFactor = 5.0f;                // 空中での移動制御係数
     float m_airControlFactor = 1.8f;                // 空中での移動制御係数
+
+    bool m_isMoveInput = false;
 
     //================
     // ウォールラン関連
@@ -292,9 +306,8 @@ private:
     float m_climbingTime = 0.25f;
 
     // 移動速度
-    const float m_walkSpeed = 6.0f;
     const float m_runSpeed = 12.0f;
-    const float m_crounchSpeed = 4.0f;
+    const float m_crounchSpeed = 6.0f;
     float m_moveSpeed = 1.0f;
     float m_decelMoveSpeed = 1.0f;
     float m_moveSpeedPre = 1.0f;

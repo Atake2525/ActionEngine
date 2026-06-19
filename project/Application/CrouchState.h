@@ -1,7 +1,7 @@
 #include "PlayerState.h"
 #pragma once
 
-class RunState : public PlayerState {
+class CrouchState : public PlayerState {
 public:
     void Enter(Player& player) override;
     void Update(Player& player) override;
