@@ -144,7 +144,7 @@ private: // プレイヤーステート管理
     /// <summary>
     /// ジャンプ処理
     /// </summary>
-    void Jump();
+    void JumpStart();
 
     /// <summary>
     /// 衝突判定の適用

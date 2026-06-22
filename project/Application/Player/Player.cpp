@@ -259,12 +259,14 @@ void Player::UpdateState()
     // Run入力があり、かつ前回の状態がWalkであればRunにする
     if (m_command.run && (m_velocity.translate.z != 0.0f || m_velocity.translate.x != 0.0f))
     {
-        m_walkState = PlayerWalkState::Run;
+        //m_walkState = PlayerWalkState::Run;
+        ChangeState(std::make_unique<RunState>());
     }
     // しゃがみ入力
     if (m_command.crouch)
     {
-        m_walkState = PlayerWalkState::Crouch;
+        //m_walkState = PlayerWalkState::Crouch;
+        ChangeState(std::make_unique<CrouchState>());
     }
 
     // crouchを解除しようとしたときに可能かを確認する
@@ -275,14 +277,7 @@ void Player::UpdateState()
 
     UpdateParkourState();
 
-    if (m_command.move.x != 0.0f || m_command.move.y != 0.0f)
-    {
-        m_isMoveInput = true;
-    }
-    else
-    {
-        m_isMoveInput = false;
-    }
+    
 }
 
 void Player::UpdateParkourState()
@@ -476,7 +471,14 @@ void Player::Move() {
     {
         WallRun();
     }
-    Jump();
+
+    // ジャンプ入力があったらジャンプ処理
+    if (m_command.jump)
+    {
+        ChangeState(std::make_unique<JumpState>());
+        m_pCurrentState->Enter(*this);
+
+    }
 
     if (m_walkState == PlayerWalkState::Climbing)
     {
@@ -502,22 +504,6 @@ void Player::GroundMove(const float speed)
 
     m_moveSpeedPre = m_moveSpeed;
 
-
-    // プレイヤーの歩行状態に応じて移動速度を設定
-    /*switch (m_walkState)
-    {
-    case Player::PlayerWalkState::Walk:
-        speed = m_walkSpeed;
-        break;
-    case Player::PlayerWalkState::Run:
-        speed = m_runSpeed;
-        break;
-    case Player::PlayerWalkState::Crouch:
-        speed = m_crounchSpeed;
-        m_crouchTimer += m_delta / m_crouchTime;
-
-        break;
-    }*/
     if (speed == m_crounchSpeed)
     {
         m_crouchTimer += m_delta / m_crouchTime;
@@ -896,29 +882,24 @@ void Player::Climbing()
 
 }
 
-void Player::Jump()
+void Player::JumpStart()
 {
-    // ジャンプ入力があったらジャンプ処理
-    if (m_command.jump)
+    // ジャンプ開始時の初速を計算
+    float gravityPerFrame = max(-m_gravity.y * m_delta, 0.0f);
+    float jumpStartVelocity = sqrtf(2.0f * gravityPerFrame * m_jumpHeight);
+    switch (m_walkState)
     {
-        // ジャンプ開始時の初速を計算
-        float gravityPerFrame = max(-m_gravity.y * m_delta, 0.0f);
-        float jumpStartVelocity = sqrtf(2.0f * gravityPerFrame * m_jumpHeight);
-        switch (m_walkState)
+    case Player::PlayerWalkState::WallRun:
+        m_velocity.translate.y = jumpStartVelocity;
+        break;
+    case Player::PlayerWalkState::Sliding:
+        break;
+    default:
+        if (m_onGround) // 設置状態のジャンプ処理
         {
-        case Player::PlayerWalkState::WallRun:
             m_velocity.translate.y = jumpStartVelocity;
-            break;
-        case Player::PlayerWalkState::Sliding:
-            break;
-        default:
-            if (m_onGround) // 設置状態のジャンプ処理
-            {
-                m_velocity.translate.y = jumpStartVelocity;
-            }
-            break;
         }
-
+        break;
     }
 }
 
