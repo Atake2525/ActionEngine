@@ -279,6 +279,24 @@ void Player::UpdateState()
 
     
 }
+    if (m_command.move.x != 0.0f || m_command.move.y != 0.0f)
+    {
+        m_isMoveInput = true;
+    }
+    else
+    {
+        m_isMoveInput = false;
+    }
+
+    if (m_command.crouch)
+    {
+        ChangeState(std::make_unique<CrouchState>());
+    }
+    else
+    {
+        ChangeState(std::make_unique<RunState>());
+    }
+}
 
 void Player::UpdateParkourState()
 {
