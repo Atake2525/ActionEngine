@@ -35,6 +35,8 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
     // カメラの初期設定
     m_pCamera->SetFovY(m_fovDefault);
     m_fov = m_fovDefault;
+    m_fovBefore = m_fov;
+    m_fovAfter = m_fovDefault;
 
     // JsonDataからステージ情報を取得してプレイヤーの初期位置とゴールの位置を設定する処理
     if (JsonLoader::GetInstance()->CheckJsonLoaded(jsonName))
@@ -256,18 +258,18 @@ void Player::UpdateState()
         m_wallRunningObjectAABB = AABB::Zero;
     }
 
-    // Run入力があり、かつ前回の状態がWalkであればRunにする
-    if (m_command.run && (m_velocity.translate.z != 0.0f || m_velocity.translate.x != 0.0f))
-    {
-        //m_walkState = PlayerWalkState::Run;
-        ChangeState(std::make_unique<RunState>());
-    }
-    // しゃがみ入力
-    if (m_command.crouch)
-    {
-        //m_walkState = PlayerWalkState::Crouch;
-        ChangeState(std::make_unique<CrouchState>());
-    }
+    //// Run入力があり、かつ前回の状態がWalkであればRunにする
+    //if (m_command.run && (m_velocity.translate.z != 0.0f || m_velocity.translate.x != 0.0f))
+    //{
+    //    //m_walkState = PlayerWalkState::Run;
+    //    ChangeState(std::make_unique<RunState>());
+    //}
+    //// しゃがみ入力
+    //if (m_command.crouch)
+    //{
+    //    //m_walkState = PlayerWalkState::Crouch;
+    //    ChangeState(std::make_unique<CrouchState>());
+    //}
 
     // crouchを解除しようとしたときに可能かを確認する
     if (m_walkStatePre == PlayerWalkState::Crouch && m_walkState != PlayerWalkState::Crouch)
@@ -276,17 +278,6 @@ void Player::UpdateState()
     }
 
     UpdateParkourState();
-
-    
-}
-    if (m_command.move.x != 0.0f || m_command.move.y != 0.0f)
-    {
-        m_isMoveInput = true;
-    }
-    else
-    {
-        m_isMoveInput = false;
-    }
 
     if (m_command.crouch)
     {
@@ -369,10 +360,6 @@ const bool Player::CanClimbing()
 
     Vector3 dir = CollisionManager::GetInstance()->GetCollisionObjectDirectionForAABB(pAABB);
     Vector3 cameraDir = m_pCamera->GetDirection();
-
-    /*dir.x = fabs(dir.x);
-    dir.y = fabs(dir.y);
-    dir.z = fabs(dir.z);*/
 
     Vector3 fsbsCameraDir;
 
@@ -526,9 +513,7 @@ void Player::GroundMove(const float speed)
     {
         m_crouchTimer += m_delta / m_crouchTime;
     }
-
-
-    if (m_crouchTimer != 0.0f && m_walkState != PlayerWalkState::Crouch)
+    else
     {
         m_crouchTimer -= m_delta / m_crouchTime;
     }
@@ -987,17 +972,20 @@ void Player::ApplyCameraEffect()
 
     // 移動速度がダッシュ速度ならFovを広げる
 
-    if (m_playerSpeed == m_runSpeed)
+    if (m_playerSpeed == m_runSpeed && !m_isRunFov)
     {
         m_fovChangeTimer = 0.0f;
         m_fovBefore = m_fov;
         m_fovAfter = m_fovRun;
+        m_isRunFov = true;
     }
-    else
+
+    if (m_isRunFov && m_playerSpeed == 0.0f)
     {
         m_fovChangeTimer = 0.0f;
         m_fovBefore = m_fov;
         m_fovAfter = m_fovDefault;
+        m_isRunFov = false;
     }
 
     m_fovChangeTimer += GameTime::GetInstance()->GetDeltaTime() / m_fovChangeTime;

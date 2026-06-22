@@ -325,6 +325,7 @@ private:
 
     // Fov補間用タイマー
     bool m_isFovChange = false;
+    bool m_isRunFov = false;
     float m_fovBefore = 0.0f;
     float m_fovAfter = 0.0f;
     float m_fov = 0.0f;
@@ -332,7 +333,7 @@ private:
     float m_fovChangeTimer = 0.0f;    // FOV補間用タイマー
     float m_fovChangeTime = 0.1f;     // FOV補間時間
     float m_fovDefault = 1.2f; // デフォルトFOV
-    float m_fovRun = 1.5f;    // ダッシュ時FOV
+    float m_fovRun = 1.4f;    // ダッシュ時FOV
 
 
     //==================================================
