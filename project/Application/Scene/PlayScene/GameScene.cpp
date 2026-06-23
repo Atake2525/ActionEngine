@@ -22,7 +22,7 @@ void GameScene::Initialize() {
 
     SkyBox::GetInstance()->SetCamera(m_pCamera.get());
     SkyBox::GetInstance()->SetTexture("Resources/white1x1.dds");
-    SkyBox::GetInstance()->SetSunPoewr(0.0f);
+    Light::GetInstance()->SetIntensityDirectionalLight(0.0f);
 
     m_pInput = Input::GetInstance();
 
@@ -84,7 +84,7 @@ void GameScene::Update() {
             radius = EaseOutExpo(0.0f, m_finalScanRadius, m_startTimer);
             Light::GetInstance()->SetRadius(radius);
 
-            SkyBox::GetInstance()->SetSunPoewr(m_startTimer);
+            Light::GetInstance()->SetIntensityDirectionalLight(m_startTimer);
 
             break;
         }
