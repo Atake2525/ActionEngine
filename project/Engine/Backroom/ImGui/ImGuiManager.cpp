@@ -57,6 +57,14 @@ void ImGuiManager::Initialize()
 	ImFont* font = io.Fonts->AddFontFromFileTTF("Resources/Fonts/BIZ-UDGothicR.ttc", 14.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
 }
 
+
+void ImGuiManager::Update() {
+	ImGui_ImplDX12_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui::NewFrame();
+	BeginDockSpace();
+}
+
 void ImGuiManager::BeginDockSpace()
 {
 	ImGuiIO& io = ImGui::GetIO();
