@@ -84,11 +84,9 @@ void MyGame::Update() {
         finished = true;
     }
 
-    ImGui_ImplDX12_NewFrame();
-    ImGui_ImplWin32_NewFrame();
-    ImGui::NewFrame();
+    
 #ifndef NDEBUG
-    ImGuiManager::GetInstance()->BeginDockSpace();
+    ImGuiManager::GetInstance()->Update();
 #endif // !NDEBUG
 
     DirectXBase::GetInstance()->Update();
@@ -187,8 +185,11 @@ void MyGame::Draw() {
 
     DirectXBase::GetInstance()->ApplyFullViewport();
 
+#ifndef NDEBUG
     // 実際のcommandListのImGuiの描画コマンドを積む
     ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), DirectXBase::GetInstance()->GetCommandList().Get());
+#endif // !NDEBUG
+
 
     DirectXBase::GetInstance()->PostDraw();
 
