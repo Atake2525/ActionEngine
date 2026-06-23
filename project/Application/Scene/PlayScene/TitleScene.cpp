@@ -8,6 +8,7 @@
 #include "Light.h"
 #include "FadeManager.h"
 #include "Collision.h"
+#include "Light.h"
 
 using namespace std;
 
@@ -23,7 +24,7 @@ void TitleScene::Initialize() {
 
     SkyBox::GetInstance()->SetCamera(m_pCamera.get());
     SkyBox::GetInstance()->SetTexture("Resources/white1x1.dds");
-    SkyBox::GetInstance()->SetSunPoewr(1.0f);
+    Light::GetInstance()->SetIntensityDirectionalLight(1.0f);
 
     m_pInput = Input::GetInstance();
 
