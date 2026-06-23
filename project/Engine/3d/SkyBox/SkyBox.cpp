@@ -311,6 +311,8 @@ void SkyBox::Update() {
 
 	Vector3 sunDirection = Light::GetInstance()->GetDirectionDirectionalLight();
 	sunData->sunDirection = { sunDirection.x, -sunDirection.y, sunDirection.z };
+	sunData->power = Light::GetInstance()->GetIntensityDirectionalLight();
+
 
 	transformationMatrix->WVP = worldViewProjectionMatrix;
 	transformationMatrix->World = worldMatrix;
