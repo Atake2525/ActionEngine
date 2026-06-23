@@ -50,8 +50,6 @@ public:
 
 	void SetColor(const Vector4& color) { materialData->color = color; }
 
-	void SetSunPoewr(const float& power) { sunData->power = power; }
-
 	const uint32_t& GetSrvIndex() const { return srvIndex; }
 
 	/// <summary>
