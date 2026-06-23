@@ -26,14 +26,14 @@ private:
     };
 
     // プレイヤーの歩行状態
-    enum class PlayerWalkState : int {
+    /*enum class PlayerWalkState : int {
         Walk = 0,
         Run = 1,
         Crouch = 2,
         WallRun = 3,
         Sliding = 4,
         Climbing = 5,
-    };
+    };*/
 
     // コントロールモード
     enum class ControlMode {
@@ -93,7 +93,7 @@ private: // プレイヤーステート管理
     /// <summary>
     /// しゃがみ状態を解除できるかどうかを確認する(ステート)
     /// </summary>
-    void CanUncrouch();
+    bool CanUncrouch();
 
     /// <summary>
     /// よじ登りができるかを確認する
@@ -122,6 +122,11 @@ private: // プレイヤーステート管理
     void GroundMove(const float speed);
 
     /// <summary>
+    /// ウォールランの開始処理
+    /// </summary>
+    void WallRunStart();
+
+    /// <summary>
     /// ウォールラン処理
     /// </summary>
     void WallRun();
@@ -142,9 +147,14 @@ private: // プレイヤーステート管理
     void StartClimbing();
 
     /// <summary>
-    /// ジャンプ処理
+    /// ジャンプ開始処理
     /// </summary>
     void JumpStart();
+
+    /// <summary>
+    /// ウォールジャンプ開始処理
+    /// </summary>
+    void WallJumpStart();
 
     /// <summary>
     /// 衝突判定の適用
@@ -231,9 +241,12 @@ private:
     friend class RunState;
     friend class JumpState;
     friend class CrouchState;
+    friend class WallRunState;
+    friend class ClimbingState;
+    friend class WallJumpState;
 
-    PlayerWalkState m_walkState = PlayerWalkState::Walk;
-    PlayerWalkState m_walkStatePre = PlayerWalkState::Walk;
+    /*PlayerWalkState m_walkState = PlayerWalkState::Walk;
+    PlayerWalkState m_walkStatePre = PlayerWalkState::Walk;*/
 
     //==================================================
     // プレイヤー状態管理(パルクール)
@@ -295,6 +308,7 @@ private:
     //================
     float m_canClimbingCheckSize = 2.5f; // よじ登り可能かのチェック範囲の増加量
 
+    bool m_isClimbing = false;
     bool m_canClimbing = false;
     float m_climbingHeight = -4.0f; // よじ登りができるまでの高さ
     bool m_isClimbingMotion = false; 

@@ -117,6 +117,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Setting\ControllerConfig.cpp" />
     <ClCompile Include="Application\Setting\AudioConfig.cpp" />
     <ClCompile Include="Application\CrouchState.cpp" />
+    <ClCompile Include="Application\Player\ClimbingState.cpp" />
     <ClCompile Include="Engine\2d\UI\UIElement.cpp" />
     <ClCompile Include="Engine\3d\Object\Object3dBase\DebugObject3d.cpp" />
     <ClCompile Include="Engine\3d\DebugLine\DebugLine.cpp" />
@@ -183,6 +184,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Player\PlayerState.cpp" />
     <ClCompile Include="Application\Player\JumpState.cpp" />
     <ClCompile Include="Application\Player\RunState.cpp" />
+    <ClCompile Include="Application\Player\WallRunState.cpp" />
+    <ClCompile Include="Application\Player\WallJumpState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Setting\KeyboardConfig.h" />
@@ -196,6 +199,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Setting\SettingUtility.h" />
     <ClInclude Include="Application\Setting\AudioConfig.h" />
     <ClInclude Include="Application\CrouchState.h" />
+    <ClInclude Include="Application\Player\ClimbingState.h" />
     <ClInclude Include="Engine\2d\UI\UIElement.h" />
     <ClInclude Include="Engine\3d\Object\Object3dBase\DebugObject3d.h" />
     <ClInclude Include="Engine\3d\DebugLine\DebugLine.h" />
@@ -283,6 +287,8 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Player\PlayerState.h" />
     <ClInclude Include="Application\Player\JumpState.h" />
     <ClInclude Include="Application\Player\RunState.h" />
+    <ClInclude Include="Application\Player\WallRunState.h" />
+    <ClInclude Include="Application\Player\WallJumpState.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="externals\assimp\lib\Release\assimp-vc143-mtd.lib">
