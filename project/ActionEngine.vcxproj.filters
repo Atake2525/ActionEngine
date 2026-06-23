@@ -396,6 +396,15 @@
     <ClCompile Include="Application\CrouchState.cpp">
       <Filter>Application\Player\State</Filter>
     </ClCompile>
+    <ClCompile Include="Application\Player\ClimbingState.cpp">
+      <Filter>Application\Player\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Player\WallRunState.cpp">
+      <Filter>Application\Player\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Player\WallJumpState.cpp">
+      <Filter>Application\Player\State</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Setting\KeyboardConfig.h">
@@ -681,6 +690,15 @@
       <Filter>Application\Player\State</Filter>
     </ClInclude>
     <ClInclude Include="Application\CrouchState.h">
+      <Filter>Application\Player\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Player\ClimbingState.h">
+      <Filter>Application\Player\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Player\WallRunState.h">
+      <Filter>Application\Player\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Player\WallJumpState.h">
       <Filter>Application\Player\State</Filter>
     </ClInclude>
   </ItemGroup>
