@@ -16,19 +16,19 @@ void TutorialStage::Initialize(Player* player, Camera* camera)
 {
     OffScreenRendering::GetInstance()->SetGrayscaleColor(GRAYSCALE_SEPIA);
 
-    JsonLoader::GetInstance()->LoadJson("Resources/Json/Stage/Tutorial.json", "TutorialStage", false);
+    JsonLoader::GetInstance()->LoadJson("Resources/Json/Stage/Tutorial3.json", "TutorialStage", false);
 
     // ステージオブジェクトの初期化
     stageObject = make_unique<Object3d>();
     stageObject->Initialize();
-    Model* model = ModelManager::GetInstance()->LoadModel("Resources/Model/obj/Stage/TutorialStage", "Model.obj");
+    Model* model = ModelManager::GetInstance()->LoadModel("Resources/Model/obj/Stage/TutorialStage3", "Model.obj");
     stageObject->SetModel(model);
     stageObject->SetEnableLighting(true);
     stageObject->Update();
 
     collisionObject = make_unique<Object3d>();
     collisionObject->Initialize();
-    model = ModelManager::GetInstance()->LoadModel("Resources/Model/obj/Stage/TutorialStage", "Collision.obj", false);
+    model = ModelManager::GetInstance()->LoadModel("Resources/Model/obj/Stage/TutorialStage3", "Collision.obj", false);
     collisionObject->SetModel(model);
     collisionObject->Update();
     
