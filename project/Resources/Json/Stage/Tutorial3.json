@@ -8,7 +8,7 @@
                 "translation": [
                     0.0,
                     0.0,
-                    1.0
+                    0.0
                 ],
                 "rotation": [
                     0.0,
@@ -31,9 +31,9 @@
             "name": "円柱",
             "transform": {
                 "translation": [
-                    0.0,
-                    66.0,
-                    1.0
+                    -49.0,
+                    74.0,
+                    0.0
                 ],
                 "rotation": [
                     0.0,
