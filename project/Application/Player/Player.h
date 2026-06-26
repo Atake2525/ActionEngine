@@ -320,8 +320,8 @@ private:
     float m_climbingTime = 0.25f;
 
     // 移動速度
-    const float m_runSpeed = 12.0f;
-    const float m_crounchSpeed = 6.0f;
+    const float m_runSpeed = 20.0f;
+    const float m_crounchSpeed = 12.0f;
     float m_moveSpeed = 1.0f;
     float m_decelMoveSpeed = 1.0f;
     float m_moveSpeedPre = 1.0f;

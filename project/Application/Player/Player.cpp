@@ -283,11 +283,11 @@ void Player::UpdateParkourState()
         AABB pAABB = m_playerAABB;
         pAABB += Vector3{ m_velocity.translate.x, 0.0f, m_velocity.translate.z };
         // 落下中かつ壁走り用のオブジェクトに衝突している時に壁走り
-        if (!m_wallRunning && CollisionManager::GetInstance()->IsCollisionObjectForAABB(pAABB, true, m_wallRunningObjectAABB) && m_velocity.translate.y < 0.0f && !m_isClimbing)
+        if (!m_wallRunning && CollisionManager::GetInstance()->IsCollisionObjectForAABB(pAABB, false, m_wallRunningObjectAABB) && m_velocity.translate.y < 0.0f && !m_isClimbing)
         {
-            if (CollisionManager::GetInstance()->GetCollisionObjectAABBsForAABB(pAABB, true).size() != 0)
+            if (CollisionManager::GetInstance()->GetCollisionObjectAABBsForAABB(pAABB, false).size() != 0)
             {
-                m_wallRunningObjectAABB = CollisionManager::GetInstance()->GetCollisionObjectAABBsForAABB(pAABB, true)[0];
+                m_wallRunningObjectAABB = CollisionManager::GetInstance()->GetCollisionObjectAABBsForAABB(pAABB, false)[0];
             }
             m_wallRunning = true;
             ChangeState(std::make_unique<WallRunState>());
@@ -296,7 +296,7 @@ void Player::UpdateParkourState()
         pAABB += m_wallPenetration;
         // 現在の位置(AABB)からウォールラン中の壁の方向に移動させ衝突しているかを判定する
         // 判定していなければウォールランを終了する
-        if (m_wallRunning && m_isStartWallRun && (!CollisionManager::GetInstance()->IsCollisionObjectForAABB(pAABB, true) || m_command.jump == 1.0f))
+        if (m_wallRunning && m_isStartWallRun && (!CollisionManager::GetInstance()->IsCollisionObjectForAABB(pAABB, false) || m_command.jump == 1.0f))
         {
             m_wallRunning = false;
             m_isStartWallRun = false;
@@ -626,7 +626,7 @@ void Player::WallRunStart() {
         // ウォールラン用のオブジェクトとの貫通量を取得
     AABB pAABB = m_playerAABB;
     pAABB += Vector3{ m_velocity.translate.x, 0.0f, m_velocity.translate.z };
-    m_wallPenetration = CollisionManager::GetInstance()->GetPenetrationForAABB(pAABB, true);
+    m_wallPenetration = CollisionManager::GetInstance()->GetPenetrationForAABB(pAABB, false);
 
     // 現状ウォールランの移動量が斜めになることは無いので貫通量と視点方向から移動方向を算出
     Transform affine = Transform::Default;
@@ -886,10 +886,12 @@ void Player::JumpStart()
 }
 
 void Player::WallJumpStart() {
-    // ジャンプ開始時の初速を計算
+    // ジャンプ開始時の初速を計算 
     float gravityPerFrame = max(-m_gravity.y * m_delta, 0.0f);
     float jumpStartVelocity = sqrtf(2.0f * gravityPerFrame * m_jumpHeight);
     m_velocity.translate.y = jumpStartVelocity;
+    m_wallRunning = false;
+    ChangeState(std::make_unique<RunState>());
 }
 
 void Player::ApplyCollision()
@@ -1122,7 +1124,7 @@ void Player::UpdateDebugUI() {
             penetration.x, penetration.y, penetration.z);
 
         AABB aabb = m_playerAABB + Vector3{ m_velocity.translate.x, 0.0f, m_velocity.translate.z };
-        penetration = CollisionManager::GetInstance()->GetPenetrationForAABB(aabb, true);
+        penetration = CollisionManager::GetInstance()->GetPenetrationForAABB(aabb, false);
         ImGui::Text("WallRun Penetration: (%.2f, %.2f, %.2f)", penetration.x, penetration.y, penetration.z);
 
         // Transform
@@ -1149,9 +1151,11 @@ void Player::UpdateDebugUI() {
             ImGui::Text("Speed : %f", speed);
             // 歩行速度
             ImGui::Text("Run Speed : %f", &m_runSpeed);
+            //ImGui::DragFloat("Run Speed", &m_runSpeed, 0.1f);
             ImGui::Text("Crounch Speed : %f", &m_crounchSpeed);
+            //ImGui::DragFloat("Crounch Speed", &m_crounchSpeed, 0.1f);
             // 加速時間
-            ImGui::DragFloat("Max Speed Time", &m_maxSpeedTime, 0.01f);
+            //ImGui::DragFloat("Max Speed Time", &m_maxSpeedTime, 0.01f);
             // 減速時間
             ImGui::DragFloat("Decel Time", &m_decelTime, 0.01f);
             ImGui::TreePop();
