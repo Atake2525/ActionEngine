@@ -2,7 +2,7 @@
 #include <memory>
 #pragma once
 #include <string>
-#include "Capsule.h"
+#include "PlayerState.h"
 
 class Camera;
 class Input;
@@ -19,21 +19,21 @@ class Player
 {
 private:
     // プレイヤーステート
-    enum class PlayerState : int {
+    enum class WalkState : int {
         Idle = 0,
         Move = 1,
         Falling = 2
     };
 
     // プレイヤーの歩行状態
-    enum class PlayerWalkState : int {
+    /*enum class PlayerWalkState : int {
         Walk = 0,
         Run = 1,
         Crouch = 2,
         WallRun = 3,
         Sliding = 4,
         Climbing = 5,
-    };
+    };*/
 
     // コントロールモード
     enum class ControlMode {
@@ -60,6 +60,7 @@ public:
     /// 更新処理
     /// </summary>
     void Update();
+    void ChangeState(std::unique_ptr<PlayerState> nextState);
 
     void UpdateModel();
 
@@ -92,7 +93,7 @@ private: // プレイヤーステート管理
     /// <summary>
     /// しゃがみ状態を解除できるかどうかを確認する(ステート)
     /// </summary>
-    void CanUncrouch();
+    bool CanUncrouch();
 
     /// <summary>
     /// よじ登りができるかを確認する
@@ -118,7 +119,12 @@ private: // プレイヤーステート管理
     /// <summary>
     /// 歩行処理
     /// </summary>
-    void Walk();
+    void GroundMove(const float speed);
+
+    /// <summary>
+    /// ウォールランの開始処理
+    /// </summary>
+    void WallRunStart();
 
     /// <summary>
     /// ウォールラン処理
@@ -141,9 +147,14 @@ private: // プレイヤーステート管理
     void StartClimbing();
 
     /// <summary>
-    /// ジャンプ処理
+    /// ジャンプ開始処理
     /// </summary>
-    void Jump();
+    void JumpStart();
+
+    /// <summary>
+    /// ウォールジャンプ開始処理
+    /// </summary>
+    void WallJumpStart();
 
     /// <summary>
     /// 衝突判定の適用
@@ -216,12 +227,26 @@ private:
     //==================================================
     // プレイヤー状態管理
     //==================================================
-    bool m_isFirstInput = false;
-    PlayerState m_state = PlayerState::Idle;
-    PlayerState m_statePre = PlayerState::Idle;
+    std::unique_ptr<PlayerState> m_pCurrentState;
+    const float& GetRunSpeed() const { return m_runSpeed; }
+    const float& GetCrouchSpeed() const { return m_crounchSpeed; }
+    const bool& IsMoveInput() const { return m_isMoveInput; }
+    const bool& IsRunInput() const { return m_command.run; }
+    const bool& IsCrouchInput() const { return m_command.crouch; }
 
-    PlayerWalkState m_walkState = PlayerWalkState::Walk;
-    PlayerWalkState m_walkStatePre = PlayerWalkState::Walk;
+    bool m_isFirstInput = false;
+    WalkState m_state = WalkState::Idle;
+    WalkState m_statePre = WalkState::Idle;
+
+    friend class RunState;
+    friend class JumpState;
+    friend class CrouchState;
+    friend class WallRunState;
+    friend class ClimbingState;
+    friend class WallJumpState;
+
+    /*PlayerWalkState m_walkState = PlayerWalkState::Walk;
+    PlayerWalkState m_walkStatePre = PlayerWalkState::Walk;*/
 
     //==================================================
     // プレイヤー状態管理(パルクール)
@@ -246,6 +271,8 @@ private:
     float m_turnControlFactor = 1.8f;               // 地上での移動制御係数
     //float m_airControlFactor = 5.0f;                // 空中での移動制御係数
     float m_airControlFactor = 1.8f;                // 空中での移動制御係数
+
+    bool m_isMoveInput = false;
 
     //================
     // ウォールラン関連
@@ -281,6 +308,7 @@ private:
     //================
     float m_canClimbingCheckSize = 2.5f; // よじ登り可能かのチェック範囲の増加量
 
+    bool m_isClimbing = false;
     bool m_canClimbing = false;
     float m_climbingHeight = -4.0f; // よじ登りができるまでの高さ
     bool m_isClimbingMotion = false; 
@@ -292,9 +320,8 @@ private:
     float m_climbingTime = 0.25f;
 
     // 移動速度
-    const float m_walkSpeed = 6.0f;
-    const float m_runSpeed = 12.0f;
-    const float m_crounchSpeed = 4.0f;
+    const float m_runSpeed = 20.0f;
+    const float m_crounchSpeed = 12.0f;
     float m_moveSpeed = 1.0f;
     float m_decelMoveSpeed = 1.0f;
     float m_moveSpeedPre = 1.0f;
@@ -312,6 +339,7 @@ private:
 
     // Fov補間用タイマー
     bool m_isFovChange = false;
+    bool m_isRunFov = false;
     float m_fovBefore = 0.0f;
     float m_fovAfter = 0.0f;
     float m_fov = 0.0f;
@@ -319,7 +347,7 @@ private:
     float m_fovChangeTimer = 0.0f;    // FOV補間用タイマー
     float m_fovChangeTime = 0.1f;     // FOV補間時間
     float m_fovDefault = 1.2f; // デフォルトFOV
-    float m_fovRun = 1.5f;    // ダッシュ時FOV
+    float m_fovRun = 1.4f;    // ダッシュ時FOV
 
 
     //==================================================
