@@ -219,13 +219,12 @@ void Player::UpdateState()
 {
     // 前回の状態を保存
     m_statePre = m_state;
-    //m_walkStatePre = m_walkState;
 
-    if (m_command.crouch && !m_isClimbing)
+    if (m_command.crouch && !m_isClimbing && !m_wallRunning)
     {
         ChangeState(std::make_unique<CrouchState>());
     }
-    else if (CanUncrouch() && !m_isClimbing)
+    else if (CanUncrouch() && !m_isClimbing && !m_wallRunning)
     {
         ChangeState(std::make_unique<RunState>());
     }
@@ -233,7 +232,6 @@ void Player::UpdateState()
     // よじ登り中はClimbingに固定する
     if (m_isClimbingMotion)
     {
-        //m_walkState = PlayerWalkState::Climbing;
         m_canClimbing = false;
         m_onGround = true;
         m_state = WalkState::Idle;
@@ -254,8 +252,6 @@ void Player::UpdateState()
     // よじ登りができるかの確認
     m_canClimbing = CanClimbing();
 
-    //m_walkState = PlayerWalkState::Walk;
-
     // 空中判定(地面からの距離が一定以上離れているか)
     float groundDistance = CollisionManager::GetInstance()->GetMaxGroundDistanceForAABB(m_playerAABB);
     if (groundDistance > 0.2f && m_onGround)
@@ -267,7 +263,6 @@ void Player::UpdateState()
     if (!m_onGround && m_velocity.translate.y <= 0.0f && groundDistance <= 0.01f)
     {
         m_onGround = true;
-        m_wallRunningObjectAABB = AABB::Zero;
     }
 
     UpdateParkourState();
@@ -283,12 +278,8 @@ void Player::UpdateParkourState()
         AABB pAABB = m_playerAABB;
         pAABB += Vector3{ m_velocity.translate.x, 0.0f, m_velocity.translate.z };
         // 落下中かつ壁走り用のオブジェクトに衝突している時に壁走り
-        if (!m_wallRunning && CollisionManager::GetInstance()->IsCollisionObjectForAABB(pAABB, false, m_wallRunningObjectAABB) && m_velocity.translate.y < 0.0f && !m_isClimbing)
+        if (!m_wallRunning && CollisionManager::GetInstance()->IsCollisionObjectForAABB(pAABB, false) && m_velocity.translate.y < 0.0f && !m_isClimbing)
         {
-            if (CollisionManager::GetInstance()->GetCollisionObjectAABBsForAABB(pAABB, false).size() != 0)
-            {
-                m_wallRunningObjectAABB = CollisionManager::GetInstance()->GetCollisionObjectAABBsForAABB(pAABB, false)[0];
-            }
             m_wallRunning = true;
             ChangeState(std::make_unique<WallRunState>());
         }
@@ -296,10 +287,9 @@ void Player::UpdateParkourState()
         pAABB += m_wallPenetration;
         // 現在の位置(AABB)からウォールラン中の壁の方向に移動させ衝突しているかを判定する
         // 判定していなければウォールランを終了する
-        if (m_wallRunning && m_isStartWallRun && (!CollisionManager::GetInstance()->IsCollisionObjectForAABB(pAABB, false) || m_command.jump == 1.0f))
+        if (m_wallRunning && !CollisionManager::GetInstance()->IsCollisionObjectForAABB(pAABB, false))
         {
             m_wallRunning = false;
-            m_isStartWallRun = false;
             m_wallPenetration = Vector3::Zero;
         }
     }
@@ -308,8 +298,6 @@ void Player::UpdateParkourState()
     if (m_command.jump && m_canClimbing && !m_isClimbingMotion)
     {
         m_isClimbing = true;
-        //StartClimbing();
-        ///m_walkState = PlayerWalkState::Climbing;
     }
 }
 
@@ -442,21 +430,11 @@ void Player::Rotate() {
 }
 
 void Player::Move() {
-    // よじ登り中は他の処理をしないように最初に更新
-    /*if (m_walkState == PlayerWalkState::Climbing || m_isClimbingMotion)
-    {
-        Climbing();
-        m_playerAABB.max.y = m_playerAABB.min.y + m_playerHeight + m_crouchHeight;
-        return;
-    }*/
 
-    /*if (!m_wallRunning)
-    {*/
-        if (m_pCurrentState)
-        {
-            m_pCurrentState->Update(*this);
-        }
-    //}
+    if (m_pCurrentState)
+    {
+        m_pCurrentState->Update(*this);
+    }
 
     // ジャンプ入力があったらジャンプ処理
     if (m_command.jump)
@@ -474,11 +452,6 @@ void Player::Move() {
             ChangeState(std::make_unique<ClimbingState>());
         }
     }
-
-    /*if (m_walkState == PlayerWalkState::Climbing)
-    {
-        Climbing();
-    }*/
 
     // 空中制御を適用
     UpdateVelocity();
@@ -623,44 +596,68 @@ void Player::GroundMove(const float speed)
 
 void Player::WallRunStart() {
     // ウォールランの開始フレームの情報から移動方向を決める
-        // ウォールラン用のオブジェクトとの貫通量を取得
+    // ウォールラン用のオブジェクトとの貫通量を取得
     AABB pAABB = m_playerAABB;
     pAABB += Vector3{ m_velocity.translate.x, 0.0f, m_velocity.translate.z };
     m_wallPenetration = CollisionManager::GetInstance()->GetPenetrationForAABB(pAABB, false);
 
-    // 現状ウォールランの移動量が斜めになることは無いので貫通量と視点方向から移動方向を算出
+    // 現状ウォールランは単一ベクトルなので貫通量と視点方向とある程度の移動量から移動方向を算出
     Transform affine = Transform::Default;
     affine.rotate.y = m_cameraTransform.rotate.y;
     Matrix4x4 cameraMatrix = MakeAffineMatrix(affine);
-    Vector3 cameraDirection = TransformNormal({ 0.0f, 0.0f, 1.0f }, cameraMatrix);
-    // 貫通量は0か0以外であることが分かればよい
+    Vector3 cameraDirection = m_pCamera->GetDirection();
 
-    Vector3 wallpenetration = Vector3::Zero;
-    if (m_wallPenetration.x != 0.0f)
-    {
-        wallpenetration.x = 1.0f;
-    }
-    if (m_wallPenetration.z != 0.0f)
-    {
-        wallpenetration.z = 1.0f;
-    }
-    m_wallRunDirection.x = Sign(wallpenetration.z) * Sign(cameraDirection.x);
-    m_wallRunDirection.z = Sign(wallpenetration.x) * Sign(cameraDirection.z);
 
-    // ウォールラン用のオブジェクトとほぼ垂直の視点の場合直前の入力を使って移動方向を算出する
-    if (std::fabs(cameraDirection.z) < 0.1f)
+    // オブジェクトが視点の正面にある場合はウォールランはしないようにしたいのでその場合はRunStateに戻す
+    if ((m_wallPenetration.x != 0.0f && std::fabs(cameraDirection.z) < 0.1f) || (m_wallPenetration.z != 0.0f && std::fabs(cameraDirection.x) < 0.1f))
     {
-        Vector3 walkDirection = TransformNormal({ m_command.move.x, 0.0f, m_command.move.y }, cameraMatrix);
-
-        m_wallRunDirection.x = Sign(wallpenetration.z) * Sign(walkDirection.z);
-        m_wallRunDirection.z = Sign(wallpenetration.x) * Sign(walkDirection.x);
+        ChangeState(std::make_unique<RunState>());
+        m_wallRunning = false;
+        return;
     }
+
+    // 一定の速度以上で落下していた場合落下速度を行くり落とすようにする
+    if (m_velocity.translate.y < m_wallRunFallThreshold)
+    {
+        m_isDecelVelY = true;
+        // 落下速度に応じて落下速度が0になるまでの時間を計算する 最大はm_maxDecelVelYTime
+        m_wallRunFallTime = std::fabs(m_velocity.translate.y + 0.2f) * 2.0f;
+        m_wallRunFallTime = std::min(m_wallRunFallTime, m_maxwallRunFallTime);
+        if (m_wallRunFallTime == 0.0f) // m_decelVelYTimeが0.0fだとエラーになるため 0.05fとする
+        {
+            m_wallRunFallTime = 0.05f;
+        }
+        m_velYBefore = m_velocity.translate.y;
+    }
+    else
+    {
+        m_velocity.translate.y = 0.0f;
+    }
+
+    m_wallRunDirection.x = Sign(std::fabs(m_wallPenetration.z)) * Sign(cameraDirection.x);
+    m_wallRunDirection.z = Sign(std::fabs(m_wallPenetration.x)) * Sign(cameraDirection.z);
+
+    
     m_wallRunDirection *= m_runSpeed;
 }
 
 void Player::WallRun() {
 
     m_moveAmount = { fabs(m_wallRunDirection.x), fabs(m_wallRunDirection.z) };
+
+    if (m_isDecelVelY)
+    {
+        m_wallRunFallTimer += GameTime::GetInstance()->GetDeltaTime() / m_wallRunFallTime;
+        m_wallRunFallTimer = std::min(m_wallRunFallTimer, 1.0f);
+
+        m_velocity.translate.y = Lerp(m_velYBefore, 0.0f, m_wallRunFallTimer);
+
+        if (m_wallRunFallTimer == 1.0f)
+        {
+            m_isDecelVelY = false;
+            m_wallRunFallTimer = 0.0f;
+        }
+    }
 
     // 現在の速度を計算
     m_playerSpeed = max(fabs(m_moveAmount.x), fabs(m_moveAmount.y));
@@ -825,10 +822,10 @@ void Player::StartClimbing()
     m_climbingTimer = 0.0f;
     m_climbingStep = 0;
     m_isClimbingMotion = true;
+    m_isClimbing = true;
     m_onGround = true;
     m_state = WalkState::Idle;
     m_wallRunning = false;
-    m_isStartWallRun = false;
     m_wallPenetration = Vector3::Zero;
     m_velocity.translate = Vector3::Zero;
     m_moveAmount = Vector2::Zero;
@@ -907,19 +904,13 @@ void Player::ApplyCollision()
 void Player::ApplyGravity()
 {
     // 重力の適用処理の実装
-    if (!m_onGround)
+    if (!m_onGround && !m_wallRunning) // 空中にいてもウォールラン中ならば重力の処理は実行しない
     {
         m_fallVelocity = m_velocity.translate.y + m_gravity.y * m_delta;
         float groundDist = CollisionManager::GetInstance()->GetMaxGroundDistanceForAABB(m_playerAABB);
         // 落下速度の上限
-        //m_velocity.translate.y = m_velocity.translate.y + m_fallVelocity * m_delta;
         m_velocity.translate.y += m_gravity.y * m_delta;
         m_velocity.translate.y = max(m_fallVelocity, -groundDist);
-        // 壁走り中には落下速度を固定する
-        if (m_wallRunning && m_velocity.translate.y < 0.0f)
-        {
-            m_velocity.translate.y = m_wallRunGravity * m_delta;
-        }
     }
 }
 
@@ -998,21 +989,21 @@ void Player::ApplyCameraEffect()
             {
                 signWallRunDirection.z = -1.0f;
             }
-            float wallRunPenetration = 1.0f;
-            if (m_wallPenetration.z < 0.0f || m_wallPenetration.x)
+            float wallRunPenetration = -1.0f;
+            if (m_wallPenetration.z > 0.0f || m_wallPenetration.x < 0.0f)
             {
-                wallRunPenetration = -1.0f;
+                wallRunPenetration = 1.0f;
             }
             // 回転後角度を代入 回転後の角度は移動方向、壁がプレイヤーから左右どちらにあるかによって変わるのでそれも考慮する
             // 移動方向に応じての回転を入れいる
             Vector3 cameraDirection = m_pCamera->GetDirection();
             if (m_wallRunDirection.x != 0.0f)
             {
-                m_wallRunRotateAfter = m_wallRunRotateAngle * signWallRunDirection.x * Sign(cameraDirection.z);
+                m_wallRunRotateAfter = m_wallRunRotateAngle * (signWallRunDirection.x * wallRunPenetration * -1.0f);
             }
             if (m_wallRunDirection.z != 0.0f)
             {
-                m_wallRunRotateAfter = m_wallRunRotateAngle * signWallRunDirection.z * Sign(cameraDirection.x);
+                m_wallRunRotateAfter = m_wallRunRotateAngle * (signWallRunDirection.z * wallRunPenetration * -1.0f);
             }
 
         }
@@ -1094,9 +1085,6 @@ void Player::UpdateDebugUI() {
 
     ImGui::DragFloat("CrouchHeihgt", &m_crouchHeight, 0.0f);
     ImGui::DragFloat("CrouchHeightOffset", &m_crouchHeightOffset, 0.01f);
-
-    ImGui::DragFloat3("WallRunObjectMin", &m_wallRunningObjectAABB.min.x);
-    ImGui::DragFloat3("WallRunObjectMax", &m_wallRunningObjectAABB.max.x);
 
     ImGui::Separator();
 

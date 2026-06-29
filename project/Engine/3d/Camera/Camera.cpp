@@ -19,27 +19,6 @@ Camera::Camera()
 
 void Camera::Update() {
 
-#ifndef NDEBUG
-	Vector3 rotate = SwapDegree(transform.rotate);
-
-	Vector3 dirc = { -worldMatrix.m[0][2], -worldMatrix.m[1][2], worldMatrix.m[2][2] };
-
-	ImGui::SetNextWindowPos(ImVec2{ float(WinApp::GetInstance()->GetkClientWidth()) - 300.0f, 18.0f * number }, ImGuiCond_FirstUseEver);
-	ImGui::SetNextWindowSize(ImVec2{ 300.0f, 128.0f }, ImGuiCond_FirstUseEver);
-	ImGui::Begin("CameraStatus");
-	ImGui::DragFloat3("Position", &transform.translate.x, 0.1f);
-	ImGui::DragFloat3("Rotation", &rotate.x, 0.5f);
-	ImGui::DragFloat3("Direction1", &direction.x);
-	ImGui::DragFloat3("Direction2", &dirc.x);
-	ImGui::DragFloat("Fov", &fovY, 0.01f);
-	ImGui::DragFloat("farClipDist", &farClipDistance, 1.0f);
-    ImGui::DragFloat("drawHeihgt", &drawHeihgt, 0.1f);
-	ImGui::End();
-
-	transform.rotate = SwapRadian(rotate);
-#endif // _CAMERADEBUG
-
-
 	transform.rotate.x = std::fmod(transform.rotate.x, 2 * std::numbers::pi_v<float>);
 	transform.rotate.y = std::fmod(transform.rotate.y, 2 * std::numbers::pi_v<float>);
 	transform.rotate.z = std::fmod(transform.rotate.z, 2 * std::numbers::pi_v<float>);
@@ -77,6 +56,33 @@ void Camera::Update() {
 	projectionMatrix = MakePrespectiveFovMatrix(fovY, aspect, nearClipDistance, farClipDistance);
 
 	viewProjectionMatrix = Multiply(viewMatrix, projectionMatrix);
+
+	Vector3 cameraRightDir = {
+		std::cos(transform.rotate.y),
+		0.0f,
+		std::sin(transform.rotate.y)
+	};
+
+#ifndef NDEBUG
+	Vector3 rotate = SwapDegree(transform.rotate);
+
+	Vector3 dirc = { -worldMatrix.m[0][2], -worldMatrix.m[1][2], worldMatrix.m[2][2] };
+
+	ImGui::SetNextWindowPos(ImVec2{ float(WinApp::GetInstance()->GetkClientWidth()) - 300.0f, 18.0f * number }, ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowSize(ImVec2{ 300.0f, 128.0f }, ImGuiCond_FirstUseEver);
+	ImGui::Begin("CameraStatus");
+	ImGui::DragFloat3("Position", &transform.translate.x, 0.1f);
+	ImGui::DragFloat3("Rotation", &rotate.x, 0.5f);
+	ImGui::DragFloat3("Direction1", &direction.x);
+	ImGui::DragFloat3("Direction2", &dirc.x);
+	ImGui::DragFloat3("Direction3", &cameraRightDir.x);
+	ImGui::DragFloat("Fov", &fovY, 0.01f);
+	ImGui::DragFloat("farClipDist", &farClipDistance, 1.0f);
+	ImGui::DragFloat("drawHeihgt", &drawHeihgt, 0.1f);
+	ImGui::End();
+
+	transform.rotate = SwapRadian(rotate);
+#endif // _CAMERADEBUG
 }
 
 const Vector3 Camera::GetWorldPosition() const
@@ -86,4 +92,8 @@ const Vector3 Camera::GetWorldPosition() const
 	result.y = worldMatrix.m[3][1];
 	result.z = worldMatrix.m[3][2];
 	return result;
+}
+
+const Vector3 Camera::GetHolizontalDirection() const {
+	return { std::cos(transform.rotate.y), 0.0f, std::sin(transform.rotate.y) };
 }
