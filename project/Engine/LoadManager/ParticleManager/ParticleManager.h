@@ -118,14 +118,14 @@ public:
 	/// </summary>
 	void Initialize();
 
-	ModelData LoadModelFile(const std::string& directoryPath, const std::string& filename);
+	ModelData LoadModelFile(const std::string& directoryPath, const std::string& fileName);
 
 	/// <summary>
 	/// パーティクルグループの生成
 	/// </summary>
 	/// <param name="name">名前</param>
 	/// <param name="textureFilePath">テクスチャ名</param>
-	void CreateParticleGroupFromOBJ(std::string directoryPath, std::string filename, const std::string& name);
+	void CreateParticleGroupFromOBJ(std::string directoryPath, std::string fileName, const std::string& name);
 
 	void CreateParticleGroup(ParticleType particleType, std::string textureFilePath, const std::string& name);
 
@@ -218,10 +218,10 @@ private:
 
 	bool IsCollision(const AABB& aabb, const Vector3& point);
 	//MaterialData materialData;
-	Particle MakeNewParticle(std::mt19937& randomEngine, const Vector3& translate);
+	Particle MakeNewParticle(std::mt19937& randomEngine, const Vector3& position);
 
 	//MaterialData materialData;
-	Particle MakeNewParticle_HitEffect(std::mt19937& randomEngine, const Vector3& translate);
+	Particle MakeNewParticle_HitEffect(std::mt19937& randomEngine, const Vector3& position);
 
 	std::unordered_map<std::string, ParticleGroup> particleGroups;
 

@@ -78,13 +78,13 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
     m_pDrawModel->ToggleStartAnimation();
 
     m_playerAABB = m_pModel->GetAABB();
-    m_playerAABB += m_transform.translate;
+    m_playerAABB += m_transform.position;
     m_playerHeight = AABB::GetSize(m_playerAABB).y;
     CollisionManager::GetInstance()->AddCollisionTarget(m_playerAABB, "Player");
 
     // カメラの高さをモデルの高さに合わせて調整 (ちょっとだけ低くする)
-    m_cameraTransform.translate.y = m_playerAABB.max.y - m_transform.translate.y - AABB::GetSize(m_playerAABB).y * m_eyeHeight;
-    //m_cameraHeight = m_cameraTransform.translate.y;
+    m_cameraTransform.position.y = m_playerAABB.max.y - m_transform.position.y - AABB::GetSize(m_playerAABB).y * m_eyeHeight;
+    //m_cameraHeight = m_cameraTransform.position.y;
 
     // コントロールモードの初期設定
     if (Input::GetInstance()->IsConnectedController())
@@ -260,7 +260,7 @@ void Player::UpdateState()
         m_state = WalkState::Falling;
     }
     // 地面空の高さがほぼ0になっていれば地上判定を行う
-    if (!m_onGround && m_velocity.translate.y <= 0.0f && groundDistance <= 0.01f)
+    if (!m_onGround && m_velocity.position.y <= 0.0f && groundDistance <= 0.01f)
     {
         m_onGround = true;
     }
@@ -276,9 +276,9 @@ void Player::UpdateParkourState()
     if (!m_onGround)
     {
         AABB pAABB = m_playerAABB;
-        pAABB += Vector3{ m_velocity.translate.x, 0.0f, m_velocity.translate.z };
+        pAABB += Vector3{ m_velocity.position.x, 0.0f, m_velocity.position.z };
         // 落下中かつ壁走り用のオブジェクトに衝突している時に壁走り
-        if (!m_wallRunning && CollisionManager::GetInstance()->IsCollisionObjectForAABB(pAABB, false) && m_velocity.translate.y < 0.0f && !m_isClimbing)
+        if (!m_wallRunning && CollisionManager::GetInstance()->IsCollisionObjectForAABB(pAABB, false) && m_velocity.position.y < 0.0f && !m_isClimbing)
         {
             m_wallRunning = true;
             ChangeState(std::make_unique<WallRunState>());
@@ -317,11 +317,11 @@ bool Player::CanUncrouch()
 const bool Player::CanClimbing()
 {
     AABB pAABB = m_playerAABB;
-    pAABB += m_velocity.translate;
+    pAABB += m_velocity.position;
     // 壁に当たっていなくても良い様にプレイヤーのAABBを大きくして判定する
     pAABB = AddSize(pAABB, m_canClimbingCheckSize);
-    pAABB.min.y = m_playerAABB.min.y + m_velocity.translate.y;
-    pAABB.max.y = m_playerAABB.max.y + m_velocity.translate.y;
+    pAABB.min.y = m_playerAABB.min.y + m_velocity.position.y;
+    pAABB.max.y = m_playerAABB.max.y + m_velocity.position.y;
 
     float groundObjectDist = CollisionManager::GetInstance()->GetHeightToTopForAABB(pAABB);
     // プレイヤーの身長よりもある程度高くないと処理しないようにする
@@ -598,7 +598,7 @@ void Player::WallRunStart() {
     // ウォールランの開始フレームの情報から移動方向を決める
     // ウォールラン用のオブジェクトとの貫通量を取得
     AABB pAABB = m_playerAABB;
-    pAABB += Vector3{ m_velocity.translate.x, 0.0f, m_velocity.translate.z };
+    pAABB += Vector3{ m_velocity.position.x, 0.0f, m_velocity.position.z };
     m_wallPenetration = CollisionManager::GetInstance()->GetPenetrationForAABB(pAABB, false);
 
     // 現状ウォールランは単一ベクトルなので貫通量と視点方向とある程度の移動量から移動方向を算出
@@ -617,21 +617,21 @@ void Player::WallRunStart() {
     }
 
     // 一定の速度以上で落下していた場合落下速度を行くり落とすようにする
-    if (m_velocity.translate.y < m_wallRunFallThreshold)
+    if (m_velocity.position.y < m_wallRunFallThreshold)
     {
         m_isDecelVelY = true;
         // 落下速度に応じて落下速度が0になるまでの時間を計算する 最大はm_maxDecelVelYTime
-        m_wallRunFallTime = std::fabs(m_velocity.translate.y + 0.2f) * 2.0f;
+        m_wallRunFallTime = std::fabs(m_velocity.position.y + 0.2f) * 2.0f;
         m_wallRunFallTime = std::min(m_wallRunFallTime, m_maxwallRunFallTime);
         if (m_wallRunFallTime == 0.0f) // m_decelVelYTimeが0.0fだとエラーになるため 0.05fとする
         {
             m_wallRunFallTime = 0.05f;
         }
-        m_velYBefore = m_velocity.translate.y;
+        m_velYBefore = m_velocity.position.y;
     }
     else
     {
-        m_velocity.translate.y = 0.0f;
+        m_velocity.position.y = 0.0f;
     }
 
     m_wallRunDirection.x = Sign(std::fabs(m_wallPenetration.z)) * Sign(cameraDirection.x);
@@ -650,7 +650,7 @@ void Player::WallRun() {
         m_wallRunFallTimer += GameTime::GetInstance()->GetDeltaTime() / m_wallRunFallTime;
         m_wallRunFallTimer = std::min(m_wallRunFallTimer, 1.0f);
 
-        m_velocity.translate.y = Lerp(m_velYBefore, 0.0f, m_wallRunFallTimer);
+        m_velocity.position.y = Lerp(m_velYBefore, 0.0f, m_wallRunFallTimer);
 
         if (m_wallRunFallTimer == 1.0f)
         {
@@ -764,7 +764,7 @@ void Player::StartClimbing()
     // よじ登りの最終地点などの計算
     float height = m_playerAABB.max.y - m_playerAABB.min.y;
 
-    AABB pAABB = m_playerAABB + m_velocity.translate;
+    AABB pAABB = m_playerAABB + m_velocity.position;
     pAABB = AddSize(pAABB, m_canClimbingCheckSize);
     pAABB.min.y = m_playerAABB.min.y;
     pAABB.max.y = m_playerAABB.max.y;
@@ -792,32 +792,32 @@ void Player::StartClimbing()
     {
         if (cameraDir.x > 0.0f)
         {
-            rePairPosition.x = m_transform.translate.x - colObj.min.x;
+            rePairPosition.x = m_transform.position.x - colObj.min.x;
         }
         if (cameraDir.x < 0.0f)
         {
-            rePairPosition.x = m_transform.translate.x - colObj.max.x;
+            rePairPosition.x = m_transform.position.x - colObj.max.x;
         }
     }
     if (cameraDir.z != 0.0f)
     {
         if (cameraDir.z > 0.0f)
         {
-            rePairPosition.z = m_transform.translate.z - colObj.min.z;
+            rePairPosition.z = m_transform.position.z - colObj.min.z;
         }
         if (cameraDir.z < 0.0f)
         {
-            rePairPosition.z = m_transform.translate.z - colObj.max.z;
+            rePairPosition.z = m_transform.position.z - colObj.max.z;
         }
     }
 
     float groundObjectDist = CollisionManager::GetInstance()->GetHeightToTopForAABB(pAABB);
     rePairPosition.y = groundObjectDist;
 
-    m_climbingStartTranslate = m_transform.translate;
-    m_climbingEndTranslate = m_transform.translate - rePairPosition;
-    m_climbingTopTranslate = m_climbingStartTranslate + ((m_climbingEndTranslate - m_climbingStartTranslate) * 0.35f);
-    m_climbingTopTranslate.y = max(m_climbingStartTranslate.y, m_climbingEndTranslate.y) + max(height * 0.15f, 0.35f);
+    m_climbingStartPosition = m_transform.position;
+    m_climbingEndPosition = m_transform.position - rePairPosition;
+    m_climbingTopPosition = m_climbingStartPosition + ((m_climbingEndPosition - m_climbingStartPosition) * 0.35f);
+    m_climbingTopPosition.y = max(m_climbingStartPosition.y, m_climbingEndPosition.y) + max(height * 0.15f, 0.35f);
 
     m_climbingTimer = 0.0f;
     m_climbingStep = 0;
@@ -827,7 +827,7 @@ void Player::StartClimbing()
     m_state = WalkState::Idle;
     m_wallRunning = false;
     m_wallPenetration = Vector3::Zero;
-    m_velocity.translate = Vector3::Zero;
+    m_velocity.position = Vector3::Zero;
     m_moveAmount = Vector2::Zero;
 }
 
@@ -841,17 +841,17 @@ void Player::Climbing()
 
     if (m_climbingStep == 0)
     {
-        climbingPosition = EaseInOut(m_climbingStartTranslate, m_climbingTopTranslate, t);
+        climbingPosition = EaseInOut(m_climbingStartPosition, m_climbingTopPosition, t);
     }
     else if (m_climbingStep == 1)
     {
-        climbingPosition = Lerp(m_climbingTopTranslate, m_climbingEndTranslate, t);
+        climbingPosition = Lerp(m_climbingTopPosition, m_climbingEndPosition, t);
     }
 
-    Vector3 moveDelta = climbingPosition - m_transform.translate;
-    m_transform.translate = climbingPosition;
+    Vector3 moveDelta = climbingPosition - m_transform.position;
+    m_transform.position = climbingPosition;
     m_playerAABB += moveDelta;
-    m_velocity.translate = Vector3::Zero;
+    m_velocity.position = Vector3::Zero;
     m_moveAmount = Vector2::Zero;
     m_playerSpeed = 0.0f;
     m_onGround = true;
@@ -878,7 +878,7 @@ void Player::JumpStart()
     float jumpStartVelocity = sqrtf(2.0f * gravityPerFrame * m_jumpHeight);
     if (m_onGround) // 設置状態のジャンプ処理
     {
-        m_velocity.translate.y = jumpStartVelocity;
+        m_velocity.position.y = jumpStartVelocity;
     }
 }
 
@@ -886,7 +886,7 @@ void Player::WallJumpStart() {
     // ジャンプ開始時の初速を計算 
     float gravityPerFrame = max(-m_gravity.y * m_delta, 0.0f);
     float jumpStartVelocity = sqrtf(2.0f * gravityPerFrame * m_jumpHeight);
-    m_velocity.translate.y = jumpStartVelocity;
+    m_velocity.position.y = jumpStartVelocity;
     m_wallRunning = false;
     ChangeState(std::make_unique<RunState>());
 }
@@ -895,9 +895,9 @@ void Player::ApplyCollision()
 {
     CollisionManager::GetInstance()->UpdateCollisionTarget(m_playerAABB, "Player");
     CollisionManager::GetInstance()->Update("Player");
-    m_transform.translate += m_velocity.translate;
+    m_transform.position += m_velocity.position;
     Vector3 penetration = CollisionManager::GetInstance()->GetPenetration();
-    m_transform.translate -= penetration;
+    m_transform.position -= penetration;
     m_playerAABB -= penetration;
 }
 
@@ -906,11 +906,11 @@ void Player::ApplyGravity()
     // 重力の適用処理の実装
     if (!m_onGround && !m_wallRunning) // 空中にいてもウォールラン中ならば重力の処理は実行しない
     {
-        m_fallVelocity = m_velocity.translate.y + m_gravity.y * m_delta;
+        m_fallVelocity = m_velocity.position.y + m_gravity.y * m_delta;
         float groundDist = CollisionManager::GetInstance()->GetMaxGroundDistanceForAABB(m_playerAABB);
         // 落下速度の上限
-        m_velocity.translate.y += m_gravity.y * m_delta;
-        m_velocity.translate.y = max(m_fallVelocity, -groundDist);
+        m_velocity.position.y += m_gravity.y * m_delta;
+        m_velocity.position.y = max(m_fallVelocity, -groundDist);
     }
 }
 
@@ -923,13 +923,13 @@ void Player::UpdateVelocity()
         dir.rotate.y = m_moveDirection.y;
         Matrix4x4 rotMat = MakeAffineMatrix(dir);
         Vector3 moveDir = TransformNormal({ m_moveAmount.x, 0.0f, m_moveAmount.y }, rotMat);
-        m_velocity.translate = { moveDir.x * m_delta, m_velocity.translate.y, moveDir.z * m_delta };
-        m_playerAABB += m_velocity.translate;
+        m_velocity.position = { moveDir.x * m_delta, m_velocity.position.y, moveDir.z * m_delta };
+        m_playerAABB += m_velocity.position;
     }
     else
     {
-        m_velocity.translate = { m_wallRunDirection.x * m_delta, m_velocity.translate.y, m_wallRunDirection.z * m_delta };
-        m_playerAABB += m_velocity.translate;
+        m_velocity.position = { m_wallRunDirection.x * m_delta, m_velocity.position.y, m_wallRunDirection.z * m_delta };
+        m_playerAABB += m_velocity.position;
     }
 
 
@@ -947,7 +947,7 @@ void Player::ApplyCameraEffect()
     m_fovPre = m_fov;
 
     // しゃがみ用にカメラを下げる
-    m_cameraTransform.translate.y = m_cameraHeight + m_crouchHeight;
+    m_cameraTransform.position.y = m_cameraHeight + m_crouchHeight;
 
     // 移動速度がダッシュ速度ならFovを広げる
 
@@ -1049,7 +1049,7 @@ void Player::UpdateDebugUI() {
     // --- God Mode ---
     if (ImGui::Checkbox("God Mode", &m_godMode) && !m_godMode)
     {
-        m_cameraTransform.translate = Vector3::Zero;
+        m_cameraTransform.position = Vector3::Zero;
     }
 
     // --- Control Mode ---
@@ -1103,7 +1103,7 @@ void Player::UpdateDebugUI() {
         float groundDist = CollisionManager::GetInstance()->GetMaxGroundDistanceForAABB(m_playerAABB);
         ImGui::Text("Ground Distance: %.2f", groundDist);
 
-        AABB pAABB = m_playerAABB + m_velocity.translate;
+        AABB pAABB = m_playerAABB + m_velocity.position;
         groundDist = CollisionManager::GetInstance()->GetGroundDistanceForAABB(pAABB);
         ImGui::Text("Ground Object Distance: %.2f", groundDist);
         // 貫通量
@@ -1111,13 +1111,13 @@ void Player::UpdateDebugUI() {
         ImGui::Text("Penetration: (%.2f, %.2f, %.2f)",
             penetration.x, penetration.y, penetration.z);
 
-        AABB aabb = m_playerAABB + Vector3{ m_velocity.translate.x, 0.0f, m_velocity.translate.z };
+        AABB aabb = m_playerAABB + Vector3{ m_velocity.position.x, 0.0f, m_velocity.position.z };
         penetration = CollisionManager::GetInstance()->GetPenetrationForAABB(aabb, false);
         ImGui::Text("WallRun Penetration: (%.2f, %.2f, %.2f)", penetration.x, penetration.y, penetration.z);
 
         // Transform
         if (ImGui::TreeNode("Transform")) {
-            ImGui::DragFloat3("##Translate", &m_transform.translate.x, 0.1f);
+            ImGui::DragFloat3("##Position", &m_transform.position.x, 0.1f);
             ImGui::DragFloat3("##Rotate", &m_transform.rotate.x, 0.1f);
             ImGui::Text("Scale:(%.2f, %.2f, %.2f)",
                 m_transform.scale.x, m_transform.scale.y, m_transform.scale.z);
@@ -1126,9 +1126,9 @@ void Player::UpdateDebugUI() {
 
         // Velocity
         if (ImGui::TreeNode("Velocity")) {
-            ImGui::DragFloat3("##Vel Translate", &m_velocity.translate.x, 0.1f);
+            ImGui::DragFloat3("##Velocity Position", &m_velocity.position.x, 0.1f);
             ImGui::DragFloat3("##Vel Rotate", &m_velocity.rotate.x, 0.1f);
-            float moveSpeed = Length({ m_velocity.translate.x, 0.0f, m_velocity.translate.z });
+            float moveSpeed = Length({ m_velocity.position.x, 0.0f, m_velocity.position.z });
             ImGui::Text("Speed : %f", moveSpeed);
             ImGui::TreePop();
         }
@@ -1171,7 +1171,7 @@ void Player::UpdateDebugUI() {
 
         if (ImGui::TreeNode("Camera Transform")) {
             ImGui::Text("Pos:  (%.2f, %.2f, %.2f)",
-                m_cameraTransform.translate.x, m_cameraTransform.translate.y, m_cameraTransform.translate.z);
+                m_cameraTransform.position.x, m_cameraTransform.position.y, m_cameraTransform.position.z);
             ImGui::Text("Rot:  (%.2f, %.2f, %.2f)",
                 m_cameraTransform.rotate.x, m_cameraTransform.rotate.y, m_cameraTransform.rotate.z);
             ImGui::TreePop();
@@ -1179,7 +1179,7 @@ void Player::UpdateDebugUI() {
 
         if (ImGui::TreeNode("Camera Velocity")) {
             ImGui::Text("Vel Pos: (%.2f, %.2f, %.2f)",
-                m_cameraVelocity.translate.x, m_cameraVelocity.translate.y, m_cameraVelocity.translate.z);
+                m_cameraVelocity.position.x, m_cameraVelocity.position.y, m_cameraVelocity.position.z);
             ImGui::Text("Vel Rot: (%.2f, %.2f, %.2f)",
                 m_cameraVelocity.rotate.x, m_cameraVelocity.rotate.y, m_cameraVelocity.rotate.z);
             ImGui::TreePop();
@@ -1205,16 +1205,16 @@ void Player::MovementGodMode()
     moveDir.z += Input::GetInstance()->PushKeyInt(DIK_W);
     moveDir.x += -Input::GetInstance()->PushKeyInt(DIK_A);
     moveDir.x += Input::GetInstance()->PushKeyInt(DIK_D);
-    m_cameraTransform.translate.y += Input::GetInstance()->PushKeyInt(DIK_SPACE);
-    m_cameraTransform.translate.y += -Input::GetInstance()->PushKeyInt(DIK_LCONTROL);
+    m_cameraTransform.position.y += Input::GetInstance()->PushKeyInt(DIK_SPACE);
+    m_cameraTransform.position.y += -Input::GetInstance()->PushKeyInt(DIK_LCONTROL);
 
     // 視点方向に移動
     Transform dir = Transform::Default;
     dir.rotate = m_cameraTransform.rotate;
     Vector3 moveVelocity = TransformNormal(moveDir, MakeAffineMatrix(dir));
-    m_cameraVelocity.translate = moveVelocity * delta * 20.0f;
+    m_cameraVelocity.position = moveVelocity * delta * 20.0f;
 
-    m_cameraTransform.translate += m_cameraVelocity.translate;
+    m_cameraTransform.position += m_cameraVelocity.position;
 }
 
 #endif // !NDEBUG

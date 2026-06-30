@@ -353,11 +353,11 @@ Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Quaternion& rotate, const
 }
 Matrix4x4 MakeAffineMatrix(Transform transform)
 {
-	return MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
+	return MakeAffineMatrix(transform.scale, transform.rotate, transform.position);
 }
 Matrix4x4 MakeAffineMatrix(QuaternionTransform quaternionTransform)
 {
-	return MakeAffineMatrix(quaternionTransform.scale, quaternionTransform.rotate, quaternionTransform.translate);
+	return MakeAffineMatrix(quaternionTransform.scale, quaternionTransform.rotate, quaternionTransform.position);
 }
 ;
 

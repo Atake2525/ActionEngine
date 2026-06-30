@@ -270,39 +270,39 @@ void Model::CreateSkinningResources(const Skeleton& skeleton)
     }
 }
 
-void Model::AddAnimation(std::string directoryPath, std::string filename, std::string animationName)
+void Model::AddAnimation(std::string directoryPath, std::string fileName, std::string animationName)
 {
-    Animation anim = LoadAnimationFile(directoryPath, filename);
+    Animation anim = LoadAnimationFile(directoryPath, fileName);
     animation[animationName] = anim;
 }
 
-void Model::AddAnimationsThreaded(const std::string& directoryPath, const std::vector<std::string>& filenames)
+void Model::AddAnimationsThreaded(const std::string& directoryPath, const std::vector<std::string>& fileNames)
 {
-    if (filenames.empty())
+    if (fileNames.empty())
     {
         return;
     }
 
-    auto animationNameFromFilename = [](const std::string& filename) {
-        size_t start = filename.find_last_of("/\\");
+    auto animationNameFromFileName = [](const std::string& fileName) {
+        size_t start = fileName.find_last_of("/\\");
         start = (start == std::string::npos) ? 0 : start + 1;
-        size_t end = filename.find_last_of('.');
+        size_t end = fileName.find_last_of('.');
         if (end == std::string::npos || end < start)
         {
-            end = filename.size();
+            end = fileName.size();
         }
-        return filename.substr(start, end - start);
+        return fileName.substr(start, end - start);
         };
 
-    std::vector<Animation> loadedAnimations(filenames.size());
+    std::vector<Animation> loadedAnimations(fileNames.size());
     std::vector<std::thread> threads;
-    threads.reserve(filenames.size());
+    threads.reserve(fileNames.size());
 
-    for (size_t i = 0; i < filenames.size(); i++)
+    for (size_t i = 0; i < fileNames.size(); i++)
     {
         // Assimpの読み込みはファイル単位で独立しているので並列化できる。
         threads.emplace_back([&, i]() {
-            loadedAnimations[i] = LoadAnimationFile(directoryPath, filenames[i]);
+            loadedAnimations[i] = LoadAnimationFile(directoryPath, fileNames[i]);
             });
     }
 
@@ -314,19 +314,19 @@ void Model::AddAnimationsThreaded(const std::string& directoryPath, const std::v
         }
     }
 
-    for (size_t i = 0; i < filenames.size(); i++)
+    for (size_t i = 0; i < fileNames.size(); i++)
     {
         // スレッド側では共有mapを書き換えず、join後にメインスレッドで一括登録する。
-        animation[animationNameFromFilename(filenames[i])] = loadedAnimations[i];
+        animation[animationNameFromFileName(fileNames[i])] = loadedAnimations[i];
     }
 }
 
-MaterialData Model::LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename) {
+MaterialData Model::LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& fileName) {
     // 1, 中で必要となる変数の宣言
     MaterialData materialData; // 構築するMaterialData
     std::string line;          // ファイルから読んだ１行を格納するもの
     // 2, ファイルを開く
-    std::ifstream file(directoryPath + "/" + filename); // ファイルを開く
+    std::ifstream file(directoryPath + "/" + fileName); // ファイルを開く
     assert(file.is_open());                             // とりあえず開けなかったら止める
     // 3, 実際にファイルを読み、MaterialDataを構築していく
     while (std::getline(file, line)) {
@@ -336,10 +336,10 @@ MaterialData Model::LoadMaterialTemplateFile(const std::string& directoryPath, c
 
         // identifierに応じた処理
         if (identifier == "map_Kd") {
-            std::string textureFilename;
-            s >> textureFilename;
+            std::string textureFileName;
+            s >> textureFileName;
             // 連結してファイルパスにする
-            materialData.textureFilePath = directoryPath + "/" + textureFilename;
+            materialData.textureFilePath = directoryPath + "/" + textureFileName;
         }
         else
         {
@@ -352,10 +352,10 @@ MaterialData Model::LoadMaterialTemplateFile(const std::string& directoryPath, c
 }
 
 // マルチスレッド化予定
-ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::string& filename) {
+ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::string& fileName) {
     ModelData modelData;            // 構築するModelData
     Assimp::Importer importer;
-    std::string filePath = directoryPath + "/" + filename;
+    std::string filePath = directoryPath + "/" + fileName;
     const aiScene* scene = importer.ReadFile(filePath.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs | aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_CalcTangentSpace);
     //assert(scene->HasMeshes()); // メッシュが無いのは対応しない
     if (!scene->HasMeshes())
@@ -622,8 +622,8 @@ Node Model::ReadNode(aiNode* node)
 
     result.transform.scale = { scale.x, scale.y, scale.z }; // Scaleはそのまま
     result.transform.rotate = { rotate.x, -rotate.y, -rotate.z, rotate.w }; // x軸を反転、さらに回転方向が逆なので軸を反転させる
-    result.transform.translate = { -translate.x, translate.y, translate.z }; // x軸を反転
-    result.localMatrix = MakeAffineMatrix(result.transform.scale, result.transform.rotate, result.transform.translate);
+    result.transform.position = { -translate.x, translate.y, translate.z }; // x軸を反転
+    result.localMatrix = MakeAffineMatrix(result.transform.scale, result.transform.rotate, result.transform.position);
     result.name = node->mName.C_Str(); // Node名を格納
     result.children.resize(node->mNumChildren); // 子供の数だけ確保
     for (uint32_t childIndex = 0; childIndex < node->mNumChildren; ++childIndex)
@@ -634,11 +634,11 @@ Node Model::ReadNode(aiNode* node)
     return result;
 }
 
-Animation Model::LoadAnimationFile(const std::string& directoryPath, const std::string& filename)
+Animation Model::LoadAnimationFile(const std::string& directoryPath, const std::string& fileName)
 {
     Animation result;
     Assimp::Importer importer;
-    std::string filePath = directoryPath + "/" + filename;
+    std::string filePath = directoryPath + "/" + fileName;
     const aiScene* scene = importer.ReadFile(filePath.c_str(), 0);
     if (scene->mNumAnimations == 0)// アニメーションが無い
     {
@@ -659,7 +659,7 @@ Animation Model::LoadAnimationFile(const std::string& directoryPath, const std::
             KeyframeVector3 keyframe;
             keyframe.time = float(keyAssimp.mTime / animationAssimp->mTicksPerSecond); // ここも秒に変換
             keyframe.value = { -keyAssimp.mValue.x, keyAssimp.mValue.y, keyAssimp.mValue.z }; // 右手->左手
-            nodeAnimation.translate.push_back(keyframe);
+            nodeAnimation.position.push_back(keyframe);
         }
         for (uint32_t keyIndex = 0; keyIndex < nodeAnimationAssimp->mNumRotationKeys; ++keyIndex)
         {
@@ -683,11 +683,11 @@ Animation Model::LoadAnimationFile(const std::string& directoryPath, const std::
     return result;
 }
 
-ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::string& filename)
+ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::string& fileName)
 {
     ModelData modelData;            // 構築するModelData
     Assimp::Importer importer;
-    std::string filePath = directoryPath + "/" + filename;
+    std::string filePath = directoryPath + "/" + fileName;
     const aiScene* scene = importer.ReadFile(filePath.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs | aiProcess_Triangulate | aiProcess_CalcTangentSpace);
     //assert(scene->HasMeshes()); 
     // メッシュが無いのは対応しない

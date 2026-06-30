@@ -16,7 +16,7 @@ void TitleScene::Initialize() {
 
     m_pCamera = make_unique<Camera>();
     m_pCamera->SetRotate(Vector3(SwapRadian(11.5f), SwapRadian(1.5f), 0.0f));
-    m_pCamera->SetTranslate({ -1.0f, 1.6f, -3.4f });
+    m_pCamera->SetPosition({ -1.0f, 1.6f, -3.4f });
     m_screenChangeTransformPre = m_pCamera->GetTransform();
     m_pCamera->Update();
 
@@ -140,7 +140,7 @@ void TitleScene::Update() {
             m_screenChangeTimer = std::clamp(m_screenChangeTimer, 0.0f, 1.0f);
             Transform cameraT = Transform::Default;
             cameraT.rotate = Lerp(m_screenChangeTransformPre.rotate, m_screenChangeTransform[m_changeNum].rotate, m_screenChangeTimer);
-            cameraT.translate = Lerp(m_screenChangeTransformPre.translate, m_screenChangeTransform[m_changeNum].translate, m_screenChangeTimer);
+            cameraT.position = Lerp(m_screenChangeTransformPre.position, m_screenChangeTransform[m_changeNum].position, m_screenChangeTimer);
             m_pCamera->SetTransform(cameraT);
 
             if (m_screenChangeTimer == 1.0f && m_changeNum == 0)

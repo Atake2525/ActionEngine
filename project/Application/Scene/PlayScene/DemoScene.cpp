@@ -11,7 +11,7 @@ void DemoScene::Initialize() {
 
 	camera = make_unique<Camera>();
 	camera->SetRotate(Vector3(SwapRadian(10.0f), 0.0f, 0.0f));
-	camera->SetTranslate({ 0.0f, 2.8f, -8.0f });
+	camera->SetPosition({ 0.0f, 2.8f, -8.0f });
 
 	TextureManager::GetInstance()->LoadTexture("Resources/white1x1.dds");
 

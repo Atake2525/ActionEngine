@@ -35,7 +35,7 @@ void ParticleManager::Initialize() {
 	CreateGraphicsPipeLineState();
 }
 
-void ParticleManager::CreateParticleGroupFromOBJ(std::string directoryPath, std::string filename, const std::string& name) {
+void ParticleManager::CreateParticleGroupFromOBJ(std::string directoryPath, std::string fileName, const std::string& name) {
 	if (particleGroups.contains(name))
 	{
 		// 読み込み済なら早期return
@@ -44,7 +44,7 @@ void ParticleManager::CreateParticleGroupFromOBJ(std::string directoryPath, std:
 
 	// パーティクルの作成
 	ParticleGroup group;
-	group.modelData = LoadModelFile(directoryPath, filename);
+	group.modelData = LoadModelFile(directoryPath, fileName);
 	// callData(Resource)などが入った構造体をリサイズする
 	group.callData.resize(group.modelData.matVertexData.size());
 
@@ -273,16 +273,16 @@ void ParticleManager::CreateParticleGroup(ParticleType particleType, std::string
 	particleGroups[name] = group;
 }
 
-Particle ParticleManager::MakeNewParticle(std::mt19937& randomEngine, const Vector3& translate) {
+Particle ParticleManager::MakeNewParticle(std::mt19937& randomEngine, const Vector3& position) {
 	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
 	Particle particle;
 	particle.transform.scale = { 0.5f, 0.5f, 0.5f };
 	particle.transform.rotate = { 0.0f, 3.14f, 0.0f };
-	particle.transform.translate = { distribution(randomEngine), distribution(randomEngine), distribution(randomEngine) };
+	particle.transform.position = { distribution(randomEngine), distribution(randomEngine), distribution(randomEngine) };
 	particle.velocity = { distribution(randomEngine), distribution(randomEngine), distribution(randomEngine) };
 
 	Vector3 randomTranslate{ distribution(randomEngine), distribution(randomEngine), distribution(randomEngine) };
-	particle.transform.translate = translate + randomTranslate;
+	particle.transform.position = position + randomTranslate;
 
 	std::uniform_real_distribution<float> distColor(0.0f, 1.0f);
 	particle.color = { distColor(randomEngine), distColor(randomEngine), distColor(randomEngine), 1.0f };
@@ -294,14 +294,14 @@ Particle ParticleManager::MakeNewParticle(std::mt19937& randomEngine, const Vect
 	return particle;
 }
 
-Particle ParticleManager::MakeNewParticle_HitEffect(std::mt19937& randomEngine, const Vector3& translate)
+Particle ParticleManager::MakeNewParticle_HitEffect(std::mt19937& randomEngine, const Vector3& position)
 {
 	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
 	std::uniform_real_distribution<float> distributionRotate(-std::numbers::pi_v<float>, std::numbers::pi_v<float>);
 	Particle particle;
 	particle.transform.scale = { 0.025f, 0.5f, 0.5f };
 	particle.transform.rotate = { 0.0f, 0.0f, distributionRotate(randomEngine) };
-	particle.transform.translate = { translate };
+	particle.transform.position = { position };
 	particle.velocity = { 0.0f, 0.0f, 0.0f };
 
 	particle.color = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -353,7 +353,7 @@ void ParticleManager::Update() {
 			}
 			// Fieldの範囲内のParticleには加速度を適用する
 			if (particleGroup->second.particleFlag.isAccelerationField) {
-				if (IsCollision(particleGroup->second.accelerationField.area, (*particleIterator).transform.translate)) {
+				if (IsCollision(particleGroup->second.accelerationField.area, (*particleIterator).transform.position)) {
 					(*particleIterator).velocity += particleGroup->second.accelerationField.acceleration * deltaTime;
 				}
 			}
@@ -361,17 +361,17 @@ void ParticleManager::Update() {
 			//(*particleIterator).currentTime += deltaTime;
 			(*particleIterator).currentTime += deltaTime;
 			float alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
-			(*particleIterator).transform.translate += (*particleIterator).velocity * deltaTime;
+			(*particleIterator).transform.position += (*particleIterator).velocity * deltaTime;
 			//if (particleGroup->second.particleFlag.start) {
 			//	// ...WorldMatrixを求めたり
 			//	//alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
 			//}
 
 			Matrix4x4 scaleMatrix = MakeScaleMatrix((*particleIterator).transform.scale);
-			Matrix4x4 translateMatrix = MakeTranslateMatrix((*particleIterator).transform.translate);
+			Matrix4x4 translateMatrix = MakeTranslateMatrix((*particleIterator).transform.position);
 			billboardMatrix = MakeRotateZMatrix((*particleIterator).transform.rotate.z);
 			Matrix4x4 worldMatrix = Multiply(scaleMatrix, Multiply(billboardMatrix, translateMatrix));
-			//Matrix4x4 worldMatrix = MakeAffineMatrix((*particleIterator).transform.scale, (*particleIterator).transform.rotate, (*particleIterator).transform.translate);
+			//Matrix4x4 worldMatrix = MakeAffineMatrix((*particleIterator).transform.scale, (*particleIterator).transform.rotate, (*particleIterator).transform.position);
 			const Matrix4x4& viewProjectionMatrix = camera->GetViewProjectionMatrix();
 			Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
 			// インスタンスが最大数を超えないようにする
@@ -616,10 +616,10 @@ ModelData ParticleManager::CreatePlaneModel()
 }
 
 // マルチスレッド化予定
-ModelData ParticleManager::LoadModelFile(const std::string& directoryPath, const std::string& filename) {
+ModelData ParticleManager::LoadModelFile(const std::string& directoryPath, const std::string& fileName) {
 	ModelData modelData;            // 構築するModelData
 	Assimp::Importer importer;
-	std::string filePath = directoryPath + "/" + filename;
+	std::string filePath = directoryPath + "/" + fileName;
 	const aiScene* scene = importer.ReadFile(filePath.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs | aiProcess_Triangulate);
 	assert(scene->HasMeshes()); // メッシュが無いのは対応しない
 

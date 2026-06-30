@@ -6,8 +6,8 @@
 #include "AABB.h"
 
 void Sprite::SetTransform(const Transform& transform){ 
-	position.x = transform.translate.x;
-	position.y = transform.translate.y;
+	position.x = transform.position.x;
+	position.y = transform.position.y;
 	rotation = transform.rotate.z;
 	scale.x = transform.scale.x;
 	scale.y = transform.scale.y;
@@ -15,7 +15,7 @@ void Sprite::SetTransform(const Transform& transform){
 
 const Transform Sprite::GetTransform() const {
 	Transform result;
-	result.translate = { position.x, position.y, 0.0f };
+	result.position = { position.x, position.y, 0.0f };
 	result.rotate = {0.0f, 0.0f, rotation };
 	result.scale = { scale.x, scale.y, 1.0f };
 	return result;
@@ -119,7 +119,7 @@ void Sprite::Update() {
 	    {0.0f, 0.0f, 0.0f},
 	};
 
-	transform.translate = {position.x, position.y, 0.0f};
+	transform.position = {position.x, position.y, 0.0f};
 	transform.rotate = {0.0f, 0.0f, rotation};
 	transform.scale = {scale.x, scale.y, 0.1f};
 
@@ -127,13 +127,13 @@ void Sprite::Update() {
 
 	Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransform.scale);
 	uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransform.rotate.z));
-	uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix(uvTransform.translate));
+	uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix(uvTransform.position));
 	materialData->uvTransform = uvTransformMatrix;
 
 	// ゲームの処理
 	//  Sprite用のWorldViewProjectionMatrixを作る
 	//  SpriteのTransform処理
-	Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
+	Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.position);
 	Matrix4x4 viewMatrix = MakeIdentity4x4();
 	Matrix4x4 projectionMatrix = MakeOrthographicMatrix(0.0f, 0.0f, float(WinApp::GetInstance()->GetkClientWidth()), float(WinApp::GetInstance()->GetkClientHeight()), 0.0f, 100.0f);
 	Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));

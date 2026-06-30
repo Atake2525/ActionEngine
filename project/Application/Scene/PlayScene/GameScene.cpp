@@ -17,7 +17,7 @@ void GameScene::Initialize() {
     TextureManager::GetInstance()->LoadTexture("Resources/white1x1.dds");
 
     m_pCamera = make_unique<Camera>();
-    m_pCamera->SetTranslate({ 0.0f, 1.8f, 0.0f });
+    m_pCamera->SetPosition({ 0.0f, 1.8f, 0.0f });
     m_pCamera->SetFarClipDistance(0.0f);
 
     SkyBox::GetInstance()->SetCamera(m_pCamera.get());

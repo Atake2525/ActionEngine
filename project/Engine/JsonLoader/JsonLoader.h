@@ -59,7 +59,7 @@ struct LevelData
 struct HotReload
 {
 	std::string directoryPath;
-	std::string filename;
+	std::string fileName;
 
 	std::string fullpath;
 

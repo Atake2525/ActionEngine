@@ -33,8 +33,8 @@ public:
 	const Matrix4x4& GetViewProjectionMatrix() const { return viewProjectionMatrix; }
 	// Getter(Rotate)
 	const Vector3& GetRotate() const { return transform.rotate; }
-	// Getter(Translate)
-	const Vector3& GetTranslate() const { return transform.translate; }
+	// Getter(Position)
+	const Vector3& GetPosition() const { return transform.position; }
 	// Getter(Direction)
 	const Vector3& GetDirection() const { return direction; }
     // Getter(nearClipDistance)
@@ -52,8 +52,8 @@ public:
 
 	// Setter(Rotate)
 	void SetRotate(const Vector3& rotate) { transform.rotate = rotate; }
-	// Setter(Translate)
-	void SetTranslate(const Vector3& translate) { transform.translate = translate; }
+	// Setter(Position)
+	void SetPosition(const Vector3& position) { transform.position = position; }
 	// Setter(farClipDistance)
 	void SetFarClipDistance(const float& farClip) { farClipDistance = farClip; }
 	// Setter(fovY)

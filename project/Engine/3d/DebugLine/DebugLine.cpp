@@ -131,7 +131,7 @@ void DebugLine::Update() {
 
     // --- Transform設定 ---
     if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
-        ImGui::DragFloat3("Position", &transform.translate.x, 0.1f);
+        ImGui::DragFloat3("Position", &transform.position.x, 0.1f);
         ImGui::DragFloat3("Rotation", &transform.rotate.x, 0.01f);
         ImGui::DragFloat3("Scale", &transform.scale.x, 0.01f);
     }
@@ -193,7 +193,7 @@ void DebugLine::Update() {
     Matrix4x4 worldMat = MakeAffineMatrix(transform);
 
     for (const auto& v : baseVertices) {
-        Vector3 pos = { v.position.x + transform.translate.x, v.position.y + transform.translate.y, v.position.z + transform.translate.z };
+        Vector3 pos = { v.position.x + transform.position.x, v.position.y + transform.position.y, v.position.z + transform.position.z };
         Vector3 transformed = TransformNormal(pos, worldMat); // あなたのkMathにある変換関数
         lineVertices.push_back({ {transformed.x, transformed.y, transformed.z, 1.0f}, v.color });
     }

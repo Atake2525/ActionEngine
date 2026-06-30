@@ -16,9 +16,6 @@
     <Filter Include="Application\FrameWork">
       <UniqueIdentifier>{2c84a2ed-17bb-d39a-3569-83481bb8fcdd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Application\Player">
-      <UniqueIdentifier>{0fac7aab-7d8b-7412-77f3-cf246a31ceaf}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Application\Scene">
       <UniqueIdentifier>{53660468-fbac-904d-6c41-8497c7f59096}</UniqueIdentifier>
     </Filter>
@@ -172,7 +169,10 @@
     <Filter Include="externals\assimp\lib\Release">
       <UniqueIdentifier>{a08543a6-1b18-050e-c1a1-3a2ddd7c4a66}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Application\Player\State">
+    <Filter Include="Application\Scene\Player">
+      <UniqueIdentifier>{0fac7aab-7d8b-7412-77f3-cf246a31ceaf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\Scene\Player\State">
       <UniqueIdentifier>{f920d583-de28-4795-bb6c-39a46bce184d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -346,7 +346,7 @@
       <Filter>Application\StageManager</Filter>
     </ClCompile>
     <ClCompile Include="Application\Player\Player.cpp">
-      <Filter>Application\Player</Filter>
+      <Filter>Application\Scene\Player</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Collision\PhysicsCorrection.cpp">
       <Filter>Engine\Collision</Filter>
@@ -355,7 +355,7 @@
       <Filter>Application</Filter>
     </ClCompile>
     <ClCompile Include="Application\Player\PlayerUI.cpp">
-      <Filter>Application\Player</Filter>
+      <Filter>Application\Scene\Player</Filter>
     </ClCompile>
     <ClCompile Include="Application\Result.cpp">
       <Filter>Application</Filter>
@@ -385,25 +385,25 @@
       <Filter>Engine\Core\Input</Filter>
     </ClCompile>
     <ClCompile Include="Application\Player\PlayerState.cpp">
-      <Filter>Application\Player\State</Filter>
+      <Filter>Application\Scene\Player\State</Filter>
     </ClCompile>
     <ClCompile Include="Application\Player\RunState.cpp">
-      <Filter>Application\Player\State</Filter>
+      <Filter>Application\Scene\Player\State</Filter>
     </ClCompile>
     <ClCompile Include="Application\Player\JumpState.cpp">
-      <Filter>Application\Player\State</Filter>
+      <Filter>Application\Scene\Player\State</Filter>
     </ClCompile>
     <ClCompile Include="Application\CrouchState.cpp">
-      <Filter>Application\Player\State</Filter>
+      <Filter>Application\Scene\Player\State</Filter>
     </ClCompile>
     <ClCompile Include="Application\Player\ClimbingState.cpp">
-      <Filter>Application\Player\State</Filter>
+      <Filter>Application\Scene\Player\State</Filter>
     </ClCompile>
     <ClCompile Include="Application\Player\WallRunState.cpp">
-      <Filter>Application\Player\State</Filter>
+      <Filter>Application\Scene\Player\State</Filter>
     </ClCompile>
     <ClCompile Include="Application\Player\WallJumpState.cpp">
-      <Filter>Application\Player\State</Filter>
+      <Filter>Application\Scene\Player\State</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -639,7 +639,7 @@
       <Filter>Application\StageManager</Filter>
     </ClInclude>
     <ClInclude Include="Application\Player\Player.h">
-      <Filter>Application\Player</Filter>
+      <Filter>Application\Scene\Player</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Collision\PhysicsCorrection.h">
       <Filter>Engine\Collision</Filter>
@@ -648,7 +648,7 @@
       <Filter>Application</Filter>
     </ClInclude>
     <ClInclude Include="Application\Player\PlayerUI.h">
-      <Filter>Application\Player</Filter>
+      <Filter>Application\Scene\Player</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Presentation\Cinematic\ScanEffect.h">
       <Filter>Engine\Presentation\Cinematic</Filter>
@@ -681,25 +681,25 @@
       <Filter>Engine\Core\Input</Filter>
     </ClInclude>
     <ClInclude Include="Application\Player\PlayerState.h">
-      <Filter>Application\Player\State</Filter>
+      <Filter>Application\Scene\Player\State</Filter>
     </ClInclude>
     <ClInclude Include="Application\Player\RunState.h">
-      <Filter>Application\Player\State</Filter>
+      <Filter>Application\Scene\Player\State</Filter>
     </ClInclude>
     <ClInclude Include="Application\Player\JumpState.h">
-      <Filter>Application\Player\State</Filter>
+      <Filter>Application\Scene\Player\State</Filter>
     </ClInclude>
     <ClInclude Include="Application\CrouchState.h">
-      <Filter>Application\Player\State</Filter>
+      <Filter>Application\Scene\Player\State</Filter>
     </ClInclude>
     <ClInclude Include="Application\Player\ClimbingState.h">
-      <Filter>Application\Player\State</Filter>
+      <Filter>Application\Scene\Player\State</Filter>
     </ClInclude>
     <ClInclude Include="Application\Player\WallRunState.h">
-      <Filter>Application\Player\State</Filter>
+      <Filter>Application\Scene\Player\State</Filter>
     </ClInclude>
     <ClInclude Include="Application\Player\WallJumpState.h">
-      <Filter>Application\Player\State</Filter>
+      <Filter>Application\Scene\Player\State</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
