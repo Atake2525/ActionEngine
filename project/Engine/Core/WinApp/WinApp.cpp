@@ -2,14 +2,9 @@
 #include "externals/imgui/imgui.h"
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-WinApp* WinApp::instance = nullptr;
-
-WinApp* WinApp::GetInstance() {
-	if (instance == nullptr)
-	{
-		instance = new WinApp;
-	}
-	return instance;
+WinApp::~WinApp() {
+	CloseWindow(hwnd);
+	CoUninitialize();
 }
 
 // ウィンドウプロージャ
@@ -134,14 +129,6 @@ const bool WinApp::IsWindowActive()
 	return GetForegroundWindow() == hwnd;
 }
 
-// 終了
-void WinApp::Finalize() { 
-	CloseWindow(hwnd);
-	CoUninitialize();
-
-	delete instance;
-	instance = nullptr;
-}
 
 // メッセージの処理
 bool WinApp::ProcessMessage() {

@@ -44,6 +44,7 @@ struct Dissolve
 
 class DirectXBase;
 class SrvManager;
+class WinApp;
 
 class OffScreenRendering
 {
@@ -54,7 +55,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(DirectXBase* directXBase, SrvManager* srvManager);
+	void Initialize(DirectXBase& directXBase, SrvManager& srvManager, WinApp& winApp);
 
 
 	void Update();
@@ -81,8 +82,9 @@ private:
 
 	uint32_t srvIndex;
 
-	DirectXBase* m_directXBase;
-	SrvManager* m_srvManager;
+	DirectXBase* m_pDirectXBase;
+	SrvManager* m_pSrvManager;
+	WinApp* m_pWinApp;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE m_rtvDescriptorHandle;
 

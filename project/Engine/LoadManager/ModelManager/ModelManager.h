@@ -6,7 +6,6 @@
 #pragma once
 
 class Model;
-class ModelBase;
 
 class ModelManager {
 private:

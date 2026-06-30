@@ -13,21 +13,12 @@ enum class WindowMode {
 };
 
 class WinApp {
-private:
-	static WinApp* instance;
-
-	WinApp() = default;
-	~WinApp() = default;
-
-	WinApp(WinApp&) = delete;
-	WinApp& operator=(WinApp&) = delete;
-
 public:
 	static LRESULT CALLBACK windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 
 public:
-
-	static WinApp* GetInstance();
+	WinApp();
+	~WinApp();
 
 	/// <summary>
 	/// 初期化
@@ -43,9 +34,6 @@ public:
 	/// </summary>
 	/// <returns>選択されていればtrue</returns>
 	const bool IsWindowActive();
-
-	// 終了
-	void Finalize();
 
 	// メッセージの処理
 	bool ProcessMessage();

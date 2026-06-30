@@ -11,19 +11,20 @@
 #define XM_PI 3.141592654f
 #endif
 
-void DebugLine::Initialize() {
-    vertexResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(LineVertex) * size_t(MAX_LINE_VERTEX_COUNT));
+void DebugLine::Initialize(DebugLineBase& debugLineBase) {
+    m_pDebugLineBase = &debugLineBase;
+    vertexResource = m_pDebugLineBase->GetDirectXBase().CreateBufferResource(sizeof(LineVertex) * size_t(MAX_LINE_VERTEX_COUNT));
     vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
     vertexBufferView.SizeInBytes = sizeof(LineVertex) * MAX_LINE_VERTEX_COUNT;
     vertexBufferView.StrideInBytes = sizeof(LineVertex);
     vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&lineMap));
 
-    transformationMatrixResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(LineTransformationMatrix));
+    transformationMatrixResource = m_pDebugLineBase->GetDirectXBase().CreateBufferResource(sizeof(LineTransformationMatrix));
     transformationMatrixResource->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrix));
     transformationMatrix->WVP = MakeIdentity4x4();
 
     transform = Transform::Default;
-    camera = DebugLineBase::GetInstance()->GetCamera();
+    m_pCamera = m_pDebugLineBase->GetCamera();
 }
 
 // --- ヘルパー: 線を追加（ローカル座標） ---
@@ -200,8 +201,8 @@ void DebugLine::Update() {
 
     // ワールド行列の計算（カメラとの合成）
     Matrix4x4 viewProjectionMatrix = MakeIdentity4x4();
-    if (camera) {
-        viewProjectionMatrix = (camera->GetViewProjectionMatrix());
+    if (m_pCamera) {
+        viewProjectionMatrix = (m_pCamera->GetViewProjectionMatrix());
     }
     transformationMatrix->WVP = viewProjectionMatrix;
 
@@ -211,7 +212,7 @@ void DebugLine::Update() {
 }
 
 void DebugLine::Draw() {
-    DirectXBase::GetInstance()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
-    DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(0, transformationMatrixResource->GetGPUVirtualAddress());
-    DirectXBase::GetInstance()->GetCommandList()->DrawInstanced(drawVertexCount, 1, 0, 0);
+    m_pDebugLineBase->GetDirectXBase().GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
+    m_pDebugLineBase->GetDirectXBase().GetCommandList()->SetGraphicsRootConstantBufferView(0, transformationMatrixResource->GetGPUVirtualAddress());
+    m_pDebugLineBase->GetDirectXBase().GetCommandList()->DrawInstanced(drawVertexCount, 1, 0, 0);
 }

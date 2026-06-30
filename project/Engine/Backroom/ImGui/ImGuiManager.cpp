@@ -5,33 +5,21 @@
 
 using namespace Logger;
 
-ImGuiManager* ImGuiManager::instance = nullptr;
-
-ImGuiManager* ImGuiManager::GetInstance()
-{
-	if (instance == nullptr)
-	{
-		instance = new ImGuiManager;
-	}
-	return instance;
-}
-
-void ImGuiManager::Finalize()
-{
-	delete instance;
-	instance = nullptr;
+ImGuiManager::~ImGuiManager() {
 	// ImGuiの終了処理。詳細はさして重要ではないので解説は省略する。
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
 }
 
-void ImGuiManager::Initialize()
-{
+void ImGuiManager::Initialize(DirectXBase& directXBase, SrvManager& srvManager, WinApp& winApp) {
+	m_pDirectXBase = &directXBase;
+	m_pSrvManager = &srvManager;
+	m_pWinApp = &winApp;
 
-	uint32_t srvIndex = SrvManager::GetInstance()->Allocate();
+	uint32_t srvIndex = m_pSrvManager->Allocate();
 
-	if (!SrvManager::GetInstance()->CheckAllocate())
+	if (!m_pSrvManager->CheckAllocate())
 	{
 		Log("Cant Allocate");
 		return;
@@ -48,10 +36,10 @@ void ImGuiManager::Initialize()
 	ImGuiStyle& style = ImGui::GetStyle();
 	style.WindowMenuButtonPosition = ImGuiDir_Left;
 
-	ImGui_ImplWin32_Init(WinApp::GetInstance()->GetHwnd());
+	ImGui_ImplWin32_Init(m_pWinApp->GetHwnd());
 	ImGui_ImplDX12_Init(
-		DirectXBase::GetInstance()->GetDevice().Get(), DirectXBase::GetInstance()->GetSwapChainDesc().BufferCount, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, SrvManager::GetInstance()->GetDescriptorHeap().Get(), SrvManager::GetInstance()->GetCPUDescriptorHandle(srvIndex),
-		SrvManager::GetInstance()->GetGPUDescriptorHandle(srvIndex));
+		m_pDirectXBase->GetDevice().Get(), m_pDirectXBase->GetSwapChainDesc().BufferCount, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, m_pSrvManager->GetDescriptorHeap().Get(), m_pSrvManager->GetCPUDescriptorHandle(srvIndex),
+		m_pSrvManager->GetGPUDescriptorHandle(srvIndex));
 	
 	// 日本語化
 	ImFont* font = io.Fonts->AddFontFromFileTTF("Resources/Fonts/BIZ-UDGothicR.ttc", 14.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());

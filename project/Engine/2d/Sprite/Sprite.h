@@ -9,9 +9,15 @@
 
 #pragma once
 
+class Render2DBase;
+class TextureManager;
+class WinApp;
+class SrvManager;
+
 // スプライト
 class Sprite {
 public:
+	void SetContext(Render2DBase& render2DBase, SrvManager& srvManager, TextureManager& textureManager, WinApp& winApp);
 	/// <summary>
 	/// 初期化
 	/// </summary>
@@ -33,6 +39,11 @@ public:
 	void Draw();
 
 private:
+
+	Render2DBase* m_pRender2DBase;
+	TextureManager* m_pTextureManager;
+	WinApp* m_pWinApp;
+	SrvManager* m_pSrvManager;
 
 	struct VertexData {
 		Vector4 position;

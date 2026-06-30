@@ -9,24 +9,10 @@
 #include "ImGuiManager.h"
 #endif // !NDEBUG
 
-
-GameTime* GameTime::instance = nullptr;
-
-GameTime* GameTime::GetInstance() {
-    if (instance == nullptr) {
-        instance = new GameTime;
-    }
-    return instance;
-}
-
-void GameTime::Finalize() {
-    delete instance;
-    instance = nullptr;
-}
-
-void GameTime::Initialize() {
+void GameTime::Initialize(DirectXBase& directXBase) {
+    m_pDirectXBase = &directXBase;
     deltaTime = 0.0f;
-    maxFPS = DirectXBase::GetInstance()->GetMaxFPS();
+    maxFPS = m_pDirectXBase->GetMaxFPS();
 }
 
 #ifndef NDEBUG

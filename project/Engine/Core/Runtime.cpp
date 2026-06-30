@@ -57,10 +57,10 @@ void Runtime::SetupEngine() {
     engine.graphics.offScreen.Initialize(&engine.graphics.dx, &engine.graphics.srv);
     engine.graphics.render2DBase.Initialize();
     engine.graphics.object3DBase.Initialize();
-#ifndef NDEBUF
+#ifndef NDEBUG
     engine.graphics.imgui.Initialize();
     engine.graphics.debugLine.Initialize();
-#endif // !NDEBUF
+#endif // !NDEBUG
 
     engine.assets.audio.Initialize();
     engine.assets.textures.Initialize();
