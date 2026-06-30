@@ -47,6 +47,8 @@ public:
 	const float& GetfovY() const { return fovY; }
 	// Getter(Transform)
 	const Transform& GetTransform() const { return transform; }
+	// カメラの水平回転方向
+	const Vector3 GetHolizontalDirection() const;
 
 	// Setter(Rotate)
 	void SetRotate(const Vector3& rotate) { transform.rotate = rotate; }
