@@ -71,14 +71,14 @@ public:
     //  Transform
     // ============================
     const Transform& GetTransform() const { return transform; }
-    const Vector3& GetTranslate() const { return transform.translate; }
+    const Vector3& GetPosition() const { return transform.position; }
     const Vector3& GetScale() const { return transform.scale; }
     const Vector3& GetRotate() const { return transform.rotate; }
     const Vector3 GetRotateInDegree() const;
 
     void SetTransform(const Transform& transform) { this->transform = transform; }
-    void SetTransform(const Vector3& translate, const Vector3& scale, const Vector3& rotate);
-    void SetTranslate(const Vector3& translate) { transform.translate = translate; }
+    void SetTransform(const Vector3& position, const Vector3& scale, const Vector3& rotate);
+    void SetPosition(const Vector3& position) { transform.position = position; }
     void SetScale(const Vector3& scale) { transform.scale = scale; }
     void SetRotate(const Vector3& rotate) { transform.rotate = rotate; }
     void SetRotateInDegree(const Vector3& rotate);

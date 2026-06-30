@@ -289,7 +289,7 @@ void SkyBox::Update() {
 	if (camera_)
 	{
 		transform = camera_->GetTransform();
-		transform.translate = camera_->GetWorldPosition();
+		transform.position = camera_->GetWorldPosition();
 	}
 	else
 	{
@@ -298,7 +298,7 @@ void SkyBox::Update() {
 	}
 	// 3DのTransform処理
 	//rotatez += SwapRadian(1.0f);
-	Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, Vector3{ 0.0f, 0.0f, 0.0f /*rotatez*/ }, transform.translate);
+	Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, Vector3{ 0.0f, 0.0f, 0.0f /*rotatez*/ }, transform.position);
 
 	Matrix4x4 worldViewProjectionMatrix;
 	if (camera_) {

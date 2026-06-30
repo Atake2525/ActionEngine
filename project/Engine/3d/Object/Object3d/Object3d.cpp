@@ -81,7 +81,7 @@ void Object3d::Update() {
 
 
     // 3DのTransform処理
-    worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
+    worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.position);
     worldMatrix = Multiply(worldMatrix, rotateQuaternionMatrix);
 
     if (model_->IsAnimation() && startAnimation)
@@ -142,7 +142,7 @@ void Object3d::Update() {
         const Matrix4x4& viewProjectionMatrix = camera->GetViewProjectionMatrix();
         worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
 
-        Vector3 clipPos = MatrixTransform(transform.translate, worldViewProjectionMatrix);
+        Vector3 clipPos = MatrixTransform(transform.position, worldViewProjectionMatrix);
 
         // NDC → スクリーン座標
         float screenX = (clipPos.x * 0.5f + 0.5f) * (float)WinApp::GetInstance()->GetkClientWidth();
@@ -280,11 +280,11 @@ void Object3d::AddAnimation(std::string directoryPath, std::string fileName, std
     }
 }
 
-void Object3d::AddAnimationsThreaded(const std::string& directoryPath, const std::vector<std::string>& filenames) {
+void Object3d::AddAnimationsThreaded(const std::string& directoryPath, const std::vector<std::string>& fileNames) {
     if (model_->IsAnimation())
     {
         // 読み込みはModel側で並列実行し、Object3d側は反映済みのテーブルを受け取るだけにする。
-        model_->AddAnimationsThreaded(directoryPath, filenames);
+        model_->AddAnimationsThreaded(directoryPath, fileNames);
         animation = model_->GetAnimation();
         Log("アニメーションの並列読み込み完了\n");
     }
@@ -332,8 +332,8 @@ void Object3d::SetRotateInDegree(const Vector3& rotate) {
     transform.rotate = SwapRadian(rotate);
 }
 
-void Object3d::SetTransform(const Vector3& translate, const Vector3& scale, const Vector3& rotate) {
-    transform.translate = translate;
+void Object3d::SetTransform(const Vector3& position, const Vector3& scale, const Vector3& rotate) {
+    transform.position = position;
     transform.scale = scale;
     transform.rotate = rotate;
 }
@@ -364,7 +364,7 @@ void Object3d::ApplyAnimation(Skeleton& skeleton, const Animation& animation, fl
         // 対象のJointのAnimationがあれば、値の適用を行う。 下記のif分はc++17から可能になった初期化付きif文
         if (auto it = animation.nodeAnimations.find(joint.name); it != animation.nodeAnimations.end()) {
             const NodeAnimation& rootNodeAnimation = (*it).second;
-            joint.transform.translate = CalculateValue(rootNodeAnimation.translate, animationTime);
+            joint.transform.position = CalculateValue(rootNodeAnimation.position, animationTime);
             joint.transform.rotate = CalculateValue(rootNodeAnimation.rotate, animationTime);
             joint.transform.scale = CalculateValue(rootNodeAnimation.scale, animationTime);
         }
@@ -380,17 +380,17 @@ const bool Object3d::ChangeAnimation(Animation& beforAnimation, Animation& after
     afterFrameTime = std::fmod(afterFrameTime, afterAnimation.duration);
     for (Joint& joint : skeleton.joints)
     {
-        Vector3 beforTranslate, afterTranslate;
+        Vector3 beforePosition, afterPosition;
         Quaternion beforRotate, afterRotate;
         Vector3 beforScale, afterScale;
-        beforTranslate = joint.transform.translate;
+        beforePosition = joint.transform.position;
         beforRotate = joint.transform.rotate;
         beforScale = joint.transform.scale;
         bool beforSuccess = false, afterSuccess = false;
         // 対象のJointのAnimationがあれば、値の適用を行う。 下記のif分はc++17から可能になった初期化付きif文
         if (auto it = beforAnimation.nodeAnimations.find(joint.name); it != beforAnimation.nodeAnimations.end()) {
             const NodeAnimation rootNodeAnimation = (*it).second;
-            beforTranslate = CalculateValue(rootNodeAnimation.translate, beforFrameTime);
+            beforePosition = CalculateValue(rootNodeAnimation.position, beforFrameTime);
             beforRotate = CalculateValue(rootNodeAnimation.rotate, beforFrameTime);
             beforScale = CalculateValue(rootNodeAnimation.scale, beforFrameTime);
             beforSuccess = true;
@@ -399,7 +399,7 @@ const bool Object3d::ChangeAnimation(Animation& beforAnimation, Animation& after
         // 対象のJointのAnimationがあれば、値の適用を行う。 下記のif分はc++17から可能になった初期化付きif文
         if (auto it = afterAnimation.nodeAnimations.find(joint.name); it != afterAnimation.nodeAnimations.end()) {
             const NodeAnimation rootNodeAnimation = (*it).second;
-            afterTranslate = CalculateValue(rootNodeAnimation.translate, afterFrameTime);
+            afterPosition = CalculateValue(rootNodeAnimation.position, afterFrameTime);
             afterRotate = CalculateValue(rootNodeAnimation.rotate, afterFrameTime);
             afterScale = CalculateValue(rootNodeAnimation.scale, afterFrameTime);
             afterSuccess = true;
@@ -410,7 +410,7 @@ const bool Object3d::ChangeAnimation(Animation& beforAnimation, Animation& after
         if (beforSuccess && afterSuccess)
         {
             // 両方の処理ができていれば実行する
-            joint.transform.translate = Lerp(beforTranslate, afterTranslate, changeAnimationTime);
+            joint.transform.position = Lerp(beforePosition, afterPosition, changeAnimationTime);
             joint.transform.rotate = Slerp(beforRotate, afterRotate, changeAnimationTime);
             joint.transform.scale = Lerp(beforScale, afterScale, changeAnimationTime);
         }
@@ -421,7 +421,7 @@ const bool Object3d::ChangeAnimation(Animation& beforAnimation, Animation& after
                 // 対象のJointのAnimationがあれば、値の適用を行う。 下記のif分はc++17から可能になった初期化付きif文
                 if (auto it = afterAnimation.nodeAnimations.find(joint.name); it != afterAnimation.nodeAnimations.end()) {
                     const NodeAnimation& rootNodeAnimation = (*it).second;
-                    joint.transform.translate = CalculateValue(rootNodeAnimation.translate, animationTime);
+                    joint.transform.position = CalculateValue(rootNodeAnimation.position, animationTime);
                     joint.transform.rotate = CalculateValue(rootNodeAnimation.rotate, animationTime);
                     joint.transform.scale = CalculateValue(rootNodeAnimation.scale, animationTime);
                 }
@@ -639,8 +639,8 @@ void Object3d::UpdateAABB()
 void Object3d::UpdateCapsule()
 {
     // カプセルの更新
-    capsule.start = capsulePre.start + transform.translate;
-    capsule.end = capsulePre.end + transform.translate;
+    capsule.start = capsulePre.start + transform.position;
+    capsule.end = capsulePre.end + transform.position;
 }
 
 const Skeleton Object3d::CreateSkelton(const Node& rootNode)
@@ -686,7 +686,7 @@ void Object3d::UpdateSkelton(Skeleton& skelton)
     // 全てのJointを更新。親が若いので通常ループで処理可能になっている
     for (Joint& joint : skelton.joints)
     {
-        joint.localMatrix = MakeAffineMatrix(joint.transform.scale, joint.transform.rotate, joint.transform.translate);
+        joint.localMatrix = MakeAffineMatrix(joint.transform.scale, joint.transform.rotate, joint.transform.position);
         if (joint.parent) { // 親がいれば親の行列を掛ける
             joint.skeletonSpaceMatrix = Multiply(joint.localMatrix, skelton.joints[*joint.parent].skeletonSpaceMatrix);
         }

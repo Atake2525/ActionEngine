@@ -22,12 +22,12 @@ void ModelManager::Initialize() {
 }
 
 Model* ModelManager::LoadModel(const std::string& directoryPath, const std::string& fileName, const bool isAnimation) {
-	std::string filename = fileName;
+	const std::string& modelKey = fileName;
 
 	// 読み込み済モデルを検索
-	if (models.contains(filename)) {
+	if (models.contains(modelKey)) {
 		// 読み込み済なら早期return
-		return models.at(filename).get();
+		return models.at(modelKey).get();
 	}
 
 	// モデルの生成と読み込み、初期化
@@ -35,8 +35,8 @@ Model* ModelManager::LoadModel(const std::string& directoryPath, const std::stri
 	model->Initialize(directoryPath, fileName, isAnimation);
 
 	// モデルをmapコンテナに格納する
-	models.insert(std::make_pair(filename, std::move(model)));
-	return models.at(filename).get();
+	models.insert(std::make_pair(modelKey, std::move(model)));
+	return models.at(modelKey).get();
 }
 
 Model* ModelManager::FindModel(const std::string& fileName) {

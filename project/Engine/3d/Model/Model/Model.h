@@ -119,9 +119,9 @@ public:
 	void CreateSkinningResources(const Skeleton& skeleton);
 
 	// アニメーションの追加
-	void AddAnimation(std::string directoryPath, std::string filename, std::string animationName);
+	void AddAnimation(std::string directoryPath, std::string fileName, std::string animationName);
 
-	void AddAnimationsThreaded(const std::string& directoryPath, const std::vector<std::string>& filenames);
+	void AddAnimationsThreaded(const std::string& directoryPath, const std::vector<std::string>& fileNames);
 
 	void SetPBRMaterial(const float metallic, const float roughness);
 
@@ -183,7 +183,7 @@ private:
 	// ノード情報のロード
 	static Node ReadNode(aiNode* node);
 	// アニメーションの読み込み
-	static Animation LoadAnimationFile(const std::string& directoryPath, const std::string& filename);
+	static Animation LoadAnimationFile(const std::string& directoryPath, const std::string& fileName);
 	// .gltfファイルの読み取り
 	static ModelData LoadModelFileGLTF(const std::string& directoryPath, const std::string& fileName);
 	// .objファイルの読み取り

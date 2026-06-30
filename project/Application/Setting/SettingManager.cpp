@@ -9,12 +9,12 @@
 using namespace Setting;
 using namespace Logger;
 
-bool SettingManager::Load(const std::string filename, SettingType type) {
+bool SettingManager::Load(const std::string& fileName, SettingType type) {
 	
 	// jsonを読んでデータを取得する
-	nlohmann::json deserialized = JsonLoader::GetInstance()->LoadJson("Settings/" + filename);
+	nlohmann::json deserialized = JsonLoader::GetInstance()->LoadJson("Settings/" + fileName);
 
-    m_settingFileNames[static_cast<int>(type)] = filename;
+    m_settingFileNames[static_cast<int>(type)] = fileName;
     if (deserialized == nlohmann::json{}) // ファイルの展開に失敗、またはファイルが存在しないのでdefaultのkeyConfigを使用する
     {
         Log("ファイルの展開に失敗、またはファイルが存在しないため、defaultの設定を使用します\n");

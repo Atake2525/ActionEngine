@@ -217,7 +217,7 @@ void Trap::Update() {
         // 各要素を Lerp で補間
         newTransform.scale = Lerp(m_traps[i].start.scale, m_traps[i].start.scale + m_traps[i].trapData.velocity.scale, time);
         newTransform.rotate = Lerp(m_traps[i].start.rotate, m_traps[i].start.rotate + m_traps[i].trapData.velocity.rotate, time);
-        newTransform.translate = Lerp(m_traps[i].start.translate, m_traps[i].start.translate + m_traps[i].trapData.velocity.translate, time);
+        newTransform.position = Lerp(m_traps[i].start.position, m_traps[i].start.position + m_traps[i].trapData.velocity.position, time);
 
         // Transform を適用して更新
         m_traps[i].object->SetTransform(newTransform);

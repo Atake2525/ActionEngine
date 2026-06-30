@@ -153,9 +153,9 @@ void JsonLoader::LoadJson(const std::string& path, const std::string& jsonName, 
             // transformのパラメータ読み込み
             nlohmann::json& transform = object["transform"];
             // 平行移動 "translation"
-            jsonData.transform.translate.x = (float)transform["translation"][0];
-            jsonData.transform.translate.y = (float)transform["translation"][2];
-            jsonData.transform.translate.z = (float)transform["translation"][1];
+            jsonData.transform.position.x = (float)transform["translation"][0];
+            jsonData.transform.position.y = (float)transform["translation"][2];
+            jsonData.transform.position.z = (float)transform["translation"][1];
             if (object["type"].get<std::string>() == "MESH")
             {
                 // 回転角 "rotation"
@@ -185,9 +185,9 @@ void JsonLoader::LoadJson(const std::string& path, const std::string& jsonName, 
             {
                 jsonData.trap.move = true;
 
-                jsonData.trap.velocity.translate.x = (float)translate[0];
-                jsonData.trap.velocity.translate.y = (float)translate[1];
-                jsonData.trap.velocity.translate.z = (float)translate[2];
+                jsonData.trap.velocity.position.x = (float)translate[0];
+                jsonData.trap.velocity.position.y = (float)translate[1];
+                jsonData.trap.velocity.position.z = (float)translate[2];
 
                 jsonData.trap.velocity.rotate.x = SwapRadian((float)rotate[0]);
                 jsonData.trap.velocity.rotate.y = SwapRadian((float)rotate[1]);
@@ -251,9 +251,9 @@ void JsonLoader::LoadJson(const std::string& path, const std::string& jsonName, 
                     // 平行移動 "translation"
                     Transform transformchild;
                     JsonData data;
-                    transformchild.translate.x = (float)childTransform["translation"][0];
-                    transformchild.translate.y = (float)childTransform["translation"][1];
-                    transformchild.translate.z = (float)childTransform["translation"][2];
+                    transformchild.position.x = (float)childTransform["translation"][0];
+                    transformchild.position.y = (float)childTransform["translation"][1];
+                    transformchild.position.z = (float)childTransform["translation"][2];
                     // 回転角 "rotation"
                     transformchild.rotate.x = -(float)childTransform["rotation"][0];
                     transformchild.rotate.y = -(float)childTransform["rotation"][1];

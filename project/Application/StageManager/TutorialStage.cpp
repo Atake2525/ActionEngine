@@ -72,7 +72,7 @@ void TutorialStage::Update()
     }
 #endif // !NDEBUG
 
-    if (m_player->GetTransform().translate.y < -120.0f)
+    if (m_player->GetTransform().position.y < -120.0f)
     {
         FadeManager::GetInstance()->FadeOut(0.5f);
 
