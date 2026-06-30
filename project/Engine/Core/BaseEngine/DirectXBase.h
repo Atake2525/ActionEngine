@@ -15,14 +15,11 @@
 #include "Vector3.h"
 #include <memory>
 
-class OffScreenRendering;
-
 class DirectXBase {
 public:
 	DirectXBase();
 	~DirectXBase();
 
-	void Update();
 	/// <summary>
 	/// 初期化
 	/// </summary>
@@ -40,10 +37,12 @@ public:
 	void PostDraw();
 
 	// 描画前処理
-	void PreDrawRenderTexture();
+	void BeginOffScreenRendering(Microsoft::WRL::ComPtr<ID3D12Resource>resource, D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle);
 
 	// 描画後処理
-	void PostDrawRenderTexture();
+	void EndOffScreenRendering(Microsoft::WRL::ComPtr<ID3D12Resource> resource);
+
+	D3D12_CPU_DESCRIPTOR_HANDLE CreateOffScreenRenderTargetView(Microsoft::WRL::ComPtr<ID3D12Resource> resource);
 
 	void ApplyFullViewport();
 
@@ -86,8 +85,6 @@ public:
 	float GetMaxFPS() const { return m_MaxFPS; }
 
 private:
-
-	std::unique_ptr<OffScreenRendering> m_offScreenRendering;
 
 	// DirectX12デバイス
 	Microsoft::WRL::ComPtr<ID3D12Device> device;
@@ -177,7 +174,6 @@ private:
 	// スワップチェイン
 	// SwapChainからResourceを引っ張ってくる
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[2];
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvTextureHandle;
 
 	//// フェンス
 	Microsoft::WRL::ComPtr<ID3D12Fence> fence = nullptr;

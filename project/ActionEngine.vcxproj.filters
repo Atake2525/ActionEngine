@@ -405,6 +405,9 @@
     <ClCompile Include="Application\Player\WallJumpState.cpp">
       <Filter>Application\Scene\Player\State</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Core\Runtime.cpp">
+      <Filter>Engine\Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Setting\KeyboardConfig.h">
@@ -700,6 +703,12 @@
     </ClInclude>
     <ClInclude Include="Application\Player\WallJumpState.h">
       <Filter>Application\Scene\Player\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Math\EngineContext.h">
+      <Filter>Engine\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Core\Runtime.h">
+      <Filter>Engine\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

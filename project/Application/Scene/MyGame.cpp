@@ -14,11 +14,8 @@ void MyGame::Initialize() {
     WinApp::GetInstance()->Initialize(1920, 1080, WindowMode::FullScreen, L"走快");
 #endif // !NDEBUG
 
-    DirectXBase::GetInstance()->Initialize();
 
-    SrvManager::GetInstance()->Initialize();
-
-    DirectXBase::GetInstance()->InitializePosteffect();
+   /* SrvManager::GetInstance()->Initialize();
 
     ImGuiManager::GetInstance()->Initialize();
 
@@ -44,24 +41,24 @@ void MyGame::Initialize() {
 
     Light::GetInstance()->Initialize();
 
-    Input::GetInstance()->Initialize();
+    Input::GetInstance()->Initialize();*/
 
-    Audio::GetInstance()->Initialize();
+    //Audio::GetInstance()->Initialize();
     Audio::GetInstance()->LoadMP3("Resources/sound/select.mp3", "select");
     Audio::GetInstance()->LoadMP3("Resources/sound/enter.mp3", "select_enter");
     Audio::GetInstance()->LoadMP3("Resources/sound/cancel.mp3", "select_cancel");
 
-    FadeManager::GetInstance()->Initialize();
+    //FadeManager::GetInstance()->Initialize();
 
     //// ↓---- シーンの初期化 ----↓ ////
 
-    ActionEngine::Stage::StageCount::GetInstance()->Initialize();
+    //ActionEngine::Stage::StageCount::GetInstance()->Initialize();
 
-    SceneManager::GetInstance();
+    //SceneManager::GetInstance();
     SceneManager::GetInstance()->GetSettingManager().Load("KeyConfig.json", Setting::SettingType::KeyConfig);
     SceneManager::GetInstance()->GetSettingManager().Load("Audio.json", Setting::SettingType::AudioConfig);
     
-    Audio::GetInstance()->SetMasterVolume(SceneManager::GetInstance()->GetSettingManager().GetAudioSetting().masterVolume);
+    //Audio::GetInstance()->SetMasterVolume(SceneManager::GetInstance()->GetSettingManager().GetAudioSetting().masterVolume);
     
 
     SceneManager::GetInstance()->SetNextScene("TITLE");
@@ -89,7 +86,6 @@ void MyGame::Update() {
     ImGuiManager::GetInstance()->Update();
 #endif // !NDEBUG
 
-    DirectXBase::GetInstance()->Update();
 #ifndef NDEBUG
     GameTime::GetInstance()->DrawImGui();
 #endif // !NDEBUG
@@ -168,39 +164,36 @@ void MyGame::Update() {
 
 void MyGame::Draw() {
 
-    // ImGuiの内部コマンドを生成する
-    ImGui::Render();
-
-    DirectXBase::GetInstance()->PreDrawRenderTexture();
-
-    SkyBox::GetInstance()->Draw();
-    SceneManager::GetInstance()->Draw();
-    FadeManager::GetInstance()->Draw();
-
-    DirectXBase::GetInstance()->PostDrawRenderTexture();
-
-    DirectXBase::GetInstance()->PreDraw();
-
-    ParticleManager::GetInstance()->Draw();
-
-    DirectXBase::GetInstance()->ApplyFullViewport();
-
-#ifndef NDEBUG
-    // 実際のcommandListのImGuiの描画コマンドを積む
-    ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), DirectXBase::GetInstance()->GetCommandList().Get());
-#endif // !NDEBUG
-
-
-    DirectXBase::GetInstance()->PostDraw();
-
-    SceneManager::GetInstance()->CallStart();
+//    // ImGuiの内部コマンドを生成する
+//    ImGui::Render();
+//
+//
+//    SkyBox::GetInstance()->Draw();
+//    SceneManager::GetInstance()->Draw();
+//    FadeManager::GetInstance()->Draw();
+//
+//    m_directXBase->PostDrawRenderTexture();
+//
+//    m_directXBase->PreDraw();
+//
+//    ParticleManager::GetInstance()->Draw();
+//
+//    m_directXBase->ApplyFullViewport();
+//
+//#ifndef NDEBUG
+//    // 実際のcommandListのImGuiの描画コマンドを積む
+//    ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), m_directXBase->GetCommandList().Get());
+//#endif // !NDEBUG
+//
+//
+//    m_directXBase->PostDraw();
+//
+//    SceneManager::GetInstance()->CallStart();
 }
 
 void MyGame::Finalize() {
 
-    WinApp::GetInstance()->Finalize();
-
-    DirectXBase::GetInstance()->Finalize();
+    /*WinApp::GetInstance()->Finalize();
 
     SrvManager::GetInstance()->Finalize();
 
@@ -234,7 +227,7 @@ void MyGame::Finalize() {
 
     GameTime::GetInstance()->Finalize();
 
-    FadeManager::GetInstance()->Finalize();
+    FadeManager::GetInstance()->Finalize();*/
 
     FrameWork::Finalize();
 }

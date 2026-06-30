@@ -43,6 +43,7 @@ struct Dissolve
 };
 
 class DirectXBase;
+class SrvManager;
 
 class OffScreenRendering
 {
@@ -53,7 +54,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(DirectXBase* directXBase);
+	void Initialize(DirectXBase* directXBase, SrvManager* srvManager);
 
 
 	void Update();
@@ -67,6 +68,8 @@ public:
 
 	const Vector4 GetRenderTargetClearValue() const { return renderTargetClearValue; }
 
+	const D3D12_CPU_DESCRIPTOR_HANDLE GetRenderTargetDescriptorHandle() const { return m_rtvDescriptorHandle; }
+
 	/// ===== GrayScaleの設定 ===== ///
 
 	void SetGrayscaleIntensity(float value);
@@ -78,7 +81,10 @@ private:
 
 	uint32_t srvIndex;
 
-	DirectXBase* m_directxBase;
+	DirectXBase* m_directXBase;
+	SrvManager* m_srvManager;
+
+	D3D12_CPU_DESCRIPTOR_HANDLE m_rtvDescriptorHandle;
 
 private:
 	// ルートシグネチャの作成

@@ -200,19 +200,10 @@ void DirectXBase::Initialize() {
     InitializePosteffect();
 }
 
-void DirectXBase::InitializePosteffect() {
-    m_offScreenRendering = std::make_unique<OffScreenRendering>();
-    m_offScreenRendering->Initialize(this);
+D3D12_CPU_DESCRIPTOR_HANDLE DirectXBase::CreateOffScreenRenderTargetView(Microsoft::WRL::ComPtr<ID3D12Resource> resource) {
 
-    Vector4 col = m_offScreenRendering->GetRenderTargetClearValue();
-    // 指定した色で画面全体をクリアする
-    clearColor[0] = col.x;
-    clearColor[1] = col.y;
-    clearColor[2] = col.z;
-    clearColor[3] = col.w;
-
-    device->CreateRenderTargetView(m_offScreenRendering->GetRenderTextureResource().Get(), &rtvDesc, GetCPUDescriptorHandle(rtvDescriptorHeap, device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV), 2));
-    rtvTextureHandle = GetCPUDescriptorHandle(rtvDescriptorHeap, device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV), 2);
+    device->CreateRenderTargetView(resource.Get(), &rtvDesc, GetCPUDescriptorHandle(rtvDescriptorHeap, device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV), 2));
+    return GetCPUDescriptorHandle(rtvDescriptorHeap, device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV), 2);
 }
 
 // 描画前処理
@@ -245,8 +236,6 @@ void DirectXBase::PreDraw() {
     SrvManager::GetInstance()->PreDraw();
 
     ApplyFullViewport();
-
-    m_offScreenRendering->Draw();
 
 }
 
@@ -296,7 +285,7 @@ void DirectXBase::PostDraw() {
     assert(SUCCEEDED(hr));
 }
 
-void DirectXBase::PreDrawRenderTexture() {
+void DirectXBase::BeginOffScreenRendering(Microsoft::WRL::ComPtr<ID3D12Resource>resource, D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle) {
 
     // TransitionのBarrierの設定
     // 今回のバリアはTransition
@@ -304,7 +293,7 @@ void DirectXBase::PreDrawRenderTexture() {
     // Noneにしておく
     barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
     // バリアを張る対象のリソース。現在のバックバッファに対して行う
-    barrier.Transition.pResource = m_offScreenRendering->GetRenderTextureResource().Get();
+    barrier.Transition.pResource = resource.Get();
     // 遷移前(現在)のRecourceState
     barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
     // 遷移後のResourceState
@@ -317,27 +306,22 @@ void DirectXBase::PreDrawRenderTexture() {
 
     // 描画先のRTVとDSVを設定する
     D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-    commandList->OMSetRenderTargets(1, &rtvTextureHandle, false, &dsvHandle);
+    commandList->OMSetRenderTargets(1, &descriptorHandle, false, &dsvHandle);
     // 指定した深度で画面全体をクリアする
     commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
     //float clearColor[] = { 0.1f, 0.25f, 0.5f, 1.0f }; // 青っぽい色。RGBAの順
-    commandList->ClearRenderTargetView(rtvTextureHandle, clearColor, 0, nullptr);
+    commandList->ClearRenderTargetView(descriptorHandle, clearColor, 0, nullptr);
 
-    SrvManager::GetInstance()->PreDraw();
+    //SrvManager::GetInstance()->PreDraw();
 
-    commandList->RSSetViewports(1, &viewPort);       // Viewportを設定
-    commandList->RSSetScissorRects(1, &scissorRect); // Scirssorを設定
+    //commandList->RSSetViewports(1, &viewPort);       // Viewportを設定
+    //commandList->RSSetScissorRects(1, &scissorRect); // Scirssorを設定
 
 }
 
-void DirectXBase::Update() {
-
-    m_offScreenRendering->Update();
-}
-
-void DirectXBase::PostDrawRenderTexture() {
-    barrier.Transition.pResource = m_offScreenRendering->GetRenderTextureResource().Get();
+void DirectXBase::EndOffScreenRendering(Microsoft::WRL::ComPtr<ID3D12Resource> resource) {
+    barrier.Transition.pResource = resource.Get();
     barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
     barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
     // TransitionBarrierを張る
