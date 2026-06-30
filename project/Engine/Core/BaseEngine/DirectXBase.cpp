@@ -15,23 +15,15 @@ using namespace Microsoft::WRL;
 using namespace Logger;
 using namespace StringUtility;
 
-DirectXBase* DirectXBase::instance = nullptr;
+DirectXBase::DirectXBase() {
 
-DirectXBase* DirectXBase::GetInstance() {
-    if (instance == nullptr) {
-        instance = new DirectXBase;
-    }
-    return instance;
 }
 
-void DirectXBase::Finalize() {
+DirectXBase::~DirectXBase() {
     CloseHandle(fenceEvent);
 
     OffScreenRendering::GetInstance()->Finalize();
-    delete instance;
-    instance = nullptr;
 }
-
 
 ComPtr<ID3D12Resource> DirectXBase::CreateDepthStencilTextureResource(Microsoft::WRL::ComPtr<ID3D12Device> device, int32_t width, int32_t height) {
     // 生成するResouceの設定

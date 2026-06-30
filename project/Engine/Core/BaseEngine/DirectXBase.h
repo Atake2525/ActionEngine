@@ -16,29 +16,9 @@
 #include <memory>
 
 class DirectXBase {
-private:
-	// シングルトンパターンを適用
-	static DirectXBase* instance;
-
-	// コンストラクタ、デストラクタの隠蔽
-	DirectXBase() = default;
-	~DirectXBase() = default;
-	// コピーコンストラクタ、コピー代入演算子の封印
-	DirectXBase(DirectXBase&) = delete;
-	DirectXBase& operator=(DirectXBase&) = delete;
-
 public:
-
-	/// <summary>
-	/// シングルトンインスタンスの取得
-	/// </summary>
-	/// <returns>Input* instance</returns>
-	static DirectXBase* GetInstance();
-
-	/// <summary>
-	/// 終了
-	/// </summary>
-	void Finalize();
+	DirectXBase();
+	~DirectXBase();
 
 	void Update();
 	/// <summary>

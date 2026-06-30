@@ -42,30 +42,18 @@ struct Dissolve
 	//float edgerange;
 };
 
+class DirectXBase;
+
 class OffScreenRendering
 {
-private:
-	static OffScreenRendering* instance;
-
-	OffScreenRendering() = default;
-	~OffScreenRendering() = default;
-	OffScreenRendering(OffScreenRendering&) = delete;
-	OffScreenRendering& operator=(OffScreenRendering&) = delete;
-
-
 public:
-
-	static OffScreenRendering* GetInstance();
-
-	/// <summary>
-	/// 終了処理
-	/// </summary>
-	void Finalize();
+	OffScreenRendering();
+	~OffScreenRendering();
 
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize();
+	void Initialize(DirectXBase* directXBase);
 
 
 	void Update();
@@ -89,6 +77,8 @@ public:
 private:
 
 	uint32_t srvIndex;
+
+	DirectXBase* m_directxBase;
 
 private:
 	// ルートシグネチャの作成

@@ -12,27 +12,19 @@ using namespace Microsoft::WRL;
 using namespace Logger;
 using namespace std;
 
-OffScreenRendering* OffScreenRendering::instance = nullptr;
+OffScreenRendering::OffScreenRendering() {
 
-OffScreenRendering* OffScreenRendering::GetInstance()
-{
-	if (instance == nullptr)
-	{
-		instance = new OffScreenRendering;
-	}
-	return instance;
 }
 
-void OffScreenRendering::Finalize()
-{
-	delete instance;
-	instance = nullptr;
+OffScreenRendering::~OffScreenRendering() {
+
 }
 
-void OffScreenRendering::Initialize() {
+void OffScreenRendering::Initialize(DirectXBase* directXBase) {
 	CreateGraphicsPipeLineState();
+	m_directxBase = directXBase;
 
-	renderTextureResource = DirectXBase::GetInstance()->CreateRenderTextureResource(DirectXBase::GetInstance()->GetDevice(), WinApp::GetInstance()->GetkClientWidth(), WinApp::GetInstance()->GetkClientHeight(), DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, renderTargetClearValue);
+	renderTextureResource = m_directxBase->CreateRenderTextureResource(DirectXBase::GetInstance()->GetDevice(), WinApp::GetInstance()->GetkClientWidth(), WinApp::GetInstance()->GetkClientHeight(), DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, renderTargetClearValue);
 
 	// SRVの設定。FormatはResourceと同じにしておく
 	D3D12_SHADER_RESOURCE_VIEW_DESC renderTextureSrvDesc{};
