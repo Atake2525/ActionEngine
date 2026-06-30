@@ -21,11 +21,9 @@ DirectXBase::DirectXBase() {
 
 DirectXBase::~DirectXBase() {
     CloseHandle(fenceEvent);
-
-    OffScreenRendering::GetInstance()->Finalize();
 }
 
-ComPtr<ID3D12Resource> DirectXBase::CreateDepthStencilTextureResource(Microsoft::WRL::ComPtr<ID3D12Device> device, int32_t width, int32_t height) {
+ComPtr<ID3D12Resource> DirectXBase::CreateDepthStencilTextureResource(int32_t width, int32_t height) {
     // 生成するResouceの設定
     D3D12_RESOURCE_DESC resourceDesc{};
     resourceDesc.Width = width;                                   // Textureの幅
@@ -60,7 +58,7 @@ ComPtr<ID3D12Resource> DirectXBase::CreateDepthStencilTextureResource(Microsoft:
 }
 
 // RenderTextureの生成
-ComPtr<ID3D12Resource> DirectXBase::CreateRenderTextureResource(ComPtr<ID3D12Device> device, int32_t width, int32_t height, DXGI_FORMAT format, const Vector4& clearColor) {
+ComPtr<ID3D12Resource> DirectXBase::CreateRenderTextureResource(int32_t width, int32_t height, DXGI_FORMAT format, const Vector4& clearColor) {
     // 生成するResouceの設定
     D3D12_RESOURCE_DESC resourceDesc{};
     resourceDesc.Width = width;                                   // Textureの幅
@@ -199,20 +197,21 @@ void DirectXBase::Initialize() {
     InitializeScissorRect();
     CreateDXCCompiler();
 
-
+    InitializePosteffect();
 }
 
 void DirectXBase::InitializePosteffect() {
-    OffScreenRendering::GetInstance()->Initialize();
+    m_offScreenRendering = std::make_unique<OffScreenRendering>();
+    m_offScreenRendering->Initialize(this);
 
-    Vector4 col = OffScreenRendering::GetInstance()->GetRenderTargetClearValue();
+    Vector4 col = m_offScreenRendering->GetRenderTargetClearValue();
     // 指定した色で画面全体をクリアする
     clearColor[0] = col.x;
     clearColor[1] = col.y;
     clearColor[2] = col.z;
     clearColor[3] = col.w;
 
-    device->CreateRenderTargetView(OffScreenRendering::GetInstance()->GetRenderTextureResource().Get(), &rtvDesc, GetCPUDescriptorHandle(rtvDescriptorHeap, device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV), 2));
+    device->CreateRenderTargetView(m_offScreenRendering->GetRenderTextureResource().Get(), &rtvDesc, GetCPUDescriptorHandle(rtvDescriptorHeap, device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV), 2));
     rtvTextureHandle = GetCPUDescriptorHandle(rtvDescriptorHeap, device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV), 2);
 }
 
@@ -247,7 +246,7 @@ void DirectXBase::PreDraw() {
 
     ApplyFullViewport();
 
-    OffScreenRendering::GetInstance()->Draw();
+    m_offScreenRendering->Draw();
 
 }
 
@@ -305,7 +304,7 @@ void DirectXBase::PreDrawRenderTexture() {
     // Noneにしておく
     barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
     // バリアを張る対象のリソース。現在のバックバッファに対して行う
-    barrier.Transition.pResource = OffScreenRendering::GetInstance()->GetRenderTextureResource().Get();
+    barrier.Transition.pResource = m_offScreenRendering->GetRenderTextureResource().Get();
     // 遷移前(現在)のRecourceState
     barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
     // 遷移後のResourceState
@@ -334,11 +333,11 @@ void DirectXBase::PreDrawRenderTexture() {
 
 void DirectXBase::Update() {
 
-    OffScreenRendering::GetInstance()->Update();
+    m_offScreenRendering->Update();
 }
 
 void DirectXBase::PostDrawRenderTexture() {
-    barrier.Transition.pResource = OffScreenRendering::GetInstance()->GetRenderTextureResource().Get();
+    barrier.Transition.pResource = m_offScreenRendering->GetRenderTextureResource().Get();
     barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
     barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
     // TransitionBarrierを張る
@@ -367,7 +366,7 @@ void DirectXBase::InitializeCommands() {
 
 void DirectXBase::InitializeDepthStenCilView() {
     // DepthStencilTexutreをウィンドウサイズで作成
-    depthStencilResource = CreateDepthStencilTextureResource(device, WinApp::GetInstance()->GetkClientWidth(), WinApp::GetInstance()->GetkClientHeight());
+    depthStencilResource = CreateDepthStencilTextureResource(WinApp::GetInstance()->GetkClientWidth(), WinApp::GetInstance()->GetkClientHeight());
     // DSVの設定
     dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;        // Format。基本的にはResourceに合わせる
     dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D; // 2dTexture
@@ -436,7 +435,7 @@ void DirectXBase::CreateSwapChain() {
 
 void DirectXBase::CreateDepthBuffer() {
     // DepthStencilTexutreをウィンドウサイズで作成
-    ComPtr<ID3D12Resource> depthStencilResouce = CreateDepthStencilTextureResource(device, WinApp::GetInstance()->GetkClientWidth(), WinApp::GetInstance()->GetkClientHeight());
+    ComPtr<ID3D12Resource> depthStencilResouce = CreateDepthStencilTextureResource(WinApp::GetInstance()->GetkClientWidth(), WinApp::GetInstance()->GetkClientHeight());
     // DSVの設定
     D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
     dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;        // Format。基本的にはResourceに合わせる
