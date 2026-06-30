@@ -157,9 +157,6 @@
     <Filter Include="Engine\3d\Model\Model">
       <UniqueIdentifier>{96f32078-8e76-7e23-7d2e-5c53d69bb7da}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\3d\Model\ModelBase">
-      <UniqueIdentifier>{38fc41c6-2cd9-d8e1-445c-37865d8e2375}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine\3d\Object\Object3d">
       <UniqueIdentifier>{7bfeeeac-63dd-da75-902d-b0b29882a3a2}</UniqueIdentifier>
     </Filter>
@@ -174,6 +171,9 @@
     </Filter>
     <Filter Include="Application\Scene\Player\State">
       <UniqueIdentifier>{f920d583-de28-4795-bb6c-39a46bce184d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\3d\Object\ModelBase">
+      <UniqueIdentifier>{38fc41c6-2cd9-d8e1-445c-37865d8e2375}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -250,7 +250,7 @@
       <Filter>Engine\3d\Model\Model</Filter>
     </ClCompile>
     <ClCompile Include="Engine\3d\Model\ModelBase\ModelBase.cpp">
-      <Filter>Engine\3d\Model\ModelBase</Filter>
+      <Filter>Engine\3d\Object\ModelBase</Filter>
     </ClCompile>
     <ClCompile Include="Engine\LoadManager\ModelManager\ModelManager.cpp">
       <Filter>Engine\LoadManager\ModelManager</Filter>
@@ -522,7 +522,7 @@
       <Filter>Engine\3d\Model\Model</Filter>
     </ClInclude>
     <ClInclude Include="Engine\3d\Model\ModelBase\ModelBase.h">
-      <Filter>Engine\3d\Model\ModelBase</Filter>
+      <Filter>Engine\3d\Object\ModelBase</Filter>
     </ClInclude>
     <ClInclude Include="Engine\LoadManager\ModelManager\ModelManager.h">
       <Filter>Engine\LoadManager\ModelManager</Filter>

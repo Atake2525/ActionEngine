@@ -51,33 +51,20 @@ struct AudioList
 	int startFrameTime;
 };
 
-
 // 音声 クラス
 class Audio {
-private:
-	// シングルトンパターンを適用
-	static Audio* instance;
-
-	// コンストラクタ、デストラクタの隠蔽
-	Audio() = default;
-	~Audio() = default;
-	// コピーコンストラクタ、コピー代入演算子の封印
-	Audio(Audio&) = delete;
-	Audio& operator=(Audio&) = delete;
-
 public:
+	Audio();
+	~Audio();
 
 	// 初期化
-	void Initialize();
+	void Initialize(WinApp& winApp);
 
 	// 更新
 	void Update();
 
 	// インスタンスの取得
 	static Audio* GetInstance();
-
-	// 終了処理
-	void Finalize();
 
 	// wave読み込み
 	bool LoadWave(const std::string filePath, const std::string soundName, const float volume = 1.0f);

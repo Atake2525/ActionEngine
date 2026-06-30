@@ -7,12 +7,14 @@ struct CameraForGPU {
 	Vector3 worldPosition;
 };
 
+class WinApp;
+
 #pragma once
 // カメラ
 class Camera {
 public:
 	// コンストラクタ
-	Camera();
+	Camera(WinApp& winApp);
 
 	/// <summary>
 	/// 更新
@@ -97,6 +99,8 @@ public:
 	int number = 0;
 
 private:
+	WinApp* m_pWinApp;
+
 	Transform transform;
 	Matrix4x4 worldMatrix;
 	Matrix4x4 viewMatrix;

@@ -7,14 +7,11 @@
 using namespace Logger;
 using namespace std;
 
-CollisionManager* CollisionManager::instance = nullptr;
-
-CollisionManager* CollisionManager::GetInstance() {
-	if (instance == nullptr)
-	{
-		instance = new CollisionManager;
-	}
-	return instance;
+CollisionManager::~CollisionManager() {
+	collisionTarget.clear();
+	collisionObject.clear();
+	wallDashCollisionObject.clear();
+	m_collisionObjectAABB.clear();
 }
 
 void CollisionManager::Initialize() {
@@ -123,15 +120,6 @@ void CollisionManager::Update(const std::string& targetName, bool wallDashCollis
 			continue;
 		}
 	}
-}
-
-void CollisionManager::Finalize() {
-	collisionTarget.clear();
-	collisionObject.clear();
-	wallDashCollisionObject.clear();
-	m_collisionObjectAABB.clear();
-	delete instance;
-	instance = nullptr;
 }
 
 const Vector3 CollisionManager::GetPenetrationForAABB(const AABB& aabb, bool wallDashCollision)

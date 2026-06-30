@@ -90,12 +90,20 @@ struct ModelData {
 	Node rootNode;
 };
 
+class DirectXBase;
+class SrvManager;
+class TextureManager;
+class Object3dBase;
+class SkyBox;
+
 class Model {
 public:
 	struct SkinningInformation
 	{
 		uint32_t numVertices;
 	};
+
+	void SetContext(DirectXBase& directXBase, SrvManager& srvManager, TextureManager& textureManaeger, Object3dBase& object3dBase, SkyBox& skyBox);
 
 	// 初期化
 	void Initialize(std::string directoryPath, std::string fileName, bool isAnimation);
@@ -130,6 +138,8 @@ public:
 	const std::unordered_map<std::wstring, AABB>& GetMultiMeshAABB() const { return multiMeshAABB; }
 
 private:
+	DirectXBase* directXBase;
+
 
 	std::unordered_map<std::string, Animation> animation;
 	bool isAnimation = false;

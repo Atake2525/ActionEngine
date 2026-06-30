@@ -1,18 +1,20 @@
 #include "Model.h"
-#include "ModelBase.h"
 #include "DirectXBase.h"
-#include "kMath.h"
-#include "TextureManager.h"
-#include "Logger.h"
 #include "SrvManager.h"
+#include "TextureManager.h"
+#include "Object3dBase.h"
 #include "SkyBox.h"
 #include "json.hpp"
-#include "Object3dBase.h"
-#include "SrvManager.h"
+#include "kMath.h"
+#include "Logger.h"
 #include <thread>
 #include <algorithm>
 
 using namespace Logger;
+
+void Model::SetContext(DirectXBase& directXBase, SrvManager& srvManager, TextureManager& textureManaeger, Object3dBase& object3dBase, SkyBox& skyBox) {
+
+}
 
 void Model::Initialize(std::string directoryPath, std::string fileName, bool isAnimation) {
     bool enableAnimationLoad = isAnimation;

@@ -42,34 +42,21 @@ enum class Controller {
 #define MOUSE_RIGHT 1
 #define MOUSE_MIDDLE 2
 
+class WinApp;
+
 class Input {
-private:
-    // シングルトンパターンを適用
-    static Input* instance;
-
-    // コンストラクタ、デストラクタの隠蔽
-    Input() = default;
-    ~Input() = default;
-    // コピーコンストラクタ、コピー代入演算子の封印
-    //Input(Input&) = delete;
-    //Input& operator=(Input&) = delete;
-
 public:
     // namespcae省略
     template <class T> using ComPtr = Microsoft::WRL::ComPtr<T>;
 
     /// <summary>
-    /// シングルトンインスタンスの取得
+    /// 初期化
     /// </summary>
-    /// <returns>Input* instance</returns>
-    static Input* GetInstance();
+    void Initialize(WinApp& winApp);
 
     /// <summary>
-    /// 終了
+    /// 更新
     /// </summary>
-    void Finalize();
-
-    void Initialize();
     void Update();
 
     // デバイスの更新(デバイスの再認識に使う)
@@ -224,6 +211,8 @@ public:
     bool PressAnyButton();
 
 private:
+    WinApp* m_pWinApp;
+
     Vector2 m_windowSize = Vector2::Zero;
 
     // DirectInputのインスタンス生成 キーボード

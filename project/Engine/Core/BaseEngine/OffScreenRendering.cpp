@@ -20,14 +20,15 @@ OffScreenRendering::~OffScreenRendering() {
 
 }
 
-void OffScreenRendering::Initialize(DirectXBase* directXBase, SrvManager* srvManager) {
+void OffScreenRendering::Initialize(DirectXBase& directXBase, SrvManager& srvManager, WinApp& winApp) {
+	m_pDirectXBase = &directXBase;
+	m_pSrvManager = &srvManager;
+	m_pWinApp = &winApp;
 	CreateGraphicsPipeLineState();
-	m_directXBase = directXBase;
-	m_srvManager = srvManager;
 
-	renderTextureResource = m_directXBase->CreateRenderTextureResource(WinApp::GetInstance()->GetkClientWidth(), WinApp::GetInstance()->GetkClientHeight(), DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, renderTargetClearValue);
+	renderTextureResource = m_pDirectXBase->CreateRenderTextureResource(m_pWinApp->GetkClientWidth(), m_pWinApp->GetkClientHeight(), DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, renderTargetClearValue);
 
-	m_rtvDescriptorHandle = m_directXBase->CreateOffScreenRenderTargetView(renderTextureResource);
+	m_rtvDescriptorHandle = m_pDirectXBase->CreateOffScreenRenderTargetView(renderTextureResource);
 
 	// SRVの設定。FormatはResourceと同じにしておく
 	D3D12_SHADER_RESOURCE_VIEW_DESC renderTextureSrvDesc{};
@@ -36,35 +37,35 @@ void OffScreenRendering::Initialize(DirectXBase* directXBase, SrvManager* srvMan
 	renderTextureSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	renderTextureSrvDesc.Texture2D.MipLevels = 1;
 
-	srvIndex = m_srvManager->Allocate();
+	srvIndex = m_pSrvManager->Allocate();
 
-	srvCPUHandle = m_srvManager->GetCPUDescriptorHandle(srvIndex);
-	srvGPUHandle = m_srvManager->GetGPUDescriptorHandle(srvIndex);
+	srvCPUHandle = m_pSrvManager->GetCPUDescriptorHandle(srvIndex);
+	srvGPUHandle = m_pSrvManager->GetGPUDescriptorHandle(srvIndex);
 	
 	DirectX::TexMetadata metadata;
 	metadata.format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 	metadata.mipLevels = 1;
 
-	m_srvManager->CreateSRVforTexture2D(srvIndex, renderTextureResource, metadata, D3D12_SRV_DIMENSION_TEXTURE2D);
+	m_pSrvManager->CreateSRVforTexture2D(srvIndex, renderTextureResource, metadata, D3D12_SRV_DIMENSION_TEXTURE2D);
 
-	grayscaleResouce = m_directXBase->CreateBufferResource(sizeof(Grayscale));
+	grayscaleResouce = m_pDirectXBase->CreateBufferResource(sizeof(Grayscale));
 	grayscaleResouce->Map(0, nullptr, reinterpret_cast<void**>(&grayscale));
 	grayscale->grayscaleIntensity = 0.0f;
 	grayscale->toneColor = { 1.0f, 73.0f / 107.0f, 43.0f / 107.0f };
 	grayscale->alpah = 1.0f;
 
-	vignetteResource = m_directXBase->CreateBufferResource(sizeof(Vignette));
+	vignetteResource = m_pDirectXBase->CreateBufferResource(sizeof(Vignette));
 	vignetteResource->Map(0, nullptr, reinterpret_cast<void**>(&vignette));
 	vignette->enableVignette = false;
 	vignette->intensity = 16.0f;
 	vignette->scale = 0.8f;
 
-	boxFilterResource = m_directXBase->CreateBufferResource(sizeof(BoxFilter));
+	boxFilterResource = m_pDirectXBase->CreateBufferResource(sizeof(BoxFilter));
 	boxFilterResource->Map(0, nullptr, reinterpret_cast<void**>(&boxFilter));
 	boxFilter->boxFilterIntensity = 0.0f;
 	boxFilter->size = 5;
 
-    dissolveResource = m_directXBase->CreateBufferResource(sizeof(Dissolve));
+    dissolveResource = m_pDirectXBase->CreateBufferResource(sizeof(Dissolve));
     dissolveResource->Map(0, nullptr, reinterpret_cast<void**>(&dissolve));
     dissolve->edgeColor = { 1.0f, 1.0f, 1.0f };
     dissolve->threshold = 0.0f;
@@ -74,7 +75,7 @@ void OffScreenRendering::Initialize(DirectXBase* directXBase, SrvManager* srvMan
 void OffScreenRendering::Update() {
 #ifndef NDEBUG
 	ImGui::SetNextWindowPos(ImVec2{ 0.0f, 18.0f }, ImGuiCond_FirstUseEver);
-	ImGui::SetNextWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) - 18.0f }, ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowSize(ImVec2{ 300.0f, float(m_pWinApp->GetkClientHeight()) - 18.0f }, ImGuiCond_FirstUseEver);
 	ImGui::Begin("PostEffect");
 	/*if (ImGui::IsPopupOpen("PostEffect"))
 	{
@@ -165,7 +166,7 @@ void OffScreenRendering::CreateRootSignature() {
 		assert(false);
 	}
 	// バイナリをもとに作成
-	hr = m_directXBase->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
+	hr = m_pDirectXBase->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
 	assert(SUCCEEDED(hr));
 	// InputLayout
 	inputElementDescs[0].SemanticName = "POSITION";
@@ -196,9 +197,9 @@ void OffScreenRendering::CreateRootSignature() {
 	// 三角形の中を塗りつぶす
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 	// Shaderをコンパイルする
-	vertexShaderBlob = m_directXBase->CompileShader(L"Resources/shaders/PostEffect/Fullscreen.VS.hlsl", L"vs_6_0");
+	vertexShaderBlob = m_pDirectXBase->CompileShader(L"Resources/shaders/PostEffect/Fullscreen.VS.hlsl", L"vs_6_0");
 	assert(vertexShaderBlob != nullptr);
-	pixelShaderBlob = m_directXBase->CompileShader(L"Resources/shaders/PostEffect/Dissolve.PS.hlsl", L"ps_6_0");
+	pixelShaderBlob = m_pDirectXBase->CompileShader(L"Resources/shaders/PostEffect/Dissolve.PS.hlsl", L"ps_6_0");
 	assert(pixelShaderBlob != nullptr);
 
 	// DepthStencilStateの設定
@@ -231,32 +232,32 @@ void OffScreenRendering::CreateGraphicsPipeLineState() {
 	graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc;
 	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	// 実際に生成
-	HRESULT hr = m_directXBase->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPilelineState));
+	HRESULT hr = m_pDirectXBase->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPilelineState));
 	assert(SUCCEEDED(hr));
 }
 
 void OffScreenRendering::Draw() {
 
 	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-	m_directXBase->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
+	m_pDirectXBase->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
 	// PSOを設定
-	m_directXBase->GetCommandList()->SetPipelineState(graphicsPilelineState.Get());
-	m_directXBase->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	m_pDirectXBase->GetCommandList()->SetPipelineState(graphicsPilelineState.Get());
+	m_pDirectXBase->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	// grayscale
-	m_directXBase->GetCommandList()->SetGraphicsRootConstantBufferView(2, grayscaleResouce->GetGPUVirtualAddress());
+	m_pDirectXBase->GetCommandList()->SetGraphicsRootConstantBufferView(2, grayscaleResouce->GetGPUVirtualAddress());
 	// vignetting
-	m_directXBase->GetCommandList()->SetGraphicsRootConstantBufferView(3, vignetteResource->GetGPUVirtualAddress());
+	m_pDirectXBase->GetCommandList()->SetGraphicsRootConstantBufferView(3, vignetteResource->GetGPUVirtualAddress());
 	// boxFilter
-	m_directXBase->GetCommandList()->SetGraphicsRootConstantBufferView(4, boxFilterResource->GetGPUVirtualAddress());
+	m_pDirectXBase->GetCommandList()->SetGraphicsRootConstantBufferView(4, boxFilterResource->GetGPUVirtualAddress());
 	// dissolve
-	m_directXBase->GetCommandList()->SetGraphicsRootConstantBufferView(5, dissolveResource->GetGPUVirtualAddress());
+	m_pDirectXBase->GetCommandList()->SetGraphicsRootConstantBufferView(5, dissolveResource->GetGPUVirtualAddress());
 
-	m_srvManager->SetGraphicsRootDescriptorTable(6, noiseSrvIndex);
+	m_pSrvManager->SetGraphicsRootDescriptorTable(6, noiseSrvIndex);
 	// srvGPUHandleの設定
-	m_srvManager->SetGraphicsRootDescriptorTable(1, srvIndex);
+	m_pSrvManager->SetGraphicsRootDescriptorTable(1, srvIndex);
 
 	// Draw call
-	m_directXBase->GetCommandList()->DrawInstanced(3, 1, 0, 0);
+	m_pDirectXBase->GetCommandList()->DrawInstanced(3, 1, 0, 0);
 }
 
 void OffScreenRendering::SetGrayscaleIntensity(float value)

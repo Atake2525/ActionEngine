@@ -33,8 +33,8 @@ struct PlatformContext {
 
 struct GraphicsContext {
     DirectXBase dx;
-    OffScreenRendering offScreen;
     SrvManager srv;
+    OffScreenRendering offScreen;
     ImGuiManager imgui;
 
     Render2DBase render2DBase;
