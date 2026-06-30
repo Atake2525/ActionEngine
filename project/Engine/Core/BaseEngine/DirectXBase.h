@@ -15,6 +15,8 @@
 #include "Vector3.h"
 #include <memory>
 
+class OffScreenRendering;
+
 class DirectXBase {
 public:
 	DirectXBase();
@@ -76,7 +78,7 @@ public:
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateTextureResource(const DirectX::TexMetadata& metadata);
 
 	// RenderTextureの生成
-	Microsoft::WRL::ComPtr<ID3D12Resource> CreateRenderTextureResource(Microsoft::WRL::ComPtr<ID3D12Device> device, int32_t width, int32_t height, DXGI_FORMAT format, const Vector4& clearColor);
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateRenderTextureResource(int32_t width, int32_t height, DXGI_FORMAT format, const Vector4& clearColor);
 
 	[[nodiscard]]
 	Microsoft::WRL::ComPtr<ID3D12Resource> UploadTextureData(Microsoft::WRL::ComPtr<ID3D12Resource> texture, const DirectX::ScratchImage& mipImages);
@@ -85,11 +87,12 @@ public:
 
 private:
 
+	std::unique_ptr<OffScreenRendering> m_offScreenRendering;
 
 	// DirectX12デバイス
 	Microsoft::WRL::ComPtr<ID3D12Device> device;
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> CreateDepthStencilTextureResource(Microsoft::WRL::ComPtr<ID3D12Device> device, int32_t width, int32_t height);
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateDepthStencilTextureResource(int32_t width, int32_t height);
 
 	// FPS固定初期化
 	void InitializeFixFPS();
