@@ -6,6 +6,7 @@
 
 class Camera;
 class Input;
+struct AppContext;
 
 struct PlayerCommand {
     Vector2 move = Vector2::Zero;
@@ -45,6 +46,8 @@ private:
 public:
 
     ~Player();
+
+    void SetContext(AppContext& context) { m_pContext = &context; }
 
     const Capsule GetCapsule() { return m_pModel->GetCapsule(); }
     const AABB& GetAABB() const { return m_playerAABB; }
@@ -195,6 +198,8 @@ private: // プレイヤーステート管理
 
 
 private:
+    AppContext* m_pContext = nullptr;
+
     bool m_IsDead = false;
     bool m_IsFreeze = false;
 

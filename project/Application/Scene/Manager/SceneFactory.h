@@ -8,8 +8,6 @@ public:
 
     void SetContext(AppContext& context) { m_pContext = &context; }
 
-    void CallStart();
-
     /// <summary>
     /// シーン生成
     /// </summary>

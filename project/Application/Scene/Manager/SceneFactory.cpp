@@ -28,7 +28,9 @@ unique_ptr<BaseScene> SceneFactory::ChangeScene(const std::string& sceneName)
         Log("指定されたシーン名は見つかりませんでした\n");
     }
 
-    newScene->SetContext(m_pContext);
+    if (newScene) {
+        newScene->SetContext(*m_pContext);
+    }
 
     return newScene;
 }

@@ -1,7 +1,7 @@
 #pragma once
 #include "FadeManager.h"
-#include "Runtime.h"
 
+struct AppContext;
 class SceneManager;
 
 class BaseScene
@@ -20,7 +20,9 @@ public:
 
     virtual const bool& EndRequest() { return m_endRequest; }
 
-    virtual void SetContext(AppContext* context) { m_pContext = context; }
+    virtual void SetContext(AppContext& context) { m_pContext = &context; }
+
+    virtual void SetSceneManager(SceneManager* sceneManager) { m_sceneManager = sceneManager; }
 
 protected:
     bool m_endRequest = false;
@@ -29,5 +31,6 @@ protected:
 
     // シーンマネージャ
     AppContext* m_pContext = nullptr;
+    SceneManager* m_sceneManager = nullptr;
 };
 

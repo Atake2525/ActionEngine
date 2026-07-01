@@ -26,7 +26,7 @@ public:
     const bool& EndRequest() { return m_loopOut; }
 
 private:
-    AppContext* m_pContext;
+    AppContext* m_pContext = nullptr;
 
     bool drawStart = false;
     // 実行中のシーン

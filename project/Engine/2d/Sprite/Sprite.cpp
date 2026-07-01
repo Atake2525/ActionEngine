@@ -5,6 +5,14 @@
 #include "SrvManager.h"
 #include "AABB.h"
 #include "WinApp.h"
+#include <cassert>
+
+void Sprite::SetContext(SpriteContext& context) {
+	m_pDirectXBase = &context.directXBase;
+	m_pSrvManager = &context.srvManager;
+	m_pTextureManager = &context.textureManager;
+	m_pWinApp = &context.winApp;
+}
 
 void Sprite::SetTransform(const Transform& transform){ 
 	position.x = transform.position.x;
@@ -33,6 +41,17 @@ void Sprite::SetTexture(const std::string& textureFilePath, TextureManager& text
 	textureIndex = textureManager.LoadTexture(textureFilePath);
 	m_metaData = textureManager.GetMetaData(textureFilePath);
 	AdjustTextureSize();
+}
+
+void Sprite::SetTexture(const std::string& textureFilePath) {
+	assert(m_pTextureManager);
+	SetTexture(textureFilePath, *m_pTextureManager);
+}
+
+void Sprite::Initialize(std::string textureFilePath) {
+	assert(m_pDirectXBase);
+	assert(m_pTextureManager);
+	Initialize(textureFilePath, *m_pDirectXBase, *m_pTextureManager);
 }
 
 void Sprite::Initialize(std::string textureFilePath, DirectXBase& directXBase, TextureManager& textureManager) { 
@@ -67,6 +86,11 @@ void Sprite::Initialize(std::string textureFilePath, DirectXBase& directXBase, T
 	// テクスチャサイズの計算
 	AdjustTextureSize();
 
+}
+
+void Sprite::Update() {
+	assert(m_pWinApp);
+	Update(*m_pWinApp);
 }
 
 void Sprite::Update(WinApp& winApp) {
@@ -129,15 +153,26 @@ void Sprite::Update(WinApp& winApp) {
 	//  SpriteのTransform処理
 	Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.position);
 	Matrix4x4 viewMatrix = MakeIdentity4x4();
-	Matrix4x4 projectionMatrix = MakeOrthographicMatrix(0.0f, 0.0f, float(winApp.GetClientWidth()), float(winApp.GetClientHeight()), 0.0f, 100.0f);
+	Matrix4x4 projectionMatrix = MakeOrthographicMatrix(0.0f, 0.0f, float(winApp.GetkClientWidth()), float(winApp.GetkClientHeight()), 0.0f, 100.0f);
 	Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
 	transformationMatrixData->WVP = worldViewProjectionMatrix;
 	transformationMatrixData->World = worldMatrix;
 }
 
+void Sprite::ChangeTexture(std::string textureFilePath) {
+	assert(m_pTextureManager);
+	ChangeTexture(textureFilePath, *m_pTextureManager);
+}
+
 void Sprite::ChangeTexture(std::string textureFilePath, TextureManager& textureManager) { 
 	textureIndex = textureManager.LoadTexture(textureFilePath);
 	m_metaData = textureManager.GetMetaData(textureFilePath);
+}
+
+void Sprite::Draw() {
+	assert(m_pDirectXBase);
+	assert(m_pSrvManager);
+	Draw(*m_pDirectXBase, *m_pSrvManager);
 }
 
 void Sprite::Draw(DirectXBase& directXBase, SrvManager& srvManager) {

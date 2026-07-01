@@ -17,6 +17,7 @@
 #include "MouseCursor.h"
 #include "TitleSceneUI.h"
 #include "UIButton.h"
+#include "SceneRenderList.h"
 
 #pragma once
 
@@ -78,12 +79,13 @@ private:
 
     std::unique_ptr<Camera> m_pCamera;
     Input* m_pInput = nullptr;
+    SceneRenderList m_renderList;
 
     // BootScreen
 
-    std::unique_ptr<Object3d> m_bootScreen = nullptr;
+    Object3d* m_bootScreen = nullptr;
 
-    std::unique_ptr<Object3d> m_charModel = nullptr;
+    Object3d* m_charModel = nullptr;
 
 
     // TitleScreen 
@@ -95,7 +97,7 @@ private:
     Select m_select = Select::Play;
     Select m_selectPre = Select::Play;
 
-    std::unique_ptr<Sprite> m_gamePad = nullptr;
+    Sprite* m_gamePad = nullptr;
 
     std::unique_ptr<Sprite> m_credit_sound = nullptr;
     std::unique_ptr<UI::Element> m_creditUI = nullptr;

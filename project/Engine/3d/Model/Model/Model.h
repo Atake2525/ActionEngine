@@ -138,7 +138,11 @@ public:
 	const std::unordered_map<std::wstring, AABB>& GetMultiMeshAABB() const { return multiMeshAABB; }
 
 private:
-	DirectXBase* directXBase;
+	DirectXBase* m_pDirectXBase = nullptr;
+	SrvManager* m_pSrvManager = nullptr;
+	TextureManager* m_pTextureManager = nullptr;
+	Object3dBase* m_pObject3dBase = nullptr;
+	SkyBox* m_pSkyBox = nullptr;
 
 
 	std::unordered_map<std::string, Animation> animation;
@@ -195,9 +199,9 @@ private:
 	// アニメーションの読み込み
 	static Animation LoadAnimationFile(const std::string& directoryPath, const std::string& fileName);
 	// .gltfファイルの読み取り
-	static ModelData LoadModelFileGLTF(const std::string& directoryPath, const std::string& fileName);
+	ModelData LoadModelFileGLTF(const std::string& directoryPath, const std::string& fileName);
 	// .objファイルの読み取り
-	static ModelData LoadModelFileOBJ(const std::string& directoryPath, const std::string& fileName);
+	ModelData LoadModelFileOBJ(const std::string& directoryPath, const std::string& fileName);
 	// VertexResourceを作成する
 	void CreateVertexResource();
 	// VertexBufferViewを作成する(値を設定するだけ)

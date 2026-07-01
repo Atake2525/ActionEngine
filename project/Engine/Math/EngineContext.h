@@ -3,7 +3,6 @@
 #include "Input.h"
 #include "Render2DBase.h"
 #include "Object3dBase.h"
-#include "ModelBase.h"
 #include "TextureManager.h"
 #include "ModelManager.h"
 #include "Light.h"
@@ -23,6 +22,7 @@
 #include "SettingManager.h"
 #include "StageCount.h"
 #include "OffScreenRendering.h"
+#include "RenderObjectFactory.h"
 #pragma once
 
 struct PlatformContext {
@@ -63,6 +63,8 @@ struct PresentationContext {
 struct GameContext {
     SceneFactory sceneFactory;
     SceneManager sceneManager;
+    Object3dFactory object3dFactory;
+    SpriteFactory spriteFactory;
     SettingManager settings;
     ActionEngine::Stage::StageCount stageCount;
 };

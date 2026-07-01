@@ -5,12 +5,16 @@
 #pragma once
 
 class Input;
+class SpriteFactory;
+class WinApp;
 
 class MouseCursor
 {
 public:
     MouseCursor();
     ~MouseCursor();
+
+    void SetContext(Input& input, WinApp& winApp, SpriteFactory& spriteFactory);
 
     /// <summary>
     /// 初期化処理
@@ -49,6 +53,8 @@ private:
     std::unique_ptr<Sprite> m_cursorSprite;
     // マウスの押下を調べるためのInputクラス
     Input* m_input = nullptr;
+    SpriteFactory* m_pSpriteFactory = nullptr;
+    WinApp* m_pWinApp = nullptr;
     // マウスカーソルの位置
     Vector2 m_cursorPos = Vector2::Zero;
     // ウィンドウサイズ(画面外にカーソルが出ないように)

@@ -5,6 +5,8 @@
 
 using namespace Logger;
 
+ImGuiManager::ImGuiManager() {}
+
 ImGuiManager::~ImGuiManager() {
 	// ImGuiの終了処理。詳細はさして重要ではないので解説は省略する。
 	ImGui_ImplDX12_Shutdown();

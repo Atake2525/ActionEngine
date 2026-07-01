@@ -2,6 +2,8 @@
 #include "externals/imgui/imgui.h"
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+WinApp::WinApp() {}
+
 WinApp::~WinApp() {
 	CloseWindow(hwnd);
 	CoUninitialize();
@@ -91,7 +93,7 @@ void WinApp::OpenWindow() {
 
 const AABB WinApp::GetWindowAABB() const {
 	RECT windowRect;
-	RECT rt;
+	RECT rt = {0, 0, 0, 0};
 	if (GetWindowRect(hwnd, &windowRect)) {
 		rt = windowRect;
 	}

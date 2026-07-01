@@ -7,6 +7,8 @@
 #include <variant>
 #pragma once
 
+class JsonLoader;
+
 namespace Setting {
     enum class SettingType
     {
@@ -18,6 +20,7 @@ namespace Setting {
 class SettingManager
 {
 public:
+    void SetContext(JsonLoader& jsonLoader) { m_pJsonLoader = &jsonLoader; }
 
     // Jsonファイルから設定を読み込む
     bool Load(const std::string& fileName, Setting::SettingType type);
@@ -29,6 +32,7 @@ public:
     Setting::AudioSetting& GetAudioSetting() { return m_audioSetting; }
 
 private:
+    JsonLoader* m_pJsonLoader = nullptr;
     Setting::KeyBind m_keyBind;
     Setting::AudioSetting m_audioSetting;
 

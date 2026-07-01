@@ -30,6 +30,8 @@ struct FormatChunk {
 // 同時に再生できる最大数
 const uint32_t Audio::maxSourceVoiceCount = 64;
 
+Audio::Audio() {}
+
 Audio::~Audio() {
 	for (const auto& list : audioList)
 	{

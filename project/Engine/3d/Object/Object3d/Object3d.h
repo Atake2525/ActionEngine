@@ -31,6 +31,7 @@ class Object3dBase;
 class DirectXBase;
 class WinApp;
 class SrvManager;
+class GameTime;
 
 struct Object3dUpdateContext {
     float deltaTime;
@@ -43,6 +44,13 @@ struct SkinClusterContext {
     DirectXBase& directXBase;
 };
 
+struct Object3dContext {
+    DirectXBase& directXBase;
+    SrvManager& srvManager;
+    Object3dBase& object3dBase;
+    GameTime& gameTime;
+};
+
 // ============================
 //  Object3d
 // ============================
@@ -51,8 +59,12 @@ public:
     // ============================
     //  Lifecycle
     // ============================
+    void SetContext(Object3dContext& context);
+    void Initialize();
     void Initialize(Object3dBase& object3dBase);
+    void Update();
     void Update(Object3dUpdateContext& context);
+    void Draw();
     void Draw(ID3D12GraphicsCommandList& commandList);
     ~Object3d();
 
@@ -181,6 +193,11 @@ public:
     const Matrix4x4 GetJointMatrix(const std::string& jointName);
 
 private:
+    DirectXBase* m_pDirectXBase = nullptr;
+    SrvManager* m_pSrvManager = nullptr;
+    Object3dBase* m_pObject3dBase = nullptr;
+    GameTime* m_pGameTime = nullptr;
+
     // ============================
     //  Transform Data
     // ============================

@@ -23,7 +23,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize();
+	void Initialize(WinApp& winApp);
 
 	void InitializePosteffect();
 
@@ -154,7 +154,7 @@ private:
 	static D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& descriptorHeap, uint32_t descriptorSize, uint32_t index);
 
 	// ポインタ
-	//WinApp* winApp_ = nullptr;
+	WinApp* m_pWinApp = nullptr;
 
 	HRESULT hr;
 	// DXGIファクトリー

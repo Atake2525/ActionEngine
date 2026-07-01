@@ -126,7 +126,7 @@ struct Joint {
 };
 
 struct Skeleton {
-    int32_t root; // RootJointのIndex
+    int32_t root = 0; // RootJointのIndex
     std::unordered_map<std::string, int32_t> jointMap; // Joint名とIndexとの辞書
     std::vector<Joint> joints; // 所属しているジョイント
 };

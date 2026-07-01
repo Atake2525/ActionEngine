@@ -6,8 +6,15 @@
 #pragma once
 
 class Model;
+class DirectXBase;
+class SrvManager;
+class TextureManager;
+class Object3dBase;
+class SkyBox;
 
 class ModelManager {
+public:
+	void SetContext(DirectXBase& directXBase, SrvManager& srvManager, TextureManager& textureManager, Object3dBase& object3dBase, SkyBox& skyBox);
 
 	// 初期化
 	void Initialize();
@@ -29,6 +36,12 @@ class ModelManager {
 	Model* FindModel(const std::string& fileName);
 
 private:
+	DirectXBase* m_pDirectXBase = nullptr;
+	SrvManager* m_pSrvManager = nullptr;
+	TextureManager* m_pTextureManager = nullptr;
+	Object3dBase* m_pObject3dBase = nullptr;
+	SkyBox* m_pSkyBox = nullptr;
+
 	// モデレータ
 	std::unordered_map<std::string, std::unique_ptr<Model>> m_models;
 };

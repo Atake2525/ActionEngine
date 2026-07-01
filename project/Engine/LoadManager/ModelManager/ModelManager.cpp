@@ -1,6 +1,15 @@
 #include "ModelManager.h"
 #include "Model.h"
 #include "DirectXBase.h"
+#include <cassert>
+
+void ModelManager::SetContext(DirectXBase& directXBase, SrvManager& srvManager, TextureManager& textureManager, Object3dBase& object3dBase, SkyBox& skyBox) {
+	m_pDirectXBase = &directXBase;
+	m_pSrvManager = &srvManager;
+	m_pTextureManager = &textureManager;
+	m_pObject3dBase = &object3dBase;
+	m_pSkyBox = &skyBox;
+}
 
 void ModelManager::Initialize() { 
 }
@@ -16,6 +25,12 @@ Model* ModelManager::LoadModel(const std::string& directoryPath, const std::stri
 
 	// モデルの生成と読み込み、初期化
 	std::unique_ptr<Model> model = std::make_unique<Model>();
+	assert(m_pDirectXBase);
+	assert(m_pSrvManager);
+	assert(m_pTextureManager);
+	assert(m_pObject3dBase);
+	assert(m_pSkyBox);
+	model->SetContext(*m_pDirectXBase, *m_pSrvManager, *m_pTextureManager, *m_pObject3dBase, *m_pSkyBox);
 	model->Initialize(directoryPath, fileName, isAnimation);
 
 	// モデルをmapコンテナに格納する

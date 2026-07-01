@@ -5,12 +5,16 @@
 #include "GameTime.h"
 #include "ImGuiManager.h"
 #include "EasingUtility.h"
+#include "SrvManager.h"
+#include "DirectXBase.h"
 
-void FadeManager::Initialize(WinApp& winApp, Render2DBase& render2DBase, GameTime& gameTime) {
+void FadeManager::Initialize(WinApp& winApp, Render2DBase& render2DBase, GameTime& gameTime, DirectXBase& directXBase, SrvManager& srvManager, TextureManager& textureManager) {
 	m_pWinApp = &winApp;
 	m_pRender2DBase = &render2DBase;
 	m_pGameTime = &gameTime;
 	color_ = Vector3::Zero;
+	SpriteContext spriteContext{ directXBase, srvManager, textureManager, winApp };
+	m_sprite.SetContext(spriteContext);
 	m_sprite.Initialize("Resources/Sprite/white1x1.png");
 	m_sprite.SetColor({ color_.x, color_.y, color_.z, alpha_ });
 	m_sprite.SetScale({ float(m_pWinApp->GetkClientWidth()), float(m_pWinApp->GetkClientHeight()) });
@@ -62,7 +66,7 @@ void FadeManager::Update() {
 
 
 #ifndef NDEBUG
-	maxDeltaTime_ = std::max(maxDeltaTime_, deltaTime);
+	maxDeltaTime_ = (std::max)(maxDeltaTime_, deltaTime);
 	ImGui::Begin("FadeInOut");
 	ImGui::SliderFloat("fadeTimer", &fadeTimer_, 0.0f, 1.0f);
 	ImGui::DragFloat("alpha", &alpha_, 0.01f);

@@ -20,10 +20,11 @@ OffScreenRendering::~OffScreenRendering() {
 
 }
 
-void OffScreenRendering::Initialize(DirectXBase& directXBase, SrvManager& srvManager, WinApp& winApp) {
+void OffScreenRendering::Initialize(DirectXBase& directXBase, SrvManager& srvManager, WinApp& winApp, TextureManager& textureManager) {
 	m_pDirectXBase = &directXBase;
 	m_pSrvManager = &srvManager;
 	m_pWinApp = &winApp;
+	m_pTextureManager = &textureManager;
 	CreateGraphicsPipeLineState();
 
 	renderTextureResource = m_pDirectXBase->CreateRenderTextureResource(m_pWinApp->GetkClientWidth(), m_pWinApp->GetkClientHeight(), DXGI_FORMAT_R8G8B8A8_UNORM_SRGB, renderTargetClearValue);
@@ -69,7 +70,7 @@ void OffScreenRendering::Initialize(DirectXBase& directXBase, SrvManager& srvMan
     dissolveResource->Map(0, nullptr, reinterpret_cast<void**>(&dissolve));
     dissolve->edgeColor = { 1.0f, 1.0f, 1.0f };
     dissolve->threshold = 0.0f;
-	noiseSrvIndex = TextureManager::GetInstance()->LoadTexture("Resources/Sprite/noise0.png");
+	noiseSrvIndex = m_pTextureManager->LoadTexture("Resources/Sprite/noise0.png");
 }
 
 void OffScreenRendering::Update() {

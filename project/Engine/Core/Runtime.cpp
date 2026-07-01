@@ -7,8 +7,28 @@ void Runtime::Initialize() {
 }
 
 void Runtime::Update() {
+    if (m_context.engine.platform.window.ProcessMessage()) {
+        m_loopOut = true;
+        return;
+    }
+
     m_context.engine.platform.time.Update();
     m_context.engine.platform.input.Update();
+
+#ifndef NDEBUG
+    m_context.engine.graphics.imgui.Update();
+    m_context.engine.platform.time.DrawImGui();
+#endif // !NDEBUG
+
+    m_context.world.light.Update();
+    m_context.game.sceneManager.Update();
+    m_context.world.particles.Update();
+    m_context.engine.assets.audio.Update();
+    m_context.engine.presentation.fade.Update();
+
+    if (m_context.game.sceneManager.EndRequest()) {
+        m_loopOut = true;
+    }
 }
 
 void Runtime::Draw() {
@@ -17,6 +37,8 @@ void Runtime::Draw() {
 
     m_context.engine.graphics.dx.BeginOffScreenRendering(m_context.engine.graphics.offScreen.GetRenderTextureResource(), m_context.engine.graphics.offScreen.GetRenderTargetDescriptorHandle());
 
+    m_context.engine.graphics.srv.PreDraw();
+    m_context.engine.graphics.dx.ApplyFullViewport();
     m_context.world.skyBox.Draw();
     m_context.game.sceneManager.Draw();
     m_context.engine.presentation.fade.Draw();
@@ -25,8 +47,6 @@ void Runtime::Draw() {
     m_context.engine.graphics.dx.EndOffScreenRendering(m_context.engine.graphics.offScreen.GetRenderTextureResource());
 
     m_context.engine.graphics.dx.PreDraw();
-    m_context.engine.graphics.srv.PreDraw();
-    m_context.engine.graphics.dx.ApplyFullViewport();
     m_context.engine.graphics.offScreen.Draw();
 
 #ifndef NDEBUG
@@ -52,23 +72,23 @@ void Runtime::SetupEngine() {
     engine.platform.input.Initialize(engine.platform.window);
     
 
-    engine.graphics.dx.Initialize();
+    engine.graphics.dx.Initialize(engine.platform.window);
     engine.graphics.srv.Initialize(engine.graphics.dx);
-    engine.graphics.offScreen.Initialize(engine.graphics.dx, engine.graphics.srv, engine.platform.window);
+    engine.assets.textures.Initialize(engine.graphics.dx, engine.graphics.srv);
+    engine.graphics.offScreen.Initialize(engine.graphics.dx, engine.graphics.srv, engine.platform.window, engine.assets.textures);
     engine.graphics.render2DBase.Initialize(engine.graphics.dx);
-    engine.graphics.object3DBase.Initialize(engine.graphics.dx);
+    engine.graphics.object3DBase.Initialize(engine.graphics.dx, m_context.world.light);
 
     engine.platform.time.Initialize(engine.graphics.dx);
-#ifndef NDEBUG
     engine.graphics.imgui.Initialize(engine.graphics.dx, engine.graphics.srv, engine.platform.window);
+#ifndef NDEBUG
     engine.graphics.debugLine.Initialize(engine.graphics.dx);
 #endif // !NDEBUG
 
     engine.assets.audio.Initialize();
-    engine.assets.textures.Initialize(engine.graphics.dx, engine.graphics.srv);
     engine.assets.json.Initialize();
 
-    engine.presentation.fade.Initialize(engine.platform.window, engine.graphics.render2DBase, engine.platform.time);
+    engine.presentation.fade.Initialize(engine.platform.window, engine.graphics.render2DBase, engine.platform.time, engine.graphics.dx, engine.graphics.srv, engine.assets.textures);
 }
 
 void Runtime::SetupWorld() {
@@ -82,5 +102,28 @@ void Runtime::SetupWorld() {
 }
 
 void Runtime::SetupGame() {
-    m_context.game.sceneManager.SetContext(m_context);
+    EngineContext& engine = m_context.engine;
+    WorldContext& world = m_context.world;
+    GameContext& game = m_context.game;
+
+    engine.assets.models.SetContext(engine.graphics.dx, engine.graphics.srv, engine.assets.textures, engine.graphics.object3DBase, world.skyBox);
+    engine.assets.models.Initialize();
+
+    game.object3dFactory.SetContext(engine.graphics.dx, engine.graphics.srv, engine.graphics.object3DBase, engine.platform.time);
+    game.spriteFactory.SetContext(engine.graphics.dx, engine.graphics.srv, engine.assets.textures, engine.platform.window);
+
+    game.sceneFactory.SetContext(m_context);
+    game.sceneManager.SetContext(m_context);
+    game.stageCount.Initialize();
+
+    engine.assets.audio.LoadMP3("Resources/sound/select.mp3", "select");
+    engine.assets.audio.LoadMP3("Resources/sound/enter.mp3", "select_enter");
+    engine.assets.audio.LoadMP3("Resources/sound/cancel.mp3", "select_cancel");
+
+    game.sceneManager.GetSettingManager().SetContext(engine.assets.json);
+    game.sceneManager.GetSettingManager().Load("KeyConfig.json", Setting::SettingType::KeyConfig);
+    game.sceneManager.GetSettingManager().Load("Audio.json", Setting::SettingType::AudioConfig);
+    game.sceneManager.SetNextScene("TITLE");
+
+    engine.platform.window.OpenWindow();
 }
