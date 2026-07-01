@@ -3,30 +3,19 @@
 #include <dxcapi.h>
 #pragma once
 
+class DirectXBase;
+
 // スプライト描画用クラス
 class Render2DBase {
-private:
-	// シングルトンパターンを適用
-	static Render2DBase* instance;
-
-	// コンストラクタ、デストラクタの隠蔽
-	Render2DBase() = default;
-	~Render2DBase() = default;
-	// コピーコンストラクタ、コピー代入演算子の封印
-	Render2DBase(Render2DBase&) = delete;
-	Render2DBase& operator=(Render2DBase&) = delete;
-
 public:
+	Render2DBase();
+	~Render2DBase();
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize();
+	void Initialize(DirectXBase& directXBase);
 
-	// インスタンスの取得
-	static Render2DBase* GetInstance();
-
-	// 終了処理
-	void Finalize();
+	DirectXBase& GetDirectXBase() { return *m_pDircetXBase; }
 
 	/// <summary>
 	/// 共通描画設定
@@ -34,6 +23,8 @@ public:
 	void ShaderDraw();
 
 private:
+	DirectXBase* m_pDircetXBase = nullptr;
+
 	// ルートシグネチャの作成
 	void CreateRootSignature();
 	// グラフィックスパイプラインの作成

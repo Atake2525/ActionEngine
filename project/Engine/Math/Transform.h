@@ -7,7 +7,7 @@
 struct Transform {
 	Vector3 scale;
 	Vector3 rotate;
-	Vector3 translate;
+	Vector3 position;
 
 	// デフォルト値
     static const Transform Default;
@@ -16,14 +16,14 @@ struct Transform {
 inline const Transform Transform::Default = {
 	Vector3{1.0f, 1.0f, 1.0f}, // scale
 	Vector3{0.0f, 0.0f, 0.0f}, // rotate
-	Vector3{0.0f, 0.0f, 0.0f}  // translate
+	Vector3{0.0f, 0.0f, 0.0f}  // position
 };
 
 struct QuaternionTransform
 {
 	Vector3 scale;
 	Quaternion rotate;
-	Vector3 translate;
+	Vector3 position;
 };
 
 struct TransformationMatrix {
@@ -35,13 +35,13 @@ struct TransformationMatrix {
 inline Transform operator*=(Transform& t, const float& n) {
 	t.scale *= n;
 	t.rotate *= n;
-	t.translate *= n;
+	t.position *= n;
 	return t;
 }
 
 inline Transform operator*=(Transform& t1, const Transform& t2) {
 	t1.scale *= t2.scale;
 	t1.rotate *= t2.rotate;
-	t1.translate *= t2.translate;
+	t1.position *= t2.position;
 	return t1;
 }

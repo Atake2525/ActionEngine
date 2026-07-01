@@ -6,26 +6,15 @@
 #pragma once
 
 class Model;
-class ModelBase;
+class DirectXBase;
+class SrvManager;
+class TextureManager;
+class Object3dBase;
+class SkyBox;
 
 class ModelManager {
-private:
-	// シングルトンパターンを適用
-	static ModelManager* instance;
-
-	// コンストラクタ、デストラクタの隠蔽
-	ModelManager() = default;
-	~ModelManager() = default;
-	// コピーコンストラクタ、コピー代入演算子の封印
-	ModelManager(ModelManager&) = delete;
-	ModelManager& operator=(ModelManager&) = delete;
-
 public:
-
-	// シングルトンインスタンスの取得
-	static ModelManager* GetInstance();
-	// 終了
-	void Finalize();
+	void SetContext(DirectXBase& directXBase, SrvManager& srvManager, TextureManager& textureManager, Object3dBase& object3dBase, SkyBox& skyBox);
 
 	// 初期化
 	void Initialize();
@@ -47,8 +36,12 @@ public:
 	Model* FindModel(const std::string& fileName);
 
 private:
-	// モデレータ
-	std::unordered_map<std::string, std::unique_ptr<Model>> models;
+	DirectXBase* m_pDirectXBase = nullptr;
+	SrvManager* m_pSrvManager = nullptr;
+	TextureManager* m_pTextureManager = nullptr;
+	Object3dBase* m_pObject3dBase = nullptr;
+	SkyBox* m_pSkyBox = nullptr;
 
-	ModelBase* modelBase = nullptr;
+	// モデレータ
+	std::unordered_map<std::string, std::unique_ptr<Model>> m_models;
 };

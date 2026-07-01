@@ -16,9 +16,6 @@
     <Filter Include="Application\FrameWork">
       <UniqueIdentifier>{2c84a2ed-17bb-d39a-3569-83481bb8fcdd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Application\Player">
-      <UniqueIdentifier>{0fac7aab-7d8b-7412-77f3-cf246a31ceaf}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Application\Scene">
       <UniqueIdentifier>{53660468-fbac-904d-6c41-8497c7f59096}</UniqueIdentifier>
     </Filter>
@@ -160,9 +157,6 @@
     <Filter Include="Engine\3d\Model\Model">
       <UniqueIdentifier>{96f32078-8e76-7e23-7d2e-5c53d69bb7da}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\3d\Model\ModelBase">
-      <UniqueIdentifier>{38fc41c6-2cd9-d8e1-445c-37865d8e2375}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine\3d\Object\Object3d">
       <UniqueIdentifier>{7bfeeeac-63dd-da75-902d-b0b29882a3a2}</UniqueIdentifier>
     </Filter>
@@ -172,8 +166,14 @@
     <Filter Include="externals\assimp\lib\Release">
       <UniqueIdentifier>{a08543a6-1b18-050e-c1a1-3a2ddd7c4a66}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Application\Player\State">
+    <Filter Include="Application\Scene\Player">
+      <UniqueIdentifier>{0fac7aab-7d8b-7412-77f3-cf246a31ceaf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\Scene\Player\State">
       <UniqueIdentifier>{f920d583-de28-4795-bb6c-39a46bce184d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\3d\Object\ModelBase">
+      <UniqueIdentifier>{38fc41c6-2cd9-d8e1-445c-37865d8e2375}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -197,9 +197,6 @@
     </ClCompile>
     <ClCompile Include="Engine\2d\UI\UIElement.cpp">
       <Filter>Engine\2d\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\3d\Object\Object3dBase\DebugObject3d.cpp">
-      <Filter>Engine\3d\Object\Object3dBase</Filter>
     </ClCompile>
     <ClCompile Include="Engine\3d\DebugLine\DebugLine.cpp">
       <Filter>Engine\3d\DebugLine</Filter>
@@ -248,9 +245,6 @@
     </ClCompile>
     <ClCompile Include="Engine\3d\Model\Model\Model.cpp">
       <Filter>Engine\3d\Model\Model</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\3d\Model\ModelBase\ModelBase.cpp">
-      <Filter>Engine\3d\Model\ModelBase</Filter>
     </ClCompile>
     <ClCompile Include="Engine\LoadManager\ModelManager\ModelManager.cpp">
       <Filter>Engine\LoadManager\ModelManager</Filter>
@@ -346,7 +340,7 @@
       <Filter>Application\StageManager</Filter>
     </ClCompile>
     <ClCompile Include="Application\Player\Player.cpp">
-      <Filter>Application\Player</Filter>
+      <Filter>Application\Scene\Player</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Collision\PhysicsCorrection.cpp">
       <Filter>Engine\Collision</Filter>
@@ -355,7 +349,7 @@
       <Filter>Application</Filter>
     </ClCompile>
     <ClCompile Include="Application\Player\PlayerUI.cpp">
-      <Filter>Application\Player</Filter>
+      <Filter>Application\Scene\Player</Filter>
     </ClCompile>
     <ClCompile Include="Application\Result.cpp">
       <Filter>Application</Filter>
@@ -385,25 +379,28 @@
       <Filter>Engine\Core\Input</Filter>
     </ClCompile>
     <ClCompile Include="Application\Player\PlayerState.cpp">
-      <Filter>Application\Player\State</Filter>
+      <Filter>Application\Scene\Player\State</Filter>
     </ClCompile>
     <ClCompile Include="Application\Player\RunState.cpp">
-      <Filter>Application\Player\State</Filter>
+      <Filter>Application\Scene\Player\State</Filter>
     </ClCompile>
     <ClCompile Include="Application\Player\JumpState.cpp">
-      <Filter>Application\Player\State</Filter>
+      <Filter>Application\Scene\Player\State</Filter>
     </ClCompile>
     <ClCompile Include="Application\CrouchState.cpp">
-      <Filter>Application\Player\State</Filter>
+      <Filter>Application\Scene\Player\State</Filter>
     </ClCompile>
     <ClCompile Include="Application\Player\ClimbingState.cpp">
-      <Filter>Application\Player\State</Filter>
+      <Filter>Application\Scene\Player\State</Filter>
     </ClCompile>
     <ClCompile Include="Application\Player\WallRunState.cpp">
-      <Filter>Application\Player\State</Filter>
+      <Filter>Application\Scene\Player\State</Filter>
     </ClCompile>
     <ClCompile Include="Application\Player\WallJumpState.cpp">
-      <Filter>Application\Player\State</Filter>
+      <Filter>Application\Scene\Player\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\Core\Runtime.cpp">
+      <Filter>Engine\Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -430,9 +427,6 @@
     </ClInclude>
     <ClInclude Include="Engine\2d\UI\UIElement.h">
       <Filter>Engine\2d\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\3d\Object\Object3dBase\DebugObject3d.h">
-      <Filter>Engine\3d\Object\Object3dBase</Filter>
     </ClInclude>
     <ClInclude Include="Engine\3d\DebugLine\DebugLine.h">
       <Filter>Engine\3d\DebugLine</Filter>
@@ -517,9 +511,6 @@
     </ClInclude>
     <ClInclude Include="Engine\3d\Model\Model\Model.h">
       <Filter>Engine\3d\Model\Model</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\3d\Model\ModelBase\ModelBase.h">
-      <Filter>Engine\3d\Model\ModelBase</Filter>
     </ClInclude>
     <ClInclude Include="Engine\LoadManager\ModelManager\ModelManager.h">
       <Filter>Engine\LoadManager\ModelManager</Filter>
@@ -639,7 +630,7 @@
       <Filter>Application\StageManager</Filter>
     </ClInclude>
     <ClInclude Include="Application\Player\Player.h">
-      <Filter>Application\Player</Filter>
+      <Filter>Application\Scene\Player</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Collision\PhysicsCorrection.h">
       <Filter>Engine\Collision</Filter>
@@ -648,7 +639,7 @@
       <Filter>Application</Filter>
     </ClInclude>
     <ClInclude Include="Application\Player\PlayerUI.h">
-      <Filter>Application\Player</Filter>
+      <Filter>Application\Scene\Player</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Presentation\Cinematic\ScanEffect.h">
       <Filter>Engine\Presentation\Cinematic</Filter>
@@ -681,25 +672,31 @@
       <Filter>Engine\Core\Input</Filter>
     </ClInclude>
     <ClInclude Include="Application\Player\PlayerState.h">
-      <Filter>Application\Player\State</Filter>
+      <Filter>Application\Scene\Player\State</Filter>
     </ClInclude>
     <ClInclude Include="Application\Player\RunState.h">
-      <Filter>Application\Player\State</Filter>
+      <Filter>Application\Scene\Player\State</Filter>
     </ClInclude>
     <ClInclude Include="Application\Player\JumpState.h">
-      <Filter>Application\Player\State</Filter>
+      <Filter>Application\Scene\Player\State</Filter>
     </ClInclude>
     <ClInclude Include="Application\CrouchState.h">
-      <Filter>Application\Player\State</Filter>
+      <Filter>Application\Scene\Player\State</Filter>
     </ClInclude>
     <ClInclude Include="Application\Player\ClimbingState.h">
-      <Filter>Application\Player\State</Filter>
+      <Filter>Application\Scene\Player\State</Filter>
     </ClInclude>
     <ClInclude Include="Application\Player\WallRunState.h">
-      <Filter>Application\Player\State</Filter>
+      <Filter>Application\Scene\Player\State</Filter>
     </ClInclude>
     <ClInclude Include="Application\Player\WallJumpState.h">
-      <Filter>Application\Player\State</Filter>
+      <Filter>Application\Scene\Player\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Math\EngineContext.h">
+      <Filter>Engine\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\Core\Runtime.h">
+      <Filter>Engine\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

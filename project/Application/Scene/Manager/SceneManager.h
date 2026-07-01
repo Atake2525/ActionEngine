@@ -5,24 +5,11 @@
 
 #pragma once
 class SceneManager {
-private:
-
-    // コンストラクタ、デストラクタの隠蔽
-    SceneManager() = default;
-    ~SceneManager() = default;
-    // コピーコンストラクタ、コピー代入演算子の封印
-    SceneManager(SceneManager&) = delete;
-    SceneManager& operator=(SceneManager&) = delete;
-
 public:
-    // シングルトンパターンを適用
-    static SceneManager* instance;
-    // インスタンスの取得
-    static SceneManager* GetInstance();
+    SceneManager();
+    ~SceneManager();
 
-    // 終了処理
-    void Finalize();
-
+    void SetContext(AppContext& context) { m_pContext = &context; }
     // 次シーン予約
     void SetNextScene(const std::string& sceneName);
 
@@ -39,6 +26,8 @@ public:
     const bool& EndRequest() { return m_loopOut; }
 
 private:
+    AppContext* m_pContext = nullptr;
+
     bool drawStart = false;
     // 実行中のシーン
     std::unique_ptr<BaseScene> m_scene = nullptr;

@@ -31,7 +31,7 @@
 //
 //struct NodeAnimation
 //{
-//    AnimationCurve<Vector3> translate;
+//    AnimationCurve<Vector3> position;
 //    AnimationCurve<Quaternion> rotate;
 //    AnimationCurve<Vector3> scale;
 //};
@@ -51,7 +51,7 @@ struct KeyframeQuaternion
 
 struct NodeAnimation
 {
-    std::vector<KeyframeVector3> translate;
+    std::vector<KeyframeVector3> position;
     std::vector<KeyframeQuaternion> rotate;
     std::vector<KeyframeVector3> scale;
 };
@@ -126,7 +126,7 @@ struct Joint {
 };
 
 struct Skeleton {
-    int32_t root; // RootJointのIndex
+    int32_t root = 0; // RootJointのIndex
     std::unordered_map<std::string, int32_t> jointMap; // Joint名とIndexとの辞書
     std::vector<Joint> joints; // 所属しているジョイント
 };

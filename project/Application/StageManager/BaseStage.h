@@ -3,6 +3,7 @@
 
 class Player;
 class Camera;
+struct AppContext;
 
 #pragma once
 class BaseStage
@@ -10,6 +11,8 @@ class BaseStage
 public:
 
     virtual ~BaseStage() = default;
+
+    virtual void SetContext(AppContext& context) { m_pContext = &context; }
 
     /// <summary>
     /// 初期化
@@ -45,6 +48,9 @@ public:
     /// 終了処理
     /// </summary>
     virtual void Finalize();
+
+protected:
+    AppContext* m_pContext = nullptr;
 
 private:
     Player* m_player = nullptr;

@@ -42,30 +42,21 @@ struct Dissolve
 	//float edgerange;
 };
 
+class DirectXBase;
+class SrvManager;
+class WinApp;
+class TextureManager;
+
 class OffScreenRendering
 {
-private:
-	static OffScreenRendering* instance;
-
-	OffScreenRendering() = default;
-	~OffScreenRendering() = default;
-	OffScreenRendering(OffScreenRendering&) = delete;
-	OffScreenRendering& operator=(OffScreenRendering&) = delete;
-
-
 public:
-
-	static OffScreenRendering* GetInstance();
-
-	/// <summary>
-	/// 終了処理
-	/// </summary>
-	void Finalize();
+	OffScreenRendering();
+	~OffScreenRendering();
 
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize();
+	void Initialize(DirectXBase& directXBase, SrvManager& srvManager, WinApp& winApp, TextureManager& textureManager);
 
 
 	void Update();
@@ -79,6 +70,8 @@ public:
 
 	const Vector4 GetRenderTargetClearValue() const { return renderTargetClearValue; }
 
+	const D3D12_CPU_DESCRIPTOR_HANDLE GetRenderTargetDescriptorHandle() const { return m_rtvDescriptorHandle; }
+
 	/// ===== GrayScaleの設定 ===== ///
 
 	void SetGrayscaleIntensity(float value);
@@ -89,6 +82,13 @@ public:
 private:
 
 	uint32_t srvIndex;
+
+	DirectXBase* m_pDirectXBase;
+	SrvManager* m_pSrvManager;
+	WinApp* m_pWinApp;
+	TextureManager* m_pTextureManager;
+
+	D3D12_CPU_DESCRIPTOR_HANDLE m_rtvDescriptorHandle;
 
 private:
 	// ルートシグネチャの作成
@@ -131,7 +131,7 @@ private:
 	D3D12_CPU_DESCRIPTOR_HANDLE srvCPUHandle;
 	D3D12_GPU_DESCRIPTOR_HANDLE srvGPUHandle;
 
-	const Vector4 renderTargetClearValue{ 0.0f, 0.3f, 1.0f, 1.0f }; // 分かりやすい赤にする
+	const Vector4 renderTargetClearValue{ 0.0f, 0.0f, 0.0f, 0.0f }; // 分かりやすい赤にする
 
 	/// GraphicsPipeLineState
 	// PSOを作成する

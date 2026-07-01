@@ -1,8 +1,9 @@
 #include "MouseCursor.h"
 #include "Input.h"
-#include "TextureManager.h"
+#include "RenderObjectFactory.h"
 #include "WinApp.h"
 #include <algorithm>
+#include <cassert>
 
 MouseCursor::MouseCursor() {
 }
@@ -10,18 +11,23 @@ MouseCursor::MouseCursor() {
 MouseCursor::~MouseCursor() {
 }
 
+void MouseCursor::SetContext(Input& input, WinApp& winApp, SpriteFactory& spriteFactory) {
+    m_input = &input;
+    m_pWinApp = &winApp;
+    m_pSpriteFactory = &spriteFactory;
+}
+
 void MouseCursor::Initialize(const std::string& hover, const std::string& press) {
-    TextureManager::GetInstance()->LoadTexture(hover);
-    TextureManager::GetInstance()->LoadTexture(press);
+    assert(m_input);
+    assert(m_pWinApp);
+    assert(m_pSpriteFactory);
     m_cursorTextures[0] = hover;
     m_cursorTextures[1] = press;
-    m_input = Input::GetInstance();
 
-    m_cursorSprite = std::make_unique<Sprite>();
-    m_cursorSprite->Initialize(m_cursorTextures[0]);
+    m_cursorSprite = m_pSpriteFactory->Create(m_cursorTextures[0]);
     m_cursorSprite->SetAnchorPoint(ANCHORPOINT_MIDDLETOP);
 
-    m_windowSize = WinApp::GetInstance()->GetWindowSize();
+    m_windowSize = m_pWinApp->GetWindowSize();
 }
 
 void MouseCursor::SetCursorTextureFilePath(const std::string & hover, const std::string & press) {

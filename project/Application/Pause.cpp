@@ -9,14 +9,16 @@
 #include "FadeManager.h"
 #include "MouseCursor.h"
 #include "Collision.h"
+#include "EngineContext.h"
 #include <functional>
 
 using namespace std;
 
 void Pause::Initialize() {
+    AppContext& ctx = *m_pContext;
     // 処理に必要な値の取得
-    m_windowSize = WinApp::GetInstance()->GetWindowSize();
-    m_input = Input::GetInstance();
+    m_windowSize = ctx.engine.platform.window.GetWindowSize();
+    m_input = &ctx.engine.platform.input;
 
     // UIの初期化
     SetupUI();
@@ -77,51 +79,52 @@ void Pause::SetupUI() {
     {
         // 各々初期化
         ui[i] = make_unique<UI::Button>();
+        ui[i]->SetContext(m_pContext->game.spriteFactory);
         string str;
 
         switch (i) { // それぞれのpngを指定してリアクション設定
         case 0:
             ui[0]->Initialize("Resources/Sprite/Pause/back.png", *m_input);
             ui[i]->SetActiveReaction([this]() {
-                Audio::GetInstance()->Play("select_enter");
+                m_pContext->engine.assets.audio.Play("select_enter");
                 TogglePauseMenu();
                 m_selectionGroup->Hide();
                 });
             break;
         case 1:
             ui[1]->Initialize("Resources/Sprite/Pause/restart.png", *m_input);
-            ui[i]->SetActiveReaction([]() {
-                std::function<void()> restartFunc = []() {
-                    OffScreenRendering::GetInstance()->SetGrayscaleIntensity(0.0f);
-                    SceneManager::GetInstance()->SetNextScene(SceneManager::GetInstance()->GetSceneName());
+            ui[i]->SetActiveReaction([this]() {
+                std::function<void()> restartFunc = [this]() {
+                    m_pContext->engine.graphics.offScreen.SetGrayscaleIntensity(0.0f);
+                    m_pContext->game.sceneManager.SetNextScene(m_pContext->game.sceneManager.GetSceneName());
                     };
-                Audio::GetInstance()->Play("select_enter");
-                FadeManager::GetInstance()->FadeOut(0.5f);
-                FadeManager::GetInstance()->SetFinishedFadeFunction(restartFunc);
+                m_pContext->engine.assets.audio.Play("select_enter");
+                m_pContext->engine.presentation.fade.FadeOut(0.5f);
+                m_pContext->engine.presentation.fade.SetFinishedFadeFunction(restartFunc);
                 });
             break;
         case 2:
             ui[2]->Initialize("Resources/Sprite/Pause/setting.png", *m_input);
-            ui[i]->SetActiveReaction([]() {
-                Audio::GetInstance()->Play("select_cancel");
+            ui[i]->SetActiveReaction([this]() {
+                m_pContext->engine.assets.audio.Play("select_cancel");
                 });
             break;
         case 3:
             ui[3]->Initialize("Resources/Sprite/Pause/stageselect.png", *m_input);
-            ui[i]->SetActiveReaction([]() {
-                Audio::GetInstance()->Play("select_cancel");
+            ui[i]->SetActiveReaction([this]() {
+                m_pContext->engine.assets.audio.Play("select_cancel");
                 });
             break;
         case 4:
             ui[4]->Initialize("Resources/Sprite/Pause/title.png", *m_input);
-            ui[i]->SetActiveReaction([]() {
-                std::function<void()> goTitleFunc = []() {
-                    SceneManager::GetInstance()->SetNextScene("TITLE");
-                    OffScreenRendering::GetInstance()->SetGrayscaleIntensity(0.0f);
+            ui[i]->SetActiveReaction([this]() {
+                std::function<void()> goTitleFunc = [this]() {
+                    m_pContext->game.sceneManager.SetNextScene("TITLE");
+                    m_pContext->engine.graphics.offScreen.SetGrayscaleIntensity(0.0f);
                     };
-                Audio::GetInstance()->Play("select_enter");
-                FadeManager::GetInstance()->FadeOut(0.5f);
-                FadeManager::GetInstance()->SetFinishedFadeFunction(goTitleFunc);
+                m_pContext->engine.assets.audio.Play("select_enter");
+                m_pContext->engine.presentation.fade.FadeOut(0.5f);
+                m_pContext->engine.presentation.fade.SetFinishedFadeFunction(goTitleFunc);
                 });
             break;
         }
@@ -132,20 +135,20 @@ void Pause::SetupUI() {
         // ポーズの切り替えアニメーション用の位置決め
         Vector2 exitPos = { m_windowSize.x * 0.5f, -ui[i]->GetScale().y };
         float size = (m_windowSize.y - outSize.y * 2.0f) / float(ui.size());
-        float targetPosY = max(((m_windowSize.y - outSize.y * 2.0f) / float(ui.size())) * i + outSize.y, ui[i]->GetScale().y * 1.2f * i);
+        float targetPosY = (std::max)(((m_windowSize.y - outSize.y * 2.0f) / float(ui.size())) * i + outSize.y, ui[i]->GetScale().y * 1.2f * i);
         Vector2 enterPos = { m_windowSize.x * 0.5f, m_windowSize.y / 12.0f + targetPosY };
 
         Vector2 firstPos = Vector2::Zero;
         float animTimer = 0.0f;
         float animTime = 0.4f;
         // EnterとExitのReactionを設定
-        ui[i]->SetEnterReaction([firstPos, enterPos, animTimer = 0.0f, animTime = 0.4f, firstFrame = false](UI::Element& element) mutable {
+        ui[i]->SetEnterReaction([this, firstPos, enterPos, animTimer = 0.0f, animTime = 0.4f, firstFrame = false](UI::Element& element) mutable {
             if (!firstFrame)
             {
                 firstPos = element.GetPosition();
                 firstFrame = true;
             }
-            animTimer += GameTime::GetInstance()->GetUnscaledDeltaTime() / animTime;
+            animTimer += m_pContext->engine.platform.time.GetUnscaledDeltaTime() / animTime;
             animTimer = std::clamp(animTimer, 0.0f, 1.0f);
             element.SetPosition(EaseOutQuint(firstPos, enterPos, animTimer));
             if (animTimer >= 1.0f)
@@ -155,13 +158,13 @@ void Pause::SetupUI() {
                 element.ShowThisFrame();
             }
             });
-        ui[i]->SetExitReaction([firstPos, exitPos, animTimer = 0.0f, animTime = 0.4f, firstFrame = false](UI::Element& element) mutable {
+        ui[i]->SetExitReaction([this, firstPos, exitPos, animTimer = 0.0f, animTime = 0.4f, firstFrame = false](UI::Element& element) mutable {
             if (!firstFrame)
             {
                 firstPos = element.GetPosition();
                 firstFrame = true;
             }
-            animTimer += GameTime::GetInstance()->GetUnscaledDeltaTime() / animTime;
+            animTimer += m_pContext->engine.platform.time.GetUnscaledDeltaTime() / animTime;
             animTimer = std::clamp(animTimer, 0.0f, 1.0f);
             element.SetPosition(EaseOutQuint(firstPos, exitPos, animTimer));
             if (animTimer >= 1.0f)

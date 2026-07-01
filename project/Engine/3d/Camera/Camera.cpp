@@ -3,13 +3,14 @@
 #include "WinApp.h"
 #include "ImGuiManager.h"
 
-Camera::Camera()
-	: transform({ {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} })
+Camera::Camera(WinApp& winApp)
+	: m_pWinApp(&winApp)
+	, transform({ {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} })
 	, fovY(0.45f)
-	, aspect(float(WinApp::GetInstance()->GetkClientWidth()) / float(WinApp::GetInstance()->GetkClientHeight()))
+	, aspect(float(m_pWinApp->GetkClientWidth()) / float(m_pWinApp->GetkClientHeight()))
 	, nearClipDistance(0.1f)
 	, farClipDistance(100.0f)
-	, worldMatrix(MakeAffineMatrix(transform.scale, transform.rotate, transform.translate))
+	, worldMatrix(MakeAffineMatrix(transform.scale, transform.rotate, transform.position))
 	, viewMatrix(Inverse(worldMatrix))
 	, projectionMatrix(MakePrespectiveFovMatrix(fovY, aspect, nearClipDistance, farClipDistance))
 	, viewProjectionMatrix(Multiply(viewMatrix, projectionMatrix))
@@ -23,7 +24,7 @@ void Camera::Update() {
 	transform.rotate.y = std::fmod(transform.rotate.y, 2 * std::numbers::pi_v<float>);
 	transform.rotate.z = std::fmod(transform.rotate.z, 2 * std::numbers::pi_v<float>);
 
-	worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
+	worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.position);
 	if (isParent)
 	{
 		worldMatrix = Multiply(worldMatrix, parent);
@@ -52,7 +53,7 @@ void Camera::Update() {
 	direction = TransformNormal({ 0.0f, 0.0f, 1.0f }, worldMatrix);
 
 	viewMatrix = Inverse(worldMatrix);
-	aspect = float(WinApp::GetInstance()->GetkClientWidth()) / float(WinApp::GetInstance()->GetkClientHeight());
+	aspect = float(m_pWinApp->GetkClientWidth()) / float(m_pWinApp->GetkClientHeight());
 	projectionMatrix = MakePrespectiveFovMatrix(fovY, aspect, nearClipDistance, farClipDistance);
 
 	viewProjectionMatrix = Multiply(viewMatrix, projectionMatrix);
@@ -68,10 +69,10 @@ void Camera::Update() {
 
 	Vector3 dirc = { -worldMatrix.m[0][2], -worldMatrix.m[1][2], worldMatrix.m[2][2] };
 
-	ImGui::SetNextWindowPos(ImVec2{ float(WinApp::GetInstance()->GetkClientWidth()) - 300.0f, 18.0f * number }, ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowPos(ImVec2{ float(m_pWinApp->GetkClientWidth()) - 300.0f, 18.0f * number }, ImGuiCond_FirstUseEver);
 	ImGui::SetNextWindowSize(ImVec2{ 300.0f, 128.0f }, ImGuiCond_FirstUseEver);
 	ImGui::Begin("CameraStatus");
-	ImGui::DragFloat3("Position", &transform.translate.x, 0.1f);
+	ImGui::DragFloat3("Position", &transform.position.x, 0.1f);
 	ImGui::DragFloat3("Rotation", &rotate.x, 0.5f);
 	ImGui::DragFloat3("Direction1", &direction.x);
 	ImGui::DragFloat3("Direction2", &dirc.x);

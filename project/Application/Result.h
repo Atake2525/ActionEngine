@@ -8,10 +8,14 @@
 
 #pragma once
 
+struct AppContext;
+
 class Result
 {
 public:
     ~Result();
+
+    void SetContext(AppContext& context) { m_pContext = &context; }
 
     /// <summary>
     /// 初期化処理
@@ -55,6 +59,7 @@ private:
     ResultSelect m_resultSelect = ResultSelect::retry;
 
 private:
+    AppContext* m_pContext = nullptr;
     Input* m_pInput = nullptr;
     float m_playTimer = 0.0f;
     bool m_isGoal = false;

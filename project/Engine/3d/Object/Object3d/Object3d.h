@@ -27,6 +27,29 @@
 #include "Culling.h"
 
 class Camera;
+class Object3dBase;
+class DirectXBase;
+class WinApp;
+class SrvManager;
+class GameTime;
+
+struct Object3dUpdateContext {
+    float deltaTime;
+    ID3D12GraphicsCommandList& commandList;
+    Object3dBase& object3dBase;
+};
+
+struct SkinClusterContext {
+    SrvManager& srvManager;
+    DirectXBase& directXBase;
+};
+
+struct Object3dContext {
+    DirectXBase& directXBase;
+    SrvManager& srvManager;
+    Object3dBase& object3dBase;
+    GameTime& gameTime;
+};
 
 // ============================
 //  Object3d
@@ -36,15 +59,19 @@ public:
     // ============================
     //  Lifecycle
     // ============================
+    void SetContext(Object3dContext& context);
     void Initialize();
+    void Initialize(Object3dBase& object3dBase);
     void Update();
+    void Update(Object3dUpdateContext& context);
     void Draw();
+    void Draw(ID3D12GraphicsCommandList& commandList);
     ~Object3d();
 
     // ============================
     //  Model
     // ============================
-    void SetModel(Model* model);
+    void SetModel(Model* model, SkinClusterContext* context = nullptr);
     // ============================
     //  Camera
     // ============================
@@ -71,14 +98,14 @@ public:
     //  Transform
     // ============================
     const Transform& GetTransform() const { return transform; }
-    const Vector3& GetTranslate() const { return transform.translate; }
+    const Vector3& GetPosition() const { return transform.position; }
     const Vector3& GetScale() const { return transform.scale; }
     const Vector3& GetRotate() const { return transform.rotate; }
     const Vector3 GetRotateInDegree() const;
 
     void SetTransform(const Transform& transform) { this->transform = transform; }
-    void SetTransform(const Vector3& translate, const Vector3& scale, const Vector3& rotate);
-    void SetTranslate(const Vector3& translate) { transform.translate = translate; }
+    void SetTransform(const Vector3& position, const Vector3& scale, const Vector3& rotate);
+    void SetPosition(const Vector3& position) { transform.position = position; }
     void SetScale(const Vector3& scale) { transform.scale = scale; }
     void SetRotate(const Vector3& rotate) { transform.rotate = rotate; }
     void SetRotateInDegree(const Vector3& rotate);
@@ -166,6 +193,11 @@ public:
     const Matrix4x4 GetJointMatrix(const std::string& jointName);
 
 private:
+    DirectXBase* m_pDirectXBase = nullptr;
+    SrvManager* m_pSrvManager = nullptr;
+    Object3dBase* m_pObject3dBase = nullptr;
+    GameTime* m_pGameTime = nullptr;
+
     // ============================
     //  Transform Data
     // ============================
@@ -254,13 +286,13 @@ private:
 private:
 
     // MaterialResourceを作成する
-    void InitializeMaterial();
+    void InitializeMaterial(DirectXBase& directXBase);
 
     // ============================
     //  Internal Methods
     // ============================
-    void CreateTransformationMatrixResource();
-    void CreateCameraResource();
+    void CreateTransformationMatrixResource(DirectXBase& directXBase);
+    void CreateCameraResource(DirectXBase& directXBase);
 
     void ApplyAnimation(Skeleton& skeleton, const Animation& animation, float animationTime);
     const bool ChangeAnimation(Animation& beforAnimation, Animation& afterAnimation,
@@ -272,7 +304,7 @@ private:
 
     void UpdateSkelton(Skeleton& skelton);
     std::vector<SkinCluster> CreateSkinCluster(const Skeleton& skeleton,
-        const ModelData& modelData);
+        const ModelData& modelData, SkinClusterContext& context);
 
     void UpdateSkinCluster(std::vector<SkinCluster>& skinCluster, const Skeleton& skeleton);
 };
