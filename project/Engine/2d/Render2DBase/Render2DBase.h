@@ -24,6 +24,7 @@ public:
 
 private:
 	DirectXBase* m_pDircetXBase = nullptr;
+
 	// ルートシグネチャの作成
 	void CreateRootSignature();
 	// グラフィックスパイプラインの作成

@@ -49,34 +49,38 @@ void Runtime::SetupEngine() {
     EngineContext& engine = m_context.engine;
 
     engine.platform.window.Initialize();
-    engine.platform.input.Initialize();
-    engine.platform.time.Initialize();
+    engine.platform.input.Initialize(engine.platform.window);
+    
 
     engine.graphics.dx.Initialize();
-    engine.graphics.srv.Initialize();
-    engine.graphics.offScreen.Initialize(&engine.graphics.dx, &engine.graphics.srv);
-    engine.graphics.render2DBase.Initialize();
-    engine.graphics.object3DBase.Initialize();
+    engine.graphics.srv.Initialize(engine.graphics.dx);
+    engine.graphics.offScreen.Initialize(engine.graphics.dx, engine.graphics.srv, engine.platform.window);
+    engine.graphics.render2DBase.Initialize(engine.graphics.dx);
+    engine.graphics.object3DBase.Initialize(engine.graphics.dx);
+
+    engine.platform.time.Initialize(engine.graphics.dx);
 #ifndef NDEBUG
-    engine.graphics.imgui.Initialize();
-    engine.graphics.debugLine.Initialize();
+    engine.graphics.imgui.Initialize(engine.graphics.dx, engine.graphics.srv, engine.platform.window);
+    engine.graphics.debugLine.Initialize(engine.graphics.dx);
 #endif // !NDEBUG
 
     engine.assets.audio.Initialize();
-    engine.assets.textures.Initialize();
-    engine.assets.modelBase.Initialize();
-    engine.assets.models.Initialize();
+    engine.assets.textures.Initialize(engine.graphics.dx, engine.graphics.srv);
     engine.assets.json.Initialize();
 
-    engine.presentation.fade.Initialize();
+    engine.presentation.fade.Initialize(engine.platform.window, engine.graphics.render2DBase, engine.platform.time);
 }
 
 void Runtime::SetupWorld() {
     WorldContext& world = m_context.world;
+    EngineContext& engine = m_context.engine;
 
-    world.light.Initialize();
+    world.light.Initialize(engine.graphics.dx);
     world.collision.Initialize();
-    world.particles.Initialize();
-    world.skyBox.Initialize();
+    world.particles.Initialize(engine.graphics.dx, engine.graphics.srv , engine.assets.textures);
+    world.skyBox.Initialize(engine.graphics.dx, engine.graphics.srv, engine.assets.textures);
 }
 
+void Runtime::SetupGame() {
+    m_context.game.sceneManager.SetContext(m_context);
+}

@@ -1,33 +1,17 @@
 #include "ModelManager.h"
 #include "Model.h"
-#include "ModelBase.h"
 #include "DirectXBase.h"
 
-ModelManager* ModelManager::instance = nullptr;
-
-ModelManager* ModelManager::GetInstance() {
-	if (instance == nullptr) {
-		instance = new ModelManager;
-	}
-	return instance;
-}
-
-void ModelManager::Finalize() {
-	delete instance;
-	instance = nullptr;
-}
-
 void ModelManager::Initialize() { 
-	ModelBase::GetInstance()->Initialize(); 
 }
 
 Model* ModelManager::LoadModel(const std::string& directoryPath, const std::string& fileName, const bool isAnimation) {
 	const std::string& modelKey = fileName;
 
 	// 読み込み済モデルを検索
-	if (models.contains(modelKey)) {
+	if (m_models.contains(modelKey)) {
 		// 読み込み済なら早期return
-		return models.at(modelKey).get();
+		return m_models.at(modelKey).get();
 	}
 
 	// モデルの生成と読み込み、初期化
@@ -35,15 +19,15 @@ Model* ModelManager::LoadModel(const std::string& directoryPath, const std::stri
 	model->Initialize(directoryPath, fileName, isAnimation);
 
 	// モデルをmapコンテナに格納する
-	models.insert(std::make_pair(modelKey, std::move(model)));
-	return models.at(modelKey).get();
+	m_models.insert(std::make_pair(modelKey, std::move(model)));
+	return m_models.at(modelKey).get();
 }
 
 Model* ModelManager::FindModel(const std::string& fileName) {
 	// 読み込み済モデルを検索
-	if (models.contains(fileName)) {
+	if (m_models.contains(fileName)) {
 	// 読み込みモデルを戻り値としてreturn
-		return models.at(fileName).get();
+		return m_models.at(fileName).get();
 	}
 
 	// ファイル名一致無し

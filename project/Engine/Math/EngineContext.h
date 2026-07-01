@@ -44,7 +44,6 @@ struct GraphicsContext {
 
 struct AssetContext {
     TextureManager textures;
-    ModelBase modelBase;
     ModelManager models;
     JsonLoader json;
     Audio audio;

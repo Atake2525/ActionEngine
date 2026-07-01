@@ -5,19 +5,11 @@
 
 using namespace Logger;
 
-JsonLoader* JsonLoader::instance = nullptr;
-
-JsonLoader* JsonLoader::GetInstance() {
-    if (instance == nullptr)
-    {
-        instance = new JsonLoader;
-    }
-    return instance;
+JsonLoader::JsonLoader() {
+    // コンストラクタの実装
 }
-
-void JsonLoader::Finalize() {
-    delete instance;
-    instance = nullptr;
+JsonLoader::~JsonLoader() {
+    // デストラクタの実装
 }
 
 void JsonLoader::Initialize() {

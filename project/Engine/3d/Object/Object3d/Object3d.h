@@ -27,6 +27,21 @@
 #include "Culling.h"
 
 class Camera;
+class Object3dBase;
+class DirectXBase;
+class WinApp;
+class SrvManager;
+
+struct Object3dUpdateContext {
+    float deltaTime;
+    ID3D12GraphicsCommandList& commandList;
+    Object3dBase& object3dBase;
+};
+
+struct SkinClusterContext {
+    SrvManager& srvManager;
+    DirectXBase& directXBase;
+};
 
 // ============================
 //  Object3d
@@ -36,15 +51,15 @@ public:
     // ============================
     //  Lifecycle
     // ============================
-    void Initialize();
-    void Update();
-    void Draw();
+    void Initialize(Object3dBase& object3dBase);
+    void Update(Object3dUpdateContext& context);
+    void Draw(ID3D12GraphicsCommandList& commandList);
     ~Object3d();
 
     // ============================
     //  Model
     // ============================
-    void SetModel(Model* model);
+    void SetModel(Model* model, SkinClusterContext* context = nullptr);
     // ============================
     //  Camera
     // ============================
@@ -254,13 +269,13 @@ private:
 private:
 
     // MaterialResourceを作成する
-    void InitializeMaterial();
+    void InitializeMaterial(DirectXBase& directXBase);
 
     // ============================
     //  Internal Methods
     // ============================
-    void CreateTransformationMatrixResource();
-    void CreateCameraResource();
+    void CreateTransformationMatrixResource(DirectXBase& directXBase);
+    void CreateCameraResource(DirectXBase& directXBase);
 
     void ApplyAnimation(Skeleton& skeleton, const Animation& animation, float animationTime);
     const bool ChangeAnimation(Animation& beforAnimation, Animation& afterAnimation,
@@ -272,7 +287,7 @@ private:
 
     void UpdateSkelton(Skeleton& skelton);
     std::vector<SkinCluster> CreateSkinCluster(const Skeleton& skeleton,
-        const ModelData& modelData);
+        const ModelData& modelData, SkinClusterContext& context);
 
     void UpdateSkinCluster(std::vector<SkinCluster>& skinCluster, const Skeleton& skeleton);
 };
