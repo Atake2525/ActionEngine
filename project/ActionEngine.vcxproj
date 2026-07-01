@@ -119,7 +119,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\CrouchState.cpp" />
     <ClCompile Include="Application\Player\ClimbingState.cpp" />
     <ClCompile Include="Engine\2d\UI\UIElement.cpp" />
-    <ClCompile Include="Engine\3d\Object\Object3dBase\DebugObject3d.cpp" />
     <ClCompile Include="Engine\3d\DebugLine\DebugLine.cpp" />
     <ClCompile Include="Engine\3d\DebugLine\DebugLineBase.cpp" />
     <ClCompile Include="Engine\Backroom\Log\Logger.cpp" />
@@ -136,7 +135,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Math\kMath.cpp" />
     <ClCompile Include="Application\FrameWork\main.cpp" />
     <ClCompile Include="Engine\3d\Model\Model\Model.cpp" />
-    <ClCompile Include="Engine\3d\Model\ModelBase\ModelBase.cpp" />
     <ClCompile Include="Engine\LoadManager\ModelManager\ModelManager.cpp" />
     <ClCompile Include="Engine\3d\Object\Object3d\Object3d.cpp" />
     <ClCompile Include="Engine\3d\Object\Object3dBase\Object3dBase.cpp" />
@@ -203,7 +201,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Player\ClimbingState.h" />
     <ClInclude Include="Engine\Math\EngineContext.h" />
     <ClInclude Include="Engine\2d\UI\UIElement.h" />
-    <ClInclude Include="Engine\3d\Object\Object3dBase\DebugObject3d.h" />
     <ClInclude Include="Engine\3d\DebugLine\DebugLine.h" />
     <ClInclude Include="Engine\3d\DebugLine\DebugLineBase.h" />
     <ClInclude Include="Engine\Backroom\Log\Logger.h" />
@@ -232,7 +229,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\Math\kMath.h" />
     <ClInclude Include="Engine\Math\Matrix3x3.h" />
     <ClInclude Include="Engine\3d\Model\Model\Model.h" />
-    <ClInclude Include="Engine\3d\Model\ModelBase\ModelBase.h" />
     <ClInclude Include="Engine\LoadManager\ModelManager\ModelManager.h" />
     <ClInclude Include="Engine\3d\Object\Object3d\Object3d.h" />
     <ClInclude Include="Engine\3d\Object\Object3dBase\Object3dBase.h" />

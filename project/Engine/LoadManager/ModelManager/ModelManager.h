@@ -8,23 +8,6 @@
 class Model;
 
 class ModelManager {
-private:
-	// シングルトンパターンを適用
-	static ModelManager* instance;
-
-	// コンストラクタ、デストラクタの隠蔽
-	ModelManager() = default;
-	~ModelManager() = default;
-	// コピーコンストラクタ、コピー代入演算子の封印
-	ModelManager(ModelManager&) = delete;
-	ModelManager& operator=(ModelManager&) = delete;
-
-public:
-
-	// シングルトンインスタンスの取得
-	static ModelManager* GetInstance();
-	// 終了
-	void Finalize();
 
 	// 初期化
 	void Initialize();
@@ -47,7 +30,5 @@ public:
 
 private:
 	// モデレータ
-	std::unordered_map<std::string, std::unique_ptr<Model>> models;
-
-	ModelBase* modelBase = nullptr;
+	std::unordered_map<std::string, std::unique_ptr<Model>> m_models;
 };

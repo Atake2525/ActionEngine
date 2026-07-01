@@ -28,12 +28,12 @@ Object3d::~Object3d()
 
 }
 
-void Object3d::Initialize() {
+void Object3d::Initialize(Object3dBase& object3dBase) {
 
     //// Resourceの作成
-    CreateTransformationMatrixResource();
+    CreateTransformationMatrixResource(object3dBase.GetDirectXBase());
     //CreateLightResource();
-    CreateCameraResource();
+    CreateCameraResource(object3dBase.GetDirectXBase());
 
     // 書き込むためのアドレスを取得
     transformationMatrixResource->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrix));
@@ -64,18 +64,18 @@ void Object3d::Initialize() {
     cameraData->farClipDistance = 1000.0f;
     cameraData->drawHeihgt = 1.0f;
 
-    camera = Object3dBase::GetInstance()->GetDefaultCamera();
+    camera = object3dBase.GetDefaultCamera();
 
-    cullingTemplateResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(CullingTemplate));
+    cullingTemplateResource = object3dBase.GetDirectXBase().CreateBufferResource(sizeof(CullingTemplate));
     cullingTemplateResource->Map(0, nullptr, reinterpret_cast<void**>(&cullingTemplateData));
 
     cullingTemplateData->drawHeight = -1.0f;
     privateCullingData.drawHeight = 100.0f;
 
-    InitializeMaterial();
+    InitializeMaterial(object3dBase.GetDirectXBase());
 }
 
-void Object3d::Update() {
+void Object3d::Update(Object3dUpdateContext& context) {
 
     Matrix4x4 localMatrix = model_->GetModelData().rootNode.localMatrix;
 
@@ -86,7 +86,7 @@ void Object3d::Update() {
 
     if (model_->IsAnimation() && startAnimation)
     {
-        animationTime += animationSpeed / std::round(1.0f / GameTime::GetInstance()->GetDeltaTime()); // 時刻を進める。1/60で固定してあるが、計測した時間を使って可変フレーム対応する方が望ましい
+        animationTime += animationSpeed / std::round(1.0f / context.deltaTime); // 時刻を進める。1/60で固定してあるが、計測した時間を使って可変フレーム対応する方が望ましい
         animationTime = std::fmod(animationTime, animation[animationKey].duration); // 最後まで行ったら最初からリピート再生。リピートしなくても別に良い
         if (animationTime < 0.0f) // 逆再生に備えてanimationTimeが0を下回ったら最後のアニメーション時間を代入
         {
@@ -145,9 +145,9 @@ void Object3d::Update() {
         Vector3 clipPos = MatrixTransform(transform.position, worldViewProjectionMatrix);
 
         // NDC → スクリーン座標
-        float screenX = (clipPos.x * 0.5f + 0.5f) * (float)WinApp::GetInstance()->GetkClientWidth();
-        float screenY = (1.0f - (clipPos.y * 0.5f + 0.5f)) * (float)WinApp::GetInstance()->GetkClientHeight();
-        float t = screenX;
+        /*float screenX = (clipPos.x * 0.5f + 0.5f) * (float)m_pWinApp->GetkClientWidth();
+        float screenY = (1.0f - (clipPos.y * 0.5f + 0.5f)) * (float)m_pWinApp->GetkClientHeight();
+        float t = screenX;*/
     }
     else {
         worldViewProjectionMatrix = worldMatrix;
@@ -161,13 +161,13 @@ void Object3d::Update() {
         transformationMatrix->WorldInverseTranspose = Inverse(worldMatrix);
         if (model_->IsAnimation())
         {
-            DirectXBase::GetInstance()->GetCommandList()->SetComputeRootSignature(Object3dBase::GetInstance()->GetComputeRootSignature().Get());
-            DirectXBase::GetInstance()->GetCommandList()->SetPipelineState(Object3dBase::GetInstance()->GetComputePipelineState().Get());
+            context.commandList.SetComputeRootSignature(context.object3dBase.GetComputeRootSignature().Get());
+            context.commandList.SetPipelineState(context.object3dBase.GetComputePipelineState().Get());
         }
     }
 
     // Culling用データの更新
-    CullingTemplate data = Object3dBase::GetInstance()->GetCullingTemplate() + privateCullingData;
+    CullingTemplate data = context.object3dBase.GetCullingTemplate() + privateCullingData;
     cullingTemplateData->drawHeight = data.drawHeight;
 
     UpdateAABB();
@@ -188,32 +188,32 @@ void Object3d::UpdateSkinCluster(std::vector<SkinCluster>& skinCluster, const Sk
     }
 }
 
-void Object3d::Draw() {
+void Object3d::Draw(ID3D12GraphicsCommandList& commandList) {
 
     // wvp用のCBufferの場所を設定
-    DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
+    commandList.SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
 
-    DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(3, cameraResource->GetGPUVirtualAddress());
+    commandList.SetGraphicsRootConstantBufferView(3, cameraResource->GetGPUVirtualAddress());
 
-    DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(13, cullingTemplateResource->GetGPUVirtualAddress());
+    commandList.SetGraphicsRootConstantBufferView(13, cullingTemplateResource->GetGPUVirtualAddress());
 
     // 3Dモデルが割り当てられていれば描画する
     if (model_) {
         // wvp用のCBufferの場所を設定
-        DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+        commandList.SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
         model_->Draw();
     }
 }
 
-void Object3d::CreateTransformationMatrixResource() {
-    transformationMatrixResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(TransformationMatrix));
+void Object3d::CreateTransformationMatrixResource(DirectXBase& directXBase) {
+    transformationMatrixResource =  directXBase.CreateBufferResource(sizeof(TransformationMatrix));
 }
 
-void Object3d::CreateCameraResource() {
-    cameraResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(CameraForGPU));
+void Object3d::CreateCameraResource(DirectXBase& directXBase) {
+    cameraResource = directXBase.CreateBufferResource(sizeof(CameraForGPU));
 }
 
-void Object3d::SetModel(Model* model) {
+void Object3d::SetModel(Model* model, SkinClusterContext* context) {
     // モデルを検索してセットする
     model_ = model;
     first = model_->GetMeshAABB();
@@ -230,7 +230,7 @@ void Object3d::SetModel(Model* model) {
         animation = model_->GetAnimation();
         skeleton = CreateSkelton(model_->GetModelData().rootNode);
         skinCluster.resize(model_->GetModelData().matVertexData.size());
-        skinCluster = CreateSkinCluster(skeleton, model_->GetModelData());
+        skinCluster = CreateSkinCluster(skeleton, model_->GetModelData(), *context);
         model_->SetSkinCluster(skinCluster);
         // GPUskinning用リソースはModel側でメッシュ数に合わせて確保する。
         model_->CreateSkinningResources(skeleton);
@@ -697,7 +697,7 @@ void Object3d::UpdateSkelton(Skeleton& skelton)
     }
 }
 
-std::vector<SkinCluster> Object3d::CreateSkinCluster(const Skeleton& skeleton, const ModelData& modelData)
+std::vector<SkinCluster> Object3d::CreateSkinCluster(const Skeleton& skeleton, const ModelData& modelData, SkinClusterContext& context)
 {
     std::vector<SkinCluster> skinCluster;
     skinCluster.resize(modelData.matVertexData.size());
@@ -706,17 +706,17 @@ std::vector<SkinCluster> Object3d::CreateSkinCluster(const Skeleton& skeleton, c
     for (const auto& matVData : modelData.matVertexData)
     {
         // palette用のResourceを確保
-        skinCluster[index].paletteResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(WellForGPU) * skeleton.joints.size());
+        skinCluster[index].paletteResource = context.directXBase.CreateBufferResource(sizeof(WellForGPU) * skeleton.joints.size());
         WellForGPU* mappedPalette = nullptr;
         skinCluster[index].paletteResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedPalette));
         skinCluster[index].mappedPalette = { mappedPalette, skeleton.joints.size() }; // spanを使ってアクセスするようにする
 
-        uint32_t srvIndex = SrvManager::GetInstance()->Allocate();
+        uint32_t srvIndex = context.srvManager.Allocate();
 
-        assert(SrvManager::GetInstance()->CheckAllocate());
+        assert(context.srvManager.CheckAllocate());
 
-        skinCluster[index].paletteSrvHandle.first = SrvManager::GetInstance()->GetCPUDescriptorHandle(srvIndex);
-        skinCluster[index].paletteSrvHandle.second = SrvManager::GetInstance()->GetGPUDescriptorHandle(srvIndex);
+        skinCluster[index].paletteSrvHandle.first = context.srvManager.GetCPUDescriptorHandle(srvIndex);
+        skinCluster[index].paletteSrvHandle.second = context.srvManager.GetGPUDescriptorHandle(srvIndex);
 
         // palette用のsrvを作成
         D3D12_SHADER_RESOURCE_VIEW_DESC paletteSrvDesc{};
@@ -727,10 +727,10 @@ std::vector<SkinCluster> Object3d::CreateSkinCluster(const Skeleton& skeleton, c
         paletteSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
         paletteSrvDesc.Buffer.NumElements = UINT(skeleton.joints.size());
         paletteSrvDesc.Buffer.StructureByteStride = sizeof(WellForGPU);
-        DirectXBase::GetInstance()->GetDevice()->CreateShaderResourceView(skinCluster[index].paletteResource.Get(), &paletteSrvDesc, skinCluster[index].paletteSrvHandle.first);
+        context.directXBase.GetDevice()->CreateShaderResourceView(skinCluster[index].paletteResource.Get(), &paletteSrvDesc, skinCluster[index].paletteSrvHandle.first);
 
         // influence用のResourceを確保
-        skinCluster[index].influenceResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(VertexInfluence) * matVData.second.vertices.size());
+        skinCluster[index].influenceResource = context.directXBase.CreateBufferResource(sizeof(VertexInfluence) * matVData.second.vertices.size());
         VertexInfluence* mappedInfluence = nullptr;
         skinCluster[index].influenceResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedInfluence));
         std::memset(mappedInfluence, 0, sizeof(VertexInfluence) * matVData.second.vertices.size()); // 0埋め。weightを0にしておく
@@ -787,8 +787,8 @@ void Object3d::SetPBRMaterial(const float metallic, const float roughness) {
     model_->SetPBRMaterial(metallic, roughness);
 }
 
-void Object3d::InitializeMaterial() {
-    materialResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(Material));
+void Object3d::InitializeMaterial(DirectXBase& directXBase) {
+    materialResource = directXBase.CreateBufferResource(sizeof(Material));
     //  書き込むためのアドレスを取得
     materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
 

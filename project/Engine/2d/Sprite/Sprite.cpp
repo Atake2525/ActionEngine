@@ -4,6 +4,7 @@
 #include "TextureManager.h"
 #include "SrvManager.h"
 #include "AABB.h"
+#include "WinApp.h"
 
 void Sprite::SetTransform(const Transform& transform){ 
 	position.x = transform.position.x;
@@ -21,43 +22,29 @@ const Transform Sprite::GetTransform() const {
 	return result;
 }
 
-void Sprite::SetStatus(const Vector2& position, const float& rotation, const Vector2& scale, const Vector4& color){ 
-	this->position = position; 
-	this->rotation = rotation;
-	this->scale = scale;
-	materialData->color = color;
-}
-
 void Sprite::SetTransform(const Vector2& position, const float& rotation, const Vector2& scale) {
 	this->position = position;
 	this->rotation = rotation;
 	this->scale = scale;
 }
 
-void Sprite::SetTexture(const std::string& textureFilePath) {
+void Sprite::SetTexture(const std::string& textureFilePath, TextureManager& textureManager) {
 	texturefilePath = textureFilePath;
-	textureIndex = TextureManager::GetInstance()->LoadTexture(textureFilePath);
+	textureIndex = textureManager.LoadTexture(textureFilePath);
+	m_metaData = textureManager.GetMetaData(textureFilePath);
 	AdjustTextureSize();
 }
 
-void Sprite::SetContext(Render2DBase& render2DBase, SrvManager& srvManager, TextureManager& textureManager, WinApp& winApp) {
-	m_pRender2DBase = &render2DBase;
-	m_pSrvManager = &srvManager;
-	m_pTextureManager = &textureManager;
-	m_pWinApp = &winApp;
-}
-
-
-void Sprite::Initialize(std::string textureFilePath) { 
+void Sprite::Initialize(std::string textureFilePath, DirectXBase& directXBase, TextureManager& textureManager) { 
 
 	// VertexResourceの作成
-	CreateVertexResource();
+	CreateVertexResource(directXBase);
 	// IndexResourceの作成
-	CreateIndexResource();
+	CreateIndexResource(directXBase);
 	// MaterialResourceの作成
-	CreateMaterialResource();
+	CreateMaterialResource(directXBase);
 	// TransformationMatrixResourceの作成
-	CreateTransformationMatrixResource();
+	CreateTransformationMatrixResource(directXBase);
 	// VertexBufferViewの作成
 	CreateVertexBufferView();
 	// IndexBufferViewの作成
@@ -74,14 +61,15 @@ void Sprite::Initialize(std::string textureFilePath) {
 	SetTransformatinMatrix();
 
 	texturefilePath = textureFilePath;
-	textureIndex = TextureManager::GetInstance()->LoadTexture(textureFilePath);
+	textureIndex = textureManager.LoadTexture(textureFilePath);
+	m_metaData = textureManager.GetMetaData(textureFilePath);
 
 	// テクスチャサイズの計算
 	AdjustTextureSize();
 
 }
 
-void Sprite::Update() {
+void Sprite::Update(WinApp& winApp) {
 
 	// アンカーポイントの設定
 	float left = 0.0f - anchorPoint.x;
@@ -91,11 +79,10 @@ void Sprite::Update() {
 
 	
 	// テクスチャ範囲指定の設定
-	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(texturefilePath);
-	float tex_left = textureLeftTop.x / metadata.width;
-	float tex_right = (textureLeftTop.x + textureSize.x) / metadata.width;
-	float tex_top = textureLeftTop.y / metadata.height;
-	float tex_bottom = (textureLeftTop.y + textureSize.y) / metadata.height;
+	float tex_left = textureLeftTop.x / m_metaData.width;
+	float tex_right = (textureLeftTop.x + textureSize.x) / m_metaData.width;
+	float tex_top = textureLeftTop.y / m_metaData.height;
+	float tex_bottom = (textureLeftTop.y + textureSize.y) / m_metaData.height;
 
 	// sprite(頂点データ)の設定
 	vertexData[0].position = {left, top, 0.0f, 1.0f}; // 左上
@@ -142,46 +129,47 @@ void Sprite::Update() {
 	//  SpriteのTransform処理
 	Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.position);
 	Matrix4x4 viewMatrix = MakeIdentity4x4();
-	Matrix4x4 projectionMatrix = MakeOrthographicMatrix(0.0f, 0.0f, float(m_pWinApp->GetkClientWidth()), float(m_pWinApp->GetkClientHeight()), 0.0f, 100.0f);
+	Matrix4x4 projectionMatrix = MakeOrthographicMatrix(0.0f, 0.0f, float(winApp.GetClientWidth()), float(winApp.GetClientHeight()), 0.0f, 100.0f);
 	Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
 	transformationMatrixData->WVP = worldViewProjectionMatrix;
 	transformationMatrixData->World = worldMatrix;
 }
 
-void Sprite::ChangeTexture(std::string textureFilePath) { 
-	textureIndex = m_pTextureManager->LoadTexture(textureFilePath);
+void Sprite::ChangeTexture(std::string textureFilePath, TextureManager& textureManager) { 
+	textureIndex = textureManager.LoadTexture(textureFilePath);
+	m_metaData = textureManager.GetMetaData(textureFilePath);
 }
 
-void Sprite::Draw() {
+void Sprite::Draw(DirectXBase& directXBase, SrvManager& srvManager) {
 	// Spriteの描画。変更が必要なものだけ変更する
-	m_pRender2DBase->GetDirectXBase().GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView); // VBVを設定
+	directXBase.GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView); // VBVを設定
 
-	m_pRender2DBase->GetDirectXBase().GetCommandList()->IASetIndexBuffer(&indexbufferView); // IBVを設定
+	directXBase.GetCommandList()->IASetIndexBuffer(&indexbufferView); // IBVを設定
 
 	// マテリアルCBufferの場所を設定
-	m_pRender2DBase->GetDirectXBase().GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+	directXBase.GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
 	// TransformationMatrixCBBufferの場所を設定
-	m_pRender2DBase->GetDirectXBase().GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
+	directXBase.GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
 	//SpriteBase::GetInstance()->GetDxBase()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(textureIndex));
-	m_pSrvManager->SetGraphicsRootDescriptorTable(2, textureIndex);
+	srvManager.SetGraphicsRootDescriptorTable(2, textureIndex);
 	// 描画
-	m_pRender2DBase->GetDirectXBase().GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
+	directXBase.GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
 
-void Sprite::CreateIndexResource() { 
-	indexResource = m_pRender2DBase->GetDirectXBase().CreateBufferResource(sizeof(uint32_t) * 6);
+void Sprite::CreateIndexResource(DirectXBase& directXBase) { 
+	indexResource = directXBase.CreateBufferResource(sizeof(uint32_t) * 6);
 }
 
-void Sprite::CreateVertexResource() { 
-	vertexResource = m_pRender2DBase->GetDirectXBase().CreateBufferResource(sizeof(VertexData) * 6);
+void Sprite::CreateVertexResource(DirectXBase& directXBase) { 
+	vertexResource = directXBase.CreateBufferResource(sizeof(VertexData) * 6);
 }
 
-void Sprite::CreateMaterialResource() { 
-	materialResource = m_pRender2DBase->GetDirectXBase().CreateBufferResource(sizeof(Material));
+void Sprite::CreateMaterialResource(DirectXBase& directXBase) { 
+	materialResource = directXBase.CreateBufferResource(sizeof(Material));
 }
 
-void Sprite::CreateTransformationMatrixResource() { 
-	transformationMatrixResource = m_pRender2DBase->GetDirectXBase().CreateBufferResource(sizeof(TransformationMatrix));
+void Sprite::CreateTransformationMatrixResource(DirectXBase& directXBase) { 
+	transformationMatrixResource = directXBase.CreateBufferResource(sizeof(TransformationMatrix));
 }
 
 void Sprite::CreateIndexBufferView() {
@@ -215,11 +203,9 @@ void Sprite::SetTransformatinMatrix() {
 }
 
 void Sprite::AdjustTextureSize() {
-	// テクスチャメタデータを取得
-	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(texturefilePath);
 
-	textureSize.x = static_cast<float>(metadata.width);
-	textureSize.y = static_cast<float>(metadata.height);
+	textureSize.x = static_cast<float>(m_metaData.width);
+	textureSize.y = static_cast<float>(m_metaData.height);
 	// 画像サイズをテクスチャサイズに合わせる
 	scale = textureSize;
 }

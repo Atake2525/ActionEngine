@@ -58,7 +58,7 @@ public:
 	~Audio();
 
 	// 初期化
-	void Initialize(WinApp& winApp);
+	void Initialize();
 
 	// 更新
 	void Update();

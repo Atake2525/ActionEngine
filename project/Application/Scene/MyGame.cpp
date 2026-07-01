@@ -6,12 +6,12 @@ void MyGame::Initialize() {
 
 #pragma region 基盤システムの初期化
 
-    GameTime::GetInstance()->Initialize();
+    //GameTime::GetInstance()->Initialize();
 
 #ifndef NDEBUG
-    WinApp::GetInstance()->Initialize();
+    //WinApp::GetInstance()->Initialize();
 #else
-    WinApp::GetInstance()->Initialize(1920, 1080, WindowMode::FullScreen, L"走快");
+    //WinApp::GetInstance()->Initialize(1920, 1080, WindowMode::FullScreen, L"走快");
 #endif // !NDEBUG
 
 

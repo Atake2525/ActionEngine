@@ -4,32 +4,18 @@
 #include "Render2DBase.h"
 #include <functional>
 
+class WinApp;
+class Render2DBase;
+class GameTime;
+
 class FadeManager
 {
-private:
-	static FadeManager* instance;
-
-	// コンストラクタ、デストラクタの隠蔽
-	FadeManager() = default;
-	~FadeManager() = default;
-	// コピーコンストラクタ、コピー代入演算子の封印
-	FadeManager(FadeManager&) = delete;
-	FadeManager& operator=(FadeManager&) = delete;
-
 public:
-
-	/// <summary>
-	/// シングルトンインスタンスの取得
-	/// </summary>
-	/// <returns>TextureManager* instance</returns>
-	static FadeManager* GetInstance();
-
-	void Finalize();
 
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize();
+	void Initialize(WinApp& winApp, Render2DBase& render2DBase, GameTime& gameTime);
 
 	const bool CompleteFade();
 	const bool& IsFade() const { return fade_; }
@@ -49,6 +35,10 @@ public:
 	void Draw();
 
 private:
+    WinApp* m_pWinApp;
+    Render2DBase* m_pRender2DBase;
+    GameTime* m_pGameTime;
+
 	bool fade_ = false;
 	bool completeFade_ = false;
 
@@ -67,6 +57,6 @@ private:
 	std::function<void()> fadeFunction;
 	std::function<void()> finishedFadeFunction;
 
-	Sprite* sprite_ = nullptr;
+	Sprite m_sprite;
 };
 

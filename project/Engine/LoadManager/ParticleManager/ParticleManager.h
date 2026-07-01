@@ -15,6 +15,9 @@
 #pragma once
 
 class Camera;
+class DirectXBase;
+class SrvManager;
+class TextureManager;
 
 struct Particle {
 	Transform transform;
@@ -90,33 +93,14 @@ enum class ParticleType {
 };
 
 class ParticleManager {
-private:
-	// シングルトンパターンを適用
-	static ParticleManager* instance;
-
-	// コンストラクタ、デストラクタの隠蔽
-	ParticleManager() = default;
-	~ParticleManager() = default;
-	// コピーコンストラクタ、コピー代入演算子の封印
-	ParticleManager(ParticleManager&) = delete;
-	ParticleManager& operator=(ParticleManager&) = delete;
-
 public:
-	/// <summary>
-	/// インスタンスの取得
-	/// </summary>
-	/// <returns></returns>
-	static ParticleManager* GetInstance();
-
-	/// <summary>
-	/// 終了処理
-	/// </summary>
-	void Finalize();
+    ParticleManager();
+    ~ParticleManager();
 
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize();
+	void Initialize(DirectXBase& directXBase, SrvManager& srvManager, TextureManager& textureManager);
 
 	ModelData LoadModelFile(const std::string& directoryPath, const std::string& fileName);
 
@@ -151,7 +135,10 @@ public:
 	void SetCamera(Camera* camera) { this->camera = camera; }
 
 private:
-
+	
+    DirectXBase* m_pDirectXBase = nullptr;
+	SrvManager* m_pSrvManager = nullptr;
+	TextureManager* m_pTextureManager = nullptr;
 	Camera* camera = nullptr;
 	/// <summary>
 	/// ランダムエンジンの初期化
