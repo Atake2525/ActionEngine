@@ -13,6 +13,10 @@ using namespace Microsoft::WRL;
 // ImGuiで0番を、PostEffectで1番を使用するため、2番から使用
 uint32_t TextureManager::kSRVIndexTop = 2;
 
+TextureManager::TextureManager() {}
+
+TextureManager::~TextureManager() {}
+
 
 void TextureManager::Initialize(DirectXBase& directXBase, SrvManager& srvManager) {
 	m_pDirectXBase = &directXBase;

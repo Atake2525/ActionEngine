@@ -7,6 +7,8 @@
 #include <random>
 #pragma once
 
+struct AppContext;
+
 // 罠の情報を格納するための構造体
 struct Traps
 {
@@ -26,6 +28,8 @@ class Trap
 public:
     Trap();
     ~Trap();
+
+    void SetContext(AppContext& context) { m_pContext = &context; }
 
     /// <summary>
     /// 初期化
@@ -49,6 +53,7 @@ public:
     void SetDrawHeight(const float height);
 
 private:
+    AppContext* m_pContext = nullptr;
 
     /// <summary>
     /// トラップを作成する関数

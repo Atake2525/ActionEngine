@@ -28,5 +28,5 @@ public:
 private:
 	bool loopOut_ = false;
 
-	std::unique_ptr<Runtime> m_runtime;
+	std::unique_ptr<Runtime> m_pRuntime;
 };

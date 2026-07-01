@@ -7,6 +7,9 @@
 #include "SpriteDefinitions.h"
 #include "externals/DirectXTex/DirectXTex.h"
 
+#ifdef Sprite
+#undef Sprite
+#endif
 
 #pragma once
 
@@ -16,30 +19,47 @@ class WinApp;
 class SrvManager;
 class DirectXBase;
 
+struct SpriteContext {
+	DirectXBase& directXBase;
+	SrvManager& srvManager;
+	TextureManager& textureManager;
+	WinApp& winApp;
+};
+
 // スプライト
 class Sprite {
 public:
+	void SetContext(SpriteContext& context);
+
 	/// <summary>
 	/// 初期化
 	/// </summary>
+	void Initialize(std::string textureFilePath);
 	void Initialize(std::string textureFilePath, DirectXBase& directXBase, TextureManager& textureManager);
 
 	/// <summary>
 	/// 更新
 	/// </summary>
+	void Update();
 	void Update(WinApp& winApp);
 
 	/// <summary>
 	/// テクスチャ変更
 	/// </summary>
+	void ChangeTexture(std::string textureFilePath);
 	void ChangeTexture(std::string textureFilePath, TextureManager& textureManager);
 	
 	/// <summary>
 	/// 描画
 	/// </summary>
+	void Draw();
 	void Draw(DirectXBase& directXBase, SrvManager& srvManager);
 
 private:
+	DirectXBase* m_pDirectXBase = nullptr;
+	SrvManager* m_pSrvManager = nullptr;
+	TextureManager* m_pTextureManager = nullptr;
+	WinApp* m_pWinApp = nullptr;
 
 	DirectX::TexMetadata m_metaData;
 
@@ -168,5 +188,6 @@ public:
 	// Setter(Transform)
 	void SetTransform(const Vector2& position, const float& rotation, const Vector2& scale);
 	// Setter(Texture)
+	void SetTexture(const std::string& textureFilePath);
 	void SetTexture(const std::string& textureFilePath, TextureManager& textureManager);
 };

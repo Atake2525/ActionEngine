@@ -7,10 +7,14 @@
 using namespace Microsoft::WRL;
 using namespace Logger;
 
-void Object3dBase::Initialize(DirectXBase& directXBase) {
-	m_pDirectXBase = &directXBase;
+Object3dBase::Object3dBase() {}
+Object3dBase::~Object3dBase() {}
 
-	cullingTemplateData.drawHeight = -1.0f; // -1.0fで
+void Object3dBase::Initialize(DirectXBase& directXBase, Light& light) {
+	m_pDirectXBase = &directXBase;
+	m_pLight = &light;
+
+	cullingTemplateData.drawHeight = -1.0f; // -1.0fで初期化
 
 	CreateGraphicsPipeLineState();
 	CreateCSPipeLineState();
@@ -277,11 +281,11 @@ void Object3dBase::ShaderDraw() {
 	// 形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけば良い
 	m_pDirectXBase->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	m_pDirectXBase->GetCommandList()->SetGraphicsRootConstantBufferView(4, Light::GetInstance()->GetDirectionalLightResource()->GetGPUVirtualAddress());
+	m_pDirectXBase->GetCommandList()->SetGraphicsRootConstantBufferView(4, m_pLight->GetDirectionalLightResource()->GetGPUVirtualAddress());
 
-	m_pDirectXBase->GetCommandList()->SetGraphicsRootConstantBufferView(5, Light::GetInstance()->GetPointlLightResource()->GetGPUVirtualAddress());
+	m_pDirectXBase->GetCommandList()->SetGraphicsRootConstantBufferView(5, m_pLight->GetPointlLightResource()->GetGPUVirtualAddress());
 
-	m_pDirectXBase->GetCommandList()->SetGraphicsRootConstantBufferView(6, Light::GetInstance()->GetSpotLightResource()->GetGPUVirtualAddress());
+	m_pDirectXBase->GetCommandList()->SetGraphicsRootConstantBufferView(6, m_pLight->GetSpotLightResource()->GetGPUVirtualAddress());
 
-	m_pDirectXBase->GetCommandList()->SetGraphicsRootConstantBufferView(14, Light::GetInstance()->GetScanResource()->GetGPUVirtualAddress());
+	m_pDirectXBase->GetCommandList()->SetGraphicsRootConstantBufferView(14, m_pLight->GetScanResource()->GetGPUVirtualAddress());
 }

@@ -9,6 +9,7 @@
 #include "Result.h"
 
 class Player;
+struct AppContext;
 
 /// <summary>
 /// ゴール
@@ -18,6 +19,8 @@ class Goal
 public:
 	// デストラクタ
 	~Goal();
+
+	void SetContext(AppContext& context) { m_pContext = &context; }
 
 	/// <summary>
 	/// 初期化
@@ -48,6 +51,8 @@ public:
 
 
 private:
+	AppContext* m_pContext = nullptr;
+
 	// 全体で使うメンバ変数
 	Input* m_input = nullptr;
 	Player* m_player = nullptr;

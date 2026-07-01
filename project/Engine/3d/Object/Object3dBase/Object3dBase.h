@@ -7,14 +7,17 @@
 
 class Camera;
 class DirectXBase;
+class Light;
 
 // オブジェクト描画用クラス
 class Object3dBase {
 public:
+    Object3dBase();
+	~Object3dBase();
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(DirectXBase& directXBase);
+	void Initialize(DirectXBase& directXBase, Light& light);
 
 	/// <summary>
 	/// 共通描画設定
@@ -39,6 +42,7 @@ public:
 
 private:
     DirectXBase* m_pDirectXBase = nullptr;
+	Light* m_pLight = nullptr;
 	Camera* defaultCamera = nullptr;
 
 private:

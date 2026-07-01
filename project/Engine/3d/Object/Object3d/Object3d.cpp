@@ -28,6 +28,18 @@ Object3d::~Object3d()
 
 }
 
+void Object3d::SetContext(Object3dContext& context) {
+    m_pDirectXBase = &context.directXBase;
+    m_pSrvManager = &context.srvManager;
+    m_pObject3dBase = &context.object3dBase;
+    m_pGameTime = &context.gameTime;
+}
+
+void Object3d::Initialize() {
+    assert(m_pObject3dBase);
+    Initialize(*m_pObject3dBase);
+}
+
 void Object3d::Initialize(Object3dBase& object3dBase) {
 
     //// Resourceの作成
@@ -73,6 +85,20 @@ void Object3d::Initialize(Object3dBase& object3dBase) {
     privateCullingData.drawHeight = 100.0f;
 
     InitializeMaterial(object3dBase.GetDirectXBase());
+}
+
+void Object3d::Update() {
+    assert(m_pDirectXBase);
+    assert(m_pObject3dBase);
+    assert(m_pGameTime);
+
+    auto commandList = m_pDirectXBase->GetCommandList();
+    Object3dUpdateContext context{
+        m_pGameTime->GetDeltaTime(),
+        *commandList.Get(),
+        *m_pObject3dBase,
+    };
+    Update(context);
 }
 
 void Object3d::Update(Object3dUpdateContext& context) {
@@ -188,6 +214,13 @@ void Object3d::UpdateSkinCluster(std::vector<SkinCluster>& skinCluster, const Sk
     }
 }
 
+void Object3d::Draw() {
+    assert(m_pDirectXBase);
+
+    auto commandList = m_pDirectXBase->GetCommandList();
+    Draw(*commandList.Get());
+}
+
 void Object3d::Draw(ID3D12GraphicsCommandList& commandList) {
 
     // wvp用のCBufferの場所を設定
@@ -227,10 +260,13 @@ void Object3d::SetModel(Model* model, SkinClusterContext* context) {
     CreateCapsule();
     if (model_->IsAnimation())
     {
+        SkinClusterContext localContext{ *m_pSrvManager, *m_pDirectXBase };
+        SkinClusterContext& skinClusterContext = context ? *context : localContext;
+
         animation = model_->GetAnimation();
         skeleton = CreateSkelton(model_->GetModelData().rootNode);
         skinCluster.resize(model_->GetModelData().matVertexData.size());
-        skinCluster = CreateSkinCluster(skeleton, model_->GetModelData(), *context);
+        skinCluster = CreateSkinCluster(skeleton, model_->GetModelData(), skinClusterContext);
         model_->SetSkinCluster(skinCluster);
         // GPUskinning用リソースはModel側でメッシュ数に合わせて確保する。
         model_->CreateSkinningResources(skeleton);

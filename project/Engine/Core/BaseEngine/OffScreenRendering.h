@@ -45,6 +45,7 @@ struct Dissolve
 class DirectXBase;
 class SrvManager;
 class WinApp;
+class TextureManager;
 
 class OffScreenRendering
 {
@@ -55,7 +56,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(DirectXBase& directXBase, SrvManager& srvManager, WinApp& winApp);
+	void Initialize(DirectXBase& directXBase, SrvManager& srvManager, WinApp& winApp, TextureManager& textureManager);
 
 
 	void Update();
@@ -85,6 +86,7 @@ private:
 	DirectXBase* m_pDirectXBase;
 	SrvManager* m_pSrvManager;
 	WinApp* m_pWinApp;
+	TextureManager* m_pTextureManager;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE m_rtvDescriptorHandle;
 
@@ -129,7 +131,7 @@ private:
 	D3D12_CPU_DESCRIPTOR_HANDLE srvCPUHandle;
 	D3D12_GPU_DESCRIPTOR_HANDLE srvGPUHandle;
 
-	const Vector4 renderTargetClearValue{ 0.0f, 0.3f, 1.0f, 1.0f }; // 分かりやすい赤にする
+	const Vector4 renderTargetClearValue{ 0.0f, 0.0f, 0.0f, 0.0f }; // 分かりやすい赤にする
 
 	/// GraphicsPipeLineState
 	// PSOを作成する

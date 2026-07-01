@@ -63,9 +63,6 @@ public:
 	// 更新
 	void Update();
 
-	// インスタンスの取得
-	static Audio* GetInstance();
-
 	// wave読み込み
 	bool LoadWave(const std::string filePath, const std::string soundName, const float volume = 1.0f);
 

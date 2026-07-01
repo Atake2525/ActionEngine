@@ -8,6 +8,9 @@
 
 using namespace std;
 
+Light::Light() {}
+Light::~Light(){}
+
 void Light::Initialize(DirectXBase& dxBase) {
 	m_pDirectXBase = &dxBase;
 

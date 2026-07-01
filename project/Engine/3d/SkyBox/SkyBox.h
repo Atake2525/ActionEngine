@@ -9,6 +9,7 @@ class Camera;
 class DirectXBase;
 class SrvManager;
 class TextureManager;
+class Light;
 
 // SkyBoxのhlslに送るデータ用の構造体
 struct SkyBoXData
@@ -17,9 +18,11 @@ struct SkyBoXData
 	std::vector<Vector4> positions;
 };
 
+class Light;
+
 // SkyBox Class
 class SkyBox {
-private:
+public:
 	// シングルトンパターンを適用
 	static SkyBox* instance;
 
@@ -30,7 +33,6 @@ private:
 	SkyBox(SkyBox&) = delete;
 	SkyBox& operator=(SkyBox&) = delete;
 
-public:
 	/// <summary>
 	/// インスタンスの取得
 	/// </summary>
@@ -58,7 +60,7 @@ public:
 	/// <summary>
 	/// 更新
 	/// </summary>
-	void Update();
+	void Update(Light& light);
 
 	/// <summary>
 	/// 描画

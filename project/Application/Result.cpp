@@ -11,6 +11,7 @@
 #include "Collision.h"
 #include "MouseCursor.h"
 #include "Audio.h"
+#include "EngineContext.h"
 #include <algorithm>
 
 
@@ -22,39 +23,37 @@ Result::~Result()
 
 void Result::Initialize()
 {
+    AppContext& ctx = *m_pContext;
 
-    m_pInput = Input::GetInstance();
+    m_pInput = &ctx.engine.platform.input;
 
     // 0 ~ 9 までのSpriteをあらかじめ読み込んでおく
     for (int i = 0; i < 10; i++)
     {
         std::string str = std::to_string(i);
-        TextureManager::GetInstance()->LoadTexture("Resources/Sprite/Result/" + str + ".png");
+        ctx.engine.assets.textures.LoadTexture("Resources/Sprite/Result/" + str + ".png");
     }
-    m_windowSize = WinApp::GetInstance()->GetWindowSize();
-    DirectX::TexMetadata metaData = TextureManager::GetInstance()->GetMetaData("Resources/Sprite/Result/0.png");
+    m_windowSize = ctx.engine.platform.window.GetWindowSize();
+    DirectX::TexMetadata metaData = ctx.engine.assets.textures.GetMetaData("Resources/Sprite/Result/0.png");
     m_timeTextureScale = { static_cast<float>(metaData.width), static_cast<float>(metaData.height) };
 
     // ステージクリアのテキスト用スプライトの用意
-    m_clearTextSprite = std::make_unique<Sprite>();
-    m_clearTextSprite->Initialize("Resources/Sprite/Result/StageClearText.png");
+    m_clearTextSprite = ctx.game.spriteFactory.Create("Resources/Sprite/Result/StageClearText.png");
     Vector2 textureScale = m_clearTextSprite->GetScale();
     m_clearTextSprite->SetScale(Vector2::Zero);
     m_clearTextSprite->SetAnchorPoint(ANCHORPOINT_MIDDLETOP);
     m_clearTextSprite->SetPosition({ m_windowSize.x / 2.0f, 0.0f });
-    metaData = TextureManager::GetInstance()->GetMetaData("Resources/Sprite/Result/StageClearText.png");
+    metaData = ctx.engine.assets.textures.GetMetaData("Resources/Sprite/Result/StageClearText.png");
     m_clearTextTextureScale = textureScale;
 
     // リザルト背景用の黒いスプライトを用意
-    m_backScreenSprite = std::make_unique<Sprite>();
-    m_backScreenSprite->Initialize("Resources/Sprite/black1x1.png");
+    m_backScreenSprite = ctx.game.spriteFactory.Create("Resources/Sprite/black1x1.png");
     m_backScreenSprite->SetScale(Vector2::Zero);
     m_backScreenSprite->SetAnchorPoint(ANCHORPOINT_MIDDLE);
     m_backScreenSprite->SetPosition({ m_windowSize.x / 2.0f, m_windowSize.y / 1.8f });
     m_backScreenSprite->SetColor({ 1.0f, 1.0f, 1.0f, 0.4f });
 
-    m_clearTimeTextSprite = std::make_unique<Sprite>();
-    m_clearTimeTextSprite->Initialize("Resources/Sprite/Result/StageClearTime.png");
+    m_clearTimeTextSprite = ctx.game.spriteFactory.Create("Resources/Sprite/Result/StageClearTime.png");
     m_clearTimeTextureScale = m_clearTimeTextSprite->GetScale() / 1.7f;
     m_clearTimeTextSprite->SetScale(Vector2::Zero);
     m_clearTimeTextSprite->SetAnchorPoint(ANCHORPOINT_LEFTTOP);
@@ -65,22 +64,22 @@ void Result::Initialize()
     const Vector2 basePosition = m_backScreenSprite->GetPosition() + Vector2{ 0.0f, m_windowSize.y * 0.12f };
     const float horizontalOffset = m_windowSize.x * 0.16f;
 
-    std::function<void()> retryFunc = [&]() {
-        std::function<void()> sceneFunc = [&]() {
-            SceneManager::GetInstance()->SetNextScene(SceneManager::GetInstance()->GetSceneName());
+    std::function<void()> retryFunc = [this]() {
+        std::function<void()> sceneFunc = [this]() {
+            m_pContext->game.sceneManager.SetNextScene(m_pContext->game.sceneManager.GetSceneName());
             };
-        Audio::GetInstance()->Play("select_enter");
-        FadeManager::GetInstance()->FadeOut(1.0f);
-        FadeManager::GetInstance()->SetFinishedFadeFunction(sceneFunc);
+        m_pContext->engine.assets.audio.Play("select_enter");
+        m_pContext->engine.presentation.fade.FadeOut(1.0f);
+        m_pContext->engine.presentation.fade.SetFinishedFadeFunction(sceneFunc);
         };
-    std::function<void()> goTitleFunc = [&]() {
-        std::function<void()> sceneFunc = [&]() {
-            SceneManager::GetInstance()->SetNextScene("TITLE");
+    std::function<void()> goTitleFunc = [this]() {
+        std::function<void()> sceneFunc = [this]() {
+            m_pContext->game.sceneManager.SetNextScene("TITLE");
 
             };
-        Audio::GetInstance()->Play("select_enter");
-        FadeManager::GetInstance()->FadeOut(1.0f);
-        FadeManager::GetInstance()->SetFinishedFadeFunction(sceneFunc);
+        m_pContext->engine.assets.audio.Play("select_enter");
+        m_pContext->engine.presentation.fade.FadeOut(1.0f);
+        m_pContext->engine.presentation.fade.SetFinishedFadeFunction(sceneFunc);
         };
 
     UI::InteractionReaction reaction;
@@ -89,12 +88,13 @@ void Result::Initialize()
     reaction.highlightColor = { 0.0f, 1.0f, 0.6f, 1.0f };
     reaction.highlight = true;
     reaction.custom = [this]() {
-        Audio::GetInstance()->Play("select");
+        m_pContext->engine.assets.audio.Play("select");
         };
     std::array<std::unique_ptr<UI::Element>, 2> m_uiElements;
     for (int i = 0; i < m_uiElements.size(); i++)
     {
         m_uiElements[i] = std::make_unique<UI::Button>();
+        m_uiElements[i]->SetContext(ctx.game.spriteFactory);
         m_uiElements[i]->SetOnSelectedReaction(reaction);
     }
     m_uiElements[0]->Initialize("Resources/Sprite/Result/GoTitle.png", *m_pInput);
@@ -148,12 +148,12 @@ void Result::Update()
     case Result::ResultDrawPhase::backScreen:
         if (!m_isGoal)
         {
-            m_playTimer += GameTime::GetInstance()->GetUnscaledDeltaTime();
+            m_playTimer += m_pContext->engine.platform.time.GetUnscaledDeltaTime();
         }
         else
         {
             // アニメーションさせるためにタイマーを使う
-            m_resultDrawTimer += GameTime::GetInstance()->GetUnscaledDeltaTime();
+            m_resultDrawTimer += m_pContext->engine.platform.time.GetUnscaledDeltaTime();
             m_resultDrawTimer = std::clamp(m_resultDrawTimer, 0.0f, 1.0f);
             for (int i = 0; i < m_clearTimeSprites.size(); i++)
             {
@@ -178,7 +178,7 @@ void Result::Update()
         }
         break;
     case Result::ResultDrawPhase::clearTime:
-        m_resultDrawTimer += GameTime::GetInstance()->GetUnscaledDeltaTime();
+        m_resultDrawTimer += m_pContext->engine.platform.time.GetUnscaledDeltaTime();
         if (m_resultDrawTimer >= 0.3f)
         {
             m_uiEnterTimers.fill(0.0f);
@@ -219,7 +219,7 @@ void Result::CalculateStageClearTimer()
 {
 
     // プレイ時間を時分秒に正規化する
-    int totalCentiseconds = std::max(0, static_cast<int>(m_playTimer * 100.0f + 0.5f));
+    int totalCentiseconds = (std::max)(0, static_cast<int>(m_playTimer * 100.0f + 0.5f));
     int hours = totalCentiseconds / 360000;
     int minutes = (totalCentiseconds / 6000) % 60;
     int seconds = (totalCentiseconds / 100) % 60;
@@ -243,15 +243,13 @@ void Result::CalculateStageClearTimer()
         if (i != 0 && i % 2 == 0)
         {
             // 桁数の値をSpriteで読み込む
-            std::unique_ptr<Sprite> sprite = std::make_unique<Sprite>();
-            sprite->Initialize("Resources/Sprite/Result/TimerColon.png");
+            std::unique_ptr<Sprite> sprite = m_pContext->game.spriteFactory.Create("Resources/Sprite/Result/TimerColon.png");
             m_clearTimeSprites.push_back(move(sprite));
             digit++;
         }
 
         // 桁数の値をSpriteで読み込む
-        std::unique_ptr<Sprite> sprite = std::make_unique<Sprite>();
-        sprite->Initialize("Resources/Sprite/Result/" + std::to_string(time) + ".png");
+        std::unique_ptr<Sprite> sprite = m_pContext->game.spriteFactory.Create("Resources/Sprite/Result/" + std::to_string(time) + ".png");
         m_clearTimeSprites.push_back(move(sprite));
     }
 
@@ -279,7 +277,7 @@ void Result::SetUIEnterReaction(UI::Element& ui, const Vector2& targetPosition, 
             return;
         }
 
-        m_uiEnterTimers[index] += GameTime::GetInstance()->GetUnscaledDeltaTime() / m_uiEnterTime;
+        m_uiEnterTimers[index] += m_pContext->engine.platform.time.GetUnscaledDeltaTime() / m_uiEnterTime;
         m_uiEnterTimers[index] = std::clamp(m_uiEnterTimers[index], 0.0f, 1.0f);
 
         const float timer = m_uiEnterTimers[index];

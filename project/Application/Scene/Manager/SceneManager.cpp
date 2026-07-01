@@ -1,12 +1,16 @@
 #include "SceneManager.h"
 #include "GameTime.h"
-#include "Runtime.h"
+#include "EngineContext.h"
 
 using namespace std;
 
+SceneManager::SceneManager() = default;
+
 SceneManager::~SceneManager() {
     m_nextScene = nullptr;
-    m_scene->Finalize();
+    if (m_scene) {
+        m_scene->Finalize();
+    }
 }
 
 void SceneManager::SetNextScene(const std::string& sceneName)
@@ -28,6 +32,8 @@ void SceneManager::Update() {
         // シーン切り替え
         m_scene = move(m_nextScene);
         m_nextScene = nullptr;
+
+        m_scene->SetSceneManager(this);
 
         // 次のシーンを初期化する
         m_scene->Initialize();

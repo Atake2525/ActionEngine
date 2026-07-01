@@ -6,6 +6,8 @@
 using namespace Microsoft::WRL;
 using namespace Logger;
 
+Render2DBase::Render2DBase() {}
+Render2DBase::~Render2DBase() {}
 
 void Render2DBase::Initialize(DirectXBase& directXBase) {
 	m_pDircetXBase = &directXBase;

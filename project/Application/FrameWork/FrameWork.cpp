@@ -1,14 +1,17 @@
 #include "FrameWork.h"
 
 void FrameWork::Initialize() {
-	m_runtime = std::make_unique<Runtime>();
+	m_pRuntime = std::make_unique<Runtime>();
+	m_pRuntime->Initialize();
 }
 
 void FrameWork::Update() {
-	m_runtime->Update();
+	m_pRuntime->Update();
+	loopOut_ = m_pRuntime->EndRequest();
 }
 
 void FrameWork::Finalize() {
+	m_pRuntime.reset();
 }
 
 void FrameWork::Run() {
@@ -23,7 +26,7 @@ void FrameWork::Run() {
 			break;
 		}
 		// 描画
-		m_runtime->Draw();
+		m_pRuntime->Draw();
 	}
 	// 終了処理
 	Finalize();

@@ -4,15 +4,17 @@
 #include <sstream>
 #include "Logger.h"
 #include <filesystem>
+#include <cassert>
 
 
 using namespace Setting;
 using namespace Logger;
 
 bool SettingManager::Load(const std::string& fileName, SettingType type) {
+    assert(m_pJsonLoader);
 	
 	// jsonを読んでデータを取得する
-	nlohmann::json deserialized = JsonLoader::GetInstance()->LoadJson("Settings/" + fileName);
+	nlohmann::json deserialized = m_pJsonLoader->LoadJson("Settings/" + fileName);
 
     m_settingFileNames[static_cast<int>(type)] = fileName;
     if (deserialized == nlohmann::json{}) // ファイルの展開に失敗、またはファイルが存在しないのでdefaultのkeyConfigを使用する

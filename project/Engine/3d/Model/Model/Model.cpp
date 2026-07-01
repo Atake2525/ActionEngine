@@ -13,7 +13,11 @@
 using namespace Logger;
 
 void Model::SetContext(DirectXBase& directXBase, SrvManager& srvManager, TextureManager& textureManaeger, Object3dBase& object3dBase, SkyBox& skyBox) {
-
+    m_pDirectXBase = &directXBase;
+    m_pSrvManager = &srvManager;
+    m_pTextureManager = &textureManaeger;
+    m_pObject3dBase = &object3dBase;
+    m_pSkyBox = &skyBox;
 }
 
 void Model::Initialize(std::string directoryPath, std::string fileName, bool isAnimation) {
@@ -63,7 +67,7 @@ void Model::Initialize(std::string directoryPath, std::string fileName, bool isA
         vertexResource.at(num)->Map(0, nullptr, reinterpret_cast<void**>(&vertexData[num]));
         std::memcpy(vertexData[num], matData.second.vertices.data(), sizeof(VertexData) * matData.second.vertices.size()); // 頂点データをリソースにコピー
 
-        indexResource.at(num) = DirectXBase::GetInstance()->CreateBufferResource(sizeof(uint32_t) * matData.second.indices.size());
+        indexResource.at(num) = m_pDirectXBase->CreateBufferResource(sizeof(uint32_t) * matData.second.indices.size());
 
         indexBufferView.at(num).BufferLocation = indexResource.at(num)->GetGPUVirtualAddress();
         indexBufferView.at(num).SizeInBytes = UINT(sizeof(uint32_t) * matData.second.indices.size());
@@ -72,7 +76,7 @@ void Model::Initialize(std::string directoryPath, std::string fileName, bool isA
         indexResource.at(num)->Map(0, nullptr, reinterpret_cast<void**>(&mappedIndex));
         std::memcpy(mappedIndex, matData.second.indices.data(), sizeof(uint32_t) * matData.second.indices.size());
 
-        materialTemplateResource.at(matData.second.materialIndex) = DirectXBase::GetInstance()->CreateBufferResource(sizeof(MaterialTemplate));
+        materialTemplateResource.at(matData.second.materialIndex) = m_pDirectXBase->CreateBufferResource(sizeof(MaterialTemplate));
         materialTemplateResource.at(matData.second.materialIndex)->Map(0, nullptr, reinterpret_cast<void**>(&materialTemplateData[matData.second.materialIndex]));
         std::memcpy(materialTemplateData[matData.second.materialIndex], &modelData.materialTemplate.at(matData.second.materialIndex), sizeof(MaterialTemplate));
         num++;
@@ -94,7 +98,7 @@ void Model::SkinningUpdate(const Skeleton& skeleton) {
             continue;
         }
 
-        const size_t jointCount = std::min(skeleton.joints.size(), skinCluster[meshIndex].inverseBindPoseMatrices.size());
+        const size_t jointCount = (std::min)(skeleton.joints.size(), skinCluster[meshIndex].inverseBindPoseMatrices.size());
         for (size_t jointIndex = 0; jointIndex < jointCount; ++jointIndex)
         {
             mappedPalette[meshIndex][jointIndex].skeletonSpaceMatrix =
@@ -106,19 +110,19 @@ void Model::SkinningUpdate(const Skeleton& skeleton) {
         ++meshIndex;
     }
 
-    auto* commandList = DirectXBase::GetInstance()->GetCommandList().Get();
-    commandList->SetComputeRootSignature(Object3dBase::GetInstance()->GetComputeRootSignature().Get());
-    commandList->SetPipelineState(Object3dBase::GetInstance()->GetComputePipelineState().Get());
+    auto* commandList = m_pDirectXBase->GetCommandList().Get();
+    commandList->SetComputeRootSignature(m_pObject3dBase->GetComputeRootSignature().Get());
+    commandList->SetPipelineState(m_pObject3dBase->GetComputePipelineState().Get());
 
-    SrvManager::GetInstance()->PreDraw();
+    m_pSrvManager->PreDraw();
 
     meshIndex = 0;
     for (const auto& matData : modelData.matVertexData)
     {
-        commandList->SetComputeRootDescriptorTable(0, SrvManager::GetInstance()->GetGPUDescriptorHandle(paletteSrvIndex[meshIndex]));
-        commandList->SetComputeRootDescriptorTable(1, SrvManager::GetInstance()->GetGPUDescriptorHandle(inputVertexSrvIndex[meshIndex]));
-        commandList->SetComputeRootDescriptorTable(2, SrvManager::GetInstance()->GetGPUDescriptorHandle(influenceSrvIndex[meshIndex]));
-        commandList->SetComputeRootDescriptorTable(3, SrvManager::GetInstance()->GetGPUDescriptorHandle(outputVertexUavIndex[meshIndex]));
+        commandList->SetComputeRootDescriptorTable(0, m_pSrvManager->GetGPUDescriptorHandle(paletteSrvIndex[meshIndex]));
+        commandList->SetComputeRootDescriptorTable(1, m_pSrvManager->GetGPUDescriptorHandle(inputVertexSrvIndex[meshIndex]));
+        commandList->SetComputeRootDescriptorTable(2, m_pSrvManager->GetGPUDescriptorHandle(influenceSrvIndex[meshIndex]));
+        commandList->SetComputeRootDescriptorTable(3, m_pSrvManager->GetGPUDescriptorHandle(outputVertexUavIndex[meshIndex]));
         commandList->SetComputeRootConstantBufferView(4, skinningInformationResource[meshIndex]->GetGPUVirtualAddress());
         commandList->Dispatch(UINT(matData.second.vertices.size() + 1023) / 1024, 1, 1); // 頂点数に応じてディスパッチサイズを計算
 
@@ -136,27 +140,27 @@ void Model::Draw() {
     int index = 0;
     for (const auto& matData : modelData.matVertexData)
     {
-        DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(8, materialTemplateResource[matData.second.materialIndex]->GetGPUVirtualAddress());
+        m_pDirectXBase->GetCommandList()->SetGraphicsRootConstantBufferView(8, materialTemplateResource[matData.second.materialIndex]->GetGPUVirtualAddress());
         if (isAnimation)
         {
-            DirectXBase::GetInstance()->GetCommandList()->IASetVertexBuffers(0, 1, &outputVertexBufferView[index]); // VBVを設定
+            m_pDirectXBase->GetCommandList()->IASetVertexBuffers(0, 1, &outputVertexBufferView[index]); // VBVを設定
         }
         else
         {
-            DirectXBase::GetInstance()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView[0][index]); // VBVを設定
+            m_pDirectXBase->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView[0][index]); // VBVを設定
         }
 
-        DirectXBase::GetInstance()->GetCommandList()->IASetIndexBuffer(&indexBufferView.at(index)); // VBVを設定
+        m_pDirectXBase->GetCommandList()->IASetIndexBuffer(&indexBufferView.at(index)); // VBVを設定
 
 
-        SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(2, modelData.material[matData.second.materialIndex].textureIndex);
-        SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(10, modelData.material[matData.second.materialIndex].normalMapIndex); // ノーマルマップ
-        SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(11, modelData.material[matData.second.materialIndex].metallicMapIndex); // メタリックマップ
-        SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(12, modelData.material[matData.second.materialIndex].roughnessMapIndex); // ラフネスマップ
+        m_pSrvManager->SetGraphicsRootDescriptorTable(2, modelData.material[matData.second.materialIndex].textureIndex);
+        m_pSrvManager->SetGraphicsRootDescriptorTable(10, modelData.material[matData.second.materialIndex].normalMapIndex); // ノーマルマップ
+        m_pSrvManager->SetGraphicsRootDescriptorTable(11, modelData.material[matData.second.materialIndex].metallicMapIndex); // メタリックマップ
+        m_pSrvManager->SetGraphicsRootDescriptorTable(12, modelData.material[matData.second.materialIndex].roughnessMapIndex); // ラフネスマップ
 
-        SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(7, SkyBox::GetInstance()->GetSrvIndex());
+        m_pSrvManager->SetGraphicsRootDescriptorTable(7, m_pSkyBox->GetSrvIndex());
 
-        DirectXBase::GetInstance()->GetCommandList()->DrawIndexedInstanced(UINT(matData.second.indices.size()), 1, 0, 0, 0);
+        m_pDirectXBase->GetCommandList()->DrawIndexedInstanced(UINT(matData.second.indices.size()), 1, 0, 0, 0);
 
         index++;
     }
@@ -208,11 +212,11 @@ void Model::CreateSkinningResources(const Skeleton& skeleton)
             continue;
         }
 
-        paletteResource[meshIndex] = DirectXBase::GetInstance()->CreateBufferResource(sizeof(WellForGPU) * jointCount);
-        inputVertexResource[meshIndex] = DirectXBase::GetInstance()->CreateBufferResource(sizeof(VertexData) * vertexCount);
-        influenceResource[meshIndex] = DirectXBase::GetInstance()->CreateBufferResource(sizeof(VertexInfluence) * vertexCount);
-        outputVertexResource[meshIndex] = DirectXBase::GetInstance()->CreateUAVBufferResource(sizeof(VertexData) * vertexCount);
-        skinningInformationResource[meshIndex] = DirectXBase::GetInstance()->CreateBufferResource(sizeof(SkinningInformation));
+        paletteResource[meshIndex] = m_pDirectXBase->CreateBufferResource(sizeof(WellForGPU) * jointCount);
+        inputVertexResource[meshIndex] = m_pDirectXBase->CreateBufferResource(sizeof(VertexData) * vertexCount);
+        influenceResource[meshIndex] = m_pDirectXBase->CreateBufferResource(sizeof(VertexInfluence) * vertexCount);
+        outputVertexResource[meshIndex] = m_pDirectXBase->CreateUAVBufferResource(sizeof(VertexData) * vertexCount);
+        skinningInformationResource[meshIndex] = m_pDirectXBase->CreateBufferResource(sizeof(SkinningInformation));
 
         paletteResource[meshIndex]->Map(0, nullptr, reinterpret_cast<void**>(&mappedPalette[meshIndex]));
         std::memset(mappedPalette[meshIndex], 0, sizeof(WellForGPU) * jointCount);
@@ -258,15 +262,15 @@ void Model::CreateSkinningResources(const Skeleton& skeleton)
         outputVertexBufferView[meshIndex].SizeInBytes = UINT(sizeof(VertexData) * vertexCount);
         outputVertexBufferView[meshIndex].StrideInBytes = sizeof(VertexData);
 
-        paletteSrvIndex[meshIndex] = SrvManager::GetInstance()->Allocate();
-        inputVertexSrvIndex[meshIndex] = SrvManager::GetInstance()->Allocate();
-        influenceSrvIndex[meshIndex] = SrvManager::GetInstance()->Allocate();
-        outputVertexUavIndex[meshIndex] = SrvManager::GetInstance()->Allocate();
+        paletteSrvIndex[meshIndex] = m_pSrvManager->Allocate();
+        inputVertexSrvIndex[meshIndex] = m_pSrvManager->Allocate();
+        influenceSrvIndex[meshIndex] = m_pSrvManager->Allocate();
+        outputVertexUavIndex[meshIndex] = m_pSrvManager->Allocate();
 
-        SrvManager::GetInstance()->CreateSRVforStructuredBuffer(paletteSrvIndex[meshIndex], paletteResource[meshIndex], static_cast<UINT>(jointCount), sizeof(WellForGPU));
-        SrvManager::GetInstance()->CreateSRVforStructuredBuffer(inputVertexSrvIndex[meshIndex], inputVertexResource[meshIndex], static_cast<UINT>(vertexCount), sizeof(VertexData));
-        SrvManager::GetInstance()->CreateSRVforStructuredBuffer(influenceSrvIndex[meshIndex], influenceResource[meshIndex], static_cast<UINT>(vertexCount), sizeof(VertexInfluence));
-        SrvManager::GetInstance()->CreateUAVforStructuredBuffer(outputVertexUavIndex[meshIndex], outputVertexResource[meshIndex], static_cast<UINT>(vertexCount), sizeof(VertexData));
+        m_pSrvManager->CreateSRVforStructuredBuffer(paletteSrvIndex[meshIndex], paletteResource[meshIndex], static_cast<UINT>(jointCount), sizeof(WellForGPU));
+        m_pSrvManager->CreateSRVforStructuredBuffer(inputVertexSrvIndex[meshIndex], inputVertexResource[meshIndex], static_cast<UINT>(vertexCount), sizeof(VertexData));
+        m_pSrvManager->CreateSRVforStructuredBuffer(influenceSrvIndex[meshIndex], influenceResource[meshIndex], static_cast<UINT>(vertexCount), sizeof(VertexInfluence));
+        m_pSrvManager->CreateUAVforStructuredBuffer(outputVertexUavIndex[meshIndex], outputVertexResource[meshIndex], static_cast<UINT>(vertexCount), sizeof(VertexData));
 
         ++meshIndex;
     }
@@ -459,7 +463,7 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
             modelData.matVertexData[meshName].skinClusterData[JointName] = jointWeightData;
         }
     }
-    uint32_t texIndex = TextureManager::GetInstance()->LoadTexture("Resources/Sprite/black1x1.png");
+    uint32_t texIndex = m_pTextureManager->LoadTexture("Resources/Sprite/black1x1.png");
     // テクスチャが無い場合white1x1を張るようにする
     if (scene->mNumMaterials == 0)
     {
@@ -474,7 +478,7 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
         matData.roughnessMapIndex = texIndex;
 
         // 読み込んだテクスチャの番号尾を取得
-        matData.textureIndex = TextureManager::GetInstance()->LoadTexture(matData.textureFilePath);
+        matData.textureIndex = m_pTextureManager->LoadTexture(matData.textureFilePath);
 
         MaterialTemplate matTempData;
         // メタリックの数値
@@ -497,16 +501,16 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
             matData.textureFilePath = directoryPath + "/" + textureFilePath.C_Str();
 
             // テクスチャ読み込み
-            TextureManager::GetInstance()->LoadTexture(matData.textureFilePath);
+            m_pTextureManager->LoadTexture(matData.textureFilePath);
             // 読み込んだテクスチャの番号尾を取得
-            matData.textureIndex = TextureManager::GetInstance()->LoadTexture(matData.textureFilePath);
+            matData.textureIndex = m_pTextureManager->LoadTexture(matData.textureFilePath);
 
 
             // ノーマルマップ、メタリックマップ、ラフネスマップの読み込み
             if (material->GetTexture(aiTextureType_NORMALS, 0, &textureFilePath) == AI_SUCCESS ||
                 material->GetTexture(aiTextureType_HEIGHT, 0, &textureFilePath) == AI_SUCCESS) {
                 matData.normalMapFilePath = directoryPath + "/" + textureFilePath.C_Str();
-                matData.normalMapIndex = TextureManager::GetInstance()->LoadTexture(matData.normalMapFilePath, TextureColorSpace::Linear);
+                matData.normalMapIndex = m_pTextureManager->LoadTexture(matData.normalMapFilePath, TextureColorSpace::Linear);
             }
             else
             {
@@ -515,7 +519,7 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
             }
             if (material->GetTexture(aiTextureType_METALNESS, 0, &textureFilePath) == AI_SUCCESS) {
                 matData.metallicMapFilePath = directoryPath + "/" + textureFilePath.C_Str();
-                matData.metallicMapIndex = TextureManager::GetInstance()->LoadTexture(matData.metallicMapFilePath, TextureColorSpace::Linear);
+                matData.metallicMapIndex = m_pTextureManager->LoadTexture(matData.metallicMapFilePath, TextureColorSpace::Linear);
             }
             else
             {
@@ -524,7 +528,7 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
             }
             if (material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &textureFilePath) == AI_SUCCESS) {
                 matData.roughnessMapFilePath = directoryPath + "/" + textureFilePath.C_Str();
-                matData.roughnessMapIndex = TextureManager::GetInstance()->LoadTexture(matData.roughnessMapFilePath, TextureColorSpace::Linear);
+                matData.roughnessMapIndex = m_pTextureManager->LoadTexture(matData.roughnessMapFilePath, TextureColorSpace::Linear);
             }
             else
             {
@@ -571,7 +575,7 @@ ModelData Model::LoadModelFileGLTF(const std::string& directoryPath, const std::
             matData.roughnessMapIndex = texIndex;
 
             // 読み込んだテクスチャの番号尾を取得
-            matData.textureIndex = TextureManager::GetInstance()->LoadTexture(matData.textureFilePath);
+            matData.textureIndex = m_pTextureManager->LoadTexture(matData.textureFilePath);
 
             // メタリックの数値
             float metallic = 0.0f;
@@ -773,7 +777,7 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
         }
 
     }
-    uint32_t texIndex = TextureManager::GetInstance()->LoadTexture("Resources/Sprite/black1x1.png");
+    uint32_t texIndex = m_pTextureManager->LoadTexture("Resources/Sprite/black1x1.png");
     // マテリアルが作成されていない場合はwhite1x1を使用
     if (scene->mNumMaterials == 1 || scene->mNumMaterials == 0)
     {
@@ -788,7 +792,7 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
         matData.roughnessMapIndex = texIndex;
 
         // 読み込んだテクスチャの番号尾を取得
-        matData.textureIndex = TextureManager::GetInstance()->LoadTexture(matData.textureFilePath);
+        matData.textureIndex = m_pTextureManager->LoadTexture(matData.textureFilePath);
 
         MaterialTemplate matTempData;
         // メタリックの数値		
@@ -815,13 +819,13 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
             matData.textureFilePath = directoryPath + "/" + textureFilePath.C_Str();
 
             // 読み込んだテクスチャの番号尾を取得
-            matData.textureIndex = TextureManager::GetInstance()->LoadTexture(matData.textureFilePath);
+            matData.textureIndex = m_pTextureManager->LoadTexture(matData.textureFilePath);
 
             // ノーマルマップ、メタリックマップ、ラフネスマップの読み込み
             if (material->GetTexture(aiTextureType_NORMALS, 0, &textureFilePath) == AI_SUCCESS ||
                 material->GetTexture(aiTextureType_HEIGHT, 0, &textureFilePath) == AI_SUCCESS) {
                 matData.normalMapFilePath = directoryPath + "/" + textureFilePath.C_Str();
-                matData.normalMapIndex = TextureManager::GetInstance()->LoadTexture(matData.normalMapFilePath, TextureColorSpace::Linear);
+                matData.normalMapIndex = m_pTextureManager->LoadTexture(matData.normalMapFilePath, TextureColorSpace::Linear);
             }
             else
             {
@@ -830,7 +834,7 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
             }
             if (material->GetTexture(aiTextureType_METALNESS, 0, &textureFilePath) == AI_SUCCESS) {
                 matData.metallicMapFilePath = directoryPath + "/" + textureFilePath.C_Str();
-                matData.metallicMapIndex = TextureManager::GetInstance()->LoadTexture(matData.metallicMapFilePath, TextureColorSpace::Linear);
+                matData.metallicMapIndex = m_pTextureManager->LoadTexture(matData.metallicMapFilePath, TextureColorSpace::Linear);
             }
             else
             {
@@ -839,7 +843,7 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
             }
             if (material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &textureFilePath) == AI_SUCCESS) {
                 matData.roughnessMapFilePath = directoryPath + "/" + textureFilePath.C_Str();
-                matData.roughnessMapIndex = TextureManager::GetInstance()->LoadTexture(matData.roughnessMapFilePath, TextureColorSpace::Linear);
+                matData.roughnessMapIndex = m_pTextureManager->LoadTexture(matData.roughnessMapFilePath, TextureColorSpace::Linear);
             }
             else
             {
@@ -883,7 +887,7 @@ ModelData Model::LoadModelFileOBJ(const std::string& directoryPath, const std::s
             matData.roughnessMapIndex = texIndex;
 
             // 読み込んだテクスチャの番号尾を取得
-            matData.textureIndex = TextureManager::GetInstance()->LoadTexture(matData.textureFilePath);
+            matData.textureIndex = m_pTextureManager->LoadTexture(matData.textureFilePath);
 
             MaterialTemplate matTempData;
             // メタリックの数値		
@@ -917,7 +921,7 @@ void Model::CreateVertexResource() {
     for (const auto& matData : modelData.matVertexData)
     {
         // 頂点リソースの作成
-        vertexResource.at(index) = DirectXBase::GetInstance()->CreateBufferResource(sizeof(VertexData) * matData.second.vertices.size());
+        vertexResource.at(index) = m_pDirectXBase->CreateBufferResource(sizeof(VertexData) * matData.second.vertices.size());
         index++;
     }
 }
@@ -983,22 +987,22 @@ void Model::CreateAABB() {
 
         for (const auto& vertices : matVData.second.vertices)
         {
-            firstMultimesh.min.x = std::min(firstMultimesh.min.x, vertices.position.x);
-            firstMultimesh.min.y = std::min(firstMultimesh.min.y, vertices.position.y);
-            firstMultimesh.min.z = std::min(firstMultimesh.min.z, vertices.position.z);
+            firstMultimesh.min.x = (std::min)(firstMultimesh.min.x, vertices.position.x);
+            firstMultimesh.min.y = (std::min)(firstMultimesh.min.y, vertices.position.y);
+            firstMultimesh.min.z = (std::min)(firstMultimesh.min.z, vertices.position.z);
 
-            firstMultimesh.max.x = std::max(firstMultimesh.max.x, vertices.position.x);
-            firstMultimesh.max.y = std::max(firstMultimesh.max.y, vertices.position.y);
-            firstMultimesh.max.z = std::max(firstMultimesh.max.z, vertices.position.z);
+            firstMultimesh.max.x = (std::max)(firstMultimesh.max.x, vertices.position.x);
+            firstMultimesh.max.y = (std::max)(firstMultimesh.max.y, vertices.position.y);
+            firstMultimesh.max.z = (std::max)(firstMultimesh.max.z, vertices.position.z);
         }
 
-        meshAABB.min.x = std::min(meshAABB.min.x, firstMultimesh.min.x);
-        meshAABB.min.y = std::min(meshAABB.min.y, firstMultimesh.min.y);
-        meshAABB.min.z = std::min(meshAABB.min.z, firstMultimesh.min.z);
+        meshAABB.min.x = (std::min)(meshAABB.min.x, firstMultimesh.min.x);
+        meshAABB.min.y = (std::min)(meshAABB.min.y, firstMultimesh.min.y);
+        meshAABB.min.z = (std::min)(meshAABB.min.z, firstMultimesh.min.z);
 
-        meshAABB.max.x = std::max(meshAABB.max.x, firstMultimesh.max.x);
-        meshAABB.max.y = std::max(meshAABB.max.y, firstMultimesh.max.y);
-        meshAABB.max.z = std::max(meshAABB.max.z, firstMultimesh.max.z);
+        meshAABB.max.x = (std::max)(meshAABB.max.x, firstMultimesh.max.x);
+        meshAABB.max.y = (std::max)(meshAABB.max.y, firstMultimesh.max.y);
+        meshAABB.max.z = (std::max)(meshAABB.max.z, firstMultimesh.max.z);
 
         multiMeshAABB[matVData.first] = firstMultimesh;
     }

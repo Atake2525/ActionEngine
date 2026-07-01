@@ -7,6 +7,9 @@
 class WinApp;
 class Render2DBase;
 class GameTime;
+class DirectXBase;
+class SrvManager;
+class TextureManager;
 
 class FadeManager
 {
@@ -15,7 +18,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize(WinApp& winApp, Render2DBase& render2DBase, GameTime& gameTime);
+	void Initialize(WinApp& winApp, Render2DBase& render2DBase, GameTime& gameTime, DirectXBase& directXBase, SrvManager& srvManager, TextureManager& textureManager);
 
 	const bool CompleteFade();
 	const bool& IsFade() const { return fade_; }

@@ -287,7 +287,7 @@ void SkyBox::CreateGraphicsPipeLineState() {
 	assert(SUCCEEDED(hr));
 }
 
-void SkyBox::Update() {
+void SkyBox::Update(Light& light) {
 
 	Transform transform;
 	if (camera_)
@@ -313,9 +313,9 @@ void SkyBox::Update() {
 		worldViewProjectionMatrix = worldMatrix;
 	}
 
-	Vector3 sunDirection = Light::GetInstance()->GetDirectionDirectionalLight();
+	Vector3 sunDirection = light.GetDirectionDirectionalLight();
 	sunData->sunDirection = { sunDirection.x, -sunDirection.y, sunDirection.z };
-	sunData->power = Light::GetInstance()->GetIntensityDirectionalLight();
+	sunData->power = light.GetIntensityDirectionalLight();
 
 
 	transformationMatrix->WVP = worldViewProjectionMatrix;
