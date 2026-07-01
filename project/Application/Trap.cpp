@@ -5,6 +5,7 @@
 #include "StageCount.h"
 #include "CollisionManager.h"
 #include "ModelManager.h"
+#include "EngineContext.h"
 
 using namespace Logger;
 using namespace std;
@@ -23,13 +24,13 @@ Trap::Trap() {
 Trap::~Trap() {
 	for (int i = 0; i < m_traps.size(); i++)
 	{
-		CollisionManager::GetInstance()->DeleteCollision(m_traps[i].object.get());
+		m_pContext->world.collision.DeleteCollision(m_traps[i].object.get());
 	}
 }
 
 void Trap::Initialize(std::string jsonName) {
 	// Jsonが読み込まれていなかったら早期return
-	if (!JsonLoader::GetInstance()->CheckJsonLoaded(jsonName)) {
+	if (!m_pContext->engine.assets.json.CheckJsonLoaded(jsonName)) {
 		return;
 	}
 	random_device seedGenerator;
@@ -41,18 +42,17 @@ void Trap::Initialize(std::string jsonName) {
 	string str;
 	vector<JsonData> json;
 	m_jsonName = jsonName;
-	if (JsonLoader::GetInstance()->CheckJsonLoaded(jsonName))
+	if (m_pContext->engine.assets.json.CheckJsonLoaded(jsonName))
 	{
 		// スタート地点の取得
-		json = JsonLoader::GetInstance()->GetJsonData(jsonName, "trap");
+		json = m_pContext->engine.assets.json.GetJsonData(jsonName, "trap");
 		// スタート地点が設定されていない又はjsonが読み込めなかった場合はデフォルト位置を使用
 		if (!json.empty())
 		{
-            Model* trapModel = ModelManager::GetInstance()->LoadModel("Resources/Model/obj", "trap.obj", true);
+            Model* trapModel = m_pContext->engine.assets.models.LoadModel("Resources/Model/obj", "trap.obj", true);
 			for (auto data : json) {
 				Traps trap;
-				trap.object = make_unique<Object3d>();
-				trap.object->Initialize();
+				trap.object = m_pContext->game.object3dFactory.Create();
 				trap.object->SetTransform(data.transform);
 				trap.object->SetModel(trapModel);
 				trap.start = data.transform;
@@ -87,7 +87,7 @@ void Trap::Initialize(std::string jsonName) {
 				trap.number = m_num;
 				trap.object->Update();
 				m_traps.push_back(std::move(trap));
-				CollisionManager::GetInstance()->AddCollision(m_traps[m_num].object.get());
+				m_pContext->world.collision.AddCollision(m_traps[m_num].object.get());
 				m_num++;
 			}
 		}
@@ -101,7 +101,7 @@ void Trap::Initialize(std::string jsonName) {
 void Trap::Update() {
 
     // 経過時間を更新
-    m_gameTimer += GameTime::GetInstance()->GetDeltaTime();
+    m_gameTimer += m_pContext->engine.platform.time.GetDeltaTime();
 
     // -----------------------------
     // 初回更新時の初期化処理
@@ -134,7 +134,7 @@ void Trap::Update() {
         // 既存コリジョン削除
         for (int i = 0; i < m_traps.size(); i++)
         {
-            CollisionManager::GetInstance()->DeleteCollision(m_traps[i].object.get());
+            m_pContext->world.collision.DeleteCollision(m_traps[i].object.get());
         }
         // JSON 再ロード
         Initialize(m_jsonName);
@@ -182,7 +182,7 @@ void Trap::Update() {
             // ループしない & すでに reverse 状態 → 削除
             if (!m_traps[i].trapData.loop && m_traps[i].reverse)
             {
-                CollisionManager::GetInstance()->DeleteCollision(m_traps[i].object.get());
+                m_pContext->world.collision.DeleteCollision(m_traps[i].object.get());
                 m_traps.erase(m_traps.cbegin() + i);
                 continue;
             }
@@ -217,7 +217,7 @@ void Trap::Update() {
         // 各要素を Lerp で補間
         newTransform.scale = Lerp(m_traps[i].start.scale, m_traps[i].start.scale + m_traps[i].trapData.velocity.scale, time);
         newTransform.rotate = Lerp(m_traps[i].start.rotate, m_traps[i].start.rotate + m_traps[i].trapData.velocity.rotate, time);
-        newTransform.translate = Lerp(m_traps[i].start.translate, m_traps[i].start.translate + m_traps[i].trapData.velocity.translate, time);
+        newTransform.position = Lerp(m_traps[i].start.position, m_traps[i].start.position + m_traps[i].trapData.velocity.position, time);
 
         // Transform を適用して更新
         m_traps[i].object->SetTransform(newTransform);
@@ -249,10 +249,9 @@ void Trap::SetDrawHeight(const float height) {
 
 void Trap::MakeTrap(Traps& data) {
 	Traps trap;
-	trap.object = make_unique<Object3d>();
-	trap.object->Initialize();
+	trap.object = m_pContext->game.object3dFactory.Create();
 	trap.object->SetTransform(data.start);
-    trap.object->SetModel(ModelManager::GetInstance()->FindModel("trap.obj"));
+    trap.object->SetModel(m_pContext->engine.assets.models.FindModel("trap.obj"));
 	trap.start = data.start;
 	trap.trapData = data.trapData;
 	trap.startFrame = m_gameTimer;
@@ -268,6 +267,6 @@ void Trap::MakeTrap(Traps& data) {
 	trap.number = m_num;
 	trap.object->Update();
 	m_traps.push_back(std::move(trap));
-	CollisionManager::GetInstance()->AddCollision(m_traps[int(m_traps.size() - 1)].object.get());
+	m_pContext->world.collision.AddCollision(m_traps[int(m_traps.size() - 1)].object.get());
 	m_num++;
 }

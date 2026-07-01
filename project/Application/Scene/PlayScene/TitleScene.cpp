@@ -9,32 +9,34 @@
 #include "FadeManager.h"
 #include "Collision.h"
 #include "Light.h"
+#include "EngineContext.h"
+#include "RenderObjectFactory.h"
 
 using namespace std;
 
 void TitleScene::Initialize() {
+    AppContext& ctx = *m_pContext;
 
-    m_pCamera = make_unique<Camera>();
+    m_pCamera = make_unique<Camera>(ctx.engine.platform.window);
     m_pCamera->SetRotate(Vector3(SwapRadian(11.5f), SwapRadian(1.5f), 0.0f));
-    m_pCamera->SetTranslate({ -1.0f, 1.6f, -3.4f });
+    m_pCamera->SetPosition({ -1.0f, 1.6f, -3.4f });
     m_screenChangeTransformPre = m_pCamera->GetTransform();
     m_pCamera->Update();
 
-    TextureManager::GetInstance()->LoadTexture("Resources/white1x1.dds");
+    ctx.engine.assets.textures.LoadTexture("Resources/white1x1.dds");
 
-    SkyBox::GetInstance()->SetCamera(m_pCamera.get());
-    SkyBox::GetInstance()->SetTexture("Resources/white1x1.dds");
-    Light::GetInstance()->SetIntensityDirectionalLight(1.0f);
+    ctx.world.skyBox.SetCamera(m_pCamera.get());
+    ctx.world.skyBox.SetTexture("Resources/white1x1.dds");
+    ctx.world.light.SetIntensityDirectionalLight(1.0f);
 
-    m_pInput = Input::GetInstance();
+    m_pInput = &ctx.engine.platform.input;
 
-    Object3dBase::GetInstance()->SetDefaultCamera(m_pCamera.get());
+    ctx.engine.graphics.object3DBase.SetDefaultCamera(m_pCamera.get());
 
-    ParticleManager::GetInstance()->SetCamera(m_pCamera.get());
+    ctx.world.particles.SetCamera(m_pCamera.get());
 
-    m_charModel = make_unique<Object3d>();
-    m_charModel->Initialize();
-    Model* charModel = ModelManager::GetInstance()->LoadModel("Resources/Model/gltf", "TitleSceneChar.gltf", true);
+    m_charModel = m_renderList.AddObject3d(ctx.game.object3dFactory.Create());
+    Model* charModel = ctx.engine.assets.models.LoadModel("Resources/Model/gltf", "TitleSceneChar.gltf", true);
     m_charModel->SetModel(charModel);
     m_charModel->AddAnimation("Resources/Model/gltf", "sceneChange_Animation.gltf", "TitleScreen");
     m_charModel->ToggleStartAnimation();
@@ -43,17 +45,15 @@ void TitleScene::Initialize() {
     m_charModel->SetEnvironmentCoefficient(0.5f);
     m_charModel->Update();
 
-    m_bootScreen = make_unique<Object3d>();
-    m_bootScreen->Initialize();
-    Model* bootScreenModel = ModelManager::GetInstance()->LoadModel("Resources/Model/obj/Title", "TitleScene_01.obj");
+    m_bootScreen = m_renderList.AddObject3d(ctx.game.object3dFactory.Create());
+    Model* bootScreenModel = ctx.engine.assets.models.LoadModel("Resources/Model/obj/Title", "TitleScene_01.obj");
     m_bootScreen->SetModel(bootScreenModel);
     m_bootScreen->Update();
     m_bootScreen->SetEnableLighting(true);
 
-    Vector2 windowSize = { WinApp::GetInstance()->GetWindowSize() };
+    Vector2 windowSize = { ctx.engine.platform.window.GetWindowSize() };
     
-    m_gamePad = make_unique<Sprite>();
-    m_gamePad->Initialize("Resources/Sprite/UI/gamepad.png");
+    m_gamePad = m_renderList.AddSprite(ctx.game.spriteFactory.Create("Resources/Sprite/UI/gamepad.png"));
     m_gamePad->SetPosition({ windowSize.x - m_gamePad->GetTextureSize().x - 10.0f, windowSize.y - m_gamePad->GetTextureSize().y - 10.0f });
     // ゲームパッドが接続されている場合は、ゲームパッドのアイコンをAlpha1.0fで表示する
     if (m_pInput->IsConnectedController())
@@ -65,17 +65,17 @@ void TitleScene::Initialize() {
         m_gamePad->SetColor({ 1.0f, 1.0f, 1.0f, 0.5f });
     }
 
-    m_credit_sound = make_unique<Sprite>();
-    m_credit_sound->Initialize("Resources/Sprite/UI/credit_sound.png");
+    m_credit_sound = ctx.game.spriteFactory.Create("Resources/Sprite/UI/credit_sound.png");
     m_credit_sound->SetAnchorPoint({ 0.5f, 0.5f });
     m_credit_sound->SetPosition({ windowSize.x / 4.0f, windowSize.y / 2.0f });
 
     m_creditUI = make_unique<UI::Button>();
+    m_creditUI->SetContext(ctx.game.spriteFactory);
     m_creditUI->Initialize("Resources/Sprite/UI/credit.png", *m_pInput);
     m_creditUI->SetPosition({ windowSize.x * 0.05f, windowSize.y * 0.95f });
     std::function<void()>creditFunc = [this]() {
         m_showCredit = !m_showCredit;
-        Audio::GetInstance()->Play("select");
+        m_pContext->engine.assets.audio.Play("select");
         };
     m_creditUI->SetActiveReaction(creditFunc);
     m_creditUI->AddInteractBinding(UI::InputTrigger{ .key = DIK_SPACE, .mouseButton = 0, .controller = Controller::A });
@@ -83,25 +83,27 @@ void TitleScene::Initialize() {
     m_creditUI->ShowThisFrame();
 
     m_titleSceneUI = make_unique<TitleSceneUI>();
+    m_titleSceneUI->Initialize(ctx.game.spriteFactory, ctx.engine.platform.input, ctx.engine.platform.window, ctx.engine.assets.audio);
 
-    FadeManager::GetInstance()->FadeIn(1.0f);
+    ctx.engine.presentation.fade.FadeIn(1.0f);
 
-    Light::GetInstance()->SetPositionPointLight({ 0.2f, 1.9f, 3.4f });
-    Light::GetInstance()->SetIntensityPointLight(1.0f);
-    Light::GetInstance()->SetRadiusPointLight(4.0f);
-    Light::GetInstance()->SetColorPointLight(Vector4{ 1.0f, 93.0f / 255.0f, 0.0f, 1.0f });
+    ctx.world.light.SetPositionPointLight({ 0.2f, 1.9f, 3.4f });
+    ctx.world.light.SetIntensityPointLight(1.0f);
+    ctx.world.light.SetRadiusPointLight(4.0f);
+    ctx.world.light.SetColorPointLight(Vector4{ 1.0f, 93.0f / 255.0f, 0.0f, 1.0f });
 
-    Light::GetInstance()->SetDirectionDirectionalLight({ 0.174f, -0.35f, 1.0f });
-    Light::GetInstance()->SetIntensityDirectionalLight(1.0f);
-    Light::GetInstance()->SetRadius(m_pCamera->GetFarClipDistance());
+    ctx.world.light.SetDirectionDirectionalLight({ 0.174f, -0.35f, 1.0f });
+    ctx.world.light.SetIntensityDirectionalLight(1.0f);
+    ctx.world.light.SetRadius(m_pCamera->GetFarClipDistance());
 
     m_sceneScreen = TitleSceneScreen::BootScreen;
 
 }
 
 void TitleScene::Update() {
+    AppContext& ctx = *m_pContext;
 
-    if (FadeManager::GetInstance()->IsFade())
+    if (ctx.engine.presentation.fade.IsFade())
     {
         return;
     }
@@ -136,11 +138,11 @@ void TitleScene::Update() {
         
         if (m_screenChange)
         {
-            m_screenChangeTimer += GameTime::GetInstance()->GetDeltaTime() / m_screenChangeTime[m_changeNum];
+            m_screenChangeTimer += ctx.engine.platform.time.GetDeltaTime() / m_screenChangeTime[m_changeNum];
             m_screenChangeTimer = std::clamp(m_screenChangeTimer, 0.0f, 1.0f);
             Transform cameraT = Transform::Default;
             cameraT.rotate = Lerp(m_screenChangeTransformPre.rotate, m_screenChangeTransform[m_changeNum].rotate, m_screenChangeTimer);
-            cameraT.translate = Lerp(m_screenChangeTransformPre.translate, m_screenChangeTransform[m_changeNum].translate, m_screenChangeTimer);
+            cameraT.position = Lerp(m_screenChangeTransformPre.position, m_screenChangeTransform[m_changeNum].position, m_screenChangeTimer);
             m_pCamera->SetTransform(cameraT);
 
             if (m_screenChangeTimer == 1.0f && m_changeNum == 0)
@@ -148,13 +150,13 @@ void TitleScene::Update() {
                 m_screenChangeTimer = 0.0f;
                 m_screenChangeTransformPre = cameraT;
                 m_changeNum++;
-                FadeManager::GetInstance()->FadeOut(0.4f);
-                FadeManager::GetInstance()->SetColor({ 1.0f, 1.0f, 1.0f });
+                ctx.engine.presentation.fade.FadeOut(0.4f);
+                ctx.engine.presentation.fade.SetColor({ 1.0f, 1.0f, 1.0f });
             }
 
             if (m_screenChangeTimer == 1.0f && m_changeNum == 1)
             {
-                SceneManager::GetInstance()->SetNextScene("GAMESCENE");
+                m_sceneManager->SetNextScene("GAMESCENE");
                 m_screenChange = false;
             }
         }
@@ -162,7 +164,6 @@ void TitleScene::Update() {
         // creditの表示
         m_creditUI->Update();
 
-        m_gamePad->Update();
         m_credit_sound->Update();
 
         break;
@@ -170,43 +171,38 @@ void TitleScene::Update() {
 
     Vector2 mousePos = m_pInput->GetMousePos2();
 
-    m_bootScreen->Update();
+    m_renderList.Update();
 
-    m_charModel->Update();
-
-    SkyBox::GetInstance()->Update();
+    ctx.world.skyBox.Update(m_pContext->world.light);
 
     m_pCamera->Update();
 }
 
 void TitleScene::Draw() {
+    AppContext& ctx = *m_pContext;
 
     switch (m_sceneScreen)
     {
     case TitleSceneScreen::BootScreen:
 
-        Object3dBase::GetInstance()->ShaderDraw();
+        ctx.engine.graphics.object3DBase.ShaderDraw();
 
-        m_bootScreen->Draw();
-        m_charModel->Draw();
+        m_renderList.DrawObject3d();
 
-        Render2DBase::GetInstance()->ShaderDraw();
+        ctx.engine.graphics.render2DBase.ShaderDraw();
 
         m_titleSceneUI->DrawBootScreen();
 
         break;
     case TitleSceneScreen::TitleScreen:
 
-        Object3dBase::GetInstance()->ShaderDraw();
+        ctx.engine.graphics.object3DBase.ShaderDraw();
 
-        m_bootScreen->Draw();
-        m_charModel->Draw();
+        m_renderList.DrawObject3d();
 
-        Render2DBase::GetInstance()->ShaderDraw();
+        ctx.engine.graphics.render2DBase.ShaderDraw();
 
-        Render2DBase::GetInstance()->ShaderDraw();
-
-        m_gamePad->Draw();
+        m_renderList.DrawSprites();
         m_creditUI->Draw();
         m_titleSceneUI->DrawTitleScreen();
         if (m_showCredit)
@@ -217,7 +213,7 @@ void TitleScene::Draw() {
         break;
     }
 
-    Render2DBase::GetInstance()->ShaderDraw();
+    ctx.engine.graphics.render2DBase.ShaderDraw();
 }
 
 void TitleScene::Finalize() {

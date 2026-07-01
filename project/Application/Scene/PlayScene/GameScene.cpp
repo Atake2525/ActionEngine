@@ -8,40 +8,46 @@
 #include "TutorialStage.h"
 #include "EasingUtility.h"
 #include "Light.h"
+#include "EngineContext.h"
 
 using namespace std;
 using namespace ActionEngine::Stage;
 
 void GameScene::Initialize() {
+    AppContext& ctx = *m_pContext;
 
-    TextureManager::GetInstance()->LoadTexture("Resources/white1x1.dds");
+    ctx.engine.assets.textures.LoadTexture("Resources/white1x1.dds");
 
-    m_pCamera = make_unique<Camera>();
-    m_pCamera->SetTranslate({ 0.0f, 1.8f, 0.0f });
+    m_pCamera = make_unique<Camera>(ctx.engine.platform.window);
+    m_pCamera->SetPosition({ 0.0f, 1.8f, 0.0f });
     m_pCamera->SetFarClipDistance(0.0f);
 
-    SkyBox::GetInstance()->SetCamera(m_pCamera.get());
-    SkyBox::GetInstance()->SetTexture("Resources/white1x1.dds");
-    Light::GetInstance()->SetIntensityDirectionalLight(0.0f);
+    ctx.world.skyBox.SetCamera(m_pCamera.get());
+    ctx.world.skyBox.SetTexture("Resources/white1x1.dds");
+    ctx.world.light.SetIntensityDirectionalLight(0.0f);
 
-    m_pInput = Input::GetInstance();
+    m_pInput = &ctx.engine.platform.input;
 
-    Object3dBase::GetInstance()->SetDefaultCamera(m_pCamera.get());
+    ctx.engine.graphics.object3DBase.SetDefaultCamera(m_pCamera.get());
 
     m_pPlayer = make_unique<Player>();
+    m_pPlayer->SetContext(ctx);
     m_pStage = make_unique<TutorialStage>();
+    m_pStage->SetContext(ctx);
     m_pStage->Initialize(m_pPlayer.get(), m_pCamera.get());
     m_pPlayer->Initialize(m_pCamera.get(), m_pStage->GetJsonName());
     m_pCamera->Update();
     m_pPlayer->UpdateModel();
 
     m_pPlayerUI = make_unique<PlayerUI>();
+    m_pPlayerUI->SetContext(ctx);
     m_pPlayerUI->Initialize(m_pPlayer.get());
 
-    Light::GetInstance()->SetRadius(0.1f);
-    GameTime::GetInstance()->SetDeltaPoint();
-    FadeManager::GetInstance()->FadeIn(1.0f);
+    ctx.world.light.SetRadius(0.1f);
+    ctx.engine.platform.time.SetDeltaPoint();
+    ctx.engine.presentation.fade.FadeIn(1.0f);
     m_pPause = make_unique<Pause>();
+    m_pPause->SetContext(ctx);
     m_pPause->Initialize();
 
     m_scenePhase = ScenePhase::FadeIn;
@@ -49,6 +55,7 @@ void GameScene::Initialize() {
 }
 
 void GameScene::Update() {
+    AppContext& ctx = *m_pContext;
 
     // ポーズはどのフェーズでも行えるようにする
     m_pPause->Update();
@@ -63,14 +70,14 @@ void GameScene::Update() {
     switch (m_scenePhase)
     {
     case ScenePhase::FadeIn: // シーン遷移演出フェーズ(入)
-        if (FadeManager::GetInstance()->CompleteFade() || !FadeManager::GetInstance()->IsFade())
+        if (ctx.engine.presentation.fade.CompleteFade() || !ctx.engine.presentation.fade.IsFade())
         {
             m_scenePhase = ScenePhase::Ready;
-            m_finalScanRadius = m_finalFarClipDistance + Light::GetInstance()->GetScanWidth() * 3.0f;
+            m_finalScanRadius = m_finalFarClipDistance + ctx.world.light.GetScanWidth() * 3.0f;
         }
         break;
     case ScenePhase::Ready: // スタート演出フェーズ
-        m_startTimer += GameTime::GetInstance()->GetDeltaTime() / m_startTime;
+        m_startTimer += ctx.engine.platform.time.GetDeltaTime() / m_startTime;
         m_startTimer = clamp(m_startTimer, 0.0f, 1.0f);
 
 
@@ -82,9 +89,9 @@ void GameScene::Update() {
             break;
         case 1:
             radius = EaseOutExpo(0.0f, m_finalScanRadius, m_startTimer);
-            Light::GetInstance()->SetRadius(radius);
+            ctx.world.light.SetRadius(radius);
 
-            Light::GetInstance()->SetIntensityDirectionalLight(m_startTimer);
+            ctx.world.light.SetIntensityDirectionalLight(m_startTimer);
 
             break;
         }
@@ -124,20 +131,21 @@ void GameScene::Update() {
 
 
 
-    SkyBox::GetInstance()->Update();
+    ctx.world.skyBox.Update(m_pContext->world.light);
 }
 
 void GameScene::Draw() {
+    AppContext& ctx = *m_pContext;
 
-    Render2DBase::GetInstance()->ShaderDraw();
+    ctx.engine.graphics.render2DBase.ShaderDraw();
 
 
-    Object3dBase::GetInstance()->ShaderDraw();
+    ctx.engine.graphics.object3DBase.ShaderDraw();
 
     m_pStage->DrawObject3d();
     m_pPlayer->Draw();
 
-    Render2DBase::GetInstance()->ShaderDraw();
+    ctx.engine.graphics.render2DBase.ShaderDraw();
 
     m_pStage->DrawBackSprite();
     m_pPlayerUI->Draw();

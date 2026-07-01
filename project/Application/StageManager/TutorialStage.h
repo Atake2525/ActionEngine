@@ -8,6 +8,8 @@
 class TutorialStage : public BaseStage
 {
 public:
+    void SetContext(AppContext& context) override;
+
     /// <summary>
     /// 初期化
     /// </summary>

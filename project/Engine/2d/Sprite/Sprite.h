@@ -5,34 +5,63 @@
 #include "Transform.h"
 #include <string>
 #include "SpriteDefinitions.h"
+#include "externals/DirectXTex/DirectXTex.h"
 
+#ifdef Sprite
+#undef Sprite
+#endif
 
 #pragma once
+
+class Render2DBase;
+class TextureManager;
+class WinApp;
+class SrvManager;
+class DirectXBase;
+
+struct SpriteContext {
+	DirectXBase& directXBase;
+	SrvManager& srvManager;
+	TextureManager& textureManager;
+	WinApp& winApp;
+};
 
 // スプライト
 class Sprite {
 public:
+	void SetContext(SpriteContext& context);
+
 	/// <summary>
 	/// 初期化
 	/// </summary>
 	void Initialize(std::string textureFilePath);
+	void Initialize(std::string textureFilePath, DirectXBase& directXBase, TextureManager& textureManager);
 
 	/// <summary>
 	/// 更新
 	/// </summary>
 	void Update();
+	void Update(WinApp& winApp);
 
 	/// <summary>
 	/// テクスチャ変更
 	/// </summary>
 	void ChangeTexture(std::string textureFilePath);
+	void ChangeTexture(std::string textureFilePath, TextureManager& textureManager);
 	
 	/// <summary>
 	/// 描画
 	/// </summary>
 	void Draw();
+	void Draw(DirectXBase& directXBase, SrvManager& srvManager);
 
 private:
+	DirectXBase* m_pDirectXBase = nullptr;
+	SrvManager* m_pSrvManager = nullptr;
+	TextureManager* m_pTextureManager = nullptr;
+	WinApp* m_pWinApp = nullptr;
+
+	DirectX::TexMetadata m_metaData;
 
 	struct VertexData {
 		Vector4 position;
@@ -55,13 +84,13 @@ private:
 	};
 
 	// VertexResourceを作成する
-	void CreateVertexResource();
+	void CreateVertexResource(DirectXBase& directXBase);
 	// IndexResourceを作成する
-	void CreateIndexResource();
+	void CreateIndexResource(DirectXBase& directXBase);
 	// MaterialResouceを作成する
-	void CreateMaterialResource();
+	void CreateMaterialResource(DirectXBase& directXBase);
 	// TransformationMatrixを作成する
-	void CreateTransformationMatrixResource();
+	void CreateTransformationMatrixResource(DirectXBase& directXBase);
 
 	// VertexBufferViewを作成する (値を設定するだけ)
 	void CreateVertexBufferView();
@@ -158,10 +187,7 @@ public:
 	void SetTransform(const Transform& transform);
 	// Setter(Transform)
 	void SetTransform(const Vector2& position, const float& rotation, const Vector2& scale);
-	//void SetMaterial(Material* material);
-	// 
-	// 初期化時などの一度に変更したい場合に
-	void SetStatus(const Vector2& position, const float& rotation, const Vector2& scale, const Vector4& color);
 	// Setter(Texture)
 	void SetTexture(const std::string& textureFilePath);
+	void SetTexture(const std::string& textureFilePath, TextureManager& textureManager);
 };

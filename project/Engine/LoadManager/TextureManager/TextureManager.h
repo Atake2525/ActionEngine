@@ -10,31 +10,18 @@ enum class TextureColorSpace {
     Linear
 };
 
+class DirectXBase;
+class SrvManager;
+
 #pragma once
 class TextureManager {
-private:
-	// シングルトンパターンを適用
-	static TextureManager* instance;
-
-	// コンストラクタ、デストラクタの隠蔽
-	TextureManager() = default;
-	~TextureManager() = default;
-	// コピーコンストラクタ、コピー代入演算子の封印
-	TextureManager(TextureManager&) = delete;
-	TextureManager& operator=(TextureManager&) = delete;
-
 public:
-
-	/// <summary>
-	/// シングルトンインスタンスの取得
-	/// </summary>
-	/// <returns>TextureManager* instance</returns>
-	static TextureManager* GetInstance();
-
+	TextureManager();
+    ~TextureManager();
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize();
+	void Initialize(DirectXBase& directXBase, SrvManager& srvManager);
 
 	/// <summary>
 	/// テクスチャファイルの読み込み
@@ -52,12 +39,10 @@ public:
 	// テクスチャのメタデータを取得
 	const DirectX::TexMetadata& GetMetaData(const std::string& filePath);
 
-	/// <summary>
-	/// 終了
-	/// </summary>
-	void Finalize();
-
 private:
+    DirectXBase* m_pDirectXBase = nullptr;
+    SrvManager* m_pSrvManager = nullptr;
+
 	// テクスチャ1枚分のデータ
 	struct TextureData {
 		std::string filePath; // 画像のファイルパス

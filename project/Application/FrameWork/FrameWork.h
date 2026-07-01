@@ -1,4 +1,5 @@
-#include "SceneManager.h"
+#include "runtime.h"
+#include <memory>
 
 #pragma once
 
@@ -27,5 +28,5 @@ public:
 private:
 	bool loopOut_ = false;
 
-	//SceneManager* sceneManager_ = nullptr;
+	std::unique_ptr<Runtime> m_pRuntime;
 };

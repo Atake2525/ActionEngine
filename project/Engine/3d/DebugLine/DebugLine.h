@@ -19,9 +19,11 @@ struct LineTransformationMatrix {
     Matrix4x4 WVP;
 };
 
+class DebugLineBase;
+
 class DebugLine {
 public:
-    void Initialize();
+    void Initialize(DebugLineBase& debugLineBase);
     void Update();
     void Draw();
 
@@ -35,7 +37,8 @@ public:
     void SetTransform(const Transform& transform) { this->transform = transform; }
 
 private:
-    Camera* camera;
+    DebugLineBase* m_pDebugLineBase;
+    Camera* m_pCamera;
     UINT drawVertexCount;
     UINT MAX_LINE_VERTEX_COUNT = 1024;
 

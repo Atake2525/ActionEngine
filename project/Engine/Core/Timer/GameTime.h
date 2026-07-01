@@ -1,40 +1,11 @@
 #pragma once
 #include <vector>
 
+class DirectXBase;
+
 class GameTime
 {
-private:
-	// シングルトンパターンを適用
-	static GameTime* instance;
-
-	// コンストラクタ、デストラクタの隠蔽
-	GameTime() = default;
-	~GameTime() = default;
-	// コピーコンストラクタ、コピー代入演算子の封印
-	GameTime(GameTime&) = delete;
-	GameTime& operator=(GameTime&) = delete;
-
-	struct Timer
-	{
-		float timer;
-        float maxTime;
-        bool isLoop;
-        bool isFinished;
-	};
-
 public:
-
-	/// <summary>
-	/// シングルトンインスタンスの取得
-	/// </summary>
-	/// <returns>Input* instance</returns>
-	static GameTime* GetInstance();
-
-	/// <summary>
-	/// 終了
-	/// </summary>
-	void Finalize();
-
 	void SetDeltaPoint() { 
 		Update();
 		deltaTime = 0.0f;
@@ -44,7 +15,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize();
+	void Initialize(DirectXBase& directXBase);
 
 #ifndef NDEBUG
 	void DrawImGui();
@@ -103,6 +74,17 @@ public:
 	}
 
 private:
+
+	DirectXBase* m_pDirectXBase;
+
+	struct Timer
+	{
+		float timer;
+		float maxTime;
+		bool isLoop;
+		bool isFinished;
+	};
+
 	float deltaTime = 0.0f;
 
     float cpuUsage = 0.0f;

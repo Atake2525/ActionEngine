@@ -8,34 +8,19 @@
 #include "externals/DirectXTex/DirectXTex.h"
 #pragma once
 
+class DirectXBase;
+
 class SrvManager
 {
-private:
-    // シングルトンパターンを適用
-    static SrvManager* instance;
-
-    // コンストラクタ、デストラクタの隠蔽
-    SrvManager() = default;
-    ~SrvManager() = default;
-
-    // コピーコンストラクタ、コピー代入演算子の封印
-    SrvManager(SrvManager&) = delete;
-    SrvManager& operator=(SrvManager&) = delete;
 public:
     // 最大SRV数(最大テクスチャ枚数)
     static const uint32_t maxSRVCount;
     static const uint32_t maxUAVCount;
 
-    // インスタンスの取得
-    static SrvManager* GetInstance();
-
-    // 終了処理
-    void Finalize();
-
     void PreDraw();
 
     // 初期化
-    void Initialize();
+    void Initialize(DirectXBase& directXBase);
 
     uint32_t Allocate();
 
@@ -67,7 +52,7 @@ public:
 private:
     void CreateDescriptorHeap();
 
-private:
+    DirectXBase* m_pDirectXBase;
 
     // SRV用のデスクリプタサイズ
     uint32_t descriptorSize;
