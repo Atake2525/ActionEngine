@@ -15,10 +15,10 @@
 using namespace std;
 
 void Pause::Initialize() {
-    AppContext& ctx = *m_pContext;
+    AppContext& context = *m_pContext;
     // 処理に必要な値の取得
-    m_windowSize = ctx.engine.platform.window.GetWindowSize();
-    m_input = &ctx.engine.platform.input;
+    m_windowSize = context.engine.platform.window.GetWindowSize();
+    m_input = &context.engine.platform.input;
 
     // UIの初期化
     SetupUI();

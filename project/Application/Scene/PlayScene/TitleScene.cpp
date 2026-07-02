@@ -15,28 +15,28 @@
 using namespace std;
 
 void TitleScene::Initialize() {
-    AppContext& ctx = *m_pContext;
+    AppContext& context = *m_pContext;
 
-    m_pCamera = make_unique<Camera>(ctx.engine.platform.window);
+    m_pCamera = make_unique<Camera>(context.engine.platform.window);
     m_pCamera->SetRotate(Vector3(SwapRadian(11.5f), SwapRadian(1.5f), 0.0f));
     m_pCamera->SetPosition({ -1.0f, 1.6f, -3.4f });
     m_screenChangeTransformPre = m_pCamera->GetTransform();
     m_pCamera->Update();
 
-    ctx.engine.assets.textures.LoadTexture("Resources/white1x1.dds");
+    context.engine.assets.textures.LoadTexture("Resources/white1x1.dds");
 
-    ctx.world.skyBox.SetCamera(m_pCamera.get());
-    ctx.world.skyBox.SetTexture("Resources/white1x1.dds");
-    ctx.world.light.SetIntensityDirectionalLight(1.0f);
+    context.world.skyBox.SetCamera(m_pCamera.get());
+    context.world.skyBox.SetTexture("Resources/white1x1.dds");
+    context.world.light.SetIntensityDirectionalLight(1.0f);
 
-    m_pInput = &ctx.engine.platform.input;
+    m_pInput = &context.engine.platform.input;
 
-    ctx.engine.graphics.object3DBase.SetDefaultCamera(m_pCamera.get());
+    context.engine.graphics.object3DBase.SetDefaultCamera(m_pCamera.get());
 
-    ctx.world.particles.SetCamera(m_pCamera.get());
+    context.world.particles.SetCamera(m_pCamera.get());
 
-    m_charModel = m_renderList.AddObject3d(ctx.game.object3dFactory.Create());
-    Model* charModel = ctx.engine.assets.models.LoadModel("Resources/Model/gltf", "TitleSceneChar.gltf", true);
+    m_charModel = m_renderList.AddObject3d(context.game.object3dFactory.Create());
+    Model* charModel = context.engine.assets.models.LoadModel("Resources/Model/gltf", "TitleSceneChar.gltf", true);
     m_charModel->SetModel(charModel);
     m_charModel->AddAnimation("Resources/Model/gltf", "sceneChange_Animation.gltf", "TitleScreen");
     m_charModel->ToggleStartAnimation();
@@ -45,15 +45,15 @@ void TitleScene::Initialize() {
     m_charModel->SetEnvironmentCoefficient(0.5f);
     m_charModel->Update();
 
-    m_bootScreen = m_renderList.AddObject3d(ctx.game.object3dFactory.Create());
-    Model* bootScreenModel = ctx.engine.assets.models.LoadModel("Resources/Model/obj/Title", "TitleScene_01.obj");
+    m_bootScreen = m_renderList.AddObject3d(context.game.object3dFactory.Create());
+    Model* bootScreenModel = context.engine.assets.models.LoadModel("Resources/Model/obj/Title", "TitleScene_01.obj");
     m_bootScreen->SetModel(bootScreenModel);
     m_bootScreen->Update();
     m_bootScreen->SetEnableLighting(true);
 
-    Vector2 windowSize = { ctx.engine.platform.window.GetWindowSize() };
+    Vector2 windowSize = { context.engine.platform.window.GetWindowSize() };
     
-    m_gamePad = m_renderList.AddSprite(ctx.game.spriteFactory.Create("Resources/Sprite/UI/gamepad.png"));
+    m_gamePad = m_renderList.AddSprite(context.game.spriteFactory.Create("Resources/Sprite/UI/gamepad.png"));
     m_gamePad->SetPosition({ windowSize.x - m_gamePad->GetTextureSize().x - 10.0f, windowSize.y - m_gamePad->GetTextureSize().y - 10.0f });
     // ゲームパッドが接続されている場合は、ゲームパッドのアイコンをAlpha1.0fで表示する
     if (m_pInput->IsConnectedController())
@@ -65,12 +65,12 @@ void TitleScene::Initialize() {
         m_gamePad->SetColor({ 1.0f, 1.0f, 1.0f, 0.5f });
     }
 
-    m_credit_sound = ctx.game.spriteFactory.Create("Resources/Sprite/UI/credit_sound.png");
+    m_credit_sound = context.game.spriteFactory.Create("Resources/Sprite/UI/credit_sound.png");
     m_credit_sound->SetAnchorPoint({ 0.5f, 0.5f });
     m_credit_sound->SetPosition({ windowSize.x / 4.0f, windowSize.y / 2.0f });
 
     m_creditUI = make_unique<UI::Button>();
-    m_creditUI->SetContext(ctx.game.spriteFactory);
+    m_creditUI->SetContext(context.game.spriteFactory);
     m_creditUI->Initialize("Resources/Sprite/UI/credit.png", *m_pInput);
     m_creditUI->SetPosition({ windowSize.x * 0.05f, windowSize.y * 0.95f });
     std::function<void()>creditFunc = [this]() {
@@ -83,27 +83,27 @@ void TitleScene::Initialize() {
     m_creditUI->ShowThisFrame();
 
     m_titleSceneUI = make_unique<TitleSceneUI>();
-    m_titleSceneUI->Initialize(ctx.game.spriteFactory, ctx.engine.platform.input, ctx.engine.platform.window, ctx.engine.assets.audio);
+    m_titleSceneUI->Initialize(context.game.spriteFactory, context.engine.platform.input, context.engine.platform.window, context.engine.assets.audio);
 
-    ctx.engine.presentation.fade.FadeIn(1.0f);
+    context.engine.presentation.fade.FadeIn(1.0f);
 
-    ctx.world.light.SetPositionPointLight({ 0.2f, 1.9f, 3.4f });
-    ctx.world.light.SetIntensityPointLight(1.0f);
-    ctx.world.light.SetRadiusPointLight(4.0f);
-    ctx.world.light.SetColorPointLight(Vector4{ 1.0f, 93.0f / 255.0f, 0.0f, 1.0f });
+    context.world.light.SetPositionPointLight({ 0.2f, 1.9f, 3.4f });
+    context.world.light.SetIntensityPointLight(1.0f);
+    context.world.light.SetRadiusPointLight(4.0f);
+    context.world.light.SetColorPointLight(Vector4{ 1.0f, 93.0f / 255.0f, 0.0f, 1.0f });
 
-    ctx.world.light.SetDirectionDirectionalLight({ 0.174f, -0.35f, 1.0f });
-    ctx.world.light.SetIntensityDirectionalLight(1.0f);
-    ctx.world.light.SetRadius(m_pCamera->GetFarClipDistance());
+    context.world.light.SetDirectionDirectionalLight({ 0.174f, -0.35f, 1.0f });
+    context.world.light.SetIntensityDirectionalLight(1.0f);
+    context.world.light.SetRadius(m_pCamera->GetFarClipDistance());
 
     m_sceneScreen = TitleSceneScreen::BootScreen;
 
 }
 
 void TitleScene::Update() {
-    AppContext& ctx = *m_pContext;
+    AppContext& context = *m_pContext;
 
-    if (ctx.engine.presentation.fade.IsFade())
+    if (context.engine.presentation.fade.IsFade())
     {
         return;
     }
@@ -138,7 +138,7 @@ void TitleScene::Update() {
         
         if (m_screenChange)
         {
-            m_screenChangeTimer += ctx.engine.platform.time.GetDeltaTime() / m_screenChangeTime[m_changeNum];
+            m_screenChangeTimer += context.engine.platform.time.GetDeltaTime() / m_screenChangeTime[m_changeNum];
             m_screenChangeTimer = std::clamp(m_screenChangeTimer, 0.0f, 1.0f);
             Transform cameraT = Transform::Default;
             cameraT.rotate = Lerp(m_screenChangeTransformPre.rotate, m_screenChangeTransform[m_changeNum].rotate, m_screenChangeTimer);
@@ -150,8 +150,8 @@ void TitleScene::Update() {
                 m_screenChangeTimer = 0.0f;
                 m_screenChangeTransformPre = cameraT;
                 m_changeNum++;
-                ctx.engine.presentation.fade.FadeOut(0.4f);
-                ctx.engine.presentation.fade.SetColor({ 1.0f, 1.0f, 1.0f });
+                context.engine.presentation.fade.FadeOut(0.4f);
+                context.engine.presentation.fade.SetColor({ 1.0f, 1.0f, 1.0f });
             }
 
             if (m_screenChangeTimer == 1.0f && m_changeNum == 1)
@@ -173,34 +173,34 @@ void TitleScene::Update() {
 
     m_renderList.Update();
 
-    ctx.world.skyBox.Update(m_pContext->world.light);
+    context.world.skyBox.Update(m_pContext->world.light);
 
     m_pCamera->Update();
 }
 
 void TitleScene::Draw() {
-    AppContext& ctx = *m_pContext;
+    AppContext& context = *m_pContext;
 
     switch (m_sceneScreen)
     {
     case TitleSceneScreen::BootScreen:
 
-        ctx.engine.graphics.object3DBase.ShaderDraw();
+        context.engine.graphics.object3DBase.ShaderDraw();
 
         m_renderList.DrawObject3d();
 
-        ctx.engine.graphics.render2DBase.ShaderDraw();
+        context.engine.graphics.render2DBase.ShaderDraw();
 
         m_titleSceneUI->DrawBootScreen();
 
         break;
     case TitleSceneScreen::TitleScreen:
 
-        ctx.engine.graphics.object3DBase.ShaderDraw();
+        context.engine.graphics.object3DBase.ShaderDraw();
 
         m_renderList.DrawObject3d();
 
-        ctx.engine.graphics.render2DBase.ShaderDraw();
+        context.engine.graphics.render2DBase.ShaderDraw();
 
         m_renderList.DrawSprites();
         m_creditUI->Draw();
@@ -213,7 +213,7 @@ void TitleScene::Draw() {
         break;
     }
 
-    ctx.engine.graphics.render2DBase.ShaderDraw();
+    context.engine.graphics.render2DBase.ShaderDraw();
 }
 
 void TitleScene::Finalize() {
