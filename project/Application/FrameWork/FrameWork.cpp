@@ -1,16 +1,17 @@
 #include "FrameWork.h"
 
 void FrameWork::Initialize() {
-	SceneManager::GetInstance();
+	m_pRuntime = std::make_unique<Runtime>();
+	m_pRuntime->Initialize();
 }
 
 void FrameWork::Update() {
-	//sceneManager_->Update();
+	m_pRuntime->Update();
+	loopOut_ = m_pRuntime->EndRequest();
 }
 
 void FrameWork::Finalize() {
-	//delete sceneManager_;
-	SceneManager::GetInstance()->Finalize();
+	m_pRuntime.reset();
 }
 
 void FrameWork::Run() {
@@ -25,7 +26,7 @@ void FrameWork::Run() {
 			break;
 		}
 		// 描画
-		Draw();
+		m_pRuntime->Draw();
 	}
 	// 終了処理
 	Finalize();

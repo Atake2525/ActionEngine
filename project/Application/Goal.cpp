@@ -8,6 +8,7 @@
 #include "Player.h"
 #include "GameTime.h"
 #include "ModelManager.h"
+#include "EngineContext.h"
 
 using namespace Logger;
 using namespace std;
@@ -21,24 +22,24 @@ Goal::~Goal() {
 void Goal::Initialize(const std::string jsonName, Player* player) {
 
 	m_isGoal = false;
-	m_input = Input::GetInstance();
+	m_input = &m_pContext->engine.platform.input;
 	m_player = player;
 	m_result = std::make_unique<Result>();
+	m_result->SetContext(*m_pContext);
 	m_result->Initialize();
 
-	if (JsonLoader::GetInstance()->CheckJsonLoaded(jsonName))
+	if (m_pContext->engine.assets.json.CheckJsonLoaded(jsonName))
 	{
 		// スタート地点の取得
-		vector<JsonData> m_jsonDatas = JsonLoader::GetInstance()->GetJsonData(jsonName, "goal");
+		vector<JsonData> m_jsonDatas = m_pContext->engine.assets.json.GetJsonData(jsonName, "goal");
 		// スタート地点が設定されていない又はjsonが読み込めなかった場合はデフォルト位置を使用
 		if (!m_jsonDatas.empty())
 		{
-			Model* model = ModelManager::GetInstance()->LoadModel("Resources/Model/obj", "goal.obj", false);
+			Model* model = m_pContext->engine.assets.models.LoadModel("Resources/Model/obj", "goal.obj", false);
 			for (int i = 0; i < m_jsonDatas.size(); i++)
 			{
 				unique_ptr<Object3d> goal;
-				goal = make_unique<Object3d>();
-				goal->Initialize();
+				goal = m_pContext->game.object3dFactory.Create();
 				goal->SetModel(model);
 				goal->SetEnableLighting(true);
 				goal->SetTransform(m_jsonDatas[i].transform);

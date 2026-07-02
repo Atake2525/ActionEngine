@@ -28,12 +28,24 @@ Object3d::~Object3d()
 
 }
 
+void Object3d::SetContext(Object3dContext& context) {
+    m_pDirectXBase = &context.directXBase;
+    m_pSrvManager = &context.srvManager;
+    m_pObject3dBase = &context.object3dBase;
+    m_pGameTime = &context.gameTime;
+}
+
 void Object3d::Initialize() {
+    assert(m_pObject3dBase);
+    Initialize(*m_pObject3dBase);
+}
+
+void Object3d::Initialize(Object3dBase& object3dBase) {
 
     //// Resourceの作成
-    CreateTransformationMatrixResource();
+    CreateTransformationMatrixResource(object3dBase.GetDirectXBase());
     //CreateLightResource();
-    CreateCameraResource();
+    CreateCameraResource(object3dBase.GetDirectXBase());
 
     // 書き込むためのアドレスを取得
     transformationMatrixResource->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrix));
@@ -64,29 +76,43 @@ void Object3d::Initialize() {
     cameraData->farClipDistance = 1000.0f;
     cameraData->drawHeihgt = 1.0f;
 
-    camera = Object3dBase::GetInstance()->GetDefaultCamera();
+    camera = object3dBase.GetDefaultCamera();
 
-    cullingTemplateResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(CullingTemplate));
+    cullingTemplateResource = object3dBase.GetDirectXBase().CreateBufferResource(sizeof(CullingTemplate));
     cullingTemplateResource->Map(0, nullptr, reinterpret_cast<void**>(&cullingTemplateData));
 
     cullingTemplateData->drawHeight = -1.0f;
     privateCullingData.drawHeight = 100.0f;
 
-    InitializeMaterial();
+    InitializeMaterial(object3dBase.GetDirectXBase());
 }
 
 void Object3d::Update() {
+    assert(m_pDirectXBase);
+    assert(m_pObject3dBase);
+    assert(m_pGameTime);
+
+    auto commandList = m_pDirectXBase->GetCommandList();
+    Object3dUpdateContext context{
+        m_pGameTime->GetDeltaTime(),
+        *commandList.Get(),
+        *m_pObject3dBase,
+    };
+    Update(context);
+}
+
+void Object3d::Update(Object3dUpdateContext& context) {
 
     Matrix4x4 localMatrix = model_->GetModelData().rootNode.localMatrix;
 
 
     // 3DのTransform処理
-    worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
+    worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.position);
     worldMatrix = Multiply(worldMatrix, rotateQuaternionMatrix);
 
     if (model_->IsAnimation() && startAnimation)
     {
-        animationTime += animationSpeed / std::round(1.0f / GameTime::GetInstance()->GetDeltaTime()); // 時刻を進める。1/60で固定してあるが、計測した時間を使って可変フレーム対応する方が望ましい
+        animationTime += animationSpeed / std::round(1.0f / context.deltaTime); // 時刻を進める。1/60で固定してあるが、計測した時間を使って可変フレーム対応する方が望ましい
         animationTime = std::fmod(animationTime, animation[animationKey].duration); // 最後まで行ったら最初からリピート再生。リピートしなくても別に良い
         if (animationTime < 0.0f) // 逆再生に備えてanimationTimeが0を下回ったら最後のアニメーション時間を代入
         {
@@ -142,12 +168,12 @@ void Object3d::Update() {
         const Matrix4x4& viewProjectionMatrix = camera->GetViewProjectionMatrix();
         worldViewProjectionMatrix = Multiply(worldMatrix, viewProjectionMatrix);
 
-        Vector3 clipPos = MatrixTransform(transform.translate, worldViewProjectionMatrix);
+        Vector3 clipPos = MatrixTransform(transform.position, worldViewProjectionMatrix);
 
         // NDC → スクリーン座標
-        float screenX = (clipPos.x * 0.5f + 0.5f) * (float)WinApp::GetInstance()->GetkClientWidth();
-        float screenY = (1.0f - (clipPos.y * 0.5f + 0.5f)) * (float)WinApp::GetInstance()->GetkClientHeight();
-        float t = screenX;
+        /*float screenX = (clipPos.x * 0.5f + 0.5f) * (float)m_pWinApp->GetkClientWidth();
+        float screenY = (1.0f - (clipPos.y * 0.5f + 0.5f)) * (float)m_pWinApp->GetkClientHeight();
+        float t = screenX;*/
     }
     else {
         worldViewProjectionMatrix = worldMatrix;
@@ -161,13 +187,13 @@ void Object3d::Update() {
         transformationMatrix->WorldInverseTranspose = Inverse(worldMatrix);
         if (model_->IsAnimation())
         {
-            DirectXBase::GetInstance()->GetCommandList()->SetComputeRootSignature(Object3dBase::GetInstance()->GetComputeRootSignature().Get());
-            DirectXBase::GetInstance()->GetCommandList()->SetPipelineState(Object3dBase::GetInstance()->GetComputePipelineState().Get());
+            context.commandList.SetComputeRootSignature(context.object3dBase.GetComputeRootSignature().Get());
+            context.commandList.SetPipelineState(context.object3dBase.GetComputePipelineState().Get());
         }
     }
 
     // Culling用データの更新
-    CullingTemplate data = Object3dBase::GetInstance()->GetCullingTemplate() + privateCullingData;
+    CullingTemplate data = context.object3dBase.GetCullingTemplate() + privateCullingData;
     cullingTemplateData->drawHeight = data.drawHeight;
 
     UpdateAABB();
@@ -189,31 +215,38 @@ void Object3d::UpdateSkinCluster(std::vector<SkinCluster>& skinCluster, const Sk
 }
 
 void Object3d::Draw() {
+    assert(m_pDirectXBase);
+
+    auto commandList = m_pDirectXBase->GetCommandList();
+    Draw(*commandList.Get());
+}
+
+void Object3d::Draw(ID3D12GraphicsCommandList& commandList) {
 
     // wvp用のCBufferの場所を設定
-    DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
+    commandList.SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
 
-    DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(3, cameraResource->GetGPUVirtualAddress());
+    commandList.SetGraphicsRootConstantBufferView(3, cameraResource->GetGPUVirtualAddress());
 
-    DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(13, cullingTemplateResource->GetGPUVirtualAddress());
+    commandList.SetGraphicsRootConstantBufferView(13, cullingTemplateResource->GetGPUVirtualAddress());
 
     // 3Dモデルが割り当てられていれば描画する
     if (model_) {
         // wvp用のCBufferの場所を設定
-        DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+        commandList.SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
         model_->Draw();
     }
 }
 
-void Object3d::CreateTransformationMatrixResource() {
-    transformationMatrixResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(TransformationMatrix));
+void Object3d::CreateTransformationMatrixResource(DirectXBase& directXBase) {
+    transformationMatrixResource =  directXBase.CreateBufferResource(sizeof(TransformationMatrix));
 }
 
-void Object3d::CreateCameraResource() {
-    cameraResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(CameraForGPU));
+void Object3d::CreateCameraResource(DirectXBase& directXBase) {
+    cameraResource = directXBase.CreateBufferResource(sizeof(CameraForGPU));
 }
 
-void Object3d::SetModel(Model* model) {
+void Object3d::SetModel(Model* model, SkinClusterContext* context) {
     // モデルを検索してセットする
     model_ = model;
     first = model_->GetMeshAABB();
@@ -227,10 +260,13 @@ void Object3d::SetModel(Model* model) {
     CreateCapsule();
     if (model_->IsAnimation())
     {
+        SkinClusterContext localContext{ *m_pSrvManager, *m_pDirectXBase };
+        SkinClusterContext& skinClusterContext = context ? *context : localContext;
+
         animation = model_->GetAnimation();
         skeleton = CreateSkelton(model_->GetModelData().rootNode);
         skinCluster.resize(model_->GetModelData().matVertexData.size());
-        skinCluster = CreateSkinCluster(skeleton, model_->GetModelData());
+        skinCluster = CreateSkinCluster(skeleton, model_->GetModelData(), skinClusterContext);
         model_->SetSkinCluster(skinCluster);
         // GPUskinning用リソースはModel側でメッシュ数に合わせて確保する。
         model_->CreateSkinningResources(skeleton);
@@ -280,11 +316,11 @@ void Object3d::AddAnimation(std::string directoryPath, std::string fileName, std
     }
 }
 
-void Object3d::AddAnimationsThreaded(const std::string& directoryPath, const std::vector<std::string>& filenames) {
+void Object3d::AddAnimationsThreaded(const std::string& directoryPath, const std::vector<std::string>& fileNames) {
     if (model_->IsAnimation())
     {
         // 読み込みはModel側で並列実行し、Object3d側は反映済みのテーブルを受け取るだけにする。
-        model_->AddAnimationsThreaded(directoryPath, filenames);
+        model_->AddAnimationsThreaded(directoryPath, fileNames);
         animation = model_->GetAnimation();
         Log("アニメーションの並列読み込み完了\n");
     }
@@ -332,8 +368,8 @@ void Object3d::SetRotateInDegree(const Vector3& rotate) {
     transform.rotate = SwapRadian(rotate);
 }
 
-void Object3d::SetTransform(const Vector3& translate, const Vector3& scale, const Vector3& rotate) {
-    transform.translate = translate;
+void Object3d::SetTransform(const Vector3& position, const Vector3& scale, const Vector3& rotate) {
+    transform.position = position;
     transform.scale = scale;
     transform.rotate = rotate;
 }
@@ -364,7 +400,7 @@ void Object3d::ApplyAnimation(Skeleton& skeleton, const Animation& animation, fl
         // 対象のJointのAnimationがあれば、値の適用を行う。 下記のif分はc++17から可能になった初期化付きif文
         if (auto it = animation.nodeAnimations.find(joint.name); it != animation.nodeAnimations.end()) {
             const NodeAnimation& rootNodeAnimation = (*it).second;
-            joint.transform.translate = CalculateValue(rootNodeAnimation.translate, animationTime);
+            joint.transform.position = CalculateValue(rootNodeAnimation.position, animationTime);
             joint.transform.rotate = CalculateValue(rootNodeAnimation.rotate, animationTime);
             joint.transform.scale = CalculateValue(rootNodeAnimation.scale, animationTime);
         }
@@ -380,17 +416,17 @@ const bool Object3d::ChangeAnimation(Animation& beforAnimation, Animation& after
     afterFrameTime = std::fmod(afterFrameTime, afterAnimation.duration);
     for (Joint& joint : skeleton.joints)
     {
-        Vector3 beforTranslate, afterTranslate;
+        Vector3 beforePosition, afterPosition;
         Quaternion beforRotate, afterRotate;
         Vector3 beforScale, afterScale;
-        beforTranslate = joint.transform.translate;
+        beforePosition = joint.transform.position;
         beforRotate = joint.transform.rotate;
         beforScale = joint.transform.scale;
         bool beforSuccess = false, afterSuccess = false;
         // 対象のJointのAnimationがあれば、値の適用を行う。 下記のif分はc++17から可能になった初期化付きif文
         if (auto it = beforAnimation.nodeAnimations.find(joint.name); it != beforAnimation.nodeAnimations.end()) {
             const NodeAnimation rootNodeAnimation = (*it).second;
-            beforTranslate = CalculateValue(rootNodeAnimation.translate, beforFrameTime);
+            beforePosition = CalculateValue(rootNodeAnimation.position, beforFrameTime);
             beforRotate = CalculateValue(rootNodeAnimation.rotate, beforFrameTime);
             beforScale = CalculateValue(rootNodeAnimation.scale, beforFrameTime);
             beforSuccess = true;
@@ -399,7 +435,7 @@ const bool Object3d::ChangeAnimation(Animation& beforAnimation, Animation& after
         // 対象のJointのAnimationがあれば、値の適用を行う。 下記のif分はc++17から可能になった初期化付きif文
         if (auto it = afterAnimation.nodeAnimations.find(joint.name); it != afterAnimation.nodeAnimations.end()) {
             const NodeAnimation rootNodeAnimation = (*it).second;
-            afterTranslate = CalculateValue(rootNodeAnimation.translate, afterFrameTime);
+            afterPosition = CalculateValue(rootNodeAnimation.position, afterFrameTime);
             afterRotate = CalculateValue(rootNodeAnimation.rotate, afterFrameTime);
             afterScale = CalculateValue(rootNodeAnimation.scale, afterFrameTime);
             afterSuccess = true;
@@ -410,7 +446,7 @@ const bool Object3d::ChangeAnimation(Animation& beforAnimation, Animation& after
         if (beforSuccess && afterSuccess)
         {
             // 両方の処理ができていれば実行する
-            joint.transform.translate = Lerp(beforTranslate, afterTranslate, changeAnimationTime);
+            joint.transform.position = Lerp(beforePosition, afterPosition, changeAnimationTime);
             joint.transform.rotate = Slerp(beforRotate, afterRotate, changeAnimationTime);
             joint.transform.scale = Lerp(beforScale, afterScale, changeAnimationTime);
         }
@@ -421,7 +457,7 @@ const bool Object3d::ChangeAnimation(Animation& beforAnimation, Animation& after
                 // 対象のJointのAnimationがあれば、値の適用を行う。 下記のif分はc++17から可能になった初期化付きif文
                 if (auto it = afterAnimation.nodeAnimations.find(joint.name); it != afterAnimation.nodeAnimations.end()) {
                     const NodeAnimation& rootNodeAnimation = (*it).second;
-                    joint.transform.translate = CalculateValue(rootNodeAnimation.translate, animationTime);
+                    joint.transform.position = CalculateValue(rootNodeAnimation.position, animationTime);
                     joint.transform.rotate = CalculateValue(rootNodeAnimation.rotate, animationTime);
                     joint.transform.scale = CalculateValue(rootNodeAnimation.scale, animationTime);
                 }
@@ -639,8 +675,8 @@ void Object3d::UpdateAABB()
 void Object3d::UpdateCapsule()
 {
     // カプセルの更新
-    capsule.start = capsulePre.start + transform.translate;
-    capsule.end = capsulePre.end + transform.translate;
+    capsule.start = capsulePre.start + transform.position;
+    capsule.end = capsulePre.end + transform.position;
 }
 
 const Skeleton Object3d::CreateSkelton(const Node& rootNode)
@@ -686,7 +722,7 @@ void Object3d::UpdateSkelton(Skeleton& skelton)
     // 全てのJointを更新。親が若いので通常ループで処理可能になっている
     for (Joint& joint : skelton.joints)
     {
-        joint.localMatrix = MakeAffineMatrix(joint.transform.scale, joint.transform.rotate, joint.transform.translate);
+        joint.localMatrix = MakeAffineMatrix(joint.transform.scale, joint.transform.rotate, joint.transform.position);
         if (joint.parent) { // 親がいれば親の行列を掛ける
             joint.skeletonSpaceMatrix = Multiply(joint.localMatrix, skelton.joints[*joint.parent].skeletonSpaceMatrix);
         }
@@ -697,7 +733,7 @@ void Object3d::UpdateSkelton(Skeleton& skelton)
     }
 }
 
-std::vector<SkinCluster> Object3d::CreateSkinCluster(const Skeleton& skeleton, const ModelData& modelData)
+std::vector<SkinCluster> Object3d::CreateSkinCluster(const Skeleton& skeleton, const ModelData& modelData, SkinClusterContext& context)
 {
     std::vector<SkinCluster> skinCluster;
     skinCluster.resize(modelData.matVertexData.size());
@@ -706,17 +742,17 @@ std::vector<SkinCluster> Object3d::CreateSkinCluster(const Skeleton& skeleton, c
     for (const auto& matVData : modelData.matVertexData)
     {
         // palette用のResourceを確保
-        skinCluster[index].paletteResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(WellForGPU) * skeleton.joints.size());
+        skinCluster[index].paletteResource = context.directXBase.CreateBufferResource(sizeof(WellForGPU) * skeleton.joints.size());
         WellForGPU* mappedPalette = nullptr;
         skinCluster[index].paletteResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedPalette));
         skinCluster[index].mappedPalette = { mappedPalette, skeleton.joints.size() }; // spanを使ってアクセスするようにする
 
-        uint32_t srvIndex = SrvManager::GetInstance()->Allocate();
+        uint32_t srvIndex = context.srvManager.Allocate();
 
-        assert(SrvManager::GetInstance()->CheckAllocate());
+        assert(context.srvManager.CheckAllocate());
 
-        skinCluster[index].paletteSrvHandle.first = SrvManager::GetInstance()->GetCPUDescriptorHandle(srvIndex);
-        skinCluster[index].paletteSrvHandle.second = SrvManager::GetInstance()->GetGPUDescriptorHandle(srvIndex);
+        skinCluster[index].paletteSrvHandle.first = context.srvManager.GetCPUDescriptorHandle(srvIndex);
+        skinCluster[index].paletteSrvHandle.second = context.srvManager.GetGPUDescriptorHandle(srvIndex);
 
         // palette用のsrvを作成
         D3D12_SHADER_RESOURCE_VIEW_DESC paletteSrvDesc{};
@@ -727,10 +763,10 @@ std::vector<SkinCluster> Object3d::CreateSkinCluster(const Skeleton& skeleton, c
         paletteSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
         paletteSrvDesc.Buffer.NumElements = UINT(skeleton.joints.size());
         paletteSrvDesc.Buffer.StructureByteStride = sizeof(WellForGPU);
-        DirectXBase::GetInstance()->GetDevice()->CreateShaderResourceView(skinCluster[index].paletteResource.Get(), &paletteSrvDesc, skinCluster[index].paletteSrvHandle.first);
+        context.directXBase.GetDevice()->CreateShaderResourceView(skinCluster[index].paletteResource.Get(), &paletteSrvDesc, skinCluster[index].paletteSrvHandle.first);
 
         // influence用のResourceを確保
-        skinCluster[index].influenceResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(VertexInfluence) * matVData.second.vertices.size());
+        skinCluster[index].influenceResource = context.directXBase.CreateBufferResource(sizeof(VertexInfluence) * matVData.second.vertices.size());
         VertexInfluence* mappedInfluence = nullptr;
         skinCluster[index].influenceResource->Map(0, nullptr, reinterpret_cast<void**>(&mappedInfluence));
         std::memset(mappedInfluence, 0, sizeof(VertexInfluence) * matVData.second.vertices.size()); // 0埋め。weightを0にしておく
@@ -787,8 +823,8 @@ void Object3d::SetPBRMaterial(const float metallic, const float roughness) {
     model_->SetPBRMaterial(metallic, roughness);
 }
 
-void Object3d::InitializeMaterial() {
-    materialResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(Material));
+void Object3d::InitializeMaterial(DirectXBase& directXBase) {
+    materialResource = directXBase.CreateBufferResource(sizeof(Material));
     //  書き込むためのアドレスを取得
     materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
 

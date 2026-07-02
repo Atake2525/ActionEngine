@@ -2,7 +2,6 @@
 #include <cassert>
 #include <algorithm>
 #include "Logger.h"
-#include "WinApp.h"
 
 #include "externals/imgui/imgui.h"
 #include "externals/imgui/imgui_impl_dx12.h"
@@ -31,17 +30,9 @@ struct FormatChunk {
 // 同時に再生できる最大数
 const uint32_t Audio::maxSourceVoiceCount = 64;
 
-Audio* Audio::instance = nullptr;
+Audio::Audio() {}
 
-
-Audio* Audio::GetInstance() {
-	if (instance == nullptr) {
-		instance = new Audio;
-	}
-	return instance;
-}
-
-void Audio::Finalize() {
+Audio::~Audio() {
 	for (const auto& list : audioList)
 	{
 		list.sourceVoice->Stop();
@@ -50,8 +41,6 @@ void Audio::Finalize() {
 	audioList.clear();
 	soundMap.clear();
 	mp3AudioData.clear();
-	delete instance;
-	instance = nullptr;
 }
 
 void Audio::Initialize() {
@@ -581,36 +570,36 @@ void Audio::Resume(const std::string soundName) {
 
 void Audio::Update() {
 
-#ifndef NDEBUG
-	ImGui::SetNextWindowPos(ImVec2{ 0.0f, 18.0f * 4 }, ImGuiCond_FirstUseEver);
-	ImGui::SetNextWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) - 18.0f * 2 }, ImGuiCond_FirstUseEver);
-	ImGui::Begin("Audio");
-	ImGui::SliderFloat("MasterVolume", &masterVolume, 0.0f, 1.0f);
-	for (AudioList list : audioList)
-	{
-		float matrix[16];
-		float volume = list.soundData.volume;
-		list.sourceVoice->GetOutputMatrix(nullptr, list.soundData.sourceVoiceDetails.InputChannels, masterVoiceDetails.InputChannels, matrix);
-		ImGui::Separator();
-		ImGui::Text("AudioList");
-		ImGui::SliderFloat("Front Left", &matrix[0], 0.0f, 1.0f);
-		ImGui::SliderFloat("Front Right", &matrix[2], 0.0f, 1.0f);
-		ImGui::SliderFloat("Center", &matrix[4], 0.0f, 1.0f);
-		ImGui::SliderFloat("LFE", &matrix[6], 0.0f, 1.0f);
-		ImGui::SliderFloat("Back Left", &matrix[8], 0.0f, 1.0f);
-		ImGui::SliderFloat("Back Right", &matrix[10], 0.0f, 1.0f);
-		ImGui::SliderFloat("Side Left", &matrix[12], 0.0f, 1.0f);
-		ImGui::SliderFloat("Side Right", &matrix[14], 0.0f, 1.0f);
-		ImGui::SliderFloat("Volume", &volume, 0.0f, 1.0f);
-		list.sourceVoice->SetVolume(volume);
-		list.soundData.volume = volume;
-		list.sourceVoice->SetOutputMatrix(nullptr, list.soundData.sourceVoiceDetails.InputChannels, masterVoiceDetails.InputChannels, matrix);
-	};
-	ImGui::End();
-
-	masterVoice->SetVolume(masterVolume);
-
-#endif // _DEBUG
+//#ifndef NDEBUG
+//	ImGui::SetNextWindowPos(ImVec2{ 0.0f, 18.0f * 4 }, ImGuiCond_FirstUseEver);
+//	ImGui::SetNextWindowSize(ImVec2{ 300.0f, float(WinApp::GetInstance()->GetkClientHeight()) - 18.0f * 2 }, ImGuiCond_FirstUseEver);
+//	ImGui::Begin("Audio");
+//	ImGui::SliderFloat("MasterVolume", &masterVolume, 0.0f, 1.0f);
+//	for (AudioList list : audioList)
+//	{
+//		float matrix[16];
+//		float volume = list.soundData.volume;
+//		list.sourceVoice->GetOutputMatrix(nullptr, list.soundData.sourceVoiceDetails.InputChannels, masterVoiceDetails.InputChannels, matrix);
+//		ImGui::Separator();
+//		ImGui::Text("AudioList");
+//		ImGui::SliderFloat("Front Left", &matrix[0], 0.0f, 1.0f);
+//		ImGui::SliderFloat("Front Right", &matrix[2], 0.0f, 1.0f);
+//		ImGui::SliderFloat("Center", &matrix[4], 0.0f, 1.0f);
+//		ImGui::SliderFloat("LFE", &matrix[6], 0.0f, 1.0f);
+//		ImGui::SliderFloat("Back Left", &matrix[8], 0.0f, 1.0f);
+//		ImGui::SliderFloat("Back Right", &matrix[10], 0.0f, 1.0f);
+//		ImGui::SliderFloat("Side Left", &matrix[12], 0.0f, 1.0f);
+//		ImGui::SliderFloat("Side Right", &matrix[14], 0.0f, 1.0f);
+//		ImGui::SliderFloat("Volume", &volume, 0.0f, 1.0f);
+//		list.sourceVoice->SetVolume(volume);
+//		list.soundData.volume = volume;
+//		list.sourceVoice->SetOutputMatrix(nullptr, list.soundData.sourceVoiceDetails.InputChannels, masterVoiceDetails.InputChannels, matrix);
+//	};
+//	ImGui::End();
+//
+//	masterVoice->SetVolume(masterVolume);
+//
+//#endif // _DEBUG
 
 	// audioListのサイズが0なら早期return
 	if (audioList.size() == 0) { 

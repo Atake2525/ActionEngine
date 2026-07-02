@@ -6,20 +6,6 @@
 using namespace Logger;
 using namespace std;
 
-SceneFactory* SceneFactory::instance = nullptr;
-
-void SceneFactory::Finalize() {
-    delete instance;
-    instance = nullptr;
-}
-
-SceneFactory* SceneFactory::GetInstance() {
-    if (instance == nullptr)
-    {
-        instance = new SceneFactory;
-    }
-    return instance;
-}
 
 unique_ptr<BaseScene> SceneFactory::ChangeScene(const std::string& sceneName)
 {
@@ -40,6 +26,10 @@ unique_ptr<BaseScene> SceneFactory::ChangeScene(const std::string& sceneName)
     else
     {
         Log("指定されたシーン名は見つかりませんでした\n");
+    }
+
+    if (newScene) {
+        newScene->SetContext(*m_pContext);
     }
 
     return newScene;

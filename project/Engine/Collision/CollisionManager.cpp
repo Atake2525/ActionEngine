@@ -7,14 +7,13 @@
 using namespace Logger;
 using namespace std;
 
-CollisionManager* CollisionManager::instance = nullptr;
+CollisionManager::CollisionManager() {}
 
-CollisionManager* CollisionManager::GetInstance() {
-	if (instance == nullptr)
-	{
-		instance = new CollisionManager;
-	}
-	return instance;
+CollisionManager::~CollisionManager() {
+	collisionTarget.clear();
+	collisionObject.clear();
+	wallDashCollisionObject.clear();
+	m_collisionObjectAABB.clear();
 }
 
 void CollisionManager::Initialize() {
@@ -51,8 +50,7 @@ void CollisionManager::Update(const std::string& targetName, bool wallDashCollis
 		if (targetDistance < objectSize + 0.0f)
 		{
 			// オブジェクトのメッシュごとのAABBを取得する
-			const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
-			for (AABB terrainAABB : terrains)
+			for (const AABB& terrainAABB : object->GetAABBMultiMeshed())
 			{
 				AABB target = collisionTarget[targetName];
 
@@ -125,15 +123,6 @@ void CollisionManager::Update(const std::string& targetName, bool wallDashCollis
 	}
 }
 
-void CollisionManager::Finalize() {
-	collisionTarget.clear();
-	collisionObject.clear();
-	wallDashCollisionObject.clear();
-	m_collisionObjectAABB.clear();
-	delete instance;
-	instance = nullptr;
-}
-
 const Vector3 CollisionManager::GetPenetrationForAABB(const AABB& aabb, bool wallDashCollision)
 {
 	Vector3 result = Vector3::Zero;
@@ -158,8 +147,7 @@ const Vector3 CollisionManager::GetPenetrationForAABB(const AABB& aabb, bool wal
 		if (targetDistance < objectSize + 0.0f)
 		{
 			// オブジェクトのメッシュごとのAABBを取得する
-			const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
-			for (AABB terrainAABB : terrains)
+			for (const AABB& terrainAABB : object->GetAABBMultiMeshed())
 			{
 				AABB target = aabb;
 
@@ -248,7 +236,7 @@ const Vector3 CollisionManager::GetAllPenetrationForAABB(const AABB& aabb, bool 
 		{
 			// オブジェクトのメッシュごとのAABBを取得する
 			const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
-			for (AABB terrainAABB : terrains)
+			for (const AABB& terrainAABB : terrains)
 			{
 				AABB target = aabb;
 
@@ -348,8 +336,7 @@ const float CollisionManager::GetGroundDistanceForAABB(const AABB& aabb, bool wa
 	for (const auto& object : colObj) {
 		// オブジェクトのメッシュごとのAABBを取得する
 		float serchDistance = Distance(object->GetAABB().max, aabb.min);
-		const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
-		for (AABB terrainAABB : terrains)
+		for (const AABB& terrainAABB : object->GetAABBMultiMeshed())
 		{
 			AABB target = aabb;
 
@@ -392,8 +379,7 @@ const std::vector<AABB> CollisionManager::GetCollisionObjectAABBsForAABB(const A
 		if (targetDistance < objectSize + 0.0f)
 		{
 			// オブジェクトのメッシュごとのAABBを取得する
-			const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
-			for (AABB terrainAABB : terrains)
+			for (const AABB& terrainAABB : object->GetAABBMultiMeshed())
 			{
 				AABB target = aabb;
 
@@ -434,8 +420,7 @@ const float CollisionManager::GetGroundMAXDistance(const std::string& targetName
 	for (const auto& object : colObj) {
 		// オブジェクトのメッシュごとのAABBを取得する
 		float serchDistance = Distance(object->GetAABB().max, target->second.min);
-		const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
-		for (AABB terrainAABB : terrains)
+		for (const AABB& terrainAABB : object->GetAABBMultiMeshed())
 		{
 			AABB target = collisionTarget.at(targetName);
 
@@ -468,8 +453,7 @@ const float CollisionManager::GetMaxGroundDistanceForAABB(const AABB& aabb, bool
 	for (const auto& object : colObj) {
 		// オブジェクトのメッシュごとのAABBを取得する
 		float serchDistance = Distance(object->GetAABB().max, aabb.min);
-		const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
-		for (AABB terrainAABB : terrains)
+		for (const AABB& terrainAABB : object->GetAABBMultiMeshed())
 		{
             // 座標をAABBに変換
             AABB target = aabb;
@@ -682,8 +666,7 @@ const Vector3 CollisionManager::CheckPenetrationAmount(const AABB& aabb)
 		if (dist < objectSize + 0.0f)
 		{
 			// オブジェクトのメッシュごとのAABBを取得する
-			const std::vector<AABB> terrains = object->GetAABBMultiMeshed();
-			for (AABB terrainAABB : terrains)
+			for (const AABB& terrainAABB : object->GetAABBMultiMeshed())
 			{
 				AABB target = aabb;
 

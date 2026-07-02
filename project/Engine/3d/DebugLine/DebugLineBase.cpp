@@ -3,40 +3,23 @@
 #include <cassert>
 #include "DirectXBase.h"
 
-
 using namespace Microsoft::WRL;
 using namespace Logger;
 
-DebugLineBase* DebugLineBase::instance = nullptr;
-
-DebugLineBase* DebugLineBase::GetInstance()
+void DebugLineBase::Initialize(DirectXBase& directXBase)
 {
-    if (instance == nullptr)
-    {
-        instance = new DebugLineBase;
-    }
-    return instance;
-}
-
-void DebugLineBase::Finalize()
-{
-    delete instance;
-    instance = nullptr;
-}
-
-void DebugLineBase::Initialize()
-{
+    m_pDirectXBase = &directXBase;
     CreateGraphicsPipeLineState();
 }
 
 void DebugLineBase::ShaderDraw()
 {
     // RootSignatureを設定。PSOに設定しているけど別途設定が必要
-    DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
+    m_pDirectXBase->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
     // PSOを設定
-    DirectXBase::GetInstance()->GetCommandList()->SetPipelineState(graphicsPipelineState.Get());
+    m_pDirectXBase->GetCommandList()->SetPipelineState(graphicsPipelineState.Get());
     // 形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけば良い
-    DirectXBase::GetInstance()->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
+    m_pDirectXBase->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 }
 
 void DebugLineBase::CreateRootSignature() {
@@ -64,7 +47,7 @@ void DebugLineBase::CreateRootSignature() {
         assert(false);
     }
     // バイナリを基に生成
-    hr = DirectXBase::GetInstance()->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
+    hr = m_pDirectXBase->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
     assert(SUCCEEDED(hr));
 
     // InputLayoutの設定
@@ -90,9 +73,9 @@ void DebugLineBase::CreateRootSignature() {
     rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
     // シェーダーをコンパイルする
-    vertexShaderBlob = DirectXBase::GetInstance()->CompileShader(L"Resources/shaders/DebugLine/DebugLine.VS.hlsl", L"vs_6_5");
+    vertexShaderBlob = m_pDirectXBase->CompileShader(L"Resources/shaders/DebugLine/DebugLine.VS.hlsl", L"vs_6_5");
     assert(vertexShaderBlob != nullptr);
-    pixelShaderBlob = DirectXBase::GetInstance()->CompileShader(L"Resources/shaders/DebugLine/DebugLine.PS.hlsl", L"ps_6_5");
+    pixelShaderBlob = m_pDirectXBase->CompileShader(L"Resources/shaders/DebugLine/DebugLine.PS.hlsl", L"ps_6_5");
     assert(pixelShaderBlob != nullptr);
 }
 
@@ -116,6 +99,6 @@ void DebugLineBase::CreateGraphicsPipeLineState()
     graphicsPipelineStateDesc.SampleDesc.Count = 1;
     graphicsPipelineStateDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
     // 実際に生成
-    HRESULT hr = DirectXBase::GetInstance()->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState));
+    HRESULT hr = m_pDirectXBase->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState));
     assert(SUCCEEDED(hr));
 }

@@ -32,6 +32,7 @@ namespace UI {
 
         // グループにUI要素を追加する関数
         void Add(std::shared_ptr<Element> button);
+        void Add(std::unique_ptr<Element> button);
 
         // グループ内の全てのUI要素を更新する関数
         void Update();

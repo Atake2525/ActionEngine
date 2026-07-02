@@ -24,21 +24,9 @@ enum class CollisionDirection {
 
 // 当たり判定マネージャー
 class CollisionManager {
-private:
-	// シングルトンパターンの適用
-	static CollisionManager* instance;
-
-	// コンストラクタ、デストラクタの隠蔽
-	CollisionManager() = default;
-	~CollisionManager() = default;
-	// コピーコンストラクタ、コピー代入演算子の封印
-	CollisionManager(CollisionManager&) = delete;
-	CollisionManager& operator=(CollisionManager&) = delete;
-
 public:
-
-	// インスタンスの取得
-	static CollisionManager* GetInstance();
+	CollisionManager();
+	~CollisionManager();
 
 	/// <summary>
 	/// 取得
@@ -49,11 +37,6 @@ public:
 	/// 更新
 	/// </summary>
 	void Update(const std::string& targetName, bool wallDashCollision = false);
-
-	/// <summary>
-	/// 終了処理
-	/// </summary>
-	void Finalize();
 
 	/// <summary>
 	/// 貫通量を取得

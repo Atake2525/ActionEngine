@@ -1,38 +1,26 @@
 #include "Input.h"
 #include <cassert>
 #include "WinApp.h"
-#include <cmath>
 #include "ImGuiManager.h"
+#include <cmath>
 #include "kMath.h"
 #include "Logger.h"
 
 using namespace Logger;
 
-Input* Input::instance = nullptr;
+void Input::Initialize(WinApp& winApp) {
+    m_pWinApp = &winApp;
 
-Input* Input::GetInstance() {
-    if (instance == nullptr) {
-        instance = new Input;
-    }
-    return instance;
-}
-
-void Input::Finalize() {
-    delete instance;
-    instance = nullptr;
-}
-
-void Input::Initialize() {
     HRESULT result;
 
     // DirectInputのインスタンス生成 キーボード
-    result = DirectInput8Create(WinApp::GetInstance()->GetHInstance(), DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&directInput, nullptr);
+    result = DirectInput8Create(m_pWinApp->GetHInstance(), DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&directInput, nullptr);
     assert(SUCCEEDED(result));
 
-    result = DirectInput8Create(WinApp::GetInstance()->GetHInstance(), DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&directInputMouse, nullptr);
+    result = DirectInput8Create(m_pWinApp->GetHInstance(), DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&directInputMouse, nullptr);
     assert(SUCCEEDED(result));
 
-    result = DirectInput8Create(WinApp::GetInstance()->GetHInstance(), DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&directInputGamePad, nullptr);
+    result = DirectInput8Create(m_pWinApp->GetHInstance(), DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&directInputGamePad, nullptr);
     assert(SUCCEEDED(result));
 
     CreateKeyboardDevice();
@@ -41,7 +29,7 @@ void Input::Initialize() {
 
     ShowMouseCursor(showCursor);
 
-    m_windowSize = WinApp::GetInstance()->GetWindowSize();
+    m_windowSize = m_pWinApp->GetWindowSize();
 }
 
 void Input::UpdateDevice() {
@@ -69,7 +57,7 @@ void Input::CreateKeyboardDevice() {
     result = keyboard->SetDataFormat(&c_dfDIKeyboard);
     assert(SUCCEEDED(result));
     // 排他制御レベルセット
-    result = keyboard->SetCooperativeLevel(WinApp::GetInstance()->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
+    result = keyboard->SetCooperativeLevel(m_pWinApp->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
     assert(SUCCEEDED(result));
     Log("キーボードの接続に成功\n");
 }
@@ -91,7 +79,7 @@ void Input::CreateMouseDevice() {
     // 入力データ形式のセット
     result = mouse->SetDataFormat(&c_dfDIMouse);
     // 排他制御レベルセット
-    result = mouse->SetCooperativeLevel(WinApp::GetInstance()->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
+    result = mouse->SetCooperativeLevel(m_pWinApp->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
     assert(SUCCEEDED(result));
     if (success)
     {
@@ -295,7 +283,7 @@ Vector2 Input::GetMousePos2() {
     GetCursorPos(&pos);
 
     // スクリーン座標をウィンドウのクライアント領域内の座標に変換する
-    HWND hwnd = WinApp::GetInstance()->GetHwnd();
+    HWND hwnd = m_pWinApp->GetHwnd();
     ScreenToClient(hwnd, &pos);
 
     // 現在のクライアント領域サイズを取得する

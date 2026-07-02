@@ -8,7 +8,7 @@ namespace ActionEngine {
     namespace Stage {
 		class StageCount
 		{
-		private:
+		public:
 			static StageCount* instance;
 
 			StageCount() = default;
@@ -17,7 +17,6 @@ namespace ActionEngine {
 			StageCount(StageCount&) = delete;
 			StageCount& operator=(StageCount&) = delete;
 
-		public:
 			static StageCount* GetInstance();
 
 			// 終了処理

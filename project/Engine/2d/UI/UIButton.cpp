@@ -2,6 +2,8 @@
 #include "Collision.h"
 
 #include "Logger.h"
+#include "RenderObjectFactory.h"
+#include <cassert>
 
 using namespace Logger;
 using namespace UI;
@@ -14,8 +16,8 @@ Button::~Button()
 
 void Button::Initialize(const std::string textureFilePath, Input& input) {
     // UI用のSpriteを作成して初期化する
-    m_sprite = std::make_unique<Sprite>();
-    m_sprite->Initialize(textureFilePath);
+    assert(m_pSpriteFactory);
+    m_sprite = m_pSpriteFactory->Create(textureFilePath);
     m_sprite->SetAnchorPoint(ANCHORPOINT_MIDDLE);
     m_originalSpriteSize = m_sprite->GetTextureSize();
 
@@ -100,6 +102,7 @@ void Button::UpdateInteractionState() {
 
         break;
     case ControlMode::Mouse:
+    {
         // マウス操作時の処理
         // マウスの位置を取得
         Vector2 mousePos = m_pInput->GetWindowMousePos2();
@@ -117,6 +120,7 @@ void Button::UpdateInteractionState() {
             m_selectedReactionLocked = false; // 状態のロックを解除する
         }
         break;
+    }
     case ControlMode::GamePad:
         // ゲームパッド操作時の処理
         if (m_selected)

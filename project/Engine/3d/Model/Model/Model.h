@@ -90,12 +90,20 @@ struct ModelData {
 	Node rootNode;
 };
 
+class DirectXBase;
+class SrvManager;
+class TextureManager;
+class Object3dBase;
+class SkyBox;
+
 class Model {
 public:
 	struct SkinningInformation
 	{
 		uint32_t numVertices;
 	};
+
+	void SetContext(DirectXBase& directXBase, SrvManager& srvManager, TextureManager& textureManaeger, Object3dBase& object3dBase, SkyBox& skyBox);
 
 	// 初期化
 	void Initialize(std::string directoryPath, std::string fileName, bool isAnimation);
@@ -119,9 +127,9 @@ public:
 	void CreateSkinningResources(const Skeleton& skeleton);
 
 	// アニメーションの追加
-	void AddAnimation(std::string directoryPath, std::string filename, std::string animationName);
+	void AddAnimation(std::string directoryPath, std::string fileName, std::string animationName);
 
-	void AddAnimationsThreaded(const std::string& directoryPath, const std::vector<std::string>& filenames);
+	void AddAnimationsThreaded(const std::string& directoryPath, const std::vector<std::string>& fileNames);
 
 	void SetPBRMaterial(const float metallic, const float roughness);
 
@@ -130,6 +138,12 @@ public:
 	const std::unordered_map<std::wstring, AABB>& GetMultiMeshAABB() const { return multiMeshAABB; }
 
 private:
+	DirectXBase* m_pDirectXBase = nullptr;
+	SrvManager* m_pSrvManager = nullptr;
+	TextureManager* m_pTextureManager = nullptr;
+	Object3dBase* m_pObject3dBase = nullptr;
+	SkyBox* m_pSkyBox = nullptr;
+
 
 	std::unordered_map<std::string, Animation> animation;
 	bool isAnimation = false;
@@ -183,11 +197,11 @@ private:
 	// ノード情報のロード
 	static Node ReadNode(aiNode* node);
 	// アニメーションの読み込み
-	static Animation LoadAnimationFile(const std::string& directoryPath, const std::string& filename);
+	static Animation LoadAnimationFile(const std::string& directoryPath, const std::string& fileName);
 	// .gltfファイルの読み取り
-	static ModelData LoadModelFileGLTF(const std::string& directoryPath, const std::string& fileName);
+	ModelData LoadModelFileGLTF(const std::string& directoryPath, const std::string& fileName);
 	// .objファイルの読み取り
-	static ModelData LoadModelFileOBJ(const std::string& directoryPath, const std::string& fileName);
+	ModelData LoadModelFileOBJ(const std::string& directoryPath, const std::string& fileName);
 	// VertexResourceを作成する
 	void CreateVertexResource();
 	// VertexBufferViewを作成する(値を設定するだけ)

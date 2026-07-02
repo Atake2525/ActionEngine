@@ -5,6 +5,8 @@
 
 #pragma once
 
+class SpriteFactory;
+
 namespace UI {
     // UIの状態を管理するクラス
     enum class TransitionState {
@@ -116,6 +118,8 @@ namespace UI {
         virtual void Update() = 0;
         virtual void Draw() = 0;
 
+        void SetContext(SpriteFactory& spriteFactory) { m_pSpriteFactory = &spriteFactory; }
+
         void AddInteractBinding(const InputTrigger& binding) { m_interactBinding.triggers.push_back(binding); }
         void SetInteractBinding(const InputBinding& binding) { m_interactBinding = binding; }
 
@@ -185,6 +189,7 @@ namespace UI {
         bool m_selectedReactionLocked = false; // リアクションを実行しないようにロックするフラグ
 
         std::unique_ptr<Sprite> m_sprite;
+        SpriteFactory* m_pSpriteFactory = nullptr;
         std::function<void(Element&)> m_enterReaction;
         std::function<void(Element&)> m_exitReaction;
 
