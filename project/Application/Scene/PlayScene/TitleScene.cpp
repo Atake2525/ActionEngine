@@ -87,10 +87,9 @@ void TitleScene::Initialize() {
 
     context.engine.presentation.fade.FadeIn(1.0f);
 
-    context.world.light.SetPositionPointLight({ 0.2f, 1.9f, 3.4f });
-    context.world.light.SetIntensityPointLight(1.0f);
-    context.world.light.SetRadiusPointLight(4.0f);
-    context.world.light.SetColorPointLight(Vector4{ 1.0f, 93.0f / 255.0f, 0.0f, 1.0f });
+	camera = new Camera();
+	camera->SetRotate(Vector3(SwapRadian(10.0f), 0.0f, 0.0f));
+	camera->SetTranslate({ 0.0f, 2.8f, -8.0f });
 
     context.world.light.SetDirectionDirectionalLight({ 0.174f, -0.35f, 1.0f });
     context.world.light.SetIntensityDirectionalLight(1.0f);

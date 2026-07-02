@@ -71,9 +71,7 @@ std::string TutorialStage::GetJsonName()
 
 void TutorialStage::Update()
 {
-    AppContext& context = *m_pContext;
 #ifndef NDEBUG
-    if (context.engine.platform.input.TriggerKey(DIK_RETURN))
     {
         goal->SetGoal();
     }
@@ -118,7 +116,6 @@ void TutorialStage::DrawBackSprite()
 
 void TutorialStage::Finalize()
 {
-    AppContext& context = *m_pContext;
     if (collisionObject)
     {
         context.world.collision.DeleteCollision(collisionObject.get());
