@@ -5,29 +5,19 @@
 #include "GameTime.h"
 #include "ImGuiManager.h"
 #include "EasingUtility.h"
+#include "SrvManager.h"
+#include "DirectXBase.h"
 
-
-FadeManager* FadeManager::instance = nullptr;
-
-FadeManager* FadeManager::GetInstance() {
-	if (instance == nullptr) {
-		instance = new FadeManager;
-	}
-	return instance;
-}
-
-void FadeManager::Finalize() {
-	delete sprite_;
-	delete instance;
-	instance = nullptr;
-}
-
-void FadeManager::Initialize() {
+void FadeManager::Initialize(WinApp& winApp, Render2DBase& render2DBase, GameTime& gameTime, DirectXBase& directXBase, SrvManager& srvManager, TextureManager& textureManager) {
+	m_pWinApp = &winApp;
+	m_pRender2DBase = &render2DBase;
+	m_pGameTime = &gameTime;
 	color_ = Vector3::Zero;
-	sprite_ = new Sprite();
-	sprite_->Initialize("Resources/Sprite/white1x1.png");
-	sprite_->SetColor({ color_.x, color_.y, color_.z, alpha_ });
-	sprite_->SetScale({ float(WinApp::GetInstance()->GetkClientWidth()), float(WinApp::GetInstance()->GetkClientHeight()) });
+	SpriteContext spriteContext{ directXBase, srvManager, textureManager, winApp };
+	m_sprite.SetContext(spriteContext);
+	m_sprite.Initialize("Resources/Sprite/white1x1.png");
+	m_sprite.SetColor({ color_.x, color_.y, color_.z, alpha_ });
+	m_sprite.SetScale({ float(m_pWinApp->GetkClientWidth()), float(m_pWinApp->GetkClientHeight()) });
 	fadeFunction = [this]() {
 		alpha_ = Lerp(alphaPre_, goalAlpha_, fadeTimer_);
 		};
@@ -46,7 +36,7 @@ const bool FadeManager::CompleteFade()
 }
 
 void FadeManager::Update() {
-	float deltaTime = GameTime::GetInstance()->GetDeltaTime();
+	float deltaTime = m_pGameTime->GetDeltaTime();
 	if (completeFade_)
 	{
 		completeFade_ = false;
@@ -70,13 +60,13 @@ void FadeManager::Update() {
 				finishedFadeFunction = nullptr;
 			}
 		}
-		sprite_->SetColor({ color_.x, color_.y, color_.z, alpha_ });
+		m_sprite.SetColor({ color_.x, color_.y, color_.z, alpha_ });
 	}
-	sprite_->Update();
+	m_sprite.Update();
 
 
 #ifndef NDEBUG
-	maxDeltaTime_ = std::max(maxDeltaTime_, deltaTime);
+	maxDeltaTime_ = (std::max)(maxDeltaTime_, deltaTime);
 	ImGui::Begin("FadeInOut");
 	ImGui::SliderFloat("fadeTimer", &fadeTimer_, 0.0f, 1.0f);
 	ImGui::DragFloat("alpha", &alpha_, 0.01f);
@@ -96,8 +86,6 @@ void FadeManager::Update() {
 	}
 
 	ImGui::End();
-
-	//sprite_->SetColor({ color_.x, color_.y, color_.z, alpha_ });
 
 #endif // !NDEBUG
 
@@ -136,6 +124,6 @@ void FadeManager::FadeIn(const float time) {
 }
 
 void FadeManager::Draw() {
-	Render2DBase::GetInstance()->ShaderDraw();
-	sprite_->Draw();
+	m_pRender2DBase->ShaderDraw();
+	m_sprite.Draw();
 }

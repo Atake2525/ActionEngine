@@ -5,33 +5,15 @@
 
 
 class Camera;
+class DirectXBase;
 
 class DebugLineBase
 {
-private: // シングルトン
-    
-    DebugLineBase() = default; // デフォルトコンストラクタ
-    ~DebugLineBase() = default; // デフォルトデストラクタ
-    DebugLineBase(const DebugLineBase&) = delete; // コピーコンストラクタの削除
-    DebugLineBase& operator=(const DebugLineBase&) = delete; // コピー代入演算子の削除
-
-    static DebugLineBase* instance;
-
 public:
-    /// <summary>
-    /// インスタンスの取得
-    /// </summary>
-    static DebugLineBase* GetInstance();
-
-    /// <summary>
-    /// 終了処理
-    /// </summary>
-    void Finalize();
-
     /// <summary>
     /// 初期化処理
     /// </summary>
-    void Initialize();
+    void Initialize(DirectXBase& directXBase);
 
     /// <summary>
     /// シェーダー描画処理
@@ -39,15 +21,17 @@ public:
     void ShaderDraw();
 
     // Getter(Camera)
-    Camera* GetCamera() const { return camera; }
+    Camera* GetCamera() const { return m_pCamera; }
 
     // Setter(Camera)
-    void SetCamera(Camera* camera) { this->camera = camera; }
+    void SetCamera(Camera* camera) { this->m_pCamera = camera; }
 
+    DirectXBase& GetDirectXBase() { return *m_pDirectXBase; }
     
 
 private:
-    Camera* camera = nullptr;
+    DirectXBase* m_pDirectXBase;
+    Camera* m_pCamera = nullptr;
 
     // ルートシグネチャの作成
     void CreateRootSignature();

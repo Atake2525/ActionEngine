@@ -1,49 +1,48 @@
 #include "ModelManager.h"
 #include "Model.h"
-#include "ModelBase.h"
 #include "DirectXBase.h"
+#include <cassert>
 
-ModelManager* ModelManager::instance = nullptr;
-
-ModelManager* ModelManager::GetInstance() {
-	if (instance == nullptr) {
-		instance = new ModelManager;
-	}
-	return instance;
-}
-
-void ModelManager::Finalize() {
-	delete instance;
-	instance = nullptr;
+void ModelManager::SetContext(DirectXBase& directXBase, SrvManager& srvManager, TextureManager& textureManager, Object3dBase& object3dBase, SkyBox& skyBox) {
+	m_pDirectXBase = &directXBase;
+	m_pSrvManager = &srvManager;
+	m_pTextureManager = &textureManager;
+	m_pObject3dBase = &object3dBase;
+	m_pSkyBox = &skyBox;
 }
 
 void ModelManager::Initialize() { 
-	ModelBase::GetInstance()->Initialize(); 
 }
 
 Model* ModelManager::LoadModel(const std::string& directoryPath, const std::string& fileName, const bool isAnimation) {
-	std::string filename = fileName;
+	const std::string& modelKey = fileName;
 
 	// 読み込み済モデルを検索
-	if (models.contains(filename)) {
+	if (m_models.contains(modelKey)) {
 		// 読み込み済なら早期return
-		return models.at(filename).get();
+		return m_models.at(modelKey).get();
 	}
 
 	// モデルの生成と読み込み、初期化
 	std::unique_ptr<Model> model = std::make_unique<Model>();
+	assert(m_pDirectXBase);
+	assert(m_pSrvManager);
+	assert(m_pTextureManager);
+	assert(m_pObject3dBase);
+	assert(m_pSkyBox);
+	model->SetContext(*m_pDirectXBase, *m_pSrvManager, *m_pTextureManager, *m_pObject3dBase, *m_pSkyBox);
 	model->Initialize(directoryPath, fileName, isAnimation);
 
 	// モデルをmapコンテナに格納する
-	models.insert(std::make_pair(filename, std::move(model)));
-	return models.at(filename).get();
+	m_models.insert(std::make_pair(modelKey, std::move(model)));
+	return m_models.at(modelKey).get();
 }
 
 Model* ModelManager::FindModel(const std::string& fileName) {
 	// 読み込み済モデルを検索
-	if (models.contains(fileName)) {
+	if (m_models.contains(fileName)) {
 	// 読み込みモデルを戻り値としてreturn
-		return models.at(fileName).get();
+		return m_models.at(fileName).get();
 	}
 
 	// ファイル名一致無し

@@ -10,26 +10,20 @@ using namespace Logger;
 using namespace StringUtility;
 using namespace Microsoft::WRL;
 
-TextureManager* TextureManager::instance = nullptr;
-
 // ImGuiで0番を、PostEffectで1番を使用するため、2番から使用
 uint32_t TextureManager::kSRVIndexTop = 2;
 
-TextureManager* TextureManager::GetInstance() {
-	if (instance == nullptr) {
-		instance = new TextureManager;
-	}
-	return instance;
-}
+TextureManager::TextureManager() {}
 
-void TextureManager::Finalize() {
-	delete instance;
-	instance = nullptr;
-}
+TextureManager::~TextureManager() {}
 
-void TextureManager::Initialize() {
+
+void TextureManager::Initialize(DirectXBase& directXBase, SrvManager& srvManager) {
+	m_pDirectXBase = &directXBase;
+	m_pSrvManager = &srvManager;
+
 	// SRVの数と同数
-	textureDatas.reserve(SrvManager::GetInstance()->maxSRVCount);
+	textureDatas.reserve(m_pSrvManager->maxSRVCount);
 
 	LoadTexture("Resources/Sprite/black1x1.png");
 	LoadTexture("Resources/Sprite/noise0.png");
@@ -48,7 +42,7 @@ uint32_t TextureManager::LoadTexture(const std::string& filePath, TextureColorSp
 	}
 
 	// テクスチャ枚数上限チェック
-	assert(SrvManager::GetInstance()->CheckAllocate());
+	assert(m_pSrvManager->CheckAllocate());
 
 
 	// テクスチャファイルを読んでプログラムで扱えるようにする
@@ -86,9 +80,9 @@ uint32_t TextureManager::LoadTexture(const std::string& filePath, TextureColorSp
 		// テクスチャデータをtextureDatasの末尾に追加する
 		textureData.filePath = filePath;
 		textureData.metadata = mipImages.GetMetadata();
-		textureData.resource = DirectXBase::GetInstance()->CreateTextureResource(textureData.metadata);
+		textureData.resource = m_pDirectXBase->CreateTextureResource(textureData.metadata);
 
-		textureData.intermediateResource = DirectXBase::GetInstance()->UploadTextureData(textureData.resource, mipImages);
+		textureData.intermediateResource = m_pDirectXBase->UploadTextureData(textureData.resource, mipImages);
 	}
 	else
 	{
@@ -96,16 +90,16 @@ uint32_t TextureManager::LoadTexture(const std::string& filePath, TextureColorSp
 		// テクスチャデータをtextureDatasの末尾に追加する
 		textureData.filePath = filePath;
 		textureData.metadata = SUCCEEDED(hr) ? mipImages.GetMetadata() : image.GetMetadata();
-		textureData.resource = DirectXBase::GetInstance()->CreateTextureResource(textureData.metadata);
+		textureData.resource = m_pDirectXBase->CreateTextureResource(textureData.metadata);
 
-		textureData.intermediateResource = DirectXBase::GetInstance()->UploadTextureData(textureData.resource, SUCCEEDED(hr) ? mipImages : image);
+		textureData.intermediateResource = m_pDirectXBase->UploadTextureData(textureData.resource, SUCCEEDED(hr) ? mipImages : image);
 	}
 
-	uint32_t srvIndex = SrvManager::GetInstance()->Allocate();
+	uint32_t srvIndex = m_pSrvManager->Allocate();
 	textureData.srvIndex = srvIndex;
 
-	textureData.srvHandleCPU = SrvManager::GetInstance()->GetCPUDescriptorHandle(textureData.srvIndex);
-	textureData.srvHandleGPU = SrvManager::GetInstance()->GetGPUDescriptorHandle(textureData.srvIndex);
+	textureData.srvHandleCPU = m_pSrvManager->GetCPUDescriptorHandle(textureData.srvIndex);
+	textureData.srvHandleGPU = m_pSrvManager->GetGPUDescriptorHandle(textureData.srvIndex);
 
 	uint32_t mapIndex = textureDatas[filePath].srvIndex;
 
@@ -113,7 +107,7 @@ uint32_t TextureManager::LoadTexture(const std::string& filePath, TextureColorSp
 	textureData.metallicMapSrvIndex = mapIndex;
 	textureData.roughnessMapSrvIndex = mapIndex;
 
-	SrvManager::GetInstance()->CreateSRVforTexture2D(srvIndex, textureData.resource, textureData.metadata);
+	m_pSrvManager->CreateSRVforTexture2D(srvIndex, textureData.resource, textureData.metadata);
 	return mapIndex;
 }
 
