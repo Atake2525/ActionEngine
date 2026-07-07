@@ -18,6 +18,23 @@ void Runtime::Update() {
 #ifndef NDEBUG
     m_context.engine.graphics.imgui.Update();
     m_context.engine.platform.time.DrawImGui();
+
+    float fps = 1.0f / m_context.engine.platform.time.GetDeltaTime();
+    ImGui::Begin("performance");
+    if (fps > 50)
+    {
+        ImGui::TextColored(ImVec4(0, 1, 0, 1), "FPS: %.1f", fps);
+    }
+    else if (fps > 30)
+    {
+        ImGui::TextColored(ImVec4(1, 1, 0, 1), "FPS: %.1f", fps);
+    }
+    else
+    {
+        ImGui::TextColored(ImVec4(1, 0, 0, 1), "FPS: %.1f", fps);
+    }
+    ImGui::End();
+
 #endif // !NDEBUG
 
     m_context.world.light.Update();
@@ -68,7 +85,12 @@ const bool Runtime::WindowProcessMessage() {
 void Runtime::SetupEngine() {
     EngineContext& engine = m_context.engine;
 
+#ifndef NDEBUG
     engine.platform.window.Initialize();
+#else
+    engine.platform.window.Initialize(1280, 720, WindowMode::Window, L"走快");
+#endif // !NDEBUG
+
     engine.platform.input.Initialize(engine.platform.window);
     
 

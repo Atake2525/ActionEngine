@@ -167,7 +167,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="externals\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Application\StageManager\BaseStage.cpp" />
     <ClCompile Include="Application\Player\Player.cpp" />
-    <ClCompile Include="Engine\Collision\PhysicsCorrection.cpp" />
     <ClCompile Include="Application\Pause.cpp" />
     <ClCompile Include="Application\Player\PlayerUI.cpp" />
     <ClCompile Include="Application\Result.cpp" />
@@ -185,6 +184,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Player\WallRunState.cpp" />
     <ClCompile Include="Application\Player\WallJumpState.cpp" />
     <ClCompile Include="Engine\Core\Runtime.cpp" />
+    <ClCompile Include="ModelLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Setting\KeyboardConfig.h" />
@@ -199,6 +199,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Setting\AudioConfig.h" />
     <ClInclude Include="Application\CrouchState.h" />
     <ClInclude Include="Application\Player\ClimbingState.h" />
+    <ClInclude Include="Engine\3d\Model\Model\ModelLoader.h" />
     <ClInclude Include="Engine\Math\EngineContext.h" />
     <ClInclude Include="Engine\2d\UI\UIElement.h" />
     <ClInclude Include="Engine\3d\DebugLine\DebugLine.h" />
@@ -269,7 +270,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\StageManager\BaseStage.h" />
     <ClInclude Include="Application\StageManager\TutorialStage.h" />
     <ClInclude Include="Application\Player\Player.h" />
-    <ClInclude Include="Engine\Collision\PhysicsCorrection.h" />
     <ClInclude Include="Application\Pause.h" />
     <ClInclude Include="Application\Player\PlayerUI.h" />
     <ClInclude Include="Engine\Presentation\Cinematic\ScanEffect.h" />
