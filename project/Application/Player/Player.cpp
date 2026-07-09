@@ -287,7 +287,7 @@ void Player::UpdateParkourState()
             m_wallRunning = true;
             ChangeState(std::make_unique<WallRunState>());
 
-            
+
         }
         // ウォールランの終了を確認する
         pAABB += m_wallPenetration;
@@ -646,7 +646,7 @@ void Player::WallRunStart() {
     m_wallRunDirection.x = Sign(std::fabs(m_wallPenetration.z)) * Sign(cameraDirection.x);
     m_wallRunDirection.z = Sign(std::fabs(m_wallPenetration.x)) * Sign(cameraDirection.z);
 
-    
+
     m_wallRunDirection *= m_runSpeed;
 }
 
@@ -949,41 +949,8 @@ void Player::UpdateCameraParent() {
     m_pCamera->SetParent(m_pModel->GetWorldMatrix());
 }
 
-void Player::ApplyCameraEffect()
-{
-    // Fov変更処理の実装
-    m_fov = m_pCamera->GetfovY();
-    m_fovPre = m_fov;
-
-    // しゃがみ用にカメラを下げる
-    m_cameraTransform.position.y = m_cameraHeight + m_crouchHeight;
-
-    // 移動速度がダッシュ速度ならFovを広げる
-
-    if (m_playerSpeed == m_runSpeed && !m_isRunFov)
-    {
-        m_fovChangeTimer = 0.0f;
-        m_fovBefore = m_fov;
-        m_fovAfter = m_fovRun;
-        m_isRunFov = true;
-    }
-
-    if (m_isRunFov && m_playerSpeed == 0.0f)
-    {
-        m_fovChangeTimer = 0.0f;
-        m_fovBefore = m_fov;
-        m_fovAfter = m_fovDefault;
-        m_isRunFov = false;
-    }
-
-    m_fovChangeTimer += m_pContext->engine.platform.time.GetDeltaTime() / m_fovChangeTime;
-    m_fovChangeTimer = clamp(m_fovChangeTimer, 0.0f, 1.0f);
-    m_fov = Lerp(m_fovBefore, m_fovAfter, m_fovChangeTimer);
-    // 計算結果をカメラにセット
-    m_pCamera->SetFovY(m_fov);
-
-
-    // ウォールダッシュをしたときのカメラの傾き
+void Player::UpdateWallRunCameraTilt() {
+    // ウォールラン中のカメラの傾き処理の実装
     if (m_wallRunning)
     {
         if (!m_completeGetRotateInfo)
@@ -1014,9 +981,7 @@ void Player::ApplyCameraEffect()
             {
                 m_wallRunRotateAfter = m_wallRunRotateAngle * (signWallRunDirection.z * wallRunPenetration * -1.0f);
             }
-
         }
-
         m_wallRunTimer += m_delta / m_wallRunTime;
     }
     else
@@ -1025,8 +990,70 @@ void Player::ApplyCameraEffect()
         m_wallRunTimer -= m_delta / m_wallRunTime;
     }
     m_wallRunTimer = clamp(m_wallRunTimer, 0.0f, 1.0f);
-
     m_cameraTransform.rotate.z = Lerp(0.0f, m_wallRunRotateAfter, m_wallRunTimer);
+}
+
+void Player::UpdateCameraFov() {
+    // Fov変更処理の実装
+    m_fov = m_pCamera->GetfovY();
+    m_fovPre = m_fov;
+    // 移動速度がダッシュ速度ならFovを広げる
+    if (m_playerSpeed == m_runSpeed && !m_isRunFov)
+    {
+        m_fovChangeTimer = 0.0f;
+        m_fovBefore = m_fov;
+        m_fovAfter = m_fovRun;
+        m_isRunFov = true;
+    }
+    if (m_isRunFov && m_playerSpeed == 0.0f)
+    {
+        m_fovChangeTimer = 0.0f;
+        m_fovBefore = m_fov;
+        m_fovAfter = m_fovDefault;
+        m_isRunFov = false;
+    }
+    m_fovChangeTimer += m_pContext->engine.platform.time.GetDeltaTime() / m_fovChangeTime;
+    m_fovChangeTimer = clamp(m_fovChangeTimer, 0.0f, 1.0f);
+    m_fov = Lerp(m_fovBefore, m_fovAfter, m_fovChangeTimer);
+    // 計算結果をカメラにセット
+    m_pCamera->SetFovY(m_fov);
+}
+
+void Player::UpdateCrouchCamera() {
+    // Crouch時のカメラの高さ変更処理の実装
+    m_crouchCameraOffsetY = m_crouchHeight + m_cameraHeight;
+    m_cameraTransform.position.y = m_crouchCameraOffsetY;
+}
+
+void Player::UpdateHeadBob() {
+    // HeadBob処理の実装
+    if (m_onGround && m_playerSpeed > 0.0f)
+    {
+        m_headBobTimer += m_pContext->engine.platform.time.GetDeltaTime() * m_headBobSpeed;
+        float bobOffset = sinf(m_headBobTimer) * 0.1f;
+        m_headBobOffset.rotate.z = SwapRadian(bobOffset * m_moveSpeed);
+        m_headBobOffset.rotate.y = SwapRadian(bobOffset * m_moveSpeed);
+
+        if (m_headBobTimer >= 2 * M_PI)
+        {
+            m_headBobTimer = 0.0f;
+            m_headBobOffset.rotate = Vector3::Zero;
+        }
+    }
+    else
+    {
+        m_headBobTimer = 0.0f;
+        m_headBobOffset.rotate = Vector3::Zero;
+    }
+    m_cameraTransform.rotate += m_headBobOffset.rotate;
+}
+
+void Player::ApplyCameraEffect()
+{
+    UpdateCrouchCamera();
+    UpdateCameraFov();
+    UpdateWallRunCameraTilt();
+    UpdateHeadBob();
 
 }
 

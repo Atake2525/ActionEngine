@@ -123,7 +123,7 @@ void Runtime::SetupGame() {
     game.sceneManager.GetSettingManager().SetContext(engine.assets.json);
     game.sceneManager.GetSettingManager().Load("KeyConfig.json", Setting::SettingType::KeyConfig);
     game.sceneManager.GetSettingManager().Load("Audio.json", Setting::SettingType::AudioConfig);
-    game.sceneManager.SetNextScene("TITLE");
+    game.sceneManager.SetNextScene("GAMESCENE");
 
     engine.platform.window.OpenWindow();
 }

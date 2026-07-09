@@ -21,12 +21,11 @@ public:
 	void Run();
 
 	// 終了チェック
-	virtual bool LoopOut() { return loopOut_; }
+	bool LoopOut() { return loopOut_; }
 
 	virtual ~FrameWork() = default;
 
 private:
-	bool loopOut_ = false;
-
 	std::unique_ptr<Runtime> m_pRuntime;
+	bool loopOut_ = false;
 };

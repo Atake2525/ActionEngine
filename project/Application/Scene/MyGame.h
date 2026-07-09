@@ -27,19 +27,9 @@ public:
 	// 描画
 	void Draw() override;
 
-	// ループ終了
-	bool LoopOut() override { return finished; }
-	
-
 	// ↑までシーンの作成に必須
 
 private:
 	D3DResourceLeakChecker d3dResourceLeakChecker;
-
-	// メンバ変数宣言
-
-#pragma region 基盤システム
-
-	bool finished = false;
 
 };

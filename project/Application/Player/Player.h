@@ -26,16 +26,6 @@ private:
         Falling = 2
     };
 
-    // プレイヤーの歩行状態
-    /*enum class PlayerWalkState : int {
-        Walk = 0,
-        Run = 1,
-        Crouch = 2,
-        WallRun = 3,
-        Sliding = 4,
-        Climbing = 5,
-    };*/
-
     // コントロールモード
     enum class ControlMode {
         KeyboardMouse,
@@ -183,6 +173,14 @@ private: // プレイヤーステート管理
     /// カメラ効果の適用
     /// </summary>
     void ApplyCameraEffect();
+
+    void UpdateCameraFov();
+    
+    void UpdateWallRunCameraTilt();
+
+    void UpdateHeadBob();
+
+    void UpdateCrouchCamera();
 
     /// <summary>
     /// モデルのアニメーションを更新する
@@ -355,6 +353,11 @@ private:
     float m_fovChangeTime = 0.1f;     // FOV補間時間
     float m_fovDefault = 1.2f; // デフォルトFOV
     float m_fovRun = 1.4f;    // ダッシュ時FOV
+    float m_headBobTimer = 0.0f; // HeadBob用タイマー
+    float m_headBobSpeed = 10.0f; // HeadBobの速度
+    float m_headBobAmount = 0.1f; // HeadBobの振幅
+    Transform m_headBobOffset = Transform::Default; // HeadBobのオフセット
+    float m_crouchCameraOffsetY = 0.0f; // Crouch時のカメラオフセット
 
 
     //==================================================
