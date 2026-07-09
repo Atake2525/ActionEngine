@@ -1,26 +1,5 @@
 #include "FrameWork.h"
-#include "BaseScene.h"
 #include "D3DResourceLeakChecker.h"
-#include "WinApp.h"
-#include "DirectXBase.h"
-#include "Input.h"
-#include "Render2DBase.h"
-#include "Object3dBase.h"
-#include "ModelBase.h"
-#include "TextureManager.h"
-#include "ModelManager.h"
-#include "Light.h"
-#include "Audio.h"
-#include "SrvManager.h"
-#include "ImGuiManager.h"
-#include "ParticleManager.h"
-#include "SkyBox.h"
-#include "JsonLoader.h"
-#include "CollisionManager.h"
-#include "FadeManager.h"
-#include "GameTime.h"
-#include "StageCount.h"
-#include "DebugLineBase.h"
 
 #include "algorithm"
 #include "externals/imgui/imgui.h"
@@ -62,9 +41,5 @@ private:
 #pragma region 基盤システム
 
 	bool finished = false;
-
-	//BaseScene* gameScene = nullptr;
-	// 
-	//SceneManager* sceneManager_ = nullptr;
 
 };

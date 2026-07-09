@@ -7,23 +7,14 @@
 using namespace Microsoft::WRL;
 using namespace Logger;
 
-Object3dBase* Object3dBase::instance = nullptr;
+Object3dBase::Object3dBase() {}
+Object3dBase::~Object3dBase() {}
 
-Object3dBase* Object3dBase::GetInstance() {
-	if (instance == nullptr) {
-		instance = new Object3dBase;
-	}
-	return instance;
-}
+void Object3dBase::Initialize(DirectXBase& directXBase, Light& light) {
+	m_pDirectXBase = &directXBase;
+	m_pLight = &light;
 
-void Object3dBase::Finalize() {
-	delete instance;
-	instance = nullptr;
-}
-
-void Object3dBase::Initialize() {
-
-	cullingTemplateData.drawHeight = -1.0f; // -1.0fで
+	cullingTemplateData.drawHeight = -1.0f; // -1.0fで初期化
 
 	CreateGraphicsPipeLineState();
 	CreateCSPipeLineState();
@@ -135,7 +126,7 @@ void Object3dBase::CreateRootSignature() {
 		assert(false);
 	}
 	// バイナリをもとに作成
-	hr = DirectXBase::GetInstance()->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
+	hr = m_pDirectXBase->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
 	assert(SUCCEEDED(hr));
 	// InputLayout
 	inputElementDescs[0].SemanticName = "POSITION";
@@ -177,9 +168,9 @@ void Object3dBase::CreateRootSignature() {
 	// 三角形の中を塗りつぶす
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 	// Shaderをコンパイルする
-	vertexShaderBlob = DirectXBase::GetInstance()->CompileShader(L"Resources/shaders/Model/Object3D.VS.hlsl", L"vs_6_5");
+	vertexShaderBlob = m_pDirectXBase->CompileShader(L"Resources/shaders/Model/Object3D.VS.hlsl", L"vs_6_5");
 	assert(vertexShaderBlob != nullptr);
-	pixelShaderBlob = DirectXBase::GetInstance()->CompileShader(L"Resources/shaders/Model/Object3D.PS.hlsl", L"ps_6_5");
+	pixelShaderBlob = m_pDirectXBase->CompileShader(L"Resources/shaders/Model/Object3D.PS.hlsl", L"ps_6_5");
 	assert(pixelShaderBlob != nullptr);
 
 	// DepthStencilStateの設定
@@ -212,7 +203,7 @@ void Object3dBase::CreateGraphicsPipeLineState() {
 	graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc;
 	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	// 実際に生成
-	HRESULT hr = DirectXBase::GetInstance()->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPilelineState));
+	HRESULT hr = m_pDirectXBase->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPilelineState));
 	assert(SUCCEEDED(hr));
 }
 
@@ -266,11 +257,11 @@ void Object3dBase::CreateCSPipeLineState() {
 		assert(false);
 	}
 	// バイナリをもとに作成
-	hr = DirectXBase::GetInstance()->GetDevice()->CreateRootSignature(0, signatureBlobCS->GetBufferPointer(), signatureBlobCS->GetBufferSize(), IID_PPV_ARGS(&rootSignatureCS));
+	hr = m_pDirectXBase->GetDevice()->CreateRootSignature(0, signatureBlobCS->GetBufferPointer(), signatureBlobCS->GetBufferSize(), IID_PPV_ARGS(&rootSignatureCS));
 	assert(SUCCEEDED(hr));
 
 	// シェーダーのコンパイル
-	computeShaderBlob = DirectXBase::GetInstance()->CompileShader(L"Resources/shaders/Model/Skinning.CS.hlsl", L"cs_6_5");
+	computeShaderBlob = m_pDirectXBase->CompileShader(L"Resources/shaders/Model/Skinning.CS.hlsl", L"cs_6_5");
 	assert(computeShaderBlob != nullptr);
 
 	// PSOを作成する
@@ -279,22 +270,22 @@ void Object3dBase::CreateCSPipeLineState() {
 		.BytecodeLength = computeShaderBlob->GetBufferSize()
 	};
 	computePipelineStateDesc.pRootSignature = rootSignatureCS.Get();
-	hr = DirectXBase::GetInstance()->GetDevice()->CreateComputePipelineState(&computePipelineStateDesc, IID_PPV_ARGS(&computePipelineState));
+	hr = m_pDirectXBase->GetDevice()->CreateComputePipelineState(&computePipelineStateDesc, IID_PPV_ARGS(&computePipelineState));
 }
 
 void Object3dBase::ShaderDraw() {
 	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
+	m_pDirectXBase->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
 	// PSOを設定
-	DirectXBase::GetInstance()->GetCommandList()->SetPipelineState(graphicsPilelineState.Get());
+	m_pDirectXBase->GetCommandList()->SetPipelineState(graphicsPilelineState.Get());
 	// 形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけば良い
-	DirectXBase::GetInstance()->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	m_pDirectXBase->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(4, Light::GetInstance()->GetDirectionalLightResource()->GetGPUVirtualAddress());
+	m_pDirectXBase->GetCommandList()->SetGraphicsRootConstantBufferView(4, m_pLight->GetDirectionalLightResource()->GetGPUVirtualAddress());
 
-	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(5, Light::GetInstance()->GetPointlLightResource()->GetGPUVirtualAddress());
+	m_pDirectXBase->GetCommandList()->SetGraphicsRootConstantBufferView(5, m_pLight->GetPointlLightResource()->GetGPUVirtualAddress());
 
-	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(6, Light::GetInstance()->GetSpotLightResource()->GetGPUVirtualAddress());
+	m_pDirectXBase->GetCommandList()->SetGraphicsRootConstantBufferView(6, m_pLight->GetSpotLightResource()->GetGPUVirtualAddress());
 
-	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(14, Light::GetInstance()->GetScanResource()->GetGPUVirtualAddress());
+	m_pDirectXBase->GetCommandList()->SetGraphicsRootConstantBufferView(14, m_pLight->GetScanResource()->GetGPUVirtualAddress());
 }

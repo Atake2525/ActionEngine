@@ -15,6 +15,9 @@
 #pragma once
 
 class Camera;
+class DirectXBase;
+class SrvManager;
+class TextureManager;
 
 struct Particle {
 	Transform transform;
@@ -90,42 +93,23 @@ enum class ParticleType {
 };
 
 class ParticleManager {
-private:
-	// シングルトンパターンを適用
-	static ParticleManager* instance;
-
-	// コンストラクタ、デストラクタの隠蔽
-	ParticleManager() = default;
-	~ParticleManager() = default;
-	// コピーコンストラクタ、コピー代入演算子の封印
-	ParticleManager(ParticleManager&) = delete;
-	ParticleManager& operator=(ParticleManager&) = delete;
-
 public:
-	/// <summary>
-	/// インスタンスの取得
-	/// </summary>
-	/// <returns></returns>
-	static ParticleManager* GetInstance();
-
-	/// <summary>
-	/// 終了処理
-	/// </summary>
-	void Finalize();
+    ParticleManager();
+    ~ParticleManager();
 
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize();
+	void Initialize(DirectXBase& directXBase, SrvManager& srvManager, TextureManager& textureManager);
 
-	ModelData LoadModelFile(const std::string& directoryPath, const std::string& filename);
+	ModelData LoadModelFile(const std::string& directoryPath, const std::string& fileName);
 
 	/// <summary>
 	/// パーティクルグループの生成
 	/// </summary>
 	/// <param name="name">名前</param>
 	/// <param name="textureFilePath">テクスチャ名</param>
-	void CreateParticleGroupFromOBJ(std::string directoryPath, std::string filename, const std::string& name);
+	void CreateParticleGroupFromOBJ(std::string directoryPath, std::string fileName, const std::string& name);
 
 	void CreateParticleGroup(ParticleType particleType, std::string textureFilePath, const std::string& name);
 
@@ -151,7 +135,10 @@ public:
 	void SetCamera(Camera* camera) { this->camera = camera; }
 
 private:
-
+	
+    DirectXBase* m_pDirectXBase = nullptr;
+	SrvManager* m_pSrvManager = nullptr;
+	TextureManager* m_pTextureManager = nullptr;
 	Camera* camera = nullptr;
 	/// <summary>
 	/// ランダムエンジンの初期化
@@ -218,10 +205,10 @@ private:
 
 	bool IsCollision(const AABB& aabb, const Vector3& point);
 	//MaterialData materialData;
-	Particle MakeNewParticle(std::mt19937& randomEngine, const Vector3& translate);
+	Particle MakeNewParticle(std::mt19937& randomEngine, const Vector3& position);
 
 	//MaterialData materialData;
-	Particle MakeNewParticle_HitEffect(std::mt19937& randomEngine, const Vector3& translate);
+	Particle MakeNewParticle_HitEffect(std::mt19937& randomEngine, const Vector3& position);
 
 	std::unordered_map<std::string, ParticleGroup> particleGroups;
 

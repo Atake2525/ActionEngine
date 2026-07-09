@@ -1,33 +1,23 @@
 #include "SceneManager.h"
 #include "GameTime.h"
+#include "EngineContext.h"
 
 using namespace std;
 
-SceneManager* SceneManager::instance = nullptr;
+SceneManager::SceneManager() = default;
 
-void SceneManager::Finalize() {
+SceneManager::~SceneManager() {
     m_nextScene = nullptr;
-    m_scene->Finalize();
-
-    SceneFactory::GetInstance()->Finalize();
-    delete instance;
-    instance = nullptr;
-}
-
-SceneManager* SceneManager::GetInstance() {
-    SceneFactory::GetInstance();
-    if (instance == nullptr)
-    {
-        instance = new SceneManager;
+    if (m_scene) {
+        m_scene->Finalize();
     }
-    return instance;
 }
 
 void SceneManager::SetNextScene(const std::string& sceneName)
 {
     m_sceneName = sceneName;
     drawStart = false;
-    m_nextScene = SceneFactory::GetInstance()->ChangeScene(sceneName);
+    m_nextScene = m_pContext->game.sceneFactory.ChangeScene(sceneName);
 }
 
 void SceneManager::Update() {
@@ -68,6 +58,6 @@ void SceneManager::CallStart()
     if (m_scene && !drawStart)
     {
         drawStart = true;
-        GameTime::GetInstance()->SetDeltaPoint();
+        m_pContext->engine.platform.time.SetDeltaPoint();
     }
 }

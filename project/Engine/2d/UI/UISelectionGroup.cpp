@@ -99,3 +99,7 @@ void SelectionGroup::Add(std::shared_ptr<Element> button) {
     }
     m_uis.push_back(button);
 }
+
+void SelectionGroup::Add(std::unique_ptr<Element> button) {
+    Add(std::shared_ptr<Element>(std::move(button)));
+}

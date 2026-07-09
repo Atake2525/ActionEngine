@@ -7,9 +7,12 @@
 #include "UISelectionGroup.h"
 #pragma once
 
+struct AppContext;
+
 class Pause
 {
 public:
+    void SetContext(AppContext& context) { m_pContext = &context; }
 
     /// <summary>
     /// 初期化処理
@@ -29,6 +32,7 @@ public:
     const bool IsPause()const { return m_pause; }
 
 private:
+    AppContext* m_pContext = nullptr;
 
     void TogglePauseMenu();
 

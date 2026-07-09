@@ -31,17 +31,21 @@ void SkyBox::Finalize() {
 }
 
 void SkyBox::SetTexture(const std::string& filePath) {
-	srvIndex = TextureManager::GetInstance()->GetSrvIndex(filePath);
+	srvIndex = m_pTextureManager->GetSrvIndex(filePath);
 }
 
 void SkyBox::SetCamera(Camera* camera) {
 	camera_ = camera;
 }
 
-void SkyBox::Initialize() {
+void SkyBox::Initialize(DirectXBase& directXBase, SrvManager& srvManager, TextureManager& textureManager) {
+	m_pDirectXBase = &directXBase;
+	m_pSrvManager = &srvManager;
+	m_pTextureManager = &textureManager;
+
 	CreateGraphicsPipeLineState();
 
-	transformationMatrixResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(TransformationMatrix));
+	transformationMatrixResource = m_pDirectXBase->CreateBufferResource(sizeof(TransformationMatrix));
 	// 書き込むためのアドレスを取得
 	transformationMatrixResource->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrix));
 
@@ -49,7 +53,7 @@ void SkyBox::Initialize() {
 	transformationMatrix->WVP = MakeIdentity4x4();
 	transformationMatrix->World = MakeIdentity4x4();
 
-	materialResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(Material));
+	materialResource = m_pDirectXBase->CreateBufferResource(sizeof(Material));
 	//  書き込むためのアドレスを取得
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
 
@@ -57,11 +61,11 @@ void SkyBox::Initialize() {
 	materialData->color = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 	// 頂点リソースの作成
-	vertexResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(VertexData) * 24);
+	vertexResource = m_pDirectXBase->CreateBufferResource(sizeof(VertexData) * 24);
 
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
 
-	sunResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(Sun));
+	sunResource = m_pDirectXBase->CreateBufferResource(sizeof(Sun));
 	sunResource->Map(0, nullptr, reinterpret_cast<void**>(&sunData));
 
 	sunData->power = 0.0f;
@@ -74,7 +78,7 @@ void SkyBox::Initialize() {
 	vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * 24);
 	vertexBufferView.StrideInBytes = sizeof(VertexData);
 
-	indexResource = DirectXBase::GetInstance()->CreateBufferResource(sizeof(uint32_t) * 36);
+	indexResource = m_pDirectXBase->CreateBufferResource(sizeof(uint32_t) * 36);
 
 	indexBufferView.BufferLocation = indexResource->GetGPUVirtualAddress();
 	indexBufferView.SizeInBytes = UINT(sizeof(uint32_t) * 36);
@@ -215,7 +219,7 @@ void SkyBox::CreateRootSignature() {
 		assert(false);
 	}
 	// バイナリをもとに作成
-	hr = DirectXBase::GetInstance()->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
+	hr = m_pDirectXBase->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
 	assert(SUCCEEDED(hr));
 
 
@@ -243,9 +247,9 @@ void SkyBox::CreateRootSignature() {
 	// 三角形の中を塗りつぶす
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 	// Shaderをコンパイルする
-	vertexShaderBlob = DirectXBase::GetInstance()->CompileShader(L"Resources/shaders/SkyBox/Skybox.VS.hlsl", L"vs_6_0");
+	vertexShaderBlob = m_pDirectXBase->CompileShader(L"Resources/shaders/SkyBox/Skybox.VS.hlsl", L"vs_6_0");
 	assert(vertexShaderBlob != nullptr);
-	pixelShaderBlob = DirectXBase::GetInstance()->CompileShader(L"Resources/shaders/SkyBox/Skybox.PS.hlsl", L"ps_6_0");
+	pixelShaderBlob = m_pDirectXBase->CompileShader(L"Resources/shaders/SkyBox/Skybox.PS.hlsl", L"ps_6_0");
 	assert(pixelShaderBlob != nullptr);
 
 	// DepthStencilStateの設定
@@ -279,17 +283,17 @@ void SkyBox::CreateGraphicsPipeLineState() {
 	graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc;
 	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	// 実際に生成
-	HRESULT hr = DirectXBase::GetInstance()->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPilelineState));
+	HRESULT hr = m_pDirectXBase->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPilelineState));
 	assert(SUCCEEDED(hr));
 }
 
-void SkyBox::Update() {
+void SkyBox::Update(Light& light) {
 
 	Transform transform;
 	if (camera_)
 	{
 		transform = camera_->GetTransform();
-		transform.translate = camera_->GetWorldPosition();
+		transform.position = camera_->GetWorldPosition();
 	}
 	else
 	{
@@ -298,7 +302,7 @@ void SkyBox::Update() {
 	}
 	// 3DのTransform処理
 	//rotatez += SwapRadian(1.0f);
-	Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, Vector3{ 0.0f, 0.0f, 0.0f /*rotatez*/ }, transform.translate);
+	Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, Vector3{ 0.0f, 0.0f, 0.0f /*rotatez*/ }, transform.position);
 
 	Matrix4x4 worldViewProjectionMatrix;
 	if (camera_) {
@@ -309,8 +313,10 @@ void SkyBox::Update() {
 		worldViewProjectionMatrix = worldMatrix;
 	}
 
-	Vector3 sunDirection = Light::GetInstance()->GetDirectionDirectionalLight();
+	Vector3 sunDirection = light.GetDirectionDirectionalLight();
 	sunData->sunDirection = { sunDirection.x, -sunDirection.y, sunDirection.z };
+	sunData->power = light.GetIntensityDirectionalLight();
+
 
 	transformationMatrix->WVP = worldViewProjectionMatrix;
 	transformationMatrix->World = worldMatrix;
@@ -344,26 +350,26 @@ void SkyBox::Update() {
 
 void SkyBox::Draw() {
 	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
-	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
+	m_pDirectXBase->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
 	// PSOを設定
-	DirectXBase::GetInstance()->GetCommandList()->SetPipelineState(graphicsPilelineState.Get());
+	m_pDirectXBase->GetCommandList()->SetPipelineState(graphicsPilelineState.Get());
 	// 形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけば良い
-	DirectXBase::GetInstance()->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	m_pDirectXBase->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// wvp用のCBufferの場所を設定
-	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
+	m_pDirectXBase->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
 
 	// wvp用のCBufferの場所を設定
-	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
+	m_pDirectXBase->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress());
 
-	DirectXBase::GetInstance()->GetCommandList()->SetGraphicsRootConstantBufferView(3, sunResource->GetGPUVirtualAddress());
+	m_pDirectXBase->GetCommandList()->SetGraphicsRootConstantBufferView(3, sunResource->GetGPUVirtualAddress());
 
-	DirectXBase::GetInstance()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView); // VBVを設定
+	m_pDirectXBase->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView); // VBVを設定
 
-	DirectXBase::GetInstance()->GetCommandList()->IASetIndexBuffer(&indexBufferView); // VBVを設定
+	m_pDirectXBase->GetCommandList()->IASetIndexBuffer(&indexBufferView); // VBVを設定
 
-	SrvManager::GetInstance()->SetGraphicsRootDescriptorTable(2, srvIndex);
+	m_pSrvManager->SetGraphicsRootDescriptorTable(2, srvIndex);
 
-	DirectXBase::GetInstance()->GetCommandList()->DrawIndexedInstanced(36, 1, 0, 0, 0);
+	m_pDirectXBase->GetCommandList()->DrawIndexedInstanced(36, 1, 0, 0, 0);
 
 }

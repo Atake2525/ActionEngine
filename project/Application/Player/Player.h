@@ -6,6 +6,7 @@
 
 class Camera;
 class Input;
+struct AppContext;
 
 struct PlayerCommand {
     Vector2 move = Vector2::Zero;
@@ -45,6 +46,8 @@ private:
 public:
 
     ~Player();
+
+    void SetContext(AppContext& context) { m_pContext = &context; }
 
     const Capsule GetCapsule() { return m_pModel->GetCapsule(); }
     const AABB& GetAABB() const { return m_playerAABB; }
@@ -195,6 +198,8 @@ private: // プレイヤーステート管理
 
 
 private:
+    AppContext* m_pContext = nullptr;
+
     bool m_IsDead = false;
     bool m_IsFreeze = false;
 
@@ -245,9 +250,6 @@ private:
     friend class ClimbingState;
     friend class WallJumpState;
 
-    /*PlayerWalkState m_walkState = PlayerWalkState::Walk;
-    PlayerWalkState m_walkStatePre = PlayerWalkState::Walk;*/
-
     //==================================================
     // プレイヤー状態管理(パルクール)
     //==================================================
@@ -269,7 +271,6 @@ private:
     float m_fallVelocityMax = -1.6f;                // 落下速度上限
     float m_decelTime = 0.2f;                       // 減速時間
     float m_turnControlFactor = 1.8f;               // 地上での移動制御係数
-    //float m_airControlFactor = 5.0f;                // 空中での移動制御係数
     float m_airControlFactor = 1.8f;                // 空中での移動制御係数
 
     bool m_isMoveInput = false;
@@ -277,18 +278,24 @@ private:
     //================
     // ウォールラン関連
     //================
-    AABB m_wallRunningObjectAABB = AABB::Zero;
     bool m_wallRunning = false;
     float m_wallRunGravity = -0.3f;
     Vector3 m_wallRunDirection = Vector3::Zero;
     Vector3 m_wallPenetration = Vector3::Zero;
-    bool m_isStartWallRun = false;
     bool m_completeRotate = false;
     bool m_completeGetRotateInfo = false;
     float m_wallRunRotateAfter = 0.0f;
     float m_wallRunRotateAngle = SwapRadian(15.0f);
     float m_wallRunTimer = 0.0f;
     float m_wallRunTime = 0.14f;
+
+    bool m_isDecelVelY = false;
+    float m_wallRunFallThreshold = -0.2f; // 落下速度を減衰し始める閾値
+    float m_velYBefore = 0.0f;
+    float m_wallRunFallTimer = 0.0f;
+    float m_wallRunFallTime = 0.0f;
+    const float m_maxwallRunFallTime = 1.0f;
+
 
     //================
     // しゃがみ関連
@@ -313,9 +320,9 @@ private:
     float m_climbingHeight = -4.0f; // よじ登りができるまでの高さ
     bool m_isClimbingMotion = false; 
     int m_climbingStep = 0; // よじ登りのステップ
-    Vector3 m_climbingStartTranslate = Vector3::Zero;
-    Vector3 m_climbingTopTranslate = Vector3::Zero;
-    Vector3 m_climbingEndTranslate = Vector3::Zero;
+    Vector3 m_climbingStartPosition = Vector3::Zero;
+    Vector3 m_climbingTopPosition = Vector3::Zero;
+    Vector3 m_climbingEndPosition = Vector3::Zero;
     float m_climbingTimer = 0.0f;
     float m_climbingTime = 0.25f;
 

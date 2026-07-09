@@ -7,12 +7,14 @@ struct CameraForGPU {
 	Vector3 worldPosition;
 };
 
+class WinApp;
+
 #pragma once
 // カメラ
 class Camera {
 public:
 	// コンストラクタ
-	Camera();
+	Camera(WinApp& winApp);
 
 	/// <summary>
 	/// 更新
@@ -33,8 +35,8 @@ public:
 	const Matrix4x4& GetViewProjectionMatrix() const { return viewProjectionMatrix; }
 	// Getter(Rotate)
 	const Vector3& GetRotate() const { return transform.rotate; }
-	// Getter(Translate)
-	const Vector3& GetTranslate() const { return transform.translate; }
+	// Getter(Position)
+	const Vector3& GetPosition() const { return transform.position; }
 	// Getter(Direction)
 	const Vector3& GetDirection() const { return direction; }
     // Getter(nearClipDistance)
@@ -47,11 +49,13 @@ public:
 	const float& GetfovY() const { return fovY; }
 	// Getter(Transform)
 	const Transform& GetTransform() const { return transform; }
+	// カメラの水平回転方向
+	const Vector3 GetHolizontalDirection() const;
 
 	// Setter(Rotate)
 	void SetRotate(const Vector3& rotate) { transform.rotate = rotate; }
-	// Setter(Translate)
-	void SetTranslate(const Vector3& translate) { transform.translate = translate; }
+	// Setter(Position)
+	void SetPosition(const Vector3& position) { transform.position = position; }
 	// Setter(farClipDistance)
 	void SetFarClipDistance(const float& farClip) { farClipDistance = farClip; }
 	// Setter(fovY)
@@ -95,6 +99,8 @@ public:
 	int number = 0;
 
 private:
+	WinApp* m_pWinApp;
+
 	Transform transform;
 	Matrix4x4 worldMatrix;
 	Matrix4x4 viewMatrix;

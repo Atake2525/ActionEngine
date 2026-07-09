@@ -45,31 +45,14 @@ struct ScanParam
 	float pad[3];
 };
 
+class DirectXBase;
 
 class Light {
-	// シングルトンパターンを適用
-	static Light* instance;
-
-	// コンストラクタ、デストラクタの隠蔽
-	Light() = default;
-	~Light() = default;
-	// コピーコンストラクタ、コピー代入演算子の封印
-	Light(Light&) = delete;
-	Light& operator=(Light&) = delete;
 public:
+	Light();
+	~Light();
 
-	/// <summary>
-	/// シングルトンインスタンスの取得
-	/// </summary>
-	/// <returns>Light* instance</returns>
-	static Light* GetInstance();
-
-	/// <summary>
-	/// 終了
-	/// </summary>
-	void Finalize();
-
-	void Initialize();
+	void Initialize(DirectXBase& dxBase);
 
 	void Update();
 
@@ -82,6 +65,8 @@ public:
 	const Microsoft::WRL::ComPtr<ID3D12Resource>& GetScanResource() const { return scanResource; }
 
 private:
+    DirectXBase* m_pDirectXBase = nullptr;
+
 	// ライトリソース宣言
 	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightResource;
 

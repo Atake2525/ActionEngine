@@ -10,31 +10,26 @@
 
 #pragma once
 
+class DirectXBase;
+class SrvManager;
+class WinApp;
+
 // ImGui初期化
 class ImGuiManager
 {
-private:
-    // シングルトンパターンを適用
-    static ImGuiManager* instance;
-
-    // コンストラクタ、デストラクタの隠蔽
-    ImGuiManager() = default;
-    ~ImGuiManager() = default;
-
-    // コピーコンストラクタ、コピー代入演算子の封印
-    ImGuiManager(ImGuiManager&) = delete;
-    ImGuiManager& operator=(ImGuiManager&) = delete;
 public:
-    // インスタンスの取得
-    static ImGuiManager* GetInstance();
-
-    // 終了処理
-    void Finalize();
-
+    ImGuiManager();
+    ~ImGuiManager();
     // 初期化
-    void Initialize();
+    void Initialize(DirectXBase& directXBase, SrvManager& srvManager, WinApp& winApp);
+
+    void Update();
 
     void BeginDockSpace();
 
+private:
+    DirectXBase* m_pDirectXBase;
+    SrvManager* m_pSrvManager;
+    WinApp* m_pWinApp;
 };
 

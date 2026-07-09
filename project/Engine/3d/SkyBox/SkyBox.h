@@ -6,6 +6,10 @@
 #include "Model.h"
 
 class Camera;
+class DirectXBase;
+class SrvManager;
+class TextureManager;
+class Light;
 
 // SkyBoxのhlslに送るデータ用の構造体
 struct SkyBoXData
@@ -14,9 +18,11 @@ struct SkyBoXData
 	std::vector<Vector4> positions;
 };
 
+class Light;
+
 // SkyBox Class
 class SkyBox {
-private:
+public:
 	// シングルトンパターンを適用
 	static SkyBox* instance;
 
@@ -27,7 +33,6 @@ private:
 	SkyBox(SkyBox&) = delete;
 	SkyBox& operator=(SkyBox&) = delete;
 
-public:
 	/// <summary>
 	/// インスタンスの取得
 	/// </summary>
@@ -42,7 +47,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize();
+	void Initialize(DirectXBase& directXBase, SrvManager& srvManager, TextureManager& textureManager);
 
 	void SetTexture(const std::string& filePath);
 
@@ -50,14 +55,12 @@ public:
 
 	void SetColor(const Vector4& color) { materialData->color = color; }
 
-	void SetSunPoewr(const float& power) { sunData->power = power; }
-
 	const uint32_t& GetSrvIndex() const { return srvIndex; }
 
 	/// <summary>
 	/// 更新
 	/// </summary>
-	void Update();
+	void Update(Light& light);
 
 	/// <summary>
 	/// 描画
@@ -109,6 +112,10 @@ private:
 	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
 
 private:
+    DirectXBase* m_pDirectXBase = nullptr;
+    SrvManager* m_pSrvManager = nullptr;
+    TextureManager* m_pTextureManager = nullptr;
+
 	SkyBoXData modelData;
 	VertexData* vertexData = nullptr;
 	uint32_t* mappedIndex = nullptr;

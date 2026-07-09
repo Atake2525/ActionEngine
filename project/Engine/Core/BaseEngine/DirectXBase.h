@@ -16,35 +16,14 @@
 #include <memory>
 
 class DirectXBase {
-private:
-	// シングルトンパターンを適用
-	static DirectXBase* instance;
-
-	// コンストラクタ、デストラクタの隠蔽
-	DirectXBase() = default;
-	~DirectXBase() = default;
-	// コピーコンストラクタ、コピー代入演算子の封印
-	DirectXBase(DirectXBase&) = delete;
-	DirectXBase& operator=(DirectXBase&) = delete;
-
 public:
+	DirectXBase();
+	~DirectXBase();
 
-	/// <summary>
-	/// シングルトンインスタンスの取得
-	/// </summary>
-	/// <returns>Input* instance</returns>
-	static DirectXBase* GetInstance();
-
-	/// <summary>
-	/// 終了
-	/// </summary>
-	void Finalize();
-
-	void Update();
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize();
+	void Initialize(WinApp& winApp);
 
 	void InitializePosteffect();
 
@@ -58,10 +37,12 @@ public:
 	void PostDraw();
 
 	// 描画前処理
-	void PreDrawRenderTexture();
+	void BeginOffScreenRendering(Microsoft::WRL::ComPtr<ID3D12Resource>resource, D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle);
 
 	// 描画後処理
-	void PostDrawRenderTexture();
+	void EndOffScreenRendering(Microsoft::WRL::ComPtr<ID3D12Resource> resource);
+
+	D3D12_CPU_DESCRIPTOR_HANDLE CreateOffScreenRenderTargetView(Microsoft::WRL::ComPtr<ID3D12Resource> resource);
 
 	void ApplyFullViewport();
 
@@ -96,7 +77,7 @@ public:
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateTextureResource(const DirectX::TexMetadata& metadata);
 
 	// RenderTextureの生成
-	Microsoft::WRL::ComPtr<ID3D12Resource> CreateRenderTextureResource(Microsoft::WRL::ComPtr<ID3D12Device> device, int32_t width, int32_t height, DXGI_FORMAT format, const Vector4& clearColor);
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateRenderTextureResource(int32_t width, int32_t height, DXGI_FORMAT format, const Vector4& clearColor);
 
 	[[nodiscard]]
 	Microsoft::WRL::ComPtr<ID3D12Resource> UploadTextureData(Microsoft::WRL::ComPtr<ID3D12Resource> texture, const DirectX::ScratchImage& mipImages);
@@ -105,11 +86,10 @@ public:
 
 private:
 
-
 	// DirectX12デバイス
 	Microsoft::WRL::ComPtr<ID3D12Device> device;
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> CreateDepthStencilTextureResource(Microsoft::WRL::ComPtr<ID3D12Device> device, int32_t width, int32_t height);
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateDepthStencilTextureResource(int32_t width, int32_t height);
 
 	// FPS固定初期化
 	void InitializeFixFPS();
@@ -174,7 +154,7 @@ private:
 	static D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(const Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& descriptorHeap, uint32_t descriptorSize, uint32_t index);
 
 	// ポインタ
-	//WinApp* winApp_ = nullptr;
+	WinApp* m_pWinApp = nullptr;
 
 	HRESULT hr;
 	// DXGIファクトリー
@@ -194,7 +174,6 @@ private:
 	// スワップチェイン
 	// SwapChainからResourceを引っ張ってくる
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles[2];
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvTextureHandle;
 
 	//// フェンス
 	Microsoft::WRL::ComPtr<ID3D12Fence> fence = nullptr;
