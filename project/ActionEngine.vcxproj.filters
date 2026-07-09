@@ -306,7 +306,7 @@
     <ClCompile Include="Application\Goal.cpp">
       <Filter>Application</Filter>
     </ClCompile>
-    <ClCompile Include="Application\Trap.cpp">
+    <ClCompile Include="Application\MoveObject.cpp">
       <Filter>Application</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Core\Timer\GameTime.cpp">
@@ -590,7 +590,7 @@
     <ClInclude Include="Application\Goal.h">
       <Filter>Application</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Trap.h">
+    <ClInclude Include="Application\MoveObject.h">
       <Filter>Application</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Core\Timer\GameTime.h">

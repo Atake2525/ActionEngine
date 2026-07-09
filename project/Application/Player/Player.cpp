@@ -278,27 +278,33 @@ void Player::UpdateParkourState()
 
     if (!m_onGround)
     {
+        // 衝突をしている必要があるので、貫通状態修正前の状態で衝突しているかを確認する
         AABB pAABB = m_playerAABB;
         pAABB += Vector3{ m_velocity.position.x, 0.0f, m_velocity.position.z };
-        // 落下中かつ壁走り用のオブジェクトに衝突している時に壁走り
-        if (!m_wallRunning && m_pContext->world.collision.IsCollisionObjectForAABB(pAABB, false) && m_velocity.position.y < 0.0f && !m_isClimbing)
+        // 落下中かつオブジェクトに衝突している、移動方向が前に向いている時に壁走り
+        if (!m_wallRunning && m_pContext->world.collision.IsCollisionObjectForAABB(pAABB) && m_moveAmount.y > 0.0f && m_velocity.position.y < 0.0f && !m_isClimbing)
         {
             m_wallRunning = true;
             ChangeState(std::make_unique<WallRunState>());
+
+            
         }
         // ウォールランの終了を確認する
         pAABB += m_wallPenetration;
         // 現在の位置(AABB)からウォールラン中の壁の方向に移動させ衝突しているかを判定する
         // 判定していなければウォールランを終了する
-        if (m_wallRunning && !m_pContext->world.collision.IsCollisionObjectForAABB(pAABB, false))
+        if (m_wallRunning && !m_pContext->world.collision.IsCollisionObjectForAABB(pAABB))
         {
             m_wallRunning = false;
             m_wallPenetration = Vector3::Zero;
+            ChangeState(std::make_unique<RunState>());
+
         }
+
     }
 
     // よじ登りの開始を確認する
-    if (m_command.jump && m_canClimbing && !m_isClimbingMotion)
+    if (m_command.jump && m_canClimbing && !m_isClimbingMotion && !m_isClimbing)
     {
         m_isClimbing = true;
     }
@@ -571,25 +577,25 @@ void Player::GroundMove(const float speed)
     }
 
     // MoveDirectionをm_cameraTransform.rotateの向きに等速で合わせる
-    if (m_moveDirection.y != m_cameraTransform.rotate.y) {
-        // Y軸回転の差分を計算
-        float diff = m_cameraTransform.rotate.y - m_moveDirection.y;
-        // 地上と空中で回転速度を変える
-        float turnFactor = m_turnControlFactor;
-        if (!m_onGround)
-        {
-            turnFactor = m_airControlFactor;
-        }
-        // 角度の差分を-180度から180度の範囲に収める
-        float adjust = Sign(diff) * m_moveSpeed * (m_delta / turnFactor);
-        // 差分が調整量より小さい場合は直接合わせる
-        if (abs(diff) < abs(adjust)) { // 調整量より差分が小さい場合
-            m_moveDirection.y = m_cameraTransform.rotate.y;
-        }
-        else { // 調整量分だけ移動方向を回転させる
-            m_moveDirection.y += adjust;
-        }
-    }
+    //if (m_moveDirection.y != m_cameraTransform.rotate.y) {
+    //    // Y軸回転の差分を計算
+    //    float diff = m_cameraTransform.rotate.y - m_moveDirection.y;
+    //    // 地上と空中で回転速度を変える
+    //    float turnFactor = m_turnControlFactor;
+    //    if (!m_onGround)
+    //    {
+    //        turnFactor = m_airControlFactor;
+    //    }
+    //    // 角度の差分を-180度から180度の範囲に収める
+    //    float adjust = Sign(diff) * m_moveSpeed * (m_delta / turnFactor);
+    //    // 差分が調整量より小さい場合は直接合わせる
+    //    if (abs(diff) < abs(adjust)) { // 調整量より差分が小さい場合
+    //        m_moveDirection.y = m_cameraTransform.rotate.y;
+    //    }
+    //    else { // 調整量分だけ移動方向を回転させる
+    //        m_moveDirection.y += adjust;
+    //    }
+    //}
     m_moveDirection.y = m_cameraTransform.rotate.y;
 
 
@@ -602,7 +608,7 @@ void Player::WallRunStart() {
     // ウォールラン用のオブジェクトとの貫通量を取得
     AABB pAABB = m_playerAABB;
     pAABB += Vector3{ m_velocity.position.x, 0.0f, m_velocity.position.z };
-    m_wallPenetration = m_pContext->world.collision.GetPenetrationForAABB(pAABB, false);
+    m_wallPenetration = m_pContext->world.collision.GetPenetrationForAABB(pAABB);
 
     // 現状ウォールランは単一ベクトルなので貫通量と視点方向とある程度の移動量から移動方向を算出
     Transform affine = Transform::Default;
@@ -825,8 +831,8 @@ void Player::StartClimbing()
     m_climbingTimer = 0.0f;
     m_climbingStep = 0;
     m_isClimbingMotion = true;
-    m_isClimbing = true;
-    m_onGround = true;
+    //m_isClimbing = true;
+    //m_onGround = true;
     m_state = WalkState::Idle;
     m_wallRunning = false;
     m_wallPenetration = Vector3::Zero;
@@ -1115,7 +1121,7 @@ void Player::UpdateDebugUI() {
             penetration.x, penetration.y, penetration.z);
 
         AABB aabb = m_playerAABB + Vector3{ m_velocity.position.x, 0.0f, m_velocity.position.z };
-        penetration = m_pContext->world.collision.GetPenetrationForAABB(aabb, false);
+        penetration = m_pContext->world.collision.GetPenetrationForAABB(aabb);
         ImGui::Text("WallRun Penetration: (%.2f, %.2f, %.2f)", penetration.x, penetration.y, penetration.z);
 
         // Transform

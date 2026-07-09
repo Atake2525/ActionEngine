@@ -12,7 +12,6 @@ CollisionManager::CollisionManager() {}
 CollisionManager::~CollisionManager() {
 	collisionTarget.clear();
 	collisionObject.clear();
-	wallDashCollisionObject.clear();
 	m_collisionObjectAABB.clear();
 }
 
@@ -20,20 +19,15 @@ void CollisionManager::Initialize() {
 	m_penetration = { 0.0f, 0.0f, 0.0f };
 	collisionTarget.clear();
 	collisionObject.clear();
-	wallDashCollisionObject.clear();
 	m_collisionObjectAABB.clear();
 }
 
-void CollisionManager::Update(const std::string& targetName, bool wallDashCollision) {
+void CollisionManager::Update(const std::string& targetName) {
 
 	m_collisionObjectAABB.clear();
 	m_penetrationPre = m_penetration;
 	m_penetration = { 0.0f, 0.0f, 0.0f };
 	std::vector<Object3d*> colObj = collisionObject;
-	if (wallDashCollision)
-	{
-		colObj = wallDashCollisionObject;
-	}
 	for (const auto& object : colObj) {
 		// ターゲット(プレイヤーなど)とオブジェクトの距離を全体のAABBから求めて離れていればcontinue
 		Vector3 centerA = CenterAABB(collisionTarget[targetName]);
@@ -123,14 +117,10 @@ void CollisionManager::Update(const std::string& targetName, bool wallDashCollis
 	}
 }
 
-const Vector3 CollisionManager::GetPenetrationForAABB(const AABB& aabb, bool wallDashCollision)
+const Vector3 CollisionManager::GetPenetrationForAABB(const AABB& aabb)
 {
 	Vector3 result = Vector3::Zero;
 	std::vector<Object3d*> colObj = collisionObject;
-	if (wallDashCollision)
-	{
-		colObj = wallDashCollisionObject;
-	}
 	for (const auto& object : colObj) {
 		// ターゲット(プレイヤーなど)とオブジェクトの距離を全体のAABBから求めて離れていればcontinue
 		Vector3 centerA = CenterAABB(aabb);
@@ -211,14 +201,10 @@ const Vector3 CollisionManager::GetPenetrationForAABB(const AABB& aabb, bool wal
 	return result;
 }
 
-const Vector3 CollisionManager::GetAllPenetrationForAABB(const AABB& aabb, bool wallDashCollision)
+const Vector3 CollisionManager::GetAllPenetrationForAABB(const AABB& aabb)
 {
 	Vector3 result = Vector3::Zero;
 	std::vector<Object3d*> colObj = collisionObject;
-	if (wallDashCollision)
-	{
-		colObj = wallDashCollisionObject;
-	}
 	for (const auto& object : colObj) {
 		// ターゲット(プレイヤーなど)とオブジェクトの距離を全体のAABBから求めて離れていればcontinue
 		Vector3 centerA = CenterAABB(aabb);
@@ -285,7 +271,7 @@ const Vector3 CollisionManager::GetAllPenetrationForAABB(const AABB& aabb, bool 
 	return result;
 }
 
-const float CollisionManager::GetGroundDistance(const std::string& targetName, bool wallDashCollision) const {
+const float CollisionManager::GetGroundDistance(const std::string& targetName) const {
 	auto target = collisionTarget.find(targetName);
 
 	if (target != collisionTarget.end()) {
@@ -297,10 +283,6 @@ const float CollisionManager::GetGroundDistance(const std::string& targetName, b
 
 	float distance = 100.0f;
 	std::vector<Object3d*> colObj = collisionObject;
-	if (wallDashCollision)
-	{
-		colObj = wallDashCollisionObject;
-	}
 	for (const auto& object : colObj) {
 		// オブジェクトのメッシュごとのAABBを取得する
 		float serchDistance = Distance(object->GetAABB().max, target->second.min);
@@ -324,15 +306,11 @@ const float CollisionManager::GetGroundDistance(const std::string& targetName, b
 	return distance;
 }
 
-const float CollisionManager::GetGroundDistanceForAABB(const AABB& aabb, bool wallDashCollision) const
+const float CollisionManager::GetGroundDistanceForAABB(const AABB& aabb) const
 {
 
 	float distance = 100.0f;
 	std::vector<Object3d*> colObj = collisionObject;
-	if (wallDashCollision)
-	{
-		colObj = wallDashCollisionObject;
-	}
 	for (const auto& object : colObj) {
 		// オブジェクトのメッシュごとのAABBを取得する
 		float serchDistance = Distance(object->GetAABB().max, aabb.min);
@@ -355,14 +333,10 @@ const float CollisionManager::GetGroundDistanceForAABB(const AABB& aabb, bool wa
 	return distance;
 }
 
-const std::vector<AABB> CollisionManager::GetCollisionObjectAABBsForAABB(const AABB& aabb, bool wallRunCollision) const
+const std::vector<AABB> CollisionManager::GetCollisionObjectAABBsForAABB(const AABB& aabb) const
 {
 	std::vector<AABB> result;
 	std::vector<Object3d*> colObj = collisionObject;
-	if (wallRunCollision)
-	{
-		colObj = wallDashCollisionObject;
-	}
 	for (const auto& object : colObj) {
 		// ターゲット(プレイヤーなど)とオブジェクトの距離を全体のAABBから求めて離れていればcontinue
 		Vector3 centerA = CenterAABB(aabb);
@@ -399,7 +373,7 @@ const std::vector<AABB> CollisionManager::GetCollisionObjectAABBsForAABB(const A
 	return result;
 }
 
-const float CollisionManager::GetGroundMAXDistance(const std::string& targetName, bool wallDashCollision) const
+const float CollisionManager::GetGroundMAXDistance(const std::string& targetName) const
 {
 	auto target = collisionTarget.find(targetName);
 
@@ -413,10 +387,6 @@ const float CollisionManager::GetGroundMAXDistance(const std::string& targetName
 	float distance = 100.0f;
 	float maxDistance = -100.0f;
 	std::vector<Object3d*> colObj = collisionObject;
-	if (wallDashCollision)
-	{
-		colObj = wallDashCollisionObject;
-	}
 	for (const auto& object : colObj) {
 		// オブジェクトのメッシュごとのAABBを取得する
 		float serchDistance = Distance(object->GetAABB().max, target->second.min);
@@ -441,15 +411,11 @@ const float CollisionManager::GetGroundMAXDistance(const std::string& targetName
 	return maxDistance;
 }
 
-const float CollisionManager::GetMaxGroundDistanceForAABB(const AABB& aabb, bool wallDashCollision) const
+const float CollisionManager::GetMaxGroundDistanceForAABB(const AABB& aabb) const
 {
 	float distance = 100.0f;
 	float maxDistance = -100.0f;
 	std::vector<Object3d*> colObj = collisionObject;
-	if (wallDashCollision)
-	{
-		colObj = wallDashCollisionObject;
-	}
 	for (const auto& object : colObj) {
 		// オブジェクトのメッシュごとのAABBを取得する
 		float serchDistance = Distance(object->GetAABB().max, aabb.min);
@@ -479,13 +445,9 @@ const float CollisionManager::GetMaxGroundDistanceForAABB(const AABB& aabb, bool
 	return maxDistance;
 }
 
-const bool CollisionManager::IsCollisionObjectForAABB(const AABB& aabb, bool wallDashCollision, const AABB& noSearchAABB) const
+const bool CollisionManager::IsCollisionObjectForAABB(const AABB& aabb, const AABB& noSearchAABB) const
 {
 	std::vector<Object3d*> colObj = collisionObject;
-	if (wallDashCollision)
-	{
-		colObj = wallDashCollisionObject;
-	}
 	for (const auto& object : colObj) {
 		// ターゲット(プレイヤーなど)とオブジェクトの距離を全体のAABBから求めて離れていればcontinue
 		Vector3 centerA = CenterAABB(aabb);
@@ -516,14 +478,10 @@ const bool CollisionManager::IsCollisionObjectForAABB(const AABB& aabb, bool wal
 	return false;
 }
 
-const float CollisionManager::GetHeightToTopForAABB(const AABB& aabb, bool wallDashCollision)
+const float CollisionManager::GetHeightToTopForAABB(const AABB& aabb)
 {
 	float maxHeight = 0.0f;
 	std::vector<Object3d*> colObj = collisionObject;
-	if (wallDashCollision)
-	{
-		colObj = wallDashCollisionObject;
-	}
 	for (const auto& object : colObj) {
 		// オブジェクトのメッシュごとのAABBを取得する
 		float serchDistance = Distance(object->GetAABB().max, aabb.min);
@@ -549,14 +507,10 @@ const float CollisionManager::GetHeightToTopForAABB(const AABB& aabb, bool wallD
 	return maxHeight;
 }
 
-const Vector3 CollisionManager::GetCollisionObjectDirectionForAABB(const AABB& aabb, bool wallDashCollision)
+const Vector3 CollisionManager::GetCollisionObjectDirectionForAABB(const AABB& aabb)
 {
 	Vector3 direction = Vector3::Zero;
 	std::vector<Object3d*> colObj = collisionObject;
-	if (wallDashCollision)
-	{
-		colObj = wallDashCollisionObject;
-	}
 	for (const auto& object : colObj) {
 		// オブジェクトのメッシュごとのAABBを取得する
 		float serchDistance = Distance(object->GetAABB().max, aabb.min);
@@ -610,14 +564,10 @@ const Vector3 CollisionManager::GetCollisionObjectDirectionForAABB(const AABB& a
 	return { Sign(direction) };
 }
 
-const AABB CollisionManager::GetObjectForCollisionDirection(const AABB& aabb, const Vector3& direction, bool wallDashCollision)
+const AABB CollisionManager::GetObjectForCollisionDirection(const AABB& aabb, const Vector3& direction)
 {
 	Vector3 dir = Vector3::Zero;
 	std::vector<Object3d*> colObj = collisionObject;
-	if (wallDashCollision)
-	{
-		colObj = wallDashCollisionObject;
-	}
 	for (const auto& object : colObj) {
 		// オブジェクトのメッシュごとのAABBを取得する
 		float serchDistance = Distance(object->GetAABB().max, aabb.min);
@@ -737,18 +687,6 @@ void CollisionManager::AddCollision(Object3d* object3d) {
 	}
 }
 
-void CollisionManager::AddWallDashColliison(Object3d* object3d)
-{
-	if (std::find(wallDashCollisionObject.begin(), wallDashCollisionObject.end(), object3d) == wallDashCollisionObject.end())
-	{
-		wallDashCollisionObject.push_back(object3d);
-	}
-	else
-	{
-		Log("既に登録されているキーが指定されています\n実行 : AddCollision\n CollisionManager.cpp\n");
-	}
-}
-
 // 衝突対象の追加
 void CollisionManager::AddCollisionTarget(AABB aabb, const std::string key)
 {
@@ -781,15 +719,6 @@ void CollisionManager::DeleteCollision(Object3d* object3d)
 		Log("指定されたキーは現在登録されていません\n実行 : DeleteCollision コード : CollisionManager.cpp\n");
 	}
 	collisionObject.erase(std::remove(collisionObject.begin(), collisionObject.end(), object3d), collisionObject.end());
-}
-
-void CollisionManager::DeleteWallDashCollision(Object3d* object3d)
-{
-	if (std::find(wallDashCollisionObject.begin(), wallDashCollisionObject.end(), object3d) == wallDashCollisionObject.end())
-	{
-		Log("指定されたキーは現在登録されていません\n実行 : DeleteCollision コード : CollisionManager.cpp\n");
-	}
-	wallDashCollisionObject.erase(std::remove(wallDashCollisionObject.begin(), wallDashCollisionObject.end(), object3d), wallDashCollisionObject.end());
 }
 
 void CollisionManager::DeleteCollisionTarget(const std::string key)

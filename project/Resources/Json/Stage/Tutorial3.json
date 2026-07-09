@@ -22,7 +22,7 @@
                 ]
             },
             "file_name": "startpoint",
-            "trap": {
+            "moveObject": {
                 "move": "false"
             }
         },
@@ -31,9 +31,9 @@
             "name": "円柱",
             "transform": {
                 "translation": [
-                    -49.0,
-                    74.0,
-                    0.0
+                    -110.0,
+                    73.5,
+                    5.086469650268555
                 ],
                 "rotation": [
                     0.0,
@@ -47,8 +47,52 @@
                 ]
             },
             "file_name": "goal",
-            "trap": {
+            "moveObject": {
                 "move": "false"
+            }
+        },
+        {
+            "type": "MESH",
+            "name": "立方体.004",
+            "transform": {
+                "translation": [
+                    -102.0,
+                    83.0,
+                    9.086469650268555
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    6.0,
+                    1.0,
+                    4.0
+                ]
+            },
+            "file_name": "trap",
+            "moveObject": {
+                "move": "true",
+                "velocity_translation": [
+                    0.0,
+                    0.0,
+                    -21.0
+                ],
+                "velocity_rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "velocity_scale": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "loop": "true",
+                "reverse": "true",
+                "runtime": 3.0,
+                "enable_spawner": "false"
             }
         }
     ]

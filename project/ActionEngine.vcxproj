@@ -155,7 +155,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\JsonLoader\JsonLoader.cpp" />
     <ClCompile Include="Engine\Presentation\Cinematic\FadeManager.cpp" />
     <ClCompile Include="Application\Goal.cpp" />
-    <ClCompile Include="Application\Trap.cpp" />
+    <ClCompile Include="Application\MoveObject.cpp" />
     <ClCompile Include="Engine\Core\Timer\GameTime.cpp" />
     <ClCompile Include="Application\StageManager\StageCount.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp" />
@@ -255,7 +255,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\3d\SkyBox\SkyBox.h" />
     <ClInclude Include="Engine\Presentation\Cinematic\FadeManager.h" />
     <ClInclude Include="Application\Goal.h" />
-    <ClInclude Include="Application\Trap.h" />
+    <ClInclude Include="Application\MoveObject.h" />
     <ClInclude Include="Engine\Core\Timer\GameTime.h" />
     <ClInclude Include="Application\StageManager\StageCount.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />
