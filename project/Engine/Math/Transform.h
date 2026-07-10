@@ -46,6 +46,14 @@ inline Transform operator+=(Transform& t1, const Transform& t2) {
 	return t1;
 }
 
+inline Transform operator+(Transform& t1, const Transform& t2) {
+	
+    return Transform{
+        t1.scale + t2.scale,
+        t1.rotate + t2.rotate,
+        t1.position + t2.position
+    };
+}
 
 inline Transform operator*=(Transform& t, const float& n) {
 	t.scale *= n;

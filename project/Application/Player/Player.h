@@ -26,6 +26,7 @@ private:
         Falling = 2
     };
 
+    
     // コントロールモード
     enum class ControlMode {
         KeyboardMouse,
@@ -336,7 +337,8 @@ private:
     //==================================================
     // カメラ関連
     //==================================================
-    Transform m_cameraTransform = Transform::Default;
+    Transform m_cameraBaseTransform = Transform::Default;
+    Transform m_cameraEffectTransform = Transform::Default;
     Transform m_cameraVelocity = Transform::Default;
 
     // モデルの身長から目の位置までの割合

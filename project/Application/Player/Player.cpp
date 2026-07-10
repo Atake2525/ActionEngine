@@ -70,14 +70,14 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
     m_pDrawModel = ctx.game.object3dFactory.Create();
     m_pDrawModel->SetModel(model);
     // 初期モデル以外の移動アニメーションも起動時にまとめて読み込んでおく。
-    m_pDrawModel->AddAnimationsThreaded("Resources/Model/gltf/char", {
+   /* m_pDrawModel->AddAnimationsThreaded("Resources/Model/gltf/char", {
         "sneak.gltf",
         "walk.gltf",
         "walk_back.gltf",
         "crouch.gltf",
         "dash.gltf",
         "fall.gltf",
-        });
+        });*/
     m_pDrawModel->ToggleStartAnimation();
 
     m_playerAABB = m_pModel->GetAABB();
@@ -86,8 +86,8 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
     ctx.world.collision.AddCollisionTarget(m_playerAABB, "Player");
 
     // カメラの高さをモデルの高さに合わせて調整 (ちょっとだけ低くする)
-    m_cameraTransform.position.y = m_playerAABB.max.y - m_transform.position.y - AABB::GetSize(m_playerAABB).y * m_eyeHeight;
-    //m_cameraHeight = m_cameraTransform.position.y;
+    m_cameraBaseTransform.position.y = m_playerAABB.max.y - m_transform.position.y - AABB::GetSize(m_playerAABB).y * m_eyeHeight;
+    //m_cameraHeight = m_cameraBaseTransform.position.y;
 
     // コントロールモードの初期設定
     if (ctx.engine.platform.input.IsConnectedController())
@@ -185,12 +185,12 @@ void Player::Update()
     }
 
     m_pDrawModel->SetTransform(m_transform);
-    Vector3 modelRotate = m_cameraTransform.rotate;
+    Vector3 modelRotate = m_cameraBaseTransform.rotate;
     modelRotate.x = 0.0f;
     m_pDrawModel->SetRotate(modelRotate);
     ApplyCameraEffect();
     m_pModel->Update();
-    m_pCamera->SetTransform(m_cameraTransform);
+    m_pCamera->SetTransform(m_cameraBaseTransform + m_cameraEffectTransform);
     UpdateCameraParent();
 }
 
@@ -429,12 +429,11 @@ void Player::HandleInput()
 }
 
 void Player::Rotate() {
-    m_cameraTransform.rotate = m_pCamera->GetTransform().rotate;
     // 視点の回転
-    m_cameraTransform.rotate.x += m_command.eye.y;
-    m_cameraTransform.rotate.y += m_command.eye.x;
+    m_cameraBaseTransform.rotate.x += m_command.eye.y;
+    m_cameraBaseTransform.rotate.y += m_command.eye.x;
 
-    m_cameraTransform.rotate.x = std::clamp(m_cameraTransform.rotate.x, SwapRadian(-90.0f), SwapRadian(90.0f));
+    m_cameraBaseTransform.rotate.x = std::clamp(m_cameraBaseTransform.rotate.x, SwapRadian(-90.0f), SwapRadian(90.0f));
 
 }
 
@@ -533,8 +532,8 @@ void Player::GroundMove(const float speed)
     }
 
     // 移動量のクランプ
-    m_moveAmount.x = clamp(m_moveAmount.x, -m_moveSpeed * fabsMoveInput.x, m_moveSpeed * fabsMoveInput.x);
-    m_moveAmount.y = clamp(m_moveAmount.y, -m_moveSpeed * fabsMoveInput.y, m_moveSpeed * fabsMoveInput.y);
+    //m_moveAmount.x = clamp(m_moveAmount.x, -m_moveSpeed * fabsMoveInput.x, m_moveSpeed * fabsMoveInput.x);
+    //m_moveAmount.y = clamp(m_moveAmount.y, -m_moveSpeed * fabsMoveInput.y, m_moveSpeed * fabsMoveInput.y);
 
     m_decelMoveSpeed = m_runSpeed;
 
@@ -572,8 +571,8 @@ void Player::GroundMove(const float speed)
 
     // 斜め移動補正（正規化）
     float len = Length(m_moveAmount);
-    if (len > 1.0f) {
-        m_moveAmount /= len;
+    if (len > m_moveSpeed && len > 1.0f) {
+        m_moveAmount *= m_moveSpeed / len;
     }
 
     // MoveDirectionをm_cameraTransform.rotateの向きに等速で合わせる
@@ -596,11 +595,11 @@ void Player::GroundMove(const float speed)
     //        m_moveDirection.y += adjust;
     //    }
     //}
-    m_moveDirection.y = m_cameraTransform.rotate.y;
+    m_moveDirection.y = m_cameraBaseTransform.rotate.y;
 
 
     // 現在の速度を計算
-    m_playerSpeed = max(fabs(m_moveAmount.x), fabs(m_moveAmount.y));
+    m_playerSpeed = Length(m_moveAmount);
 }
 
 void Player::WallRunStart() {
@@ -612,9 +611,13 @@ void Player::WallRunStart() {
 
     // 現状ウォールランは単一ベクトルなので貫通量と視点方向とある程度の移動量から移動方向を算出
     Transform affine = Transform::Default;
-    affine.rotate.y = m_cameraTransform.rotate.y;
+    affine.rotate.y = m_cameraBaseTransform.rotate.y;
     Matrix4x4 cameraMatrix = MakeAffineMatrix(affine);
-    Vector3 cameraDirection = m_pCamera->GetDirection();
+    Vector3 cameraDirection = {
+        std::sin(m_cameraBaseTransform.rotate.y),
+        0.0f,
+        std::cos(m_cameraBaseTransform.rotate.y)
+    };
 
 
     // オブジェクトが視点の正面にある場合はウォールランはしないようにしたいのでその場合はRunStateに戻す
@@ -669,7 +672,7 @@ void Player::WallRun() {
     }
 
     // 現在の速度を計算
-    m_playerSpeed = max(fabs(m_moveAmount.x), fabs(m_moveAmount.y));
+    m_playerSpeed = Length(m_moveAmount);
 }
 
 void Player::Sliding()
@@ -743,10 +746,10 @@ void Player::Sliding()
         m_moveAmount /= len;
     }
 
-    // MoveDirectionをm_cameraTransform.rotateの向きに等速で合わせる
-    if (m_moveDirection.y != m_cameraTransform.rotate.y) {
+    // MoveDirectionをm_cameraBaseTransform.rotateの向きに等速で合わせる
+    if (m_moveDirection.y != m_cameraBaseTransform.rotate.y) {
         // Y軸回転の差分を計算
-        float diff = m_cameraTransform.rotate.y - m_moveDirection.y;
+        float diff = m_cameraBaseTransform.rotate.y - m_moveDirection.y;
         // 地上と空中で回転速度を変える
         float turnFactor = m_turnControlFactor;
         if (!m_onGround)
@@ -757,7 +760,7 @@ void Player::Sliding()
         float adjust = Sign(diff) * m_moveSpeed * (m_delta / turnFactor);
         // 差分が調整量より小さい場合は直接合わせる
         if (abs(diff) < abs(adjust)) { // 調整量より差分が小さい場合
-            m_moveDirection.y = m_cameraTransform.rotate.y;
+            m_moveDirection.y = m_cameraBaseTransform.rotate.y;
         }
         else { // 調整量分だけ移動方向を回転させる
             m_moveDirection.y += adjust;
@@ -765,7 +768,7 @@ void Player::Sliding()
     }
 
     // 現在の速度を計算
-    m_playerSpeed = max(fabs(m_moveAmount.x), fabs(m_moveAmount.y));
+    m_playerSpeed = Length(m_moveAmount);
 }
 
 void Player::StartClimbing()
@@ -990,7 +993,7 @@ void Player::UpdateWallRunCameraTilt() {
         m_wallRunTimer -= m_delta / m_wallRunTime;
     }
     m_wallRunTimer = clamp(m_wallRunTimer, 0.0f, 1.0f);
-    m_cameraTransform.rotate.z = Lerp(0.0f, m_wallRunRotateAfter, m_wallRunTimer);
+    m_cameraEffectTransform.rotate.z = Lerp(0.0f, m_wallRunRotateAfter, m_wallRunTimer);
 }
 
 void Player::UpdateCameraFov() {
@@ -1022,30 +1025,57 @@ void Player::UpdateCameraFov() {
 void Player::UpdateCrouchCamera() {
     // Crouch時のカメラの高さ変更処理の実装
     m_crouchCameraOffsetY = m_crouchHeight + m_cameraHeight;
-    m_cameraTransform.position.y = m_crouchCameraOffsetY;
+    m_cameraBaseTransform.position.y = m_crouchCameraOffsetY;
 }
 
 void Player::UpdateHeadBob() {
     // HeadBob処理の実装
-    if (m_onGround && m_playerSpeed > 0.0f)
-    {
-        m_headBobTimer += m_pContext->engine.platform.time.GetDeltaTime() * m_headBobSpeed;
-        float bobOffset = sinf(m_headBobTimer) * 0.1f;
-        m_headBobOffset.rotate.z = SwapRadian(bobOffset * m_moveSpeed);
-        m_headBobOffset.rotate.y = SwapRadian(bobOffset * m_moveSpeed);
+    constexpr float moveThreshold = 0.05f;
 
-        if (m_headBobTimer >= 2 * M_PI)
-        {
-            m_headBobTimer = 0.0f;
-            m_headBobOffset.rotate = Vector3::Zero;
-        }
+    Vector3 targetRotation = Vector3::Zero;
+
+    float responseSpeed = 0.0f;
+    if (m_onGround && m_playerSpeed > moveThreshold)
+    {
+        // 移動速度に応じて揺れを強くする
+        const float speedRatio = std::clamp(m_playerSpeed / m_runSpeed, 0.0f, 1.0f);
+
+        // 歩行周期。走るほど少し速くする
+        const float frequency = Lerp(7.0f, 11.0f, speedRatio);
+        m_headBobTimer += m_delta * frequency;
+
+        // 上下方向の首振りは1歩につき2回
+        const float pitch = std::sin(m_headBobTimer * 2.0f) * 0.35f * speedRatio;
+
+        // 左右の向きはかなり弱め
+        const float yaw = std::sin(m_headBobTimer) * 0.10f * speedRatio;
+
+        // 左右への傾きを一番分かりやすくする
+        const float roll = std::sin(m_headBobTimer) * 1.2f * speedRatio;
+
+        targetRotation = SwapRadian({ pitch, yaw, roll });
+
+        responseSpeed = 14.0f;
     }
     else
     {
-        m_headBobTimer = 0.0f;
-        m_headBobOffset.rotate = Vector3::Zero;
+        responseSpeed = 8.0f;
     }
-    m_cameraTransform.rotate += m_headBobOffset.rotate;
+
+    // フレームレートに依存しにくい補間率
+    const float blend = 1.0f - std::exp(-responseSpeed * m_delta);
+
+    m_headBobOffset.rotate = Lerp(m_headBobOffset.rotate, targetRotation, blend);
+
+    // 十分ゼロに近づいたら完全に停止
+    if (!(m_onGround && m_playerSpeed > moveThreshold) && Length(m_headBobOffset.rotate) < 0.0001f)
+    {
+        m_headBobOffset.rotate = Vector3::Zero;
+        m_headBobTimer = 0.0f;
+    }
+
+    // 基準カメラではなく演出Transformへ加える
+    m_cameraEffectTransform.rotate += m_headBobOffset.rotate;
 }
 
 void Player::ApplyCameraEffect()
@@ -1085,7 +1115,7 @@ void Player::UpdateDebugUI() {
     // --- God Mode ---
     if (ImGui::Checkbox("God Mode", &m_godMode) && !m_godMode)
     {
-        m_cameraTransform.position = Vector3::Zero;
+        m_cameraBaseTransform.position = Vector3::Zero;
     }
 
     // --- Control Mode ---
@@ -1205,19 +1235,30 @@ void Player::UpdateDebugUI() {
 
         ImGui::DragFloat("Camera Height", &m_cameraHeight, 0.01f);
 
-        if (ImGui::TreeNode("Camera Transform")) {
+        if (ImGui::TreeNode("Base"))
+        {
+            ImGui::Text("Transform");
+            ImGui::Separator();
             ImGui::Text("Pos:  (%.2f, %.2f, %.2f)",
-                m_cameraTransform.position.x, m_cameraTransform.position.y, m_cameraTransform.position.z);
+                m_cameraBaseTransform.position.x, m_cameraBaseTransform.position.y, m_cameraBaseTransform.position.z);
             ImGui::Text("Rot:  (%.2f, %.2f, %.2f)",
-                m_cameraTransform.rotate.x, m_cameraTransform.rotate.y, m_cameraTransform.rotate.z);
-            ImGui::TreePop();
-        }
+                m_cameraBaseTransform.rotate.x, m_cameraBaseTransform.rotate.y, m_cameraBaseTransform.rotate.z);
 
-        if (ImGui::TreeNode("Camera Velocity")) {
+            ImGui::Text("Velocity");
             ImGui::Text("Vel Pos: (%.2f, %.2f, %.2f)",
                 m_cameraVelocity.position.x, m_cameraVelocity.position.y, m_cameraVelocity.position.z);
             ImGui::Text("Vel Rot: (%.2f, %.2f, %.2f)",
                 m_cameraVelocity.rotate.x, m_cameraVelocity.rotate.y, m_cameraVelocity.rotate.z);
+            ImGui::TreePop();
+        }
+        if (ImGui::TreeNode("Effect"))
+        {
+            ImGui::Text("Transform");
+            ImGui::Separator();
+            ImGui::Text("Pos:  (%.2f, %.2f, %.2f)",
+                m_cameraEffectTransform.position.x, m_cameraEffectTransform.position.y, m_cameraEffectTransform.position.z);
+            ImGui::Text("Rot:  (%.2f, %.2f, %.2f)",
+                m_cameraEffectTransform.rotate.x, m_cameraEffectTransform.rotate.y, m_cameraEffectTransform.rotate.z);
             ImGui::TreePop();
         }
 
@@ -1230,8 +1271,8 @@ void Player::UpdateDebugUI() {
 void Player::MovementGodMode()
 {
     // 視点移動
-    m_cameraTransform.rotate.x += m_pInput->GetMouseVel2().y * 0.001f;
-    m_cameraTransform.rotate.y += m_pInput->GetMouseVel2().x * 0.001f;
+    m_cameraBaseTransform.rotate.x += m_pInput->GetMouseVel2().y * 0.001f;
+    m_cameraBaseTransform.rotate.y += m_pInput->GetMouseVel2().x * 0.001f;
 
     // 移動処理
     float delta = m_pContext->engine.platform.time.GetDeltaTime();
@@ -1241,16 +1282,16 @@ void Player::MovementGodMode()
     moveDir.z += m_pInput->PushKeyInt(DIK_W);
     moveDir.x += -m_pInput->PushKeyInt(DIK_A);
     moveDir.x += m_pInput->PushKeyInt(DIK_D);
-    m_cameraTransform.position.y += m_pInput->PushKeyInt(DIK_SPACE);
-    m_cameraTransform.position.y += -m_pInput->PushKeyInt(DIK_LCONTROL);
+    m_cameraBaseTransform.position.y += m_pInput->PushKeyInt(DIK_SPACE);
+    m_cameraBaseTransform.position.y += -m_pInput->PushKeyInt(DIK_LCONTROL);
 
     // 視点方向に移動
     Transform dir = Transform::Default;
-    dir.rotate = m_cameraTransform.rotate;
+    dir.rotate = m_cameraBaseTransform.rotate;
     Vector3 moveVelocity = TransformNormal(moveDir, MakeAffineMatrix(dir));
     m_cameraVelocity.position = moveVelocity * delta * 20.0f;
 
-    m_cameraTransform.position += m_cameraVelocity.position;
+    m_cameraBaseTransform.position += m_cameraVelocity.position;
 }
 
 #endif // !NDEBUG
