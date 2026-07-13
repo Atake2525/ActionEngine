@@ -107,7 +107,8 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
 #else
     m_pInput->ShowMouseCursor(false);
 #endif // !NDEBUG
-    ChangeState(std::make_unique<RunState>());
+    m_pCurrentState = std::make_unique<RunState>();
+    m_pCurrentState->Enter(*this);
 
     Update();
 }
@@ -196,6 +197,11 @@ void Player::Update()
 
 void Player::ChangeState(std::unique_ptr<PlayerState> nextState)
 {
+    if (m_pCurrentState && nextState && nextState->GetStateId() == m_pCurrentState->GetStateId())
+    {
+        return;
+    }
+
     if (m_pCurrentState)
     {
         m_pCurrentState->Exit(*this);
@@ -285,9 +291,6 @@ void Player::UpdateParkourState()
         if (!m_wallRunning && m_pContext->world.collision.IsCollisionObjectForAABB(pAABB) && m_moveAmount.y > 0.0f && m_velocity.position.y < 0.0f && !m_isClimbing)
         {
             m_wallRunning = true;
-            ChangeState(std::make_unique<WallRunState>());
-
-
         }
         // ウォールランの終了を確認する
         pAABB += m_wallPenetration;
@@ -297,8 +300,16 @@ void Player::UpdateParkourState()
         {
             m_wallRunning = false;
             m_wallPenetration = Vector3::Zero;
-            ChangeState(std::make_unique<RunState>());
 
+        }
+
+        if (m_wallRunning)
+        {
+            ChangeState(std::make_unique<WallRunState>());
+        }
+        else
+        {
+            ChangeState(std::make_unique<RunState>());
         }
 
     }
@@ -308,6 +319,11 @@ void Player::UpdateParkourState()
     {
         m_isClimbing = true;
     }
+}
+
+void Player::CanWallRun()
+{
+
 }
 
 bool Player::CanUncrouch()
@@ -610,9 +626,6 @@ void Player::WallRunStart() {
     m_wallPenetration = m_pContext->world.collision.GetPenetrationForAABB(pAABB);
 
     // 現状ウォールランは単一ベクトルなので貫通量と視点方向とある程度の移動量から移動方向を算出
-    Transform affine = Transform::Default;
-    affine.rotate.y = m_cameraBaseTransform.rotate.y;
-    Matrix4x4 cameraMatrix = MakeAffineMatrix(affine);
     Vector3 cameraDirection = {
         std::sin(m_cameraBaseTransform.rotate.y),
         0.0f,

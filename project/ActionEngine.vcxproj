@@ -116,7 +116,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\StageManager\TutorialStage.cpp" />
     <ClCompile Include="Application\Setting\ControllerConfig.cpp" />
     <ClCompile Include="Application\Setting\AudioConfig.cpp" />
-    <ClCompile Include="Application\CrouchState.cpp" />
+    <ClCompile Include="Application\Player\CrouchState.cpp" />
     <ClCompile Include="Application\Player\ClimbingState.cpp" />
     <ClCompile Include="Engine\2d\UI\UIElement.cpp" />
     <ClCompile Include="Engine\3d\DebugLine\DebugLine.cpp" />
@@ -197,7 +197,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Setting\KeyConfig.h" />
     <ClInclude Include="Application\Setting\SettingUtility.h" />
     <ClInclude Include="Application\Setting\AudioConfig.h" />
-    <ClInclude Include="Application\CrouchState.h" />
+    <ClInclude Include="Application\Player\CrouchState.h" />
     <ClInclude Include="Application\Player\ClimbingState.h" />
     <ClInclude Include="Engine\Math\EngineContext.h" />
     <ClInclude Include="Engine\2d\UI\UIElement.h" />

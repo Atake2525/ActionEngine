@@ -85,6 +85,11 @@ private: // プレイヤーステート管理
     void UpdateParkourState();
 
     /// <summary>
+    /// ウォールランができるかを確認する
+    /// </summary>
+    void CanWallRun();
+
+    /// <summary>
     /// しゃがみ状態を解除できるかどうかを確認する(ステート)
     /// </summary>
     bool CanUncrouch();
