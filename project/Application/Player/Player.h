@@ -87,7 +87,7 @@ private: // プレイヤーステート管理
     /// <summary>
     /// ウォールランができるかを確認する
     /// </summary>
-    void CanWallRun();
+    const bool CanWallRun();
 
     /// <summary>
     /// しゃがみ状態を解除できるかどうかを確認する(ステート)

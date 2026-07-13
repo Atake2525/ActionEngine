@@ -288,7 +288,7 @@ void Player::UpdateParkourState()
         AABB pAABB = m_playerAABB;
         pAABB += Vector3{ m_velocity.position.x, 0.0f, m_velocity.position.z };
         // 落下中かつオブジェクトに衝突している、移動方向が前に向いている時に壁走り
-        if (!m_wallRunning && m_pContext->world.collision.IsCollisionObjectForAABB(pAABB) && m_moveAmount.y > 0.0f && m_velocity.position.y < 0.0f && !m_isClimbing)
+        if (CanWallRun())
         {
             m_wallRunning = true;
         }
@@ -321,9 +321,13 @@ void Player::UpdateParkourState()
     }
 }
 
-void Player::CanWallRun()
+const bool Player::CanWallRun()
 {
-
+    if (!m_wallRunning && m_pContext->world.collision.IsCollisionObjectForAABB(pAABB) && m_moveAmount.y > 0.0f && m_velocity.position.y < 0.0f && !m_isClimbing)
+    {
+        return true;
+    }
+    return false;
 }
 
 bool Player::CanUncrouch()
