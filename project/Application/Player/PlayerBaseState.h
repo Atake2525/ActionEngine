@@ -12,9 +12,9 @@ enum class PlayerStateId {
     Climbing
 };
 
-class PlayerState {
+class PlayerBaseState {
 public:
-    virtual ~PlayerState() = default;
+    virtual ~PlayerBaseState() = default;
 
     virtual PlayerStateId GetStateId() const noexcept = 0;
     virtual void Enter(Player& player) = 0;

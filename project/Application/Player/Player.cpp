@@ -195,7 +195,7 @@ void Player::Update()
     UpdateCameraParent();
 }
 
-void Player::ChangeState(std::unique_ptr<PlayerState> nextState)
+void Player::ChangeState(std::unique_ptr<PlayerBaseState> nextState)
 {
     if (m_pCurrentState && nextState && nextState->GetStateId() == m_pCurrentState->GetStateId())
     {
@@ -284,19 +284,14 @@ void Player::UpdateParkourState()
 
     if (!m_onGround)
     {
-        // 衝突をしている必要があるので、貫通状態修正前の状態で衝突しているかを確認する
-        AABB pAABB = m_playerAABB;
-        pAABB += Vector3{ m_velocity.position.x, 0.0f, m_velocity.position.z };
+
         // 落下中かつオブジェクトに衝突している、移動方向が前に向いている時に壁走り
-        if (CanWallRun())
+        if (CheckWallRunStart())
         {
             m_wallRunning = true;
         }
-        // ウォールランの終了を確認する
-        pAABB += m_wallPenetration;
-        // 現在の位置(AABB)からウォールラン中の壁の方向に移動させ衝突しているかを判定する
         // 判定していなければウォールランを終了する
-        if (m_wallRunning && !m_pContext->world.collision.IsCollisionObjectForAABB(pAABB))
+        if (CheckWallRunEnd())
         {
             m_wallRunning = false;
             m_wallPenetration = Vector3::Zero;
@@ -321,11 +316,56 @@ void Player::UpdateParkourState()
     }
 }
 
-const bool Player::CanWallRun()
+const bool Player::CheckWallRunStart()
 {
-    if (!m_wallRunning && m_pContext->world.collision.IsCollisionObjectForAABB(pAABB) && m_moveAmount.y > 0.0f && m_velocity.position.y < 0.0f && !m_isClimbing)
+    if (m_wallRunning || m_isClimbing)
+    {
+        return false;
+    }
+    // 衝突をしている必要があるので、貫通状態修正前の状態で衝突しているかを確認する
+    AABB pAABB = m_playerAABB;
+    pAABB += Vector3{ m_velocity.position.x, 0.0f, m_velocity.position.z };
+    if (m_pContext->world.collision.IsCollisionObjectForAABB(pAABB) && m_moveAmount.y > 0.0f && m_velocity.position.y < 0.0f)
+    {
+        // 現状ウォールランは単一ベクトルなので貫通量と視点方向とある程度の移動量から移動方向を算出
+        Vector3 cameraDir = {
+            std::sin(m_cameraBaseTransform.rotate.y),
+            0.0f,
+            std::cos(m_cameraBaseTransform.rotate.y)
+        };
+
+        // オブジェクトが視点の正面にある場合はウォールランはしないようにしたいのでその場合はRunStateに戻す
+        if ((m_wallPenetration.x != 0.0f && std::fabs(cameraDir.z) < 0.1f) || (m_wallPenetration.z != 0.0f && std::fabs(cameraDir.x) < 0.1f))
+        {
+            return false;
+        }
+        return true;
+    }
+    return false;
+}
+
+const bool Player::CheckWallRunEnd()
+{
+    if (!m_wallRunning)
+    {
+        return false;
+    }
+    // 衝突をしている必要があるので、貫通状態修正前の状態で衝突しているかを確認する
+    AABB pAABB = m_playerAABB;
+    pAABB += Vector3{ m_velocity.position.x, 0.0f, m_velocity.position.z };
+    pAABB += m_wallPenetration;
+    if (!m_pContext->world.collision.IsCollisionObjectForAABB(pAABB))
     {
         return true;
+    }
+    Vector3 cameraDir = {
+        std::sin(m_cameraBaseTransform.rotate.y),
+        0.0f,
+        std::cos(m_cameraBaseTransform.rotate.y)
+    };
+    if ((m_wallPenetration.x != 0.0f && std::fabs(cameraDir.z) < 0.1f) || (m_wallPenetration.z != 0.0f && std::fabs(cameraDir.x) < 0.1f))
+    {
+        return false;
     }
     return false;
 }
@@ -361,7 +401,11 @@ const bool Player::CanClimbing()
     }
 
     Vector3 dir = m_pContext->world.collision.GetCollisionObjectDirectionForAABB(pAABB);
-    Vector3 cameraDir = m_pCamera->GetDirection();
+    Vector3 cameraDir = {
+        std::sin(m_cameraBaseTransform.rotate.y),
+        0.0f,
+        std::cos(m_cameraBaseTransform.rotate.y)
+    };
 
     Vector3 fsbsCameraDir;
 
@@ -551,10 +595,6 @@ void Player::GroundMove(const float speed)
         fabsMoveInput.y = 1.0f;
     }
 
-    // 移動量のクランプ
-    //m_moveAmount.x = clamp(m_moveAmount.x, -m_moveSpeed * fabsMoveInput.x, m_moveSpeed * fabsMoveInput.x);
-    //m_moveAmount.y = clamp(m_moveAmount.y, -m_moveSpeed * fabsMoveInput.y, m_moveSpeed * fabsMoveInput.y);
-
     m_decelMoveSpeed = m_runSpeed;
 
     // 入力が無かったら一定速度で減速して0.0fにする
@@ -595,31 +635,40 @@ void Player::GroundMove(const float speed)
         m_moveAmount *= m_moveSpeed / len;
     }
 
-    // MoveDirectionをm_cameraTransform.rotateの向きに等速で合わせる
-    //if (m_moveDirection.y != m_cameraTransform.rotate.y) {
-    //    // Y軸回転の差分を計算
-    //    float diff = m_cameraTransform.rotate.y - m_moveDirection.y;
-    //    // 地上と空中で回転速度を変える
-    //    float turnFactor = m_turnControlFactor;
-    //    if (!m_onGround)
-    //    {
-    //        turnFactor = m_airControlFactor;
-    //    }
-    //    // 角度の差分を-180度から180度の範囲に収める
-    //    float adjust = Sign(diff) * m_moveSpeed * (m_delta / turnFactor);
-    //    // 差分が調整量より小さい場合は直接合わせる
-    //    if (abs(diff) < abs(adjust)) { // 調整量より差分が小さい場合
-    //        m_moveDirection.y = m_cameraTransform.rotate.y;
-    //    }
-    //    else { // 調整量分だけ移動方向を回転させる
-    //        m_moveDirection.y += adjust;
-    //    }
-    //}
     m_moveDirection.y = m_cameraBaseTransform.rotate.y;
 
 
     // 現在の速度を計算
     m_playerSpeed = Length(m_moveAmount);
+}
+
+void Player::AirMove(const float speed) {
+    Vector3 inputDir = {
+        std::sin(m_cameraBaseTransform.rotate.y) * m_command.move.y,
+        0.0f,
+        std::cos(m_cameraBaseTransform.rotate.y)* m_command.move.y
+    }; // カメラ基準WASD方向
+    inputDir.y = 0.0f;
+    inputDir = Normalize(inputDir);
+
+    // 現在の水平速度
+    Vector3 horizontalVel = { m_velocity.position.x, 0.0f, m_velocity.position.z };
+
+    float m_airMaxSpeed = m_runSpeed * 1.0f;
+    // 空中で目指す水平速度
+    Vector3 targetVel = inputDir * m_airMaxSpeed;
+
+    // 空中加速
+    horizontalVel = MoveToward(
+        horizontalVel,
+        targetVel,
+        m_airAcceleration * m_airControl * dt
+    );
+
+    m_velocity.x = horizontalVel.x;
+    m_velocity.z = horizontalVel.z;
+
+    m_position += m_velocity * dt;
 }
 
 void Player::WallRunStart() {
@@ -629,21 +678,7 @@ void Player::WallRunStart() {
     pAABB += Vector3{ m_velocity.position.x, 0.0f, m_velocity.position.z };
     m_wallPenetration = m_pContext->world.collision.GetPenetrationForAABB(pAABB);
 
-    // 現状ウォールランは単一ベクトルなので貫通量と視点方向とある程度の移動量から移動方向を算出
-    Vector3 cameraDirection = {
-        std::sin(m_cameraBaseTransform.rotate.y),
-        0.0f,
-        std::cos(m_cameraBaseTransform.rotate.y)
-    };
 
-
-    // オブジェクトが視点の正面にある場合はウォールランはしないようにしたいのでその場合はRunStateに戻す
-    if ((m_wallPenetration.x != 0.0f && std::fabs(cameraDirection.z) < 0.1f) || (m_wallPenetration.z != 0.0f && std::fabs(cameraDirection.x) < 0.1f))
-    {
-        ChangeState(std::make_unique<RunState>());
-        m_wallRunning = false;
-        return;
-    }
 
     // 一定の速度以上で落下していた場合落下速度を行くり落とすようにする
     if (m_velocity.position.y < m_wallRunFallThreshold)
@@ -662,9 +697,14 @@ void Player::WallRunStart() {
     {
         m_velocity.position.y = 0.0f;
     }
-
-    m_wallRunDirection.x = Sign(std::fabs(m_wallPenetration.z)) * Sign(cameraDirection.x);
-    m_wallRunDirection.z = Sign(std::fabs(m_wallPenetration.x)) * Sign(cameraDirection.z);
+    // 現状ウォールランは単一ベクトルなので貫通量と視点方向とある程度の移動量から移動方向を算出
+    Vector3 cameraDir = {
+        std::sin(m_cameraBaseTransform.rotate.y),
+        0.0f,
+        std::cos(m_cameraBaseTransform.rotate.y)
+    };
+    m_wallRunDirection.x = Sign(std::fabs(m_wallPenetration.z)) * Sign(cameraDir.x);
+    m_wallRunDirection.z = Sign(std::fabs(m_wallPenetration.x)) * Sign(cameraDir.z);
 
 
     m_wallRunDirection *= m_runSpeed;
@@ -916,6 +956,7 @@ void Player::WallJumpStart() {
     float gravityPerFrame = max(-m_gravity.y * m_delta, 0.0f);
     float jumpStartVelocity = sqrtf(2.0f * gravityPerFrame * m_jumpHeight);
     m_velocity.position.y = jumpStartVelocity;
+    m_moveAmount.x = m_wallRunDirection.x * 0.5f;
     m_wallRunning = false;
     ChangeState(std::make_unique<RunState>());
 }
@@ -945,23 +986,13 @@ void Player::ApplyGravity()
 
 void Player::UpdateVelocity()
 {
-    if (!m_wallRunning)
-    {
-        // 移動方向の計算
-        Transform dir = Transform::Default;
-        dir.rotate.y = m_moveDirection.y;
-        Matrix4x4 rotMat = MakeAffineMatrix(dir);
-        Vector3 moveDir = TransformNormal({ m_moveAmount.x, 0.0f, m_moveAmount.y }, rotMat);
-        m_velocity.position = { moveDir.x * m_delta, m_velocity.position.y, moveDir.z * m_delta };
-        m_playerAABB += m_velocity.position;
-    }
-    else
-    {
-        m_velocity.position = { m_wallRunDirection.x * m_delta, m_velocity.position.y, m_wallRunDirection.z * m_delta };
-        m_playerAABB += m_velocity.position;
-    }
-
-
+    // 移動方向の計算
+    Transform dir = Transform::Default;
+    dir.rotate.y = m_moveDirection.y;
+    Matrix4x4 rotMat = MakeAffineMatrix(dir);
+    Vector3 moveDir = TransformNormal({ m_moveAmount.x, 0.0f, m_moveAmount.y }, rotMat);
+    m_velocity.position = { moveDir.x * m_delta, m_velocity.position.y, moveDir.z * m_delta };
+    m_playerAABB += m_velocity.position;
 }
 
 void Player::UpdateCameraParent() {
@@ -992,7 +1023,8 @@ void Player::UpdateWallRunCameraTilt() {
             }
             // 回転後角度を代入 回転後の角度は移動方向、壁がプレイヤーから左右どちらにあるかによって変わるのでそれも考慮する
             // 移動方向に応じての回転を入れいる
-            Vector3 cameraDirection = m_pCamera->GetDirection();
+             // 現状ウォールランは単一ベクトルなので貫通量と視点方向とある程度の移動量から移動方向を算出
+
             if (m_wallRunDirection.x != 0.0f)
             {
                 m_wallRunRotateAfter = m_wallRunRotateAngle * (signWallRunDirection.x * wallRunPenetration * -1.0f);
@@ -1047,52 +1079,22 @@ void Player::UpdateCrouchCamera() {
 
 void Player::UpdateHeadBob() {
     // HeadBob処理の実装
-    constexpr float moveThreshold = 0.05f;
 
-    Vector3 targetRotation = Vector3::Zero;
+    float headBobSpeed = 8.0f * (m_playerSpeed / m_runSpeed) + 1.0f; // HeadBobの速度
+    m_headBobTimer += m_delta * headBobSpeed;
 
-    float responseSpeed = 0.0f;
-    if (m_onGround && m_playerSpeed > moveThreshold)
-    {
-        // 移動速度に応じて揺れを強くする
-        const float speedRatio = std::clamp(m_playerSpeed / m_runSpeed, 0.0f, 1.0f);
-
-        // 歩行周期。走るほど少し速くする
-        const float frequency = Lerp(7.0f, 11.0f, speedRatio);
-        m_headBobTimer += m_delta * frequency;
-
-        // 上下方向の首振りは1歩につき2回
-        const float pitch = std::sin(m_headBobTimer * 2.0f) * 0.35f * speedRatio;
-
-        // 左右の向きはかなり弱め
-        const float yaw = std::sin(m_headBobTimer) * 0.10f * speedRatio;
-
-        // 左右への傾きを一番分かりやすくする
-        const float roll = std::sin(m_headBobTimer) * 1.2f * speedRatio;
-
-        targetRotation = SwapRadian({ pitch, yaw, roll });
-
-        responseSpeed = 14.0f;
-    }
-    else
-    {
-        responseSpeed = 8.0f;
-    }
-
-    // フレームレートに依存しにくい補間率
-    const float blend = 1.0f - std::exp(-responseSpeed * m_delta);
-
-    m_headBobOffset.rotate = Lerp(m_headBobOffset.rotate, targetRotation, blend);
-
-    // 十分ゼロに近づいたら完全に停止
-    if (!(m_onGround && m_playerSpeed > moveThreshold) && Length(m_headBobOffset.rotate) < 0.0001f)
-    {
-        m_headBobOffset.rotate = Vector3::Zero;
-        m_headBobTimer = 0.0f;
-    }
-
-    // 基準カメラではなく演出Transformへ加える
-    m_cameraEffectTransform.rotate += m_headBobOffset.rotate;
+    float sinHeadBob = std::sin(m_headBobTimer);
+    //sinHeadBob = std::max(sinHeadBob, 0.0f); // HeadBobの値を0以上に制限
+    float headBobAbs = (1.0f - std::cos(m_headBobTimer)) * 0.5f; // HeadBobの値を0以上に制限
+    ImGui::Begin("HeadBob Debug");
+    ImGui::Text("Sin HeadBob: %f", sinHeadBob);
+    ImGui::Text("ABS HeadBob: %f", fabs(sinHeadBob));
+    ImGui::Text("headBobAbs: %f", headBobAbs);
+    ImGui::Text("HeadBob Timer: %f", m_headBobTimer);
+    ImGui::Text("Player Speed: %f", m_playerSpeed / m_runSpeed);
+    ImGui::End();
+    m_headBobOffset.position.y = headBobAbs * 0.8f;
+    m_cameraEffectTransform.position = m_headBobOffset.position;
 }
 
 void Player::ApplyCameraEffect()

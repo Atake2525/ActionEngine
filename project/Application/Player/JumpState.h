@@ -1,7 +1,7 @@
-#include "PlayerState.h"
+#include "PlayerBaseState.h"
 #pragma once
 
-class JumpState : public PlayerState {
+class JumpState : public PlayerBaseState {
 public:
     PlayerStateId GetStateId() const noexcept override { return PlayerStateId::Jump; }
     void Enter(Player& player) override;

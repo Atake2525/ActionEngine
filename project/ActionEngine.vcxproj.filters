@@ -378,7 +378,7 @@
     <ClCompile Include="Engine\Core\Input\InputConverter.cpp">
       <Filter>Engine\Core\Input</Filter>
     </ClCompile>
-    <ClCompile Include="Application\Player\PlayerState.cpp">
+    <ClCompile Include="Application\Player\PlayerBaseState.cpp">
       <Filter>Application\Player\State</Filter>
     </ClCompile>
     <ClCompile Include="Application\Player\RunState.cpp">
@@ -671,7 +671,7 @@
     <ClInclude Include="Engine\Core\Input\InputConverter.h">
       <Filter>Engine\Core\Input</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Player\PlayerState.h">
+    <ClInclude Include="Application\Player\PlayerBaseState.h">
       <Filter>Application\Player\State</Filter>
     </ClInclude>
     <ClInclude Include="Application\Player\RunState.h">

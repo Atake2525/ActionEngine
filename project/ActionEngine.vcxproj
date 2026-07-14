@@ -179,7 +179,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\2d\UI\UISelectionGroup.cpp" />
     <ClCompile Include="Application\Setting\SettingManager.cpp" />
     <ClCompile Include="Engine\Core\Input\InputConverter.cpp" />
-    <ClCompile Include="Application\Player\PlayerState.cpp" />
+    <ClCompile Include="Application\Player\PlayerBaseState.cpp" />
     <ClCompile Include="Application\Player\JumpState.cpp" />
     <ClCompile Include="Application\Player\RunState.cpp" />
     <ClCompile Include="Application\Player\WallRunState.cpp" />
@@ -282,7 +282,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\2d\UI\UISelectionGroup.h" />
     <ClInclude Include="Application\Setting\SettingManager.h" />
     <ClInclude Include="Engine\Core\Input\InputConverter.h" />
-    <ClInclude Include="Application\Player\PlayerState.h" />
+    <ClInclude Include="Application\Player\PlayerBaseState.h" />
     <ClInclude Include="Application\Player\JumpState.h" />
     <ClInclude Include="Application\Player\RunState.h" />
     <ClInclude Include="Application\Player\WallRunState.h" />

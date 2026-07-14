@@ -18,6 +18,13 @@ void Runtime::Update() {
 #ifndef NDEBUG
     m_context.engine.graphics.imgui.Update();
     m_context.engine.platform.time.DrawImGui();
+    ImGui::Begin("Performance");
+    float timeScale = m_context.engine.platform.time.GetTimeScale();
+    ImGui::DragFloat("TimeScale", &timeScale, 0.01f, 0.0f, 10.0f);
+    m_context.engine.platform.time.SetTimeScale(timeScale);
+    float framePerSecond = 1.0f / m_context.engine.platform.time.GetDeltaTime();
+    ImGui::Text("FPS: %.1f", framePerSecond);
+    ImGui::End();
 #endif // !NDEBUG
 
     m_context.world.light.Update();

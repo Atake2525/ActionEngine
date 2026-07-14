@@ -1,7 +1,7 @@
-#include "PlayerState.h"
+#include "PlayerBaseState.h"
 #pragma once
 
-class RunState : public PlayerState {
+class RunState : public PlayerBaseState {
 public:
     PlayerStateId GetStateId() const noexcept override { return PlayerStateId::Run; }
     void Enter(Player& player) override;

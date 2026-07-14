@@ -2,7 +2,7 @@
 #include <memory>
 #pragma once
 #include <string>
-#include "PlayerState.h"
+#include "PlayerBaseState.h"
 
 class Camera;
 class Input;
@@ -54,7 +54,7 @@ public:
     /// 更新処理
     /// </summary>
     void Update();
-    void ChangeState(std::unique_ptr<PlayerState> nextState);
+    void ChangeState(std::unique_ptr<PlayerBaseState> nextState);
 
     void UpdateModel();
 
@@ -87,7 +87,9 @@ private: // プレイヤーステート管理
     /// <summary>
     /// ウォールランができるかを確認する
     /// </summary>
-    const bool CanWallRun();
+    const bool CheckWallRunStart();
+
+    const bool CheckWallRunEnd();
 
     /// <summary>
     /// しゃがみ状態を解除できるかどうかを確認する(ステート)
@@ -119,6 +121,11 @@ private: // プレイヤーステート管理
     /// 歩行処理
     /// </summary>
     void GroundMove(const float speed);
+
+    /// <summary>
+    /// 空中処理
+    /// </summary>
+    void AirMove(const float speed);
 
     /// <summary>
     /// ウォールランの開始処理
@@ -236,7 +243,7 @@ private:
     //==================================================
     // プレイヤー状態管理
     //==================================================
-    std::unique_ptr<PlayerState> m_pCurrentState;
+    std::unique_ptr<PlayerBaseState> m_pCurrentState;
     const float& GetRunSpeed() const { return m_runSpeed; }
     const float& GetCrouchSpeed() const { return m_crounchSpeed; }
     const bool& IsMoveInput() const { return m_isMoveInput; }
