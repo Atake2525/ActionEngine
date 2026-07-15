@@ -9,7 +9,8 @@ enum class PlayerStateId {
     Jump,
     WallRun,
     WallJump,
-    Climbing
+    Climbing,
+    AirControl
 };
 
 class PlayerBaseState {

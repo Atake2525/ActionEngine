@@ -1,7 +1,6 @@
 #include "JumpState.h"
 #include "Player.h"
 #include <memory>
-#include "RunState.h"
 
 void JumpState::Enter(Player& player) {
     player.JumpStart();
@@ -9,7 +8,7 @@ void JumpState::Enter(Player& player) {
 }
 
 void JumpState::Update(Player& player) {
-    player.ChangeState(std::make_unique<RunState>());
+    player.HorizontalMove(player.m_airSpeed, player.m_airAccelerationTime, player.m_airDecelerationTime);
     return;
 }
 

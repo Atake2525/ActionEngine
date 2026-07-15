@@ -107,6 +107,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Application\Player\AirControlState.cpp" />
     <ClCompile Include="Application\Scene\Manager\BaseScene.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -187,6 +188,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\Core\Runtime.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Application\Player\AirControlState.h" />
     <ClInclude Include="Application\Setting\KeyboardConfig.h" />
     <ClInclude Include="Application\Scene\Manager\AbstractSceneFactory.h" />
     <ClInclude Include="Application\Scene\Manager\BaseScene.h">
