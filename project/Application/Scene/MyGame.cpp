@@ -14,6 +14,6 @@ void MyGame::Draw() {
 
 void MyGame::Finalize() {
 
-    finished = FrameWork::LoopOut();
+    FrameWork::LoopOut();
 }
 
