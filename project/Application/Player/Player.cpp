@@ -115,35 +115,54 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
 
 void Player::Update()
 {
-    m_transform = m_pModel->GetTransform();
-    m_playerAABB = m_pModel->GetAABB();
+    if (!m_IsFreeze)
+    {
+        m_transform = m_pModel->GetTransform();
+        m_playerAABB = m_pModel->GetAABB();
 
-    m_delta = m_pContext->engine.platform.time.GetDeltaTime();
+        m_delta = m_pContext->engine.platform.time.GetDeltaTime();
 
-    m_fov = m_pCamera->GetfovY();
+        m_fov = m_pCamera->GetfovY();
 
 #ifndef NDEBUG
 
-    if (m_pInput->TriggerKey(DIK_F3))
-    {
-        m_debugMode = !m_debugMode;
-    }
-    if (m_debugMode)
-    {
-        // デバッグUIの更新
-        UpdateDebugUI();
-    }
+        if (m_pInput->TriggerKey(DIK_F3))
+        {
+            m_debugMode = !m_debugMode;
+        }
+        if (m_debugMode)
+        {
+            // デバッグUIの更新
+            UpdateDebugUI();
+        }
 #endif // !NDEBUG
 
 #ifndef NDEBUG
-    // デバッグビルドの処理
+        // デバッグビルドの処理
 
-    if (m_godMode)
-    {
-        MovementGodMode();
-    }
-    else
-    {
+        if (m_godMode)
+        {
+            MovementGodMode();
+        }
+        else
+        {
+            // 入力の処理
+            HandleInput();
+            // 状態の更新
+            UpdateState();
+            // 回転処理
+            Rotate();
+            // 移動処理
+            Move();
+            ApplyCollision();
+
+            // 重力の適用
+            ApplyGravity();
+        }
+
+#else
+        // リリースモードの処理
+
         // 入力の処理
         HandleInput();
         // 状態の更新
@@ -156,43 +175,27 @@ void Player::Update()
 
         // 重力の適用
         ApplyGravity();
-    }
-
-#else
-    // リリースモードの処理
-
-    // 入力の処理
-    HandleInput();
-    // 状態の更新
-    UpdateState();
-    // 回転処理
-    Rotate();
-    // 移動処理
-    Move();
-    ApplyCollision();
-
-    // 重力の適用
-    ApplyGravity();
 #endif // !NDEBUG
 
-    UpdateModelAnimation();
+        UpdateModelAnimation();
 
-    m_transform.rotate += m_velocity.rotate;
-    m_pModel->SetTransform(m_transform);
+        m_transform.rotate += m_velocity.rotate;
+        m_pModel->SetTransform(m_transform);
 
-    if (!m_isFirstInput)
-    {
-        m_pModel->SetTransform(m_firstTransform);
+        if (!m_isFirstInput)
+        {
+            m_pModel->SetTransform(m_firstTransform);
+        }
+
+        m_pDrawModel->SetTransform(m_transform);
+        Vector3 modelRotate = m_cameraBaseTransform.rotate;
+        modelRotate.x = 0.0f;
+        m_pDrawModel->SetRotate(modelRotate);
+        ApplyCameraEffect();
+        m_pModel->Update();
+        m_pCamera->SetTransform(m_cameraBaseTransform + m_cameraEffectTransform);
+        UpdateCameraParent();
     }
-
-    m_pDrawModel->SetTransform(m_transform);
-    Vector3 modelRotate = m_cameraBaseTransform.rotate;
-    modelRotate.x = 0.0f;
-    m_pDrawModel->SetRotate(modelRotate);
-    ApplyCameraEffect();
-    m_pModel->Update();
-    m_pCamera->SetTransform(m_cameraBaseTransform + m_cameraEffectTransform);
-    UpdateCameraParent();
 }
 
 void Player::ChangeState(std::unique_ptr<PlayerBaseState> nextState)
