@@ -7,14 +7,13 @@ void MyGame::Initialize() {
 
 void MyGame::Update() {
     FrameWork::Update();
+}
+
+void MyGame::Draw() {
+}
+
+void MyGame::Finalize() {
 
     finished = FrameWork::LoopOut();
 }
 
-void MyGame::Draw() {
-
-}
-
-void MyGame::Finalize() {
-    FrameWork::Finalize();
-}

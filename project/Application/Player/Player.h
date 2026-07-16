@@ -2,7 +2,7 @@
 #include <memory>
 #pragma once
 #include <string>
-#include "PlayerState.h"
+#include "PlayerBaseState.h"
 
 class Camera;
 class Input;
@@ -26,16 +26,7 @@ private:
         Falling = 2
     };
 
-    // プレイヤーの歩行状態
-    /*enum class PlayerWalkState : int {
-        Walk = 0,
-        Run = 1,
-        Crouch = 2,
-        WallRun = 3,
-        Sliding = 4,
-        Climbing = 5,
-    };*/
-
+    
     // コントロールモード
     enum class ControlMode {
         KeyboardMouse,
@@ -63,7 +54,7 @@ public:
     /// 更新処理
     /// </summary>
     void Update();
-    void ChangeState(std::unique_ptr<PlayerState> nextState);
+    void ChangeState(std::unique_ptr<PlayerBaseState> nextState);
 
     void UpdateModel();
 
@@ -94,6 +85,13 @@ private: // プレイヤーステート管理
     void UpdateParkourState();
 
     /// <summary>
+    /// ウォールランができるかを確認する
+    /// </summary>
+    const bool CheckWallRunStart();
+
+    const bool CheckWallRunEnd();
+
+    /// <summary>
     /// しゃがみ状態を解除できるかどうかを確認する(ステート)
     /// </summary>
     bool CanUncrouch();
@@ -120,9 +118,9 @@ private: // プレイヤーステート管理
     void Move();
 
     /// <summary>
-    /// 歩行処理
+    /// 移動処理
     /// </summary>
-    void GroundMove(const float speed);
+    void HorizontalMove(const float speed, const float accelerationTime, const float decelerationTime);
 
     /// <summary>
     /// ウォールランの開始処理
@@ -133,11 +131,6 @@ private: // プレイヤーステート管理
     /// ウォールラン処理
     /// </summary>
     void WallRun();
-
-    /// <summary>
-    /// スライディング処理
-    /// </summary>
-    void Sliding();
 
     /// <summary>
     /// クライミング(よじ登り)処理
@@ -184,6 +177,14 @@ private: // プレイヤーステート管理
     /// </summary>
     void ApplyCameraEffect();
 
+    void UpdateCameraFov();
+    
+    void UpdateWallRunCameraTilt();
+
+    void UpdateHeadBob();
+
+    void UpdateCrouchCamera();
+
     /// <summary>
     /// モデルのアニメーションを更新する
     /// </summary>
@@ -200,21 +201,12 @@ private: // プレイヤーステート管理
 private:
     AppContext* m_pContext = nullptr;
 
-    bool m_IsDead = false;
     bool m_IsFreeze = false;
 
     //==================================================
     // タイマー関連
     //==================================================
     float m_delta;
-
-    float m_moveSpeedTimer = 0.0f;    // 移動速度系タイマー
-    float m_speedDecelTime = 0.2f;     // 減速時間
-    float m_maxSpeedTime = 0.3f;                    // 加速時間
-    // 減速フラグ
-    bool m_isSpeedDecel = false;
-    float m_speedBefore = 0.0f; // 減速前の速度
-    float m_speedAfter = 0.0f;  // 減速後の速度
 
     float m_crouchTimer = 0.0f;
     float m_crouchTime = 0.08f;
@@ -232,10 +224,9 @@ private:
     //==================================================
     // プレイヤー状態管理
     //==================================================
-    std::unique_ptr<PlayerState> m_pCurrentState;
+    std::unique_ptr<PlayerBaseState> m_pCurrentState;
     const float& GetRunSpeed() const { return m_runSpeed; }
     const float& GetCrouchSpeed() const { return m_crounchSpeed; }
-    const bool& IsMoveInput() const { return m_isMoveInput; }
     const bool& IsRunInput() const { return m_command.run; }
     const bool& IsCrouchInput() const { return m_command.crouch; }
 
@@ -249,6 +240,7 @@ private:
     friend class WallRunState;
     friend class ClimbingState;
     friend class WallJumpState;
+    friend class AirControlState;
 
     //==================================================
     // プレイヤー状態管理(パルクール)
@@ -262,27 +254,17 @@ private:
     Transform m_firstTransform = Transform::Default;    // 初期位置・回転・スケール
     Transform m_transform = Transform::Default;     // 現在の位置・回転・スケール
     Transform m_velocity = Transform::Default;      // 現在の速度
+    Vector3 m_horizontalVelocity = Vector3::Zero;   // 水平速度
+    float m_verticalVelocity = 0.0f;     // 垂直速度
     Vector3 m_gravity = { 0.0f, -1.0f, 0.0f };      // 重力
-    Vector3 m_moveDirection = Vector3::Zero;        // 移動方向
-    Vector2 m_moveInput = Vector2::Zero;            // 入力方向
-    Vector2 m_moveAmount = Vector2::Zero;           // 入力中の移動量
-    float m_jumpInput = 0.0f;                          // ジャンプ入力
-    float m_fallVelocity = 0.0f;                    // 落下速度
-    float m_fallVelocityMax = -1.6f;                // 落下速度上限
     float m_decelTime = 0.2f;                       // 減速時間
-    float m_turnControlFactor = 1.8f;               // 地上での移動制御係数
-    float m_airControlFactor = 1.8f;                // 空中での移動制御係数
-
-    bool m_isMoveInput = false;
 
     //================
     // ウォールラン関連
     //================
-    bool m_wallRunning = false;
-    float m_wallRunGravity = -0.3f;
+    bool m_isWallRunning = false;
     Vector3 m_wallRunDirection = Vector3::Zero;
     Vector3 m_wallPenetration = Vector3::Zero;
-    bool m_completeRotate = false;
     bool m_completeGetRotateInfo = false;
     float m_wallRunRotateAfter = 0.0f;
     float m_wallRunRotateAngle = SwapRadian(15.0f);
@@ -306,11 +288,6 @@ private:
     float m_crouchHeightOffset = -0.8f;
 
     //================
-    // スライディング関連
-    //================
-    bool m_sliding = false;
-
-    //================
     // よじ登り関連
     //================
     float m_canClimbingCheckSize = 2.5f; // よじ登り可能かのチェック範囲の増加量
@@ -328,24 +305,29 @@ private:
 
     // 移動速度
     const float m_runSpeed = 20.0f;
+    const float m_runAccelerationTime = 0.08f;
     const float m_crounchSpeed = 12.0f;
+    const float m_crouchAccelerationTime = 0.05f;
+    const float m_airSpeed = 20.0f;
+    const float m_airAccelerationTime = 0.2f;
+    const float m_groundDecelerationTime = 0.05f;
+    const float m_airDecelerationTime = 0.6f;
+
     float m_moveSpeed = 1.0f;
-    float m_decelMoveSpeed = 1.0f;
-    float m_moveSpeedPre = 1.0f;
     float m_playerSpeed = 0.0f; // 現在の速度
     float m_jumpHeight = 3.0f; // 最終的なジャンプ高さ
 
     //==================================================
     // カメラ関連
     //==================================================
-    Transform m_cameraTransform = Transform::Default;
+    Transform m_cameraBaseTransform = Transform::Default;
+    Transform m_cameraEffectTransform = Transform::Default;
     Transform m_cameraVelocity = Transform::Default;
 
     // モデルの身長から目の位置までの割合
     float m_eyeHeight = 0.09f;
 
     // Fov補間用タイマー
-    bool m_isFovChange = false;
     bool m_isRunFov = false;
     float m_fovBefore = 0.0f;
     float m_fovAfter = 0.0f;
@@ -355,6 +337,11 @@ private:
     float m_fovChangeTime = 0.1f;     // FOV補間時間
     float m_fovDefault = 1.2f; // デフォルトFOV
     float m_fovRun = 1.4f;    // ダッシュ時FOV
+    float m_headBobTimer = 0.0f; // HeadBob用タイマー
+    float m_headBobSpeed = 10.0f; // HeadBobの速度
+    float m_headBobAmount = 0.1f; // HeadBobの振幅
+    Transform m_headBobOffset = Transform::Default; // HeadBobのオフセット
+    float m_crouchCameraOffsetY = 0.0f; // Crouch時のカメラオフセット
 
 
     //==================================================

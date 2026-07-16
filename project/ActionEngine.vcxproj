@@ -107,6 +107,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Application\Player\AirControlState.cpp" />
     <ClCompile Include="Application\Scene\Manager\BaseScene.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -116,7 +117,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\StageManager\TutorialStage.cpp" />
     <ClCompile Include="Application\Setting\ControllerConfig.cpp" />
     <ClCompile Include="Application\Setting\AudioConfig.cpp" />
-    <ClCompile Include="Application\CrouchState.cpp" />
+    <ClCompile Include="Application\Player\CrouchState.cpp" />
     <ClCompile Include="Application\Player\ClimbingState.cpp" />
     <ClCompile Include="Engine\2d\UI\UIElement.cpp" />
     <ClCompile Include="Engine\3d\DebugLine\DebugLine.cpp" />
@@ -155,7 +156,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\JsonLoader\JsonLoader.cpp" />
     <ClCompile Include="Engine\Presentation\Cinematic\FadeManager.cpp" />
     <ClCompile Include="Application\Goal.cpp" />
-    <ClCompile Include="Application\Trap.cpp" />
+    <ClCompile Include="Application\MoveObject.cpp" />
     <ClCompile Include="Engine\Core\Timer\GameTime.cpp" />
     <ClCompile Include="Application\StageManager\StageCount.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp" />
@@ -178,7 +179,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\2d\UI\UISelectionGroup.cpp" />
     <ClCompile Include="Application\Setting\SettingManager.cpp" />
     <ClCompile Include="Engine\Core\Input\InputConverter.cpp" />
-    <ClCompile Include="Application\Player\PlayerState.cpp" />
+    <ClCompile Include="Application\Player\PlayerBaseState.cpp" />
     <ClCompile Include="Application\Player\JumpState.cpp" />
     <ClCompile Include="Application\Player\RunState.cpp" />
     <ClCompile Include="Application\Player\WallRunState.cpp" />
@@ -187,6 +188,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="ModelLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Application\Player\AirControlState.h" />
     <ClInclude Include="Application\Setting\KeyboardConfig.h" />
     <ClInclude Include="Application\Scene\Manager\AbstractSceneFactory.h" />
     <ClInclude Include="Application\Scene\Manager\BaseScene.h">
@@ -197,7 +199,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Setting\KeyConfig.h" />
     <ClInclude Include="Application\Setting\SettingUtility.h" />
     <ClInclude Include="Application\Setting\AudioConfig.h" />
-    <ClInclude Include="Application\CrouchState.h" />
+    <ClInclude Include="Application\Player\CrouchState.h" />
     <ClInclude Include="Application\Player\ClimbingState.h" />
     <ClInclude Include="Engine\3d\Model\Model\ModelLoader.h" />
     <ClInclude Include="Engine\Math\EngineContext.h" />
@@ -256,7 +258,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\3d\SkyBox\SkyBox.h" />
     <ClInclude Include="Engine\Presentation\Cinematic\FadeManager.h" />
     <ClInclude Include="Application\Goal.h" />
-    <ClInclude Include="Application\Trap.h" />
+    <ClInclude Include="Application\MoveObject.h" />
     <ClInclude Include="Engine\Core\Timer\GameTime.h" />
     <ClInclude Include="Application\StageManager\StageCount.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />
@@ -282,7 +284,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\2d\UI\UISelectionGroup.h" />
     <ClInclude Include="Application\Setting\SettingManager.h" />
     <ClInclude Include="Engine\Core\Input\InputConverter.h" />
-    <ClInclude Include="Application\Player\PlayerState.h" />
+    <ClInclude Include="Application\Player\PlayerBaseState.h" />
     <ClInclude Include="Application\Player\JumpState.h" />
     <ClInclude Include="Application\Player\RunState.h" />
     <ClInclude Include="Application\Player\WallRunState.h" />

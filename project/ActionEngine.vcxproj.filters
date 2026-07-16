@@ -306,7 +306,7 @@
     <ClCompile Include="Application\Goal.cpp">
       <Filter>Application</Filter>
     </ClCompile>
-    <ClCompile Include="Application\Trap.cpp">
+    <ClCompile Include="Application\MoveObject.cpp">
       <Filter>Application</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Core\Timer\GameTime.cpp">
@@ -342,6 +342,9 @@
     <ClCompile Include="Application\Player\Player.cpp">
       <Filter>Application\Player</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\Collision\PhysicsCorrection.cpp">
+      <Filter>Engine\Collision</Filter>
+    </ClCompile>
     <ClCompile Include="Application\Pause.cpp">
       <Filter>Application</Filter>
     </ClCompile>
@@ -375,7 +378,7 @@
     <ClCompile Include="Engine\Core\Input\InputConverter.cpp">
       <Filter>Engine\Core\Input</Filter>
     </ClCompile>
-    <ClCompile Include="Application\Player\PlayerState.cpp">
+    <ClCompile Include="Application\Player\PlayerBaseState.cpp">
       <Filter>Application\Player\State</Filter>
     </ClCompile>
     <ClCompile Include="Application\Player\RunState.cpp">
@@ -384,7 +387,7 @@
     <ClCompile Include="Application\Player\JumpState.cpp">
       <Filter>Application\Player\State</Filter>
     </ClCompile>
-    <ClCompile Include="Application\CrouchState.cpp">
+    <ClCompile Include="Application\Player\CrouchState.cpp">
       <Filter>Application\Player\State</Filter>
     </ClCompile>
     <ClCompile Include="Application\Player\ClimbingState.cpp">
@@ -399,6 +402,8 @@
     <ClCompile Include="Engine\Core\Runtime.cpp">
       <Filter>Engine\Core</Filter>
     </ClCompile>
+    <ClCompile Include="Application\Player\AirControlState.cpp">
+      <Filter>Application\Player\State</Filter>
     <ClCompile Include="ModelLoader.cpp">
       <Filter>Engine\3d\Model\Model</Filter>
     </ClCompile>
@@ -590,7 +595,7 @@
     <ClInclude Include="Application\Goal.h">
       <Filter>Application</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Trap.h">
+    <ClInclude Include="Application\MoveObject.h">
       <Filter>Application</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Core\Timer\GameTime.h">
@@ -668,7 +673,7 @@
     <ClInclude Include="Engine\Core\Input\InputConverter.h">
       <Filter>Engine\Core\Input</Filter>
     </ClInclude>
-    <ClInclude Include="Application\Player\PlayerState.h">
+    <ClInclude Include="Application\Player\PlayerBaseState.h">
       <Filter>Application\Player\State</Filter>
     </ClInclude>
     <ClInclude Include="Application\Player\RunState.h">
@@ -677,7 +682,7 @@
     <ClInclude Include="Application\Player\JumpState.h">
       <Filter>Application\Player\State</Filter>
     </ClInclude>
-    <ClInclude Include="Application\CrouchState.h">
+    <ClInclude Include="Application\Player\CrouchState.h">
       <Filter>Application\Player\State</Filter>
     </ClInclude>
     <ClInclude Include="Application\Player\ClimbingState.h">
@@ -695,6 +700,8 @@
     <ClInclude Include="Engine\Core\Runtime.h">
       <Filter>Engine\Core</Filter>
     </ClInclude>
+    <ClInclude Include="Application\Player\AirControlState.h">
+      <Filter>Application\Player\State</Filter>
     <ClInclude Include="Engine\3d\Model\Model\ModelLoader.h">
       <Filter>Engine\3d\Model\Model</Filter>
     </ClInclude>

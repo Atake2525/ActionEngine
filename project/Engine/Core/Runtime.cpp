@@ -18,6 +18,13 @@ void Runtime::Update() {
 #ifndef NDEBUG
     m_context.engine.graphics.imgui.Update();
     m_context.engine.platform.time.DrawImGui();
+    ImGui::Begin("Performance");
+    float timeScale = m_context.engine.platform.time.GetTimeScale();
+    ImGui::DragFloat("TimeScale", &timeScale, 0.01f, 0.0f, 10.0f);
+    m_context.engine.platform.time.SetTimeScale(timeScale);
+    float framePerSecond = 1.0f / m_context.engine.platform.time.GetDeltaTime();
+    ImGui::Text("FPS: %.1f", framePerSecond);
+    ImGui::End();
 
     float fps = 1.0f / m_context.engine.platform.time.GetDeltaTime();
     ImGui::Begin("performance");
@@ -145,7 +152,7 @@ void Runtime::SetupGame() {
     game.sceneManager.GetSettingManager().SetContext(engine.assets.json);
     game.sceneManager.GetSettingManager().Load("KeyConfig.json", Setting::SettingType::KeyConfig);
     game.sceneManager.GetSettingManager().Load("Audio.json", Setting::SettingType::AudioConfig);
-    game.sceneManager.SetNextScene("TITLE");
+    game.sceneManager.SetNextScene("GAMESCENE");
 
     engine.platform.window.OpenWindow();
 }

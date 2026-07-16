@@ -118,19 +118,6 @@ void JsonLoader::LoadJson(const std::string& path, const std::string& jsonName, 
         // 種別をMESHかCAMERAのみ通るようにする
         if (object["type"].get<std::string>() == "MESH" || object["type"].get<std::string>() == "CAMERA")
         {
-            // // 同じ名前なら後ろに数字を追加する
-            //if (levelData.datas.contains(object["file_name"].get<std::string>()))
-            //{
-            //    for (size_t i = 0; i < levelData.datas.size(); i++)
-            //    {
-            //        std::string num = "_0" + std::to_string(i);
-            //        if (!levelData.datas.contains(object["file_name"].get<std::string>() + num))
-            //        {
-            //            jsonData = levelData.datas[object["file_name"].get<std::string>() + num];
-            //            break;
-            //        }
-            //    }
-            //}
             if (!object.contains("file_name"))
             {
                 Log("objectにfile_nameが存在しません\n");
@@ -167,66 +154,66 @@ void JsonLoader::LoadJson(const std::string& path, const std::string& jsonName, 
             jsonData.transform.scale.y = (float)transform["scaling"][2];
             jsonData.transform.scale.z = (float)transform["scaling"][1];
             
-            nlohmann::json trap = object["trap"];
+            nlohmann::json moveObject = object["moveObject"];
 
-            nlohmann::json& translate = trap["velocity_translation"];
-            nlohmann::json& rotate = trap["velocity_rotation"];
-            nlohmann::json& scale = trap["velocity_scale"];
-            nlohmann::json& runtime = trap["runtime"];
-            if (trap["move"].get<std::string>() == "true")
+            nlohmann::json& translate = moveObject["velocity_translation"];
+            nlohmann::json& rotate = moveObject["velocity_rotation"];
+            nlohmann::json& scale = moveObject["velocity_scale"];
+            nlohmann::json& runtime = moveObject["runtime"];
+            if (moveObject["move"].get<std::string>() == "true")
             {
-                jsonData.trap.move = true;
+                jsonData.moveObject.move = true;
 
-                jsonData.trap.velocity.position.x = (float)translate[0];
-                jsonData.trap.velocity.position.y = (float)translate[1];
-                jsonData.trap.velocity.position.z = (float)translate[2];
+                jsonData.moveObject.velocity.position.x = (float)translate[0];
+                jsonData.moveObject.velocity.position.y = (float)translate[1];
+                jsonData.moveObject.velocity.position.z = (float)translate[2];
 
-                jsonData.trap.velocity.rotate.x = SwapRadian((float)rotate[0]);
-                jsonData.trap.velocity.rotate.y = SwapRadian((float)rotate[1]);
-                jsonData.trap.velocity.rotate.z = SwapRadian((float)rotate[2]);
+                jsonData.moveObject.velocity.rotate.x = SwapRadian((float)rotate[0]);
+                jsonData.moveObject.velocity.rotate.y = SwapRadian((float)rotate[1]);
+                jsonData.moveObject.velocity.rotate.z = SwapRadian((float)rotate[2]);
 
-                jsonData.trap.velocity.scale.x = (float)scale[0];
-                jsonData.trap.velocity.scale.y = (float)scale[1];
-                jsonData.trap.velocity.scale.z = (float)scale[2];
+                jsonData.moveObject.velocity.scale.x = (float)scale[0];
+                jsonData.moveObject.velocity.scale.y = (float)scale[1];
+                jsonData.moveObject.velocity.scale.z = (float)scale[2];
 
-                jsonData.trap.runTime = (float)runtime;
+                jsonData.moveObject.runTime = (float)runtime;
 
-                if (trap["loop"].get<std::string>() == "true")
+                if (moveObject["loop"].get<std::string>() == "true")
                 {
-                    jsonData.trap.loop = true;
+                    jsonData.moveObject.loop = true;
                 } 
                 else 
                 { 
-                    jsonData.trap.loop = false; 
+                    jsonData.moveObject.loop = false; 
                 }
-                if (trap["reverse"].get<std::string>() == "true")
+                if (moveObject["reverse"].get<std::string>() == "true")
                 {
-                    jsonData.trap.reverse = true;
+                    jsonData.moveObject.reverse = true;
                 }
                 else
                 {
-                    jsonData.trap.reverse = false;
+                    jsonData.moveObject.reverse = false;
                 }
 
-                if (trap["enable_spawner"].get<std::string>() == "true")
+                if (moveObject["enable_spawner"].get<std::string>() == "true")
                 {
-                    jsonData.trap.spawner = true;
-                    nlohmann::json spawner = trap["spawner"];
+                    jsonData.moveObject.spawner = true;
+                    nlohmann::json spawner = moveObject["spawner"];
                     nlohmann::json& spawnTime = spawner["spawn_time"];
                     if (spawner["type"].get<std::string>() == "constant")
                     {
-                        jsonData.trap.spawnerTime = { (float)spawnTime, -1.0f };
+                        jsonData.moveObject.spawnerTime = { (float)spawnTime, -1.0f };
                     }
                     else if (spawner["type"].get<std::string>() == "random")
                     {
-                        jsonData.trap.spawnerTime = { (float)spawnTime[0], (float)spawnTime[1] };
+                        jsonData.moveObject.spawnerTime = { (float)spawnTime[0], (float)spawnTime[1] };
                     }
                 }
 
             }
             else
             {
-                jsonData.trap.move = false;
+                jsonData.moveObject.move = false;
             }
             // "file_name"
             if (object.contains("file_name"))
@@ -275,17 +262,6 @@ void JsonLoader::LoadJson(const std::string& path, const std::string& jsonName, 
         levelDatas[jsonName].name = "NULL";
     }
     levelDatas[jsonName] = levelData;
-}
-
-void JsonLoader::SerchTransformFunctional(const std::string& jsonName, const std::string file_name, std::function<void(Transform transform)> function)
-{
-    for (auto data : levelDatas[jsonName].datas)
-    {
-        if (data.second.file_name == file_name)
-        {
-            function(data.second.transform);
-        }
-    }
 }
 
 const std::vector<JsonData> JsonLoader::GetJsonData(const std::string& jsonName, const std::string file_name) {

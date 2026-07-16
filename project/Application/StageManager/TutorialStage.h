@@ -1,7 +1,7 @@
 #include "BaseStage.h"
 #include "Object3d.h"
 #include "Sprite.h"
-#include "Trap.h"
+#include "MoveObject.h"
 #include "Goal.h"
 
 #pragma once
@@ -43,15 +43,10 @@ private:
     Player* m_player = nullptr;
     Camera* m_camera = nullptr;
     // ステージに必要なものの宣言
-    std::unique_ptr<Object3d> stageObject;
-    std::unique_ptr<Object3d> wallRunObject;
-    std::unique_ptr<Object3d> collisionObject;
-    std::unique_ptr<Trap> trap;
-    std::unique_ptr<Goal> goal;
-
-
-
-    std::array< std::unique_ptr<Sprite>, 4> tutorialSprites;
-
+    std::unique_ptr<Object3d> m_pStageObject;
+    std::unique_ptr<Object3d> m_pWallRunObject;
+    std::unique_ptr<Object3d> m_pCollisionObject;
+    std::unique_ptr<MoveObject> m_pMoveObject;
+    std::unique_ptr<Goal> m_pGoal;
 };
 
