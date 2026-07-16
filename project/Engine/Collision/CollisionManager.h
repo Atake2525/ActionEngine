@@ -36,49 +36,47 @@ public:
 	/// <summary>
 	/// 更新
 	/// </summary>
-	void Update(const std::string& targetName, bool wallDashCollision = false);
+	void Update(const std::string& targetName);
 
 	/// <summary>
 	/// 貫通量を取得
 	/// </summary>
 	const Vector3& GetPenetration() const { return m_penetration; }
 
-    const Vector3 GetPenetrationForAABB(const AABB& aabb, bool wallDashCollision = false);
+    const Vector3 GetPenetrationForAABB(const AABB& aabb);
 
 	/// <summary>
 	/// ３方向全ての貫通量をreturn
 	/// </summary>
-	const Vector3 GetAllPenetrationForAABB(const AABB& aabb, bool wallDashCollision = false);
+	const Vector3 GetAllPenetrationForAABB(const AABB& aabb);
 
 	// 対象と地面との距離を求める
-	const float GetGroundDistance(const std::string& targetName, bool wallDashCollision = false) const;
+	const float GetGroundDistance(const std::string& targetName) const;
 
-	const float GetGroundDistanceForAABB(const AABB& aabb, bool wallDashCollision = false) const;
+	const float GetGroundDistanceForAABB(const AABB& aabb) const;
 
 	// 衝突しているオブジェクトのAABBを変えす(複数のオブジェクトに衝突している可能性を考えてvectorで)
-	const std::vector<AABB> GetCollisionObjectAABBsForAABB(const AABB& aabb, bool wallRunCollision = false) const;
+	const std::vector<AABB> GetCollisionObjectAABBsForAABB(const AABB& aabb) const;
 
 	// 対象と地面との最大距離を求める
-	const float GetGroundMAXDistance(const std::string& targetName, bool wallDashCollision = false) const;
+	const float GetGroundMAXDistance(const std::string& targetName) const;
 
     // 指定した座標と地面との最大距離を求める
-    const float GetMaxGroundDistanceForAABB(const AABB& aabb, bool wallDashCollision = false) const;
+    const float GetMaxGroundDistanceForAABB(const AABB& aabb) const;
 
 	//const bool IsCollisionObjectForAABB(const AABB& aabb, bool wallDashCollision, const AABB& noSearchAABB = AABB::Zero) const;
 
-	const float GetHeightToTopForAABB(const AABB& aabb, bool wallDashCollision = false);
+	const float GetHeightToTopForAABB(const AABB& aabb);
 
-	const Vector3 GetCollisionObjectDirectionForAABB(const AABB& aabb, bool wallDashCollision = false);
+	const Vector3 GetCollisionObjectDirectionForAABB(const AABB& aabb);
 
-	const AABB GetObjectForCollisionDirection(const AABB& aabb, const Vector3& direction, bool wallDashCollision = false);
-	const bool IsCollisionObjectForAABB(const AABB& aabb, bool wallDashCollision = false, const AABB& noSearchAABB = AABB::Zero) const;
+	const AABB GetObjectForCollisionDirection(const AABB& aabb, const Vector3& direction);
+	const bool IsCollisionObjectForAABB(const AABB& aabb, const AABB& noSearchAABB = AABB::Zero) const;
 
 	const Vector3 CheckPenetrationAmount(const AABB& aabb);
 
 	// 当たり判定として計算するオブジェクトの追加
 	void AddCollision(Object3d* object3d);
-
-	void AddWallDashColliison(Object3d* object3d);
 
 	// 当たり判定を計算する対象の追加(念のため複数指定できるようにしておく)
 	void AddCollisionTarget(AABB aabb, const std::string key);
@@ -87,9 +85,6 @@ public:
 
 	// 判定対象オブジェクトの削除
 	void DeleteCollision(Object3d* object3d);
-
-	// 判定対象オブジェクトの削除
-	void DeleteWallDashCollision(Object3d* object3d);
 
 	// 判定対象の削除
 	void DeleteCollisionTarget(const std::string key);
@@ -104,8 +99,6 @@ public:
 private:
 
 	std::vector<Object3d*> collisionObject;
-
-	std::vector<Object3d*> wallDashCollisionObject;
 
 	std::unordered_map<std::string, AABB> collisionTarget;
 

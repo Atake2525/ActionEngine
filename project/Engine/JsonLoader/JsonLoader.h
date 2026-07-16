@@ -20,7 +20,7 @@ struct Children
 	std::string	file_name;
 };
 
-struct TrapData
+struct MoveObjectData
 {
 	bool move;
 
@@ -42,7 +42,7 @@ struct JsonData
 	std::string name;
 
 	Transform transform;
-	TrapData trap;
+	MoveObjectData moveObject;
 
 	std::string	file_name;
 
@@ -54,16 +54,6 @@ struct LevelData
 	std::string name;
 
 	std::unordered_map<std::string, JsonData> datas;
-};
-
-struct HotReload
-{
-	std::string directoryPath;
-	std::string fileName;
-
-	std::string fullpath;
-
-	FILETIME& lastWriteTime;
 };
 
 class JsonLoader
@@ -95,8 +85,6 @@ public:
 	/// <param name="jsonName">保存するJson名</param>
 	/// <param name="Overwrite">上書きするか</param>
 	void LoadJson(const std::string& path, const std::string& jsonName, const bool Overwrite = false);
-
-	void SerchTransformFunctional(const std::string& jsonName, const std::string file_name, std::function<void(Transform transform)> function);
 
 	const std::vector<JsonData> GetJsonData(const std::string& jsonName, const std::string file_name);
 
