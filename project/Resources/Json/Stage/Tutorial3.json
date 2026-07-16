@@ -3,6 +3,31 @@
     "objects": [
         {
             "type": "MESH",
+            "name": "円柱",
+            "transform": {
+                "translation": [
+                    -129.0,
+                    133.5,
+                    19.794445037841797
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "goal",
+            "moveObject": {
+                "move": "false"
+            }
+        },
+        {
+            "type": "MESH",
             "name": "球",
             "transform": {
                 "translation": [
@@ -22,31 +47,6 @@
                 ]
             },
             "file_name": "startpoint",
-            "moveObject": {
-                "move": "false"
-            }
-        },
-        {
-            "type": "MESH",
-            "name": "円柱",
-            "transform": {
-                "translation": [
-                    -110.0,
-                    73.5,
-                    5.086469650268555
-                ],
-                "rotation": [
-                    0.0,
-                    -0.0,
-                    0.0
-                ],
-                "scaling": [
-                    1.0,
-                    1.0,
-                    1.0
-                ]
-            },
-            "file_name": "goal",
             "moveObject": {
                 "move": "false"
             }
@@ -77,7 +77,7 @@
                 "velocity_translation": [
                     0.0,
                     0.0,
-                    -21.0
+                    -19.0
                 ],
                 "velocity_rotation": [
                     0.0,
@@ -91,7 +91,7 @@
                 ],
                 "loop": "true",
                 "reverse": "true",
-                "runtime": 3.0,
+                "runtime": 4.0,
                 "enable_spawner": "false"
             }
         }
