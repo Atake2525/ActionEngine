@@ -10,11 +10,11 @@
 struct AppContext;
 
 // 罠の情報を格納するための構造体
-struct Traps
+struct MoveObjectStruct
 {
     std::unique_ptr<Object3d> object;
     Transform start;
-    TrapData trapData;
+    MoveObjectData trapData;
     bool reverse;
     float startFrame;
     int number;
@@ -23,11 +23,11 @@ struct Traps
 /// <summary>
 /// トラップ
 /// </summary>
-class Trap
+class MoveObject
 {
 public:
-    Trap();
-    ~Trap();
+    MoveObject();
+    ~MoveObject();
 
     void SetContext(AppContext& context) { m_pContext = &context; }
 
@@ -58,11 +58,11 @@ private:
     /// <summary>
     /// トラップを作成する関数
     /// </summary>
-    void MakeTrap(Traps& data);
+    void MakeMoveObject(MoveObjectStruct& data);
 
     std::string m_jsonName;
 
-    std::vector<Traps> m_traps;
+    std::vector<MoveObjectStruct> m_moveObjects;
 
     float m_gameTimer = 0.0f;
 

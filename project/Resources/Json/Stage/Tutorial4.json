@@ -1,0 +1,244 @@
+{
+    "name": "scene",
+    "objects": [
+        {
+            "type": "MESH",
+            "name": "球",
+            "transform": {
+                "translation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "startpoint",
+            "trap": {
+                "move": "false"
+            }
+        },
+        {
+            "type": "MESH",
+            "name": "円柱",
+            "transform": {
+                "translation": [
+                    -49.0,
+                    74.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "goal",
+            "trap": {
+                "move": "false"
+            }
+        },
+        {
+            "type": "MESH",
+            "name": "立方体",
+            "transform": {
+                "translation": [
+                    13.50001335144043,
+                    39.999996185302734,
+                    0.9494483470916748
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    4.0,
+                    1.0
+                ]
+            },
+            "file_name": "trap",
+            "trap": {
+                "move": "true",
+                "velocity_translation": [
+                    -10.0,
+                    0.0,
+                    0.0
+                ],
+                "velocity_rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "velocity_scale": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "loop": "true",
+                "reverse": "true",
+                "runtime": 3.0,
+                "enable_spawner": "false"
+            }
+        },
+        {
+            "type": "MESH",
+            "name": "立方体.008",
+            "transform": {
+                "translation": [
+                    11.500009536743164,
+                    73.5,
+                    1.0000104904174805
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    12.5,
+                    1.0
+                ]
+            },
+            "file_name": "trap_1",
+            "trap": {
+                "move": "true",
+                "velocity_translation": [
+                    -13.5,
+                    0.0,
+                    0.0
+                ],
+                "velocity_rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "velocity_scale": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "loop": "false",
+                "reverse": "false",
+                "runtime": 2.0,
+                "enable_spawner": "true",
+                "spawner": {
+                    "type": "random",
+                    "spawn_time": [
+                        0.5,
+                        1.2000000476837158
+                    ]
+                }
+            }
+        },
+        {
+            "type": "MESH",
+            "name": "球.001",
+            "transform": {
+                "translation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "startpoint",
+            "trap": {
+                "move": "false"
+            }
+        },
+        {
+            "type": "MESH",
+            "name": "円柱.001",
+            "transform": {
+                "translation": [
+                    -49.0,
+                    74.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "goal",
+            "trap": {
+                "move": "false"
+            }
+        },
+        {
+            "type": "MESH",
+            "name": "立方体.014",
+            "transform": {
+                "translation": [
+                    13.50001335144043,
+                    39.999996185302734,
+                    0.9494483470916748
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    4.0,
+                    1.0
+                ]
+            },
+            "file_name": "trap",
+            "trap": {
+                "move": "true",
+                "velocity_translation": [
+                    -10.0,
+                    0.0,
+                    0.0
+                ],
+                "velocity_rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "velocity_scale": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "loop": "true",
+                "reverse": "true",
+                "runtime": 3.0,
+                "enable_spawner": "false"
+            }
+        }
+    ]
+}

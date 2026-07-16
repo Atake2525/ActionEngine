@@ -26,39 +26,28 @@ void TutorialStage::Initialize(Player* player, Camera* camera)
     ctx.engine.assets.json.LoadJson("Resources/Json/Stage/Tutorial3.json", "TutorialStage", false);
 
     // ステージオブジェクトの初期化
-    stageObject = ctx.game.object3dFactory.Create();
+    m_pStageObject = ctx.game.object3dFactory.Create();
     Model* model = ctx.engine.assets.models.LoadModel("Resources/Model/obj/Stage/TutorialStage3", "Model.obj");
-    stageObject->SetModel(model);
-    stageObject->SetEnableLighting(true);
-    stageObject->Update();
+    m_pStageObject->SetModel(model);
+    m_pStageObject->SetEnableLighting(true);
+    m_pStageObject->Update();
 
-    collisionObject = ctx.game.object3dFactory.Create();
+    m_pCollisionObject = ctx.game.object3dFactory.Create();
     model = ctx.engine.assets.models.LoadModel("Resources/Model/obj/Stage/TutorialStage3", "Collision.obj", false);
-    collisionObject->SetModel(model);
-    collisionObject->Update();
+    m_pCollisionObject->SetModel(model);
+    m_pCollisionObject->Update();
     
-    ctx.world.collision.AddCollision(collisionObject.get());
+    ctx.world.collision.AddCollision(m_pCollisionObject.get());
 
     // トラップの初期化
-    trap = make_unique<Trap>();
-    trap->SetContext(ctx);
-    trap->Initialize("TutorialStage");
+    m_pMoveObject = make_unique<MoveObject>();
+    m_pMoveObject->SetContext(ctx);
+    m_pMoveObject->Initialize("TutorialStage");
 
     // ゴールの初期化
-    goal = make_unique<Goal>();
-    goal->SetContext(ctx);
-    goal->Initialize("TutorialStage", player);
-
-    float windowSizeX = float(ctx.engine.platform.window.GetkClientWidth());
-    for (int i = 0; i < 4; i++)
-    {
-        tutorialSprites[i] = ctx.game.spriteFactory.Create("Resources/Sprite/tutorialUI/tutorial" + to_string(i + 1) + ".png");
-        tutorialSprites[i]->SetAnchorPoint({ 1.0f, 0.0f });
-        tutorialSprites[i]->SetPosition({ windowSizeX, 50.0f * i });
-        tutorialSprites[i]->SetScale({ 300.0f, 50.0f });
-        tutorialSprites[i]->Update();
-    }
-
+    m_pGoal = make_unique<Goal>();
+    m_pGoal->SetContext(ctx);
+    m_pGoal->Initialize("TutorialStage", player);
 
     m_player = player;
     m_camera = camera;
@@ -75,7 +64,7 @@ void TutorialStage::Update()
 #ifndef NDEBUG
     if (ctx.engine.platform.input.TriggerKey(DIK_RETURN))
     {
-        goal->SetGoal();
+        m_pGoal->SetGoal();
     }
 #endif // !NDEBUG
 
@@ -91,42 +80,37 @@ void TutorialStage::Update()
         ctx.engine.presentation.fade.SetFinishedFadeFunction(func);
     }
 
-    stageObject->Update();
+    m_pStageObject->Update();
 
-    trap->Update();
+    m_pMoveObject->Update();
 
-    goal->Update();
+    m_pGoal->Update();
 }
 
 void TutorialStage::DrawObject3d()
 {
-    stageObject->Draw();
-    trap->Draw();
-    goal->DrawGoalObject();
-    for (int i = 0; i < 4; i++)
-    {
-        tutorialSprites[i]->Update();
-    }
+    m_pStageObject->Draw();
+    m_pMoveObject->Draw();
+    m_pGoal->DrawGoalObject();
 }
 
 void TutorialStage::DrawFrontSprite() {}
 
 void TutorialStage::DrawBackSprite()
 {
-    goal->DrawResult();
+    m_pGoal->DrawResult();
 }
 
 void TutorialStage::Finalize()
 {
     AppContext& ctx = *m_pContext;
-    if (collisionObject)
+    if (m_pCollisionObject)
     {
-        ctx.world.collision.DeleteCollision(collisionObject.get());
+        ctx.world.collision.DeleteCollision(m_pCollisionObject.get());
     }
-    if (wallRunObject)
+    if (m_pWallRunObject)
     {
-        ctx.world.collision.DeleteCollision(wallRunObject.get());
-        ctx.world.collision.DeleteWallDashCollision(wallRunObject.get());
+        ctx.world.collision.DeleteCollision(m_pWallRunObject.get());
     }
     ctx.engine.assets.json.DeleteJson("TutorialStage");
 }

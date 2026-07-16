@@ -159,7 +159,7 @@ public:
     // ============================
     //  Culling
     // ============================
-    void SetDrawHeiht(const float height) { privateCullingData.drawHeight = height; }
+    void SetDrawHeight(const float height) { privateCullingData.drawHeight = height; }
     const CullingTemplate GetCullingTemplateData() const { return privateCullingData; }
 
     // ============================
