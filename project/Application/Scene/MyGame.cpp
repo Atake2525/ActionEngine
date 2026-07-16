@@ -1,4 +1,5 @@
 #include "MyGame.h"
+#include "ImGuiManager.h"
 
 void MyGame::Initialize() {
     FrameWork::Initialize();
@@ -13,5 +14,6 @@ void MyGame::Draw() {
 
 void MyGame::Finalize() {
 
-    FrameWork::Finalize();
+    finished = FrameWork::LoopOut();
 }
+

@@ -38,7 +38,7 @@ Player::~Player()
 
 void Player::Initialize(Camera* camera, const std::string& jsonName)
 {
-    AppContext& ctx = *m_pContext;
+    AppContext& context = *m_pContext;
     // カメラのセット
     m_pCamera = camera;
     // カメラの初期設定
@@ -48,10 +48,10 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
     m_fovAfter = m_fovDefault;
 
     // JsonDataからステージ情報を取得してプレイヤーの初期位置とゴールの位置を設定する処理
-    if (ctx.engine.assets.json.CheckJsonLoaded(jsonName))
+    if (context.engine.assets.json.CheckJsonLoaded(jsonName))
     {
         // スタート地点の取得
-        vector<JsonData> data = ctx.engine.assets.json.GetJsonData(jsonName, "startpoint");
+        vector<JsonData> data = context.engine.assets.json.GetJsonData(jsonName, "startpoint");
         // スタート地点が設定されていない又はjsonが読み込めなかった場合はデフォルト位置を使用
         if (!data.empty())
         {
@@ -60,15 +60,15 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
         }
     }
 
-    Model* model = ctx.engine.assets.models.LoadModel("Resources/Model/obj/Player", "PlayerCollision.obj", false);
+    Model* model = context.engine.assets.models.LoadModel("Resources/Model/obj/Player", "PlayerCollision.obj", false);
     // プレイヤーモデルの初期化
-    m_pModel = ctx.game.object3dFactory.Create();
+    m_pModel = context.game.object3dFactory.Create();
     m_pModel->SetModel(model);
     m_pModel->SetTransform(m_transform);
     //m_pModel->CreateCapsule();
 
-    model = ctx.engine.assets.models.LoadModel("Resources/Model/gltf/char", "noHeadIdle.gltf", true);
-    m_pDrawModel = ctx.game.object3dFactory.Create();
+    model = context.engine.assets.models.LoadModel("Resources/Model/gltf/char", "noHeadIdle.gltf", true);
+    m_pDrawModel = context.game.object3dFactory.Create();
     m_pDrawModel->SetModel(model);
     // 初期モデル以外の移動アニメーションも起動時にまとめて読み込んでおく。
    /* m_pDrawModel->AddAnimationsThreaded("Resources/Model/gltf/char", {
@@ -84,13 +84,13 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
     m_playerAABB = m_pModel->GetAABB();
     m_playerAABB += m_transform.position;
     m_playerHeight = AABB::GetSize(m_playerAABB).y;
-    ctx.world.collision.AddCollisionTarget(m_playerAABB, "Player");
+    context.world.collision.AddCollisionTarget(m_playerAABB, "Player");
 
     // カメラの高さをモデルの高さに合わせて調整 (ちょっとだけ低くする)
     m_cameraBaseTransform.position.y = m_playerAABB.max.y - m_transform.position.y - AABB::GetSize(m_playerAABB).y * m_eyeHeight;
 
     // コントロールモードの初期設定
-    if (ctx.engine.platform.input.IsConnectedController())
+    if (context.engine.platform.input.IsConnectedController())
     {
         m_controlMode = ControlMode::Gamepad;
     }
@@ -99,7 +99,7 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
         m_controlMode = ControlMode::KeyboardMouse;
     }
 
-    m_pInput = &ctx.engine.platform.input;
+    m_pInput = &context.engine.platform.input;
 
     // デバッグ用の初期設定
 #ifndef NDEBUG
