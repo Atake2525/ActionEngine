@@ -267,22 +267,24 @@ void Player::UpdateState()
         m_onGround = true;
     }
 
-    if (m_onGround && m_isWallRunning)
-    {
-        ChangeState(std::make_unique<RunState>());
-    }
-    else
-    {
-        ChangeState(std::make_unique<AirControlState>());
-    }
+    const bool wantsToCrouch = m_command.crouch && !m_isClimbing && !m_isWallRunning;
+    const bool needsCrouchForClearance = m_crouchTimer > 0.0f && !CanUncrouch();
 
-    if (m_command.crouch && !m_isClimbing && !m_isWallRunning)
+    // 頭上に障害物がある間は、入力を離してもCrouchStateを維持する
+    if (wantsToCrouch || needsCrouchForClearance)
     {
         ChangeState(std::make_unique<CrouchState>());
     }
-    else if (CanUncrouch() && m_pCurrentState->GetStateId() == PlayerStateId::Crouch)
+    else if (!m_isWallRunning)
     {
-        ChangeState(std::make_unique<RunState>());
+        if (m_onGround)
+        {
+            ChangeState(std::make_unique<RunState>());
+        }
+        else
+        {
+            ChangeState(std::make_unique<AirControlState>());
+        }
     }
     UpdateParkourState();
 
@@ -396,15 +398,19 @@ const bool Player::CheckWallRunEnd()
 
 bool Player::CanUncrouch()
 {
-    AABB pAABB = m_playerAABB;
-    pAABB.max.y = pAABB.min.y + m_playerHeight;
-    // オブジェクトと上方向に貫通していたらcrouchを続けるようにする
-    float penetration = m_pContext->world.collision.GetAllPenetrationForAABB(pAABB).y;
-    if (penetration != 0.0f)
+    // 現在の頭頂部から立ち状態の頭頂部までに障害物があるかを確認する
+    AABB headroomAABB = m_playerAABB;
+    headroomAABB.min.y = m_playerAABB.min.y + m_playerHeight + m_crouchHeight;
+    headroomAABB.max.y = m_playerAABB.min.y + m_playerHeight;
+
+    if (headroomAABB.min.y >= headroomAABB.max.y)
     {
-        return false;
+        return true;
     }
-    return true;
+
+    const std::vector<AABB> collisions =
+        m_pContext->world.collision.GetCollisionObjectAABBsForAABB(headroomAABB);
+    return collisions.empty();
 }
 
 const bool Player::CanClimbing()
@@ -856,8 +862,14 @@ void Player::UpdateCameraFov() {
     // Fov変更処理の実装
     m_fov = m_pCamera->GetfovY();
     m_fovPre = m_fov;
+
+    // m_playerSpeedは1フレームの移動量なので、m_runSpeedと同じ秒速に戻して比較する
+    const float currentSpeed = m_playerSpeed / max(m_delta, 0.0001f);
+    // 浮動小数点の誤差で最高速度判定を逃さないよう、わずかに余裕を持たせる
+    constexpr float kRunFovSpeedThreshold = 0.99f;
+
     // 移動速度がダッシュ速度ならFovを広げる
-    if (m_playerSpeed >= m_runSpeed && !m_isRunFov)
+    if (currentSpeed >= m_runSpeed * kRunFovSpeedThreshold && !m_isRunFov)
     {
         m_fovChangeTimer = 0.0f;
         m_fovBefore = m_fov;
@@ -879,7 +891,11 @@ void Player::UpdateCameraFov() {
 }
 
 void Player::UpdateCrouchCamera() {
-    if (m_command.crouch)
+    // 入力を離しても頭上に空間がなければ、カメラと当たり判定を戻さない
+    const bool shouldCrouch =
+        m_command.crouch || (m_crouchTimer > 0.0f && !CanUncrouch());
+
+    if (shouldCrouch)
     {
         m_crouchTimer += m_delta / m_crouchTime;
     }
@@ -1112,6 +1128,8 @@ void Player::UpdateDebugUI() {
         }
 
         ImGui::SliderFloat("FOV", &m_fov, 30.0f, 120.0f);
+        ImGui::SliderFloat("DefaultFov", &m_fovDefault, 0.0f, 200.0f);
+        ImGui::SliderFloat("DefaultFov", &m_fovRun, 0.0f, 200.0f);
     }
 
     ImGui::End();

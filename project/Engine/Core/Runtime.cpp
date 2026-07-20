@@ -95,7 +95,7 @@ void Runtime::SetupEngine() {
 #ifndef NDEBUG
     engine.platform.window.Initialize();
 #else
-    engine.platform.window.Initialize(1280, 720, WindowMode::Window, L"走快");
+    engine.platform.window.Initialize(1920, 1080, WindowMode::FullScreen, L"走快");
 #endif // !NDEBUG
 
     engine.platform.input.Initialize(engine.platform.window);
@@ -152,7 +152,7 @@ void Runtime::SetupGame() {
     game.sceneManager.GetSettingManager().SetContext(engine.assets.json);
     game.sceneManager.GetSettingManager().Load("KeyConfig.json", Setting::SettingType::KeyConfig);
     game.sceneManager.GetSettingManager().Load("Audio.json", Setting::SettingType::AudioConfig);
-    game.sceneManager.SetNextScene("GAMESCENE");
+    game.sceneManager.SetNextScene("TITLE");
 
     engine.platform.window.OpenWindow();
 }
