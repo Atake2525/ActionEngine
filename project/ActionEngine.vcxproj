@@ -185,7 +185,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Player\WallRunState.cpp" />
     <ClCompile Include="Application\Player\WallJumpState.cpp" />
     <ClCompile Include="Engine\Core\Runtime.cpp" />
-    <ClCompile Include="ModelLoader.cpp" />
+    <ClCompile Include="Engine\LoadManager\ModelLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Player\AirControlState.h" />

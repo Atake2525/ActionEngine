@@ -342,9 +342,6 @@
     <ClCompile Include="Application\Player\Player.cpp">
       <Filter>Application\Player</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Collision\PhysicsCorrection.cpp">
-      <Filter>Engine\Collision</Filter>
-    </ClCompile>
     <ClCompile Include="Application\Pause.cpp">
       <Filter>Application</Filter>
     </ClCompile>
@@ -404,8 +401,9 @@
     </ClCompile>
     <ClCompile Include="Application\Player\AirControlState.cpp">
       <Filter>Application\Player\State</Filter>
-    <ClCompile Include="ModelLoader.cpp">
-      <Filter>Engine\3d\Model\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\LoadManager\ModelLoader.cpp">
+      <Filter>Engine\LoadManager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -702,6 +700,7 @@
     </ClInclude>
     <ClInclude Include="Application\Player\AirControlState.h">
       <Filter>Application\Player\State</Filter>
+    </ClInclude>
     <ClInclude Include="Engine\3d\Model\Model\ModelLoader.h">
       <Filter>Engine\3d\Model\Model</Filter>
     </ClInclude>
