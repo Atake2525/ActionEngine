@@ -118,29 +118,28 @@ private: // プレイヤーステート管理
     void Move();
 
     /// <summary>
-    /// 移動処理
+    /// 平行移動処理
     /// </summary>
     void HorizontalMove(const float speed, const float accelerationTime, const float decelerationTime);
 
     /// <summary>
-    /// ウォールランの開始処理
+    /// スライディング処理
     /// </summary>
-    void WallRunStart();
+    void SlidingStart();
+    void Sliding();
+    const float m_maxSlideSpeedThreshold = 0.07f;
 
     /// <summary>
-    /// ウォールラン処理
+    /// ウォールランの処理
     /// </summary>
+    void WallRunStart();
     void WallRun();
 
     /// <summary>
     /// クライミング(よじ登り)処理
     /// </summary>
-    void Climbing();
-
-    /// <summary>
-    /// クライミング(よじ登り)開始処理
-    /// </summary>
     void StartClimbing();
+    void Climbing();
 
     /// <summary>
     /// ジャンプ開始処理
@@ -237,6 +236,7 @@ private:
     friend class RunState;
     friend class JumpState;
     friend class CrouchState;
+    friend class SlidingState;
     friend class WallRunState;
     friend class ClimbingState;
     friend class WallJumpState;
@@ -283,9 +283,9 @@ private:
     // しゃがみ関連
     //================
     float m_playerHeight = 0.0f;
-    float m_cameraHeight = 1.5f;
+    const float m_cameraHeight = 1.5f;
+    const float m_crouchHeightOffset = -0.8f;
     float m_crouchHeight = 0.0f;
-    float m_crouchHeightOffset = -0.8f;
 
     //================
     // よじ登り関連
@@ -312,6 +312,7 @@ private:
     const float m_airAccelerationTime = 0.2f;
     const float m_groundDecelerationTime = 0.05f;
     const float m_airDecelerationTime = 0.6f;
+    const float m_slidingAccelerationTime = 0.07f;
 
     float m_moveSpeed = 1.0f;
     float m_playerSpeed = 0.0f; // 現在の速度

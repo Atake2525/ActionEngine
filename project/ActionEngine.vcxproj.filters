@@ -405,6 +405,9 @@
     <ClCompile Include="Application\Player\AirControlState.cpp">
       <Filter>Application\Player\State</Filter>
     </ClCompile>
+    <ClCompile Include="Application\Player\SlidingState.cpp">
+      <Filter>Application\Player\State</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Setting\KeyboardConfig.h">
@@ -702,6 +705,9 @@
       <Filter>Engine\Core</Filter>
     </ClInclude>
     <ClInclude Include="Application\Player\AirControlState.h">
+      <Filter>Application\Player\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Player\SlidingState.h">
       <Filter>Application\Player\State</Filter>
     </ClInclude>
   </ItemGroup>

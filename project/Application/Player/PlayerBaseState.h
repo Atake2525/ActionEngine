@@ -6,6 +6,7 @@ class Player;
 enum class PlayerStateId {
     Run,
     Crouch,
+    Sliding,
     Jump,
     WallRun,
     WallJump,

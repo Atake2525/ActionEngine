@@ -186,6 +186,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Application\Player\WallRunState.cpp" />
     <ClCompile Include="Application\Player\WallJumpState.cpp" />
     <ClCompile Include="Engine\Core\Runtime.cpp" />
+    <ClCompile Include="Application\Player\SlidingState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Player\AirControlState.h" />
@@ -290,6 +291,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Application\Player\WallRunState.h" />
     <ClInclude Include="Application\Player\WallJumpState.h" />
     <ClInclude Include="Engine\Core\Runtime.h" />
+    <ClInclude Include="Application\Player\SlidingState.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="externals\assimp\lib\Release\assimp-vc143-mtd.lib">

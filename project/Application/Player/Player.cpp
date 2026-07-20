@@ -580,6 +580,13 @@ void Player::HorizontalMove(const float speed, const float accelerationTime, con
 
 }
 
+void Player::SlidingStart(){
+}
+
+void Player::Sliding() {
+    m_
+}
+
 void Player::WallRunStart() {
     // ウォールランの開始フレームの情報から移動方向を決める
     // ウォールラン用のオブジェクトとの貫通量を取得
@@ -696,8 +703,6 @@ void Player::StartClimbing()
     m_climbingTimer = 0.0f;
     m_climbingStep = 0;
     m_isClimbingMotion = true;
-    //m_isClimbing = true;
-    //m_onGround = true;
     m_state = WalkState::Idle;
     m_isWallRunning = false;
     m_wallPenetration = Vector3::Zero;
@@ -726,14 +731,14 @@ void Player::Climbing()
     m_playerAABB += moveDelta;
     m_velocity.position = Vector3::Zero;
     m_playerSpeed = 0.0f;
-    m_onGround = true;
+    //m_onGround = true;
 
     if (t >= 1.0f)
     {
         if (m_climbingStep == 1)
         {
             m_isClimbingMotion = false;
-            m_onGround = false;
+            //m_onGround = false;
             m_isClimbing = false;
             ChangeState(std::make_unique<RunState>());
         }
