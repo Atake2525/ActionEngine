@@ -13,7 +13,7 @@ void MyGame::Draw() {
 }
 
 void MyGame::Finalize() {
-
+    FrameWork::Finalize();
     FrameWork::LoopOut();
 }
 
