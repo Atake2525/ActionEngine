@@ -3,6 +3,7 @@
 
 void WallRunState::Enter(Player& player) {
     player.WallRunStart();
+    player.WallRunCameraTiltStart();
 }
 
 void WallRunState::Update(Player& player) {
@@ -11,5 +12,5 @@ void WallRunState::Update(Player& player) {
 }
 
 void WallRunState::Exit(Player& player) {
-
+    player.m_wallRunRotateYTimer = 0.0f;
 }

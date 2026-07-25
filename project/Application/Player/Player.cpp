@@ -274,7 +274,7 @@ void Player::UpdateState()
     {
         ChangeState(std::make_unique<RunState>());
     }
-    else
+    if (!m_onGround && !m_isWallRunning)
     {
         ChangeState(std::make_unique<AirControlState>());
     }
@@ -580,13 +580,6 @@ void Player::HorizontalMove(const float speed, const float accelerationTime, con
 
 }
 
-void Player::SlidingStart(){
-}
-
-void Player::Sliding() {
-    m_
-}
-
 void Player::WallRunStart() {
     // ウォールランの開始フレームの情報から移動方向を決める
     // ウォールラン用のオブジェクトとの貫通量を取得
@@ -815,6 +808,15 @@ void Player::UpdateCameraParent() {
     m_pCamera->SetParent(m_pModel->GetWorldMatrix());
 }
 
+void Player::WallRunCameraTiltStart() {
+    // ウォールランの進行方向にカメラを合わせる(補助)を行うために角度を計算する
+    // 高さを考慮する必要はないので二次元空間でXとZを使って計算する
+    // 二次元空間で0は右なので0を正面にするためatan2fの計算はそのままx,zにする
+    m_wallRunningTargetCameraRotateY = atan2f(m_wallRunDirection.x, m_wallRunDirection.z);
+    float cameraRotY = std::fmod(m_cameraBaseTransform.rotate.y, 2 * std::numbers::pi_v<float>);
+    m_wallRunningBeforeCameraRotateY = cameraRotY;
+}
+
 void Player::UpdateWallRunCameraTilt() {
     // ウォールラン中のカメラの傾き処理の実装
     if (m_isWallRunning)
@@ -842,22 +844,52 @@ void Player::UpdateWallRunCameraTilt() {
 
             if (m_wallRunDirection.x != 0.0f)
             {
-                m_wallRunRotateAfter = m_wallRunRotateAngle * (signWallRunDirection.x * wallRunPenetration * -1.0f);
+                m_wallRunRotateZ = m_wallRunRotateAngle * (signWallRunDirection.x * wallRunPenetration * -1.0f);
             }
             if (m_wallRunDirection.z != 0.0f)
             {
-                m_wallRunRotateAfter = m_wallRunRotateAngle * (signWallRunDirection.z * wallRunPenetration * -1.0f);
+                m_wallRunRotateZ = m_wallRunRotateAngle * (signWallRunDirection.z * wallRunPenetration * -1.0f);
             }
         }
-        m_wallRunTimer += m_delta / m_wallRunTime;
+        m_wallRunRotateZTimer += m_delta / m_wallRunRotateZTime;
+        m_wallRunRotateYTimer += m_delta / m_wallRunRotateYTime;
+
+        float cameraRotY = std::fmod(m_cameraBaseTransform.rotate.y, 2 * std::numbers::pi_v<float>);
+        
+        if (Length(m_command.eye) != 0.0f)
+        {
+            m_wallRunningBeforeCameraRotateY = cameraRotY;
+            m_wallRunRotateYTimer = 0.0f;
+        }
+        else // 視点移動がないときにのみ補助が働くようにする
+        {
+            constexpr float twoPi = 2.0f * std::numbers::pi_v<float>;
+            float angleDiff = std::remainder(m_wallRunningTargetCameraRotateY - cameraRotY, twoPi);
+
+            if (std::fabs(angleDiff) <= m_wallRunningRotateYSpeed)
+            {
+                m_cameraBaseTransform.rotate.y = m_wallRunningTargetCameraRotateY;
+            }
+            else
+            {
+                m_cameraBaseTransform.rotate.y += std::copysign(m_wallRunningRotateYSpeed, angleDiff);
+            }
+        }
     }
     else
     {
         m_completeGetRotateInfo = false;
-        m_wallRunTimer -= m_delta / m_wallRunTime;
+        m_wallRunRotateZTimer -= m_delta / m_wallRunRotateZTime;
+        m_wallRunRotateYTimer = 0.0f;
     }
-    m_wallRunTimer = clamp(m_wallRunTimer, 0.0f, 1.0f);
-    m_cameraEffectTransform.rotate.z = Lerp(0.0f, m_wallRunRotateAfter, m_wallRunTimer);
+    m_wallRunRotateZTimer = clamp(m_wallRunRotateZTimer, 0.0f, 1.0f);
+    m_wallRunRotateYTimer = clamp(m_wallRunRotateYTimer, 0.0f, 1.0f);
+
+
+
+
+
+    m_cameraEffectTransform.rotate.z = Lerp(0.0f, m_wallRunRotateZ, m_wallRunRotateZTimer);
 }
 
 void Player::UpdateCameraFov() {
@@ -1012,7 +1044,8 @@ void Player::UpdateDebugUI() {
     ImGui::Checkbox("CanClimbing", &m_canClimbing);
 
     ImGui::DragFloat("CrouchHeihgt", &m_crouchHeight, 0.0f);
-    ImGui::DragFloat("CrouchHeightOffset", &m_crouchHeightOffset, 0.01f);
+
+    ImGui::DragFloat3("WallRunDirection", &m_wallRunDirection.x, 0.1f);
 
     ImGui::Separator();
 
@@ -1089,8 +1122,6 @@ void Player::UpdateDebugUI() {
 
     // --- Camera ---
     if (ImGui::CollapsingHeader("Camera")) {
-
-        ImGui::DragFloat("Camera Height", &m_cameraHeight, 0.01f);
 
         if (ImGui::TreeNode("Base"))
         {

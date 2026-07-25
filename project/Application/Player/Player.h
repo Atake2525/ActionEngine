@@ -123,13 +123,6 @@ private: // プレイヤーステート管理
     void HorizontalMove(const float speed, const float accelerationTime, const float decelerationTime);
 
     /// <summary>
-    /// スライディング処理
-    /// </summary>
-    void SlidingStart();
-    void Sliding();
-    const float m_maxSlideSpeedThreshold = 0.07f;
-
-    /// <summary>
     /// ウォールランの処理
     /// </summary>
     void WallRunStart();
@@ -178,6 +171,7 @@ private: // プレイヤーステート管理
 
     void UpdateCameraFov();
     
+    void WallRunCameraTiltStart();
     void UpdateWallRunCameraTilt();
 
     void UpdateHeadBob();
@@ -266,10 +260,17 @@ private:
     Vector3 m_wallRunDirection = Vector3::Zero;
     Vector3 m_wallPenetration = Vector3::Zero;
     bool m_completeGetRotateInfo = false;
-    float m_wallRunRotateAfter = 0.0f;
     float m_wallRunRotateAngle = SwapRadian(15.0f);
-    float m_wallRunTimer = 0.0f;
-    float m_wallRunTime = 0.14f;
+    float m_wallRunRotateZTimer = 0.0f;
+    float m_wallRunRotateYTimer = 0.0f;
+    float m_wallRunRotateZTime = 0.14f;
+    float m_wallRunRotateYTime = 1.0f;
+    float m_wallRunRotateZ = 0.0f;
+
+    float m_wallRunningBeforeCameraRotateY = 0.0f;
+    float m_wallRunningRotateYSpeed = SwapRadian(4.0f);
+    float m_wallRunningTargetCameraRotateY = 0.0f;
+
 
     bool m_isDecelVelY = false;
     float m_wallRunFallThreshold = -0.2f; // 落下速度を減衰し始める閾値
@@ -344,6 +345,7 @@ private:
     Transform m_headBobOffset = Transform::Default; // HeadBobのオフセット
     float m_crouchCameraOffsetY = 0.0f; // Crouch時のカメラオフセット
 
+  
 
     //==================================================
     // デバッグ関連（デバッグビルドのみ）
