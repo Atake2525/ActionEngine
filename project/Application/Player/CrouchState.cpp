@@ -6,7 +6,7 @@ void CrouchState::Enter(Player& player) {
 }
 
 void CrouchState::Update(Player& player) {
-    player.HorizontalMove(player.m_crounchSpeed, player.m_crouchAccelerationTime, player.m_groundDecelerationTime);
+    player.HorizontalMove(player.m_crounchSpeed, player.m_crouchAccelerationTime);
 }
 
 void CrouchState::Exit(Player& player) {

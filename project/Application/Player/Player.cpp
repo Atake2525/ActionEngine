@@ -7,6 +7,7 @@
 #include "GameTime.h"
 #include "CollisionManager.h"
 #include <algorithm>
+#include <cmath>
 #include "EasingUtility.h"
 #include <thread>
 #include "SettingManager.h"
@@ -19,14 +20,20 @@
 #include "WallRunState.h"
 #include "WallJumpState.h"
 #include "AirControlState.h"
+#include "PlayerActionResolver.h"
+#include "PlayerMovementCalculator.h"
 #include "EngineContext.h"
 
 
 using namespace std;
 
+namespace
+{
+    constexpr char kWalkSoundPath[] = "Resources/sound/walk_sound.wav";
+    constexpr char kWalkSoundName[] = "walk_sound";
+    constexpr float kPi = 3.14159265358979323846f;
+}
 
-// 斜め移動の速度補間
-constexpr float INV_SQRT2 = 0.70710678f; // 1 / sqrt(2)
 
 Player::~Player()
 {
@@ -39,6 +46,8 @@ Player::~Player()
 void Player::Initialize(Camera* camera, const std::string& jsonName)
 {
     AppContext& context = *m_pContext;
+    context.engine.assets.audio.LoadWave(kWalkSoundPath, kWalkSoundName);
+
     // カメラのセット
     m_pCamera = camera;
     // カメラの初期設定
@@ -56,7 +65,6 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
         if (!data.empty())
         {
             m_transform = data[0].transform;
-            m_firstTransform = data[0].transform;
         }
     }
 
@@ -121,6 +129,7 @@ void Player::Update()
         m_playerAABB = m_pModel->GetAABB();
 
         m_delta = m_pContext->engine.platform.time.GetDeltaTime();
+        m_actualHorizontalSpeed = 0.0f;
 
         m_fov = m_pCamera->GetfovY();
 
@@ -182,11 +191,6 @@ void Player::Update()
         m_transform.rotate += m_velocity.rotate;
         m_pModel->SetTransform(m_transform);
 
-        if (!m_isFirstInput)
-        {
-            m_pModel->SetTransform(m_firstTransform);
-        }
-
         m_pDrawModel->SetTransform(m_transform);
         Vector3 modelRotate = m_cameraBaseTransform.rotate;
         modelRotate.x = 0.0f;
@@ -243,12 +247,6 @@ void Player::UpdateState()
         return;
     }
 
-    // 入力が入ったら最初の入力フラグを立てる
-    if (m_command.move.x != 0.0f || m_command.move.y != 0.0f)
-    {
-        m_isFirstInput = true;
-    }
-
     if (m_onGround)
     {
         int statePoint = static_cast<int>(Sign((Sign(m_command.move.x) * m_command.move.x) + (Sign(m_command.move.y) * m_command.move.y)));
@@ -265,36 +263,24 @@ void Player::UpdateState()
         m_state = WalkState::Falling;
     }
     // 地面空の高さがほぼ0になっていれば地上判定を行う
-    if (!m_onGround && m_velocity.position.y <= 0.0f && groundDistance <= 0.01f)
+    if (!m_onGround && m_verticalVelocity <= 0.0f && groundDistance <= 0.01f)
     {
         m_onGround = true;
+        m_verticalVelocity = 0.0f;
     }
 
     const bool wantsToCrouch = m_command.crouch && !m_isClimbing && !m_isWallRunning;
     const bool needsCrouchForClearance = m_crouchTimer > 0.0f && !CanUncrouch();
 
-    // 頭上に障害物がある間は、入力を離してもCrouchStateを維持する
-    if (wantsToCrouch || needsCrouchForClearance)
-    {
-        ChangeState(std::make_unique<CrouchState>());
-    }
-    else if (!m_isWallRunning)
-    {
-        if (m_onGround)
-        {
-            ChangeState(std::make_unique<RunState>());
-        }
-        else
-        {
-            ChangeState(std::make_unique<AirControlState>());
-        }
-    }
-    UpdateParkourState();
+    UpdateActionState(wantsToCrouch, needsCrouchForClearance);
 
 }
 
-void Player::UpdateParkourState()
+void Player::UpdateActionState(bool wantsToCrouch, bool needsCrouchForClearance)
 {
+    // 通常移動Stateの判定は、これまで通り壁走り判定前の状態を基準にする。
+    const bool wasWallRunning = m_isWallRunning;
+
     // 落下中かつオブジェクトに衝突している、移動方向が前に向いている時に壁走り
     if (CheckWallRunStart())
     {
@@ -314,25 +300,52 @@ void Player::UpdateParkourState()
         m_isClimbing = true;
     }
 
-    if (m_isWallRunning)
-    {
-        ChangeState(std::make_unique<WallRunState>());
-    }
+    PlayerActionContext actionContext;
+    actionContext.wasWallRunning = wasWallRunning;
+    actionContext.isWallRunning = m_isWallRunning;
+    actionContext.isOnGround = m_onGround;
+    actionContext.wantsToCrouch = wantsToCrouch;
+    actionContext.needsCrouchForClearance = needsCrouchForClearance;
+    actionContext.jumpRequested = m_command.jump;
+    actionContext.isClimbing = m_isClimbing;
 
-    // ジャンプ入力があったらジャンプ処理
-    if (m_command.jump)
+    const PlayerStateTransitionPlan plan = PlayerActionResolver::Resolve(actionContext);
+    ApplyStateTransitionPlan(plan);
+}
+
+void Player::ApplyStateTransitionPlan(const PlayerStateTransitionPlan& plan)
+{
+    for (std::size_t index = 0; index < plan.GetCount(); index++)
     {
-        if (m_onGround)
+        const PlayerStateId stateId = plan.GetStateId(index);
+
+        if (stateId == PlayerStateId::Run)
+        {
+            ChangeState(std::make_unique<RunState>());
+        }
+        else if (stateId == PlayerStateId::Crouch)
+        {
+            ChangeState(std::make_unique<CrouchState>());
+        }
+        else if (stateId == PlayerStateId::Jump)
         {
             ChangeState(std::make_unique<JumpState>());
         }
-        if (m_isWallRunning)
+        else if (stateId == PlayerStateId::WallRun)
+        {
+            ChangeState(std::make_unique<WallRunState>());
+        }
+        else if (stateId == PlayerStateId::WallJump)
         {
             ChangeState(std::make_unique<WallJumpState>());
         }
-        if (m_isClimbing)
+        else if (stateId == PlayerStateId::Climbing)
         {
             ChangeState(std::make_unique<ClimbingState>());
+        }
+        else if (stateId == PlayerStateId::AirControl)
+        {
+            ChangeState(std::make_unique<AirControlState>());
         }
     }
 }
@@ -492,8 +505,6 @@ void Player::HandleInput()
 
         m_command.jump = m_pInput->TriggerKeyInt(keyBind.keyboardConfig.GetAction(Setting::Action::Jump)) != 0;
         m_command.crouch = m_pInput->PushKeyInt(keyBind.keyboardConfig.GetAction(Setting::Action::Crouch)) != 0;
-        m_command.run = m_pInput->PushKeyInt(keyBind.keyboardConfig.GetAction(Setting::Action::Run)) != 0;
-
         m_command.eye = m_pInput->GetMouseVel3() * keyBind.sensitivity.mouse * 0.01f;
         break;
     case Player::ControlMode::Gamepad:
@@ -504,8 +515,6 @@ void Player::HandleInput()
         // gamepadはDPadやスティックの入力の可能性もあるので対応する
         m_command.jump = m_pInput->TriggerButton(keyBind.controllerConfig.GetControllerAction(Setting::Action::Jump)) != 0;
         m_command.crouch = m_pInput->PushButton(keyBind.controllerConfig.GetControllerAction(Setting::Action::Crouch)) != 0;
-        m_command.run = m_pInput->PushButton(keyBind.controllerConfig.GetControllerAction(Setting::Action::Run)) != 0;
-
         m_command.eye = m_pInput->GetRightJoyStickVelocity() * keyBind.sensitivity.controller * 0.1f;
     }
     if (keyBind.sensitivity.invertX)
@@ -544,7 +553,7 @@ void Player::Move() {
     m_playerAABB.max.y = m_playerAABB.min.y + m_playerHeight + m_crouchHeight;
 }
 
-void Player::HorizontalMove(const float speed, const float accelerationTime, const float decelerationTime) {
+void Player::HorizontalMove(float speed, float accelerationTime) {
     // Y軸回転から前後左右の回転を取得する
     Vector3 forward = {
         std::sin(m_cameraBaseTransform.rotate.y),
@@ -558,31 +567,14 @@ void Player::HorizontalMove(const float speed, const float accelerationTime, con
     };
     // 移動方向を作る
     Vector3 inputDir = right * m_command.move.x + forward * m_command.move.y;
-    // 長さが1を超える場合は正規化する
-    inputDir = Normalize(inputDir);
+    m_horizontalVelocity = PlayerMovementCalculator::CalculateHorizontalVelocity(
+        inputDir,
+        m_horizontalVelocity,
+        speed,
+        accelerationTime,
+        m_delta);
 
-    // 空中での目標速度を計算する
-    Vector3 targetVelocity = inputDir * speed * m_delta;
-
-    Vector3 velocity = m_horizontalVelocity;
-    // 現在の速度から目標速度へ、一定量だけ近づける
-    Vector3 diff = targetVelocity - velocity;
-    float distance = Length(diff);
-    float deceleration = speed / decelerationTime;
-    float acceleration = speed / accelerationTime;
-    float step = acceleration * m_delta * m_delta;
-
-    if (distance <= step)
-    {
-        velocity = targetVelocity;
-    }
-    else
-    {
-        velocity += diff / distance * step;
-    }
-    m_horizontalVelocity = velocity;
-
-    m_playerSpeed = Length(velocity);
+    m_playerSpeed = Length(m_horizontalVelocity);
 
 }
 
@@ -593,20 +585,23 @@ void Player::WallRunStart() {
     pAABB += Vector3{ m_velocity.position.x, 0.0f, m_velocity.position.z };
     m_wallPenetration = m_pContext->world.collision.GetPenetrationForAABB(pAABB);
 
+    m_isDecelVelY = false;
+    m_wallRunFallTimer = 0.0f;
+    m_wallRunFallTime = 0.0f;
 
-
-    // 一定の速度以上で落下していた場合落下速度を行くり落とすようにする
-    if (m_velocity.position.y < m_wallRunFallThreshold)
+    // 一定の速度以上で落下していた場合、落下速度をゆっくり0へ近づける。
+    if (m_verticalVelocity < m_wallRunFallThreshold)
     {
         m_isDecelVelY = true;
-        // 落下速度に応じて落下速度が0になるまでの時間を計算する 最大はm_maxDecelVelYTime
-        m_wallRunFallTime = std::fabs(m_velocity.position.y + 0.2f) * 2.0f;
+        // 60fps時の従来の減衰時間に合わせて、秒速から停止時間を求める。
+        constexpr float kWallRunFallDeceleration = 30.0f;
+        m_wallRunFallTime = std::fabs(m_verticalVelocity - m_wallRunFallThreshold) / kWallRunFallDeceleration;
         m_wallRunFallTime = std::min(m_wallRunFallTime, m_maxwallRunFallTime);
         if (m_wallRunFallTime == 0.0f) // m_decelVelYTimeが0.0fだとエラーになるため 0.05fとする
         {
             m_wallRunFallTime = 0.05f;
         }
-        m_velYBefore = m_velocity.position.y;
+        m_velYBefore = m_verticalVelocity;
     }
     else
     {
@@ -708,6 +703,8 @@ void Player::StartClimbing()
     m_isWallRunning = false;
     m_wallPenetration = Vector3::Zero;
     m_velocity.position = Vector3::Zero;
+    m_horizontalVelocity = Vector3::Zero;
+    m_verticalVelocity = 0.0f;
 }
 
 void Player::Climbing()
@@ -731,6 +728,8 @@ void Player::Climbing()
     m_transform.position = climbingPosition;
     m_playerAABB += moveDelta;
     m_velocity.position = Vector3::Zero;
+    m_horizontalVelocity = Vector3::Zero;
+    m_verticalVelocity = 0.0f;
     m_playerSpeed = 0.0f;
     m_onGround = true;
 
@@ -751,20 +750,15 @@ void Player::Climbing()
 
 void Player::JumpStart()
 {
-    // ジャンプ開始時の初速を計算
-    float gravityPerFrame = max(-m_gravity.y * m_delta, 0.0f);
-    float jumpStartVelocity = sqrtf(2.0f * gravityPerFrame * m_jumpHeight);
     if (m_onGround) // 設置状態のジャンプ処理
     {
-        m_verticalVelocity = jumpStartVelocity;
+        m_verticalVelocity = PlayerMovementCalculator::CalculateJumpVelocity(m_gravity.y, m_jumpHeight);
+        m_onGround = false;
     }
 }
 
 void Player::WallJumpStart() {
-    // ジャンプ開始時の初速を計算 
-    float gravityPerFrame = max(-m_gravity.y * m_delta, 0.0f);
-    float jumpStartVelocity = sqrtf(2.0f * gravityPerFrame * m_jumpHeight);
-    m_verticalVelocity = jumpStartVelocity;
+    m_verticalVelocity = PlayerMovementCalculator::CalculateJumpVelocity(m_gravity.y, m_jumpHeight);
 
     Vector3 wallJumpDir = {
         -m_wallPenetration.x,
@@ -774,7 +768,7 @@ void Player::WallJumpStart() {
     if (Length(wallJumpDir) > 0.0f)
     {
         wallJumpDir = Normalize(wallJumpDir);
-        m_horizontalVelocity += wallJumpDir * 0.7f;
+        m_horizontalVelocity += wallJumpDir * m_wallJumpHorizontalSpeed;
     }
 
     m_isWallRunning = false;
@@ -788,6 +782,10 @@ void Player::ApplyCollision()
     Vector3 penetration = m_pContext->world.collision.GetPenetration();
     m_transform.position -= penetration;
     m_playerAABB -= penetration;
+
+    const Vector3 actualMovement = m_velocity.position - penetration;
+    const Vector3 actualHorizontalMovement = { actualMovement.x, 0.0f, actualMovement.z };
+    m_actualHorizontalSpeed = Length(actualHorizontalMovement) / max(m_delta, 0.0001f);
 }
 
 void Player::ApplyGravity()
@@ -795,19 +793,25 @@ void Player::ApplyGravity()
     // 重力の適用処理の実装
     if (!m_onGround && !m_isWallRunning) // 空中にいてもウォールラン中ならば重力の処理は実行しない
     {
-        float fallVelocity = m_verticalVelocity + m_gravity.y * m_delta;
-        float groundDist = m_pContext->world.collision.GetMaxGroundDistanceForAABB(m_playerAABB);
-        // 落下速度の上限
-        m_verticalVelocity += m_gravity.y * m_delta;
-        m_verticalVelocity = max(fallVelocity, -groundDist);
+        const float groundDistance = m_pContext->world.collision.GetMaxGroundDistanceForAABB(m_playerAABB);
+        m_verticalVelocity = PlayerMovementCalculator::CalculateFallVelocity(
+            m_verticalVelocity,
+            m_gravity.y,
+            groundDistance,
+            m_delta);
     }
 }
 
 void Player::UpdateVelocity()
 {
     // 移動方向の計算
-    m_velocity.position = m_horizontalVelocity;
-    m_velocity.position.y = m_verticalVelocity;
+    const bool applyGravity = !m_onGround && !m_isWallRunning;
+    m_velocity.position = PlayerMovementCalculator::CalculateFrameMovement(
+        m_horizontalVelocity,
+        m_verticalVelocity,
+        m_gravity.y,
+        applyGravity,
+        m_delta);
     m_playerAABB += m_velocity.position;
 }
 
@@ -866,13 +870,11 @@ void Player::UpdateCameraFov() {
     m_fov = m_pCamera->GetfovY();
     m_fovPre = m_fov;
 
-    // m_playerSpeedは1フレームの移動量なので、m_runSpeedと同じ秒速に戻して比較する
-    const float currentSpeed = m_playerSpeed / max(m_delta, 0.0001f);
     // 浮動小数点の誤差で最高速度判定を逃さないよう、わずかに余裕を持たせる
     constexpr float kRunFovSpeedThreshold = 0.99f;
 
     // 移動速度がダッシュ速度ならFovを広げる
-    if (currentSpeed >= m_runSpeed * kRunFovSpeedThreshold && !m_isRunFov)
+    if (m_playerSpeed >= m_runSpeed * kRunFovSpeedThreshold && !m_isRunFov)
     {
         m_fovChangeTimer = 0.0f;
         m_fovBefore = m_fov;
@@ -918,13 +920,11 @@ void Player::UpdateCrouchCamera() {
 void Player::UpdateHeadBob() {
     // テスト実装
 
-    // m_horizontalVelocity は1フレームの移動量なので秒速に戻す
-    float horizontalSpeed =
-        Length(Vector3{
-            m_horizontalVelocity.x,
-            0.0f,
-            m_horizontalVelocity.z
-            }) / max(m_delta, 0.0001f);
+    const float horizontalSpeed = Length(Vector3{
+        m_horizontalVelocity.x,
+        0.0f,
+        m_horizontalVelocity.z
+        });
 
     float speedRate = clamp(horizontalSpeed / m_runSpeed, 0.0f, 1.0f);
 
@@ -938,7 +938,21 @@ void Player::UpdateHeadBob() {
     const float moveAmplitude = 0.08f;
     float amplitude = Lerp(idleAmplitude, moveAmplitude, speedRate);
 
+    const float previousHeadBobTimer = m_headBobTimer;
     m_headBobTimer += m_delta * frequency;
+
+    // sin波の極値は PI / 2 から PI 間隔で現れる。
+    // 前フレームから極値をまたいだタイミングで歩行音を再生する。
+    constexpr float kFirstExtremum = kPi * 0.5f;
+    const float previousExtremumIndex = std::floor((previousHeadBobTimer - kFirstExtremum) / kPi);
+    const float currentExtremumIndex = std::floor((m_headBobTimer - kFirstExtremum) / kPi);
+    constexpr float kWalkSoundMinSpeedRate = 0.05f;
+    const bool shouldPlayWalkSound =
+        m_onGround && m_actualHorizontalSpeed >= m_runSpeed * kWalkSoundMinSpeedRate;
+    if (shouldPlayWalkSound && currentExtremumIndex > previousExtremumIndex)
+    {
+        m_pContext->engine.assets.audio.Play(kWalkSoundName);
+    }
 
     float bobY = std::sin(m_headBobTimer) * amplitude;
 
@@ -1033,8 +1047,6 @@ void Player::UpdateDebugUI() {
 
         ImGui::Text("Gravity: (%.2f, %.2f, %.2f)",
             m_gravity.x, m_gravity.y, m_gravity.z);
-        ImGui::DragFloat("Move Speed", &m_moveSpeed, 0.1f, 0.0f, 100.0f);
-
         ImGui::DragFloat("Jump Height", &m_jumpHeight, 0.01f, 0.0f, 10.0f);
         ImGui::DragFloat3("Gravity", &m_gravity.x, 0.1f);
 
@@ -1073,13 +1085,10 @@ void Player::UpdateDebugUI() {
 
         if (ImGui::TreeNode("Speed")) {
             // プレイヤーの速度
-            float speed = m_playerSpeed / m_delta;
-            ImGui::Text("Speed : %f", speed);
+            ImGui::Text("Speed : %f", m_playerSpeed);
             // 歩行速度
-            ImGui::Text("Run Speed : %f", &m_runSpeed);
-            ImGui::Text("Crounch Speed : %f", &m_crounchSpeed);
-            // 減速時間
-            ImGui::DragFloat("Decel Time", &m_decelTime, 0.01f);
+            ImGui::Text("Run Speed : %f", m_runSpeed);
+            ImGui::Text("Crouch Speed : %f", m_crounchSpeed);
             ImGui::TreePop();
         }
 
