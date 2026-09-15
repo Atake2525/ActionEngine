@@ -8,7 +8,7 @@ void JumpState::Enter(Player& player) {
 }
 
 void JumpState::Update(Player& player) {
-    player.HorizontalMove(player.m_airSpeed, player.m_airAccelerationTime, player.m_airDecelerationTime);
+    player.HorizontalMove(player.m_airSpeed, player.m_airAccelerationTime);
     return;
 }
 

@@ -402,6 +402,12 @@
     <ClCompile Include="Application\Player\AirControlState.cpp">
       <Filter>Application\Player\State</Filter>
     </ClCompile>
+    <ClCompile Include="Application\Player\PlayerActionResolver.cpp">
+      <Filter>Application\Player\State</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Player\PlayerMovementCalculator.cpp">
+      <Filter>Application\Player</Filter>
+    </ClCompile>
     <ClCompile Include="Engine\LoadManager\ModelLoader.cpp">
       <Filter>Engine\LoadManager</Filter>
     </ClCompile>
@@ -700,6 +706,12 @@
     </ClInclude>
     <ClInclude Include="Application\Player\AirControlState.h">
       <Filter>Application\Player\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Player\PlayerActionResolver.h">
+      <Filter>Application\Player\State</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Player\PlayerMovementCalculator.h">
+      <Filter>Application\Player</Filter>
     </ClInclude>
     <ClInclude Include="Engine\3d\Model\Model\ModelLoader.h">
       <Filter>Engine\3d\Model\Model</Filter>

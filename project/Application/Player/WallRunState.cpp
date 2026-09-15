@@ -6,7 +6,7 @@ void WallRunState::Enter(Player& player) {
 }
 
 void WallRunState::Update(Player& player) {
-    player.HorizontalMove(player.m_airSpeed, player.m_airAccelerationTime, player.m_airDecelerationTime);
+    player.HorizontalMove(player.m_airSpeed, player.m_airAccelerationTime);
     player.WallRun();
 }
 

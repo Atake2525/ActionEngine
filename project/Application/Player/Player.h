@@ -7,12 +7,12 @@
 class Camera;
 class Input;
 struct AppContext;
+class PlayerStateTransitionPlan;
 
 struct PlayerCommand {
     Vector2 move = Vector2::Zero;
     Vector3 eye = Vector3::Zero;
     bool crouch = false;
-    bool run = false;
     bool jump = false;
 };
 
@@ -80,9 +80,14 @@ private: // プレイヤーステート管理
     void UpdateState();
 
     /// <summary>
-    /// パルクール処理の更新(ステート)
+    /// 行動条件の更新とState遷移の解決
     /// </summary>
-    void UpdateParkourState();
+    void UpdateActionState(bool wantsToCrouch, bool needsCrouchForClearance);
+
+    /// <summary>
+    /// 計算済みの優先順にState遷移を適用する
+    /// </summary>
+    void ApplyStateTransitionPlan(const PlayerStateTransitionPlan& plan);
 
     /// <summary>
     /// ウォールランができるかを確認する
@@ -120,7 +125,7 @@ private: // プレイヤーステート管理
     /// <summary>
     /// 移動処理
     /// </summary>
-    void HorizontalMove(const float speed, const float accelerationTime, const float decelerationTime);
+    void HorizontalMove(float speed, float accelerationTime);
 
     /// <summary>
     /// ウォールランの開始処理
@@ -225,12 +230,6 @@ private:
     // プレイヤー状態管理
     //==================================================
     std::unique_ptr<PlayerBaseState> m_pCurrentState;
-    const float& GetRunSpeed() const { return m_runSpeed; }
-    const float& GetCrouchSpeed() const { return m_crounchSpeed; }
-    const bool& IsRunInput() const { return m_command.run; }
-    const bool& IsCrouchInput() const { return m_command.crouch; }
-
-    bool m_isFirstInput = false;
     WalkState m_state = WalkState::Idle;
     WalkState m_statePre = WalkState::Idle;
 
@@ -251,13 +250,12 @@ private:
     // プレイヤー移動関連
     //==================================================
     AABB m_playerAABB;                      // プレイヤーのAABB当たり判定
-    Transform m_firstTransform = Transform::Default;    // 初期位置・回転・スケール
     Transform m_transform = Transform::Default;     // 現在の位置・回転・スケール
-    Transform m_velocity = Transform::Default;      // 現在の速度
-    Vector3 m_horizontalVelocity = Vector3::Zero;   // 水平速度
-    float m_verticalVelocity = 0.0f;     // 垂直速度
-    Vector3 m_gravity = { 0.0f, -1.0f, 0.0f };      // 重力
-    float m_decelTime = 0.2f;                       // 減速時間
+    Transform m_velocity = Transform::Default;      // このフレームで適用する移動量・回転量
+    Vector3 m_horizontalVelocity = Vector3::Zero;   // 水平速度(ワールド単位/秒)
+    float m_actualHorizontalSpeed = 0.0f;           // 衝突補正後の実際の水平速度(ワールド単位/秒)
+    float m_verticalVelocity = 0.0f;                // 垂直速度(ワールド単位/秒)
+    Vector3 m_gravity = { 0.0f, -60.0f, 0.0f };     // 加速度(ワールド単位/秒^2)
 
     //================
     // ウォールラン関連
@@ -272,7 +270,7 @@ private:
     float m_wallRunTime = 0.14f;
 
     bool m_isDecelVelY = false;
-    float m_wallRunFallThreshold = -0.2f; // 落下速度を減衰し始める閾値
+    float m_wallRunFallThreshold = -12.0f; // 落下速度を減衰し始める閾値(ワールド単位/秒)
     float m_velYBefore = 0.0f;
     float m_wallRunFallTimer = 0.0f;
     float m_wallRunFallTime = 0.0f;
@@ -310,11 +308,9 @@ private:
     const float m_crouchAccelerationTime = 0.05f;
     const float m_airSpeed = 20.0f;
     const float m_airAccelerationTime = 0.2f;
-    const float m_groundDecelerationTime = 0.05f;
-    const float m_airDecelerationTime = 0.6f;
+    const float m_wallJumpHorizontalSpeed = 42.0f;
 
-    float m_moveSpeed = 1.0f;
-    float m_playerSpeed = 0.0f; // 現在の速度
+    float m_playerSpeed = 0.0f; // 現在の水平速度(ワールド単位/秒)
     float m_jumpHeight = 3.0f; // 最終的なジャンプ高さ
 
     //==================================================
