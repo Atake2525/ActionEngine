@@ -105,5 +105,7 @@ private:
     bool m_showCredit = false;
     bool m_start = false;
 
+    static bool m_isPlayedBGM;
+
 };
 
