@@ -14,6 +14,8 @@
 
 using namespace std;
 
+bool TitleScene::m_isPlayedBGM = false;
+
 void TitleScene::Initialize() {
     AppContext& context = *m_pContext;
 
@@ -176,6 +178,14 @@ void TitleScene::Update() {
     context.world.skyBox.Update(m_pContext->world.light);
 
     m_pCamera->Update();
+
+    // BGM設定
+    if (!m_isPlayedBGM)
+    {
+        context.engine.assets.audio.LoadMP3("Resources/sound/Experimenta_Model_short.mp3", "BGM", 0.35f);
+        context.engine.assets.audio.Play("BGM", true);
+        m_isPlayedBGM = true;
+    }
 }
 
 void TitleScene::Draw() {
