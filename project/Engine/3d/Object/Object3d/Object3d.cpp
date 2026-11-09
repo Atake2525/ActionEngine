@@ -112,11 +112,21 @@ void Object3d::Update(Object3dUpdateContext& context) {
 
     if (model_->IsAnimation() && startAnimation)
     {
-        animationTime += animationSpeed / std::round(1.0f / context.deltaTime); // 時刻を進める。1/60で固定してあるが、計測した時間を使って可変フレーム対応する方が望ましい
-        animationTime = std::fmod(animationTime, animation[animationKey].duration); // 最後まで行ったら最初からリピート再生。リピートしなくても別に良い
-        if (animationTime < 0.0f) // 逆再生に備えてanimationTimeが0を下回ったら最後のアニメーション時間を代入
+        // フレーム数ではなく実際の経過秒数で進め、FPSによる再生時間の差を抑える。
+        animationTime += animationSpeed * context.deltaTime;
+        const float duration = animation[animationKey].duration;
+        // 長さ0のアニメーションではfmodによる0除算を避け、先頭姿勢を使う。
+        if (duration > 0.0f)
         {
-            animationTime = animation[animationKey].duration;
+            animationTime = std::fmod(animationTime, duration);
+        }
+        else
+        {
+            animationTime = 0.0f;
+        }
+        if (animationTime < 0.0f) // 逆再生で負になった時刻をループ範囲に戻す。
+        {
+            animationTime += duration;
         }
     }
     if (model_->IsAnimation())
@@ -127,7 +137,9 @@ void Object3d::Update(Object3dUpdateContext& context) {
         }
         if (changingAnimation && startAnimation)
         {
-            ChangeAnimation(animation[beforAnimationKey], animation[animationKey], animationTime, changeAnimationSpeed);
+            // 補間元は切り替え時に保存した姿勢。切り替え先の再生時刻は補間中も進む。
+            // startAnimationがfalseの間は補間率も進めず、その時点の姿勢を維持する。
+            ChangeAnimation(animation[animationKey], animationTime, changeAnimationSpeed, context.deltaTime);
         }
         UpdateSkelton(skeleton);
         UpdateSkinCluster(skinCluster, skeleton);
@@ -249,6 +261,10 @@ void Object3d::CreateCameraResource(DirectXBase& directXBase) {
 void Object3d::SetModel(Model* model, SkinClusterContext* context) {
     // モデルを検索してセットする
     model_ = model;
+    // モデル変更でJointの数や順序が変わるため、以前のモデルの補間情報を破棄する。
+    changingAnimation = false;
+    changeAnimationTime = 0.0f;
+    animationBlendStartPose.clear();
     first = model_->GetMeshAABB();
     aabb = first;
     auto multimeshAABBData = model_->GetMultiMeshAABB();
@@ -279,6 +295,11 @@ void Object3d::SetModel(Model* model, SkinClusterContext* context) {
 void Object3d::ResetAnimationTime()
 {
     animationTime = 0.0f;
+    // 先頭姿勢を直接適用する操作なので、残っている補間を中止する。
+    // 中止しないと、次回Updateで保存済みの古い姿勢へ引き戻されてしまう。
+    changingAnimation = false;
+    changeAnimationTime = 0.0f;
+    animationBlendStartPose.clear();
     ApplyAnimation(skeleton, animation[animationKey], animationTime);
     UpdateSkelton(skeleton);
     UpdateSkinCluster(skinCluster, skeleton);
@@ -286,10 +307,27 @@ void Object3d::ResetAnimationTime()
 
 void Object3d::ChangePlayAnimation(const std::string key)
 {
+    // 毎フレーム同じキーを要求されても、再生時刻と補間率をリセットしない。
+    // 同じアニメーションを先頭から再生し直す場合はResetAnimationTimeを使う。
+    if (animationKey == key)
+    {
+        return;
+    }
+
     if (animation.contains(key))
     {
-        beforAnimationKey = animationKey;
+        // 古いアニメーションを再計算せず、直前の更新で得られた実際の姿勢をコピーする。
+        // 例: Idle→Runの途中でCrouchへ変わった場合も、IdleとRunが混ざった姿勢からつなぐ。
+        // 保存するのはJointのローカル姿勢で、Object3dのワールド座標ではない。
+        animationBlendStartPose.clear();
+        animationBlendStartPose.reserve(skeleton.joints.size());
+        for (const Joint& joint : skeleton.joints)
+        {
+            animationBlendStartPose.push_back(joint.transform);
+        }
         animationKey = key;
+        // 切り替え先は先頭から再生する。ここではJointを書き換えず、次回Updateで補間する。
+        animationTime = 0.0f;
         changingAnimation = true;
         changeAnimationTime = 0.0f;
         //Log("再生されるアニメーションが変更されました\n");
@@ -332,9 +370,12 @@ void Object3d::AddAnimationsThreaded(const std::string& directoryPath, const std
 }
 
 void Object3d::PlayDefaultAnimation() {
-    beforAnimationKey = animationKey;
+    // 通常の補間付き切り替えとは異なり、補間を中止してDefaultAnimationを選択する。
+    // 再生時刻はリセットせず、次回UpdateのApplyAnimationで姿勢を適用する。
     animationKey = "DefaultAnimation";
     changingAnimation = false;
+    changeAnimationTime = 0.0f;
+    animationBlendStartPose.clear();
     Log("initialized animation");
     Log("アニメーションを初期化しました\n");
     if (!model_->IsAnimation())
@@ -407,69 +448,61 @@ void Object3d::ApplyAnimation(Skeleton& skeleton, const Animation& animation, fl
     }
 }
 
-const bool Object3d::ChangeAnimation(Animation& beforAnimation, Animation& afterAnimation, float animationTime, float changeTime)
+bool Object3d::ChangeAnimation(const Animation& afterAnimation, float animationTime, float changeTime, float deltaTime)
 {
-    changeAnimationTime += 1.0f / 60.0f / changeTime;
-    float beforFrameTime = animationTime;
-    beforFrameTime = std::fmod(beforFrameTime, beforAnimation.duration);
-    float afterFrameTime = animationTime;
-    afterFrameTime = std::fmod(afterFrameTime, afterAnimation.duration);
-    for (Joint& joint : skeleton.joints)
+    // 開始姿勢はChangePlayAnimationで、現在のSkeletonと同じJoint順に保存しておく。
+    assert(animationBlendStartPose.size() == skeleton.joints.size());
+    // 補間率 += 経過秒数 / 補間にかける秒数。例: 0.4秒の遷移なら0.2秒後に約0.5になる。
+    // 負のdeltaTimeでは巻き戻さず、changeTimeが0以下ならその更新で補間を完了する。
+    if (changeTime > 0.0f)
     {
-        Vector3 beforePosition, afterPosition;
-        Quaternion beforRotate, afterRotate;
-        Vector3 beforScale, afterScale;
-        beforePosition = joint.transform.position;
-        beforRotate = joint.transform.rotate;
-        beforScale = joint.transform.scale;
-        bool beforSuccess = false, afterSuccess = false;
-        // 対象のJointのAnimationがあれば、値の適用を行う。 下記のif分はc++17から可能になった初期化付きif文
-        if (auto it = beforAnimation.nodeAnimations.find(joint.name); it != beforAnimation.nodeAnimations.end()) {
-            const NodeAnimation rootNodeAnimation = (*it).second;
-            beforePosition = CalculateValue(rootNodeAnimation.position, beforFrameTime);
-            beforRotate = CalculateValue(rootNodeAnimation.rotate, beforFrameTime);
-            beforScale = CalculateValue(rootNodeAnimation.scale, beforFrameTime);
-            beforSuccess = true;
-        }
+        changeAnimationTime = std::clamp(changeAnimationTime + std::max(deltaTime, 0.0f) / changeTime, 0.0f, 1.0f);
+    }
+    else
+    {
+        changeAnimationTime = 1.0f;
+    }
 
-        // 対象のJointのAnimationがあれば、値の適用を行う。 下記のif分はc++17から可能になった初期化付きif文
+    float afterFrameTime = 0.0f;
+    if (afterAnimation.duration > 0.0f)
+    {
+        afterFrameTime = std::fmod(animationTime, afterAnimation.duration);
+    }
+    else
+    {
+        afterFrameTime = 0.0f;
+    }
+
+    for (size_t index = 0; index < skeleton.joints.size(); ++index)
+    {
+        Joint& joint = skeleton.joints[index];
+        // 開始姿勢は補間中ずっと固定する。毎フレームの補間結果を元にすると、
+        // 補間率と見た目の進み方が一致しなくなるため、保存した値を使う。
+        const QuaternionTransform& beforePose = animationBlendStartPose[index];
+        // 切り替え先にこのJointのデータがなければ、開始時の姿勢を維持する。
+        QuaternionTransform afterPose = beforePose;
+
         if (auto it = afterAnimation.nodeAnimations.find(joint.name); it != afterAnimation.nodeAnimations.end()) {
-            const NodeAnimation rootNodeAnimation = (*it).second;
-            afterPosition = CalculateValue(rootNodeAnimation.position, afterFrameTime);
-            afterRotate = CalculateValue(rootNodeAnimation.rotate, afterFrameTime);
-            afterScale = CalculateValue(rootNodeAnimation.scale, afterFrameTime);
-            afterSuccess = true;
+            const NodeAnimation& rootNodeAnimation = (*it).second;
+            afterPose.position = CalculateValue(rootNodeAnimation.position, afterFrameTime);
+            afterPose.rotate = CalculateValue(rootNodeAnimation.rotate, afterFrameTime);
+            afterPose.scale = CalculateValue(rootNodeAnimation.scale, afterFrameTime);
         }
 
-        changeAnimationTime = std::clamp(changeAnimationTime, 0.0f, 1.0f);
-
-        if (beforSuccess && afterSuccess)
-        {
-            // 両方の処理ができていれば実行する
-            joint.transform.position = Lerp(beforePosition, afterPosition, changeAnimationTime);
-            joint.transform.rotate = Slerp(beforRotate, afterRotate, changeAnimationTime);
-            joint.transform.scale = Lerp(beforScale, afterScale, changeAnimationTime);
-        }
-        if (changeAnimationTime == 1.0f)
-        {
-            for (Joint& joint : skeleton.joints)
-            {
-                // 対象のJointのAnimationがあれば、値の適用を行う。 下記のif分はc++17から可能になった初期化付きif文
-                if (auto it = afterAnimation.nodeAnimations.find(joint.name); it != afterAnimation.nodeAnimations.end()) {
-                    const NodeAnimation& rootNodeAnimation = (*it).second;
-                    joint.transform.position = CalculateValue(rootNodeAnimation.position, animationTime);
-                    joint.transform.rotate = CalculateValue(rootNodeAnimation.rotate, animationTime);
-                    joint.transform.scale = CalculateValue(rootNodeAnimation.scale, animationTime);
-                }
-            }
-            this->animationTime = afterFrameTime;
-        }
+        // 位置とスケールは線形補間、Quaternion回転は球面線形補間でつなぐ。
+        // afterPoseは再生時刻から毎回求めるので、切り替え先の動きは補間中も再生される。
+        joint.transform.position = Lerp(beforePose.position, afterPose.position, changeAnimationTime);
+        joint.transform.rotate = Slerp(beforePose.rotate, afterPose.rotate, changeAnimationTime);
+        joint.transform.scale = Lerp(beforePose.scale, afterPose.scale, changeAnimationTime);
     }
 
     if (changeAnimationTime == 1.0f)
     {
+        // 補間率1ではすでに切り替え先の姿勢になっているため、追加の適用は不要。
+        // 保存姿勢を破棄し、次回Updateから通常のApplyAnimationへ戻す。
         changeAnimationTime = 0.0f;
         changingAnimation = false;
+        animationBlendStartPose.clear();
         return true;
     }
     else

@@ -564,7 +564,7 @@ Quaternion Slerp(const Quaternion& befor, const Quaternion& after, float t) {
 	if (dot < 0.0f)
 	{
 		quat1 = -quat1;
-		//dot = -dot;
+		dot = -dot;
 	}
 
 	dot = std::clamp(dot, -1.0f, 1.0f);
@@ -707,4 +707,14 @@ int GetDigitCount(float value)
 		return 1; // 0.x の場合は 1 桁として扱う
 
 	return static_cast<int>(std::floor(std::log10(value))) + 1;
+}
+
+Vector3 CalculateOrbitPosition(Vector3 target, float distance, float yaw, float pitch) {
+	Vector3 result = Vector3::Zero;
+
+	result.x = -distance * std::sinf(yaw) * std::cosf(pitch);
+	result.y = distance * std::sinf(pitch);
+	result.z = -distance * std::cosf(yaw) * std::cosf(pitch);
+
+	return target + result;
 }

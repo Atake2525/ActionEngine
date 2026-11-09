@@ -55,6 +55,7 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
     m_fov = m_fovDefault;
     m_fovBefore = m_fov;
     m_fovAfter = m_fovDefault;
+    m_orbitCameraParam.distance = 1.7f;
 
     // JsonDataからステージ情報を取得してプレイヤーの初期位置とゴールの位置を設定する処理
     if (context.engine.assets.json.CheckJsonLoaded(jsonName))
@@ -74,12 +75,18 @@ void Player::Initialize(Camera* camera, const std::string& jsonName)
     m_pModel->SetModel(model);
     m_pModel->SetTransform(m_transform);
     //m_pModel->CreateCapsule();
-
-    model = context.engine.assets.models.LoadModel("Resources/Model/gltf/char", "noHeadIdle.gltf", true);
+    
+    std::string modelDirectoryPath = "Resources/Model/gltf/char";
+    model = context.engine.assets.models.LoadModel(modelDirectoryPath, "Idle.gltf", true);
+    model->AddAnimation(modelDirectoryPath, "dash.gltf", "run");
+    model->AddAnimation(modelDirectoryPath, "crouch.gltf", "crouch");
+    model->AddAnimation(modelDirectoryPath, "jump.gltf", "jump");
+    model->AddAnimation(modelDirectoryPath, "fall.gltf", "fall");
+    model->AddAnimation(modelDirectoryPath, "sneak.gltf", "sneak");
     m_pDrawModel = context.game.object3dFactory.Create();
     m_pDrawModel->SetModel(model);
     // 初期モデル以外の移動アニメーションも起動時にまとめて読み込んでおく。
-   /* m_pDrawModel->AddAnimationsThreaded("Resources/Model/gltf/char", {
+    /*m_pDrawModel->AddAnimationsThreaded("Resources/Model/gltf/char", {
         "sneak.gltf",
         "walk.gltf",
         "walk_back.gltf",
@@ -198,7 +205,10 @@ void Player::Update()
         ApplyCameraEffect();
         m_pModel->Update();
         m_pCamera->SetTransform(m_cameraBaseTransform + m_cameraEffectTransform);
-        UpdateCameraParent();
+        m_orbitCameraParam.target = { m_transform.position.x, m_transform.position.y + m_cameraHeight, m_transform.position.z };
+        m_orbitCameraParam.pitch = m_cameraBaseTransform.rotate.x;
+        m_orbitCameraParam.yaw = m_cameraBaseTransform.rotate.y;
+        //UpdateCameraParent();
     }
 }
 
@@ -228,7 +238,7 @@ void Player::UpdateModel() {
 
 void Player::Draw()
 {
-    //m_pDrawModel->Draw();
+    m_pDrawModel->Draw();
 }
 
 void Player::UpdateState()
@@ -315,6 +325,7 @@ void Player::UpdateActionState(bool wantsToCrouch, bool needsCrouchForClearance)
 
 void Player::ApplyStateTransitionPlan(const PlayerStateTransitionPlan& plan)
 {
+    // Stateの優先度に応じて切り替える
     for (std::size_t index = 0; index < plan.GetCount(); index++)
     {
         const PlayerStateId stateId = plan.GetStateId(index);
@@ -697,8 +708,6 @@ void Player::StartClimbing()
     m_climbingTimer = 0.0f;
     m_climbingStep = 0;
     m_isClimbingMotion = true;
-    //m_isClimbing = true;
-    //m_onGround = true;
     m_state = WalkState::Idle;
     m_isWallRunning = false;
     m_wallPenetration = Vector3::Zero;
@@ -970,18 +979,59 @@ void Player::ApplyCameraEffect()
 }
 
 void Player::UpdateModelAnimation() {
-    std::string animName = "DefaultAnimation";
-
-    if (m_state == WalkState::Falling)
+    if (m_pInput->TriggerKey(DIK_T))
     {
-        animName = "fall";
-    }
-    else if (m_state == WalkState::Idle)
-    {
-        animName = "DefaultAnimation";
+        return;
     }
 
-    if (m_pDrawModel->GetCurrentAnimationKey() != animName)
+    const std::string currentAnimationKey = m_pDrawModel->GetCurrentAnimationKey();
+    std::string animName = currentAnimationKey;
+
+    // WalkStateの更新タイミングに依存せず、確定した行動Stateから選ぶ。
+    switch (m_pCurrentState->GetStateId())
+    {
+    case PlayerStateId::Run:
+        if (m_playerSpeed != 0.0f)
+        {
+            animName = "run";
+        }
+        else
+        {
+            animName = "DefaultAnimation";
+        }
+        break;
+    case PlayerStateId::Crouch:
+        if (m_playerSpeed != 0.0f)
+        {
+            animName = "sneak";
+        }
+        else
+        {
+            animName = "crouch";
+        }
+        break;
+
+    case PlayerStateId::Jump:
+    case PlayerStateId::WallJump:
+        animName = "jump";
+        break;
+    case PlayerStateId::AirControl:
+        if (m_verticalVelocity > 0.0f)
+        {
+            animName = "jump";
+        }
+        else
+        {
+            animName = "fall";
+        }
+        break;
+    case PlayerStateId::WallRun:
+    case PlayerStateId::Climbing:
+        // 専用アニメーションがない行動は、State側の設定を維持する。
+        break;
+    }
+
+    if (currentAnimationKey != animName)
     {
         m_pDrawModel->ChangePlayAnimation(animName);
     }
@@ -1136,6 +1186,15 @@ void Player::UpdateDebugUI() {
                 m_cameraEffectTransform.position.x, m_cameraEffectTransform.position.y, m_cameraEffectTransform.position.z);
             ImGui::Text("Rot:  (%.2f, %.2f, %.2f)",
                 m_cameraEffectTransform.rotate.x, m_cameraEffectTransform.rotate.y, m_cameraEffectTransform.rotate.z);
+            ImGui::TreePop();
+        }
+        if (ImGui::TreeNode("OrbitCamera"))
+        {
+            ImGui::Text("Pos: (%.2f, %.2f, %.2f", m_orbitCameraParam.target.x, m_orbitCameraParam.target.y, m_orbitCameraParam.target.z);
+            ImGui::Text("Pitch: %.2f", m_orbitCameraParam.pitch);
+            ImGui::Text("Yaw: %.2f", m_orbitCameraParam.yaw);
+            ImGui::Separator();
+            ImGui::DragFloat("Distance", &m_orbitCameraParam.distance, 0.1f);
             ImGui::TreePop();
         }
 

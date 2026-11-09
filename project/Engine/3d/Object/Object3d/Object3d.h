@@ -82,14 +82,18 @@ public:
     // ============================
     void ToggleStartAnimation() { startAnimation = !startAnimation; }
     void SetStartAnimation(bool start) { startAnimation = start; }
+    // 補間を中止し、現在のアニメーションの先頭姿勢を即座に適用する。
     void ResetAnimationTime();
     void AddAnimation(std::string directoryPath, std::string fileName, std::string animationName);
     void AddAnimationsThreaded(const std::string& directoryPath, const std::vector<std::string>& fileNames);
+    // 補間を中止してDefaultAnimationへ戻す。再生時刻は維持し、姿勢は次回Updateで反映する。
     void PlayDefaultAnimation();
+    // 現在の姿勢を保存して新しいアニメーションへの補間を予約する。同じキーの指定は何もしない。
     void ChangePlayAnimation(const std::string key = "DefaultAnimation");
     const std::string& GetCurrentAnimationKey() const { return animationKey; }
     void ResetAnimationSpeed() { animationSpeed = 1.0f; }
     const float& GetChangeAnimationSpeed() const { return changeAnimationSpeed; }
+    // 名前はSpeedだが、値は補間にかける秒数。0以下なら次回の再生更新で即時に切り替える。
     void SetChangeAnimationSpeed(const float speed = 0.4f) { changeAnimationSpeed = speed; }
     void SetAnimationSpeed(const float speed) { animationSpeed = speed; }
     const float& GetAnimationSpeed() const { return animationSpeed; }
@@ -251,13 +255,16 @@ private:
     //  Animation Data
     // ============================
     std::unordered_map<std::string, Animation> animation;
-    std::string beforAnimationKey = "DefaultAnimation";
     std::string animationKey = "DefaultAnimation";
+    // 切り替えを要求した時点の各Jointのローカル姿勢（位置・Quaternion回転・スケール）。
+    // skeleton.jointsと同じ順序で保持し、補間が終わるまで値を固定する。
+    // 補間途中で別のキーへ切り替えた場合は、その時点の混ざった姿勢で保存し直す。
+    std::vector<QuaternionTransform> animationBlendStartPose;
 
-    bool changingAnimation = false;
-    float animationTime = 0.0f;
-    float changeAnimationTime = 0.0f;
-    float changeAnimationSpeed = 0.4f;
+    bool changingAnimation = false;     // 保存姿勢からanimationKeyの姿勢へ補間中か。
+    float animationTime = 0.0f;         // 切り替え先アニメーションの再生時刻（秒）。
+    float changeAnimationTime = 0.0f;   // 補間率。0が保存姿勢、1が切り替え先の姿勢。
+    float changeAnimationSpeed = 0.4f;  // 補間にかける時間（秒）。再生速度とは別に扱う。
 
     bool startAnimation = false;
     float animationSpeed = 1.0f;
@@ -295,8 +302,10 @@ private:
     void CreateCameraResource(DirectXBase& directXBase);
 
     void ApplyAnimation(Skeleton& skeleton, const Animation& animation, float animationTime);
-    const bool ChangeAnimation(Animation& beforAnimation, Animation& afterAnimation,
-        float animationTime, float changeTime);
+    // 保存した姿勢から、再生中のafterAnimationの姿勢へ補間する。完了時にtrueを返す。
+    // animationTime・changeTime・deltaTimeの単位は秒。呼び出し前に開始姿勢の保存が必要。
+    bool ChangeAnimation(const Animation& afterAnimation,
+        float animationTime, float changeTime, float deltaTime);
 
     const Skeleton CreateSkelton(const Node& rootNode);
     const int32_t CreateJoint(const Node& node, const std::optional<int32_t>& parent,

@@ -3,6 +3,7 @@
 #pragma once
 #include <string>
 #include "PlayerBaseState.h"
+#include "OrbitCameraController.h"
 
 class Camera;
 class Input;
@@ -72,6 +73,10 @@ public:
     const bool GetIsClimbing() const { return m_canClimbing; }
 
     const Transform& GetTransform() const { return m_transform; }
+
+    const Transform& GetCameraBaseTransform() const { return m_cameraBaseTransform; }
+
+    const OrbitCameraController::OrbitCameraParam& GetOrbitCameraParam() const { return m_orbitCameraParam; }
 
 private: // プレイヤーステート管理
     /// <summary>
@@ -319,6 +324,7 @@ private:
     Transform m_cameraBaseTransform = Transform::Default;
     Transform m_cameraEffectTransform = Transform::Default;
     Transform m_cameraVelocity = Transform::Default;
+    OrbitCameraController::OrbitCameraParam m_orbitCameraParam;
 
     // モデルの身長から目の位置までの割合
     float m_eyeHeight = 0.09f;

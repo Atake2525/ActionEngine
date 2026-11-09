@@ -1,0 +1,275 @@
+{
+    "name": "scene",
+    "objects": [
+        {
+            "type": "MESH",
+            "name": "DL_HorizontalPlatform",
+            "transform": {
+                "translation": [
+                    32.0,
+                    62.0,
+                    0.5
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    2.5,
+                    2.0,
+                    0.5
+                ]
+            },
+            "file_name": "trap_HorizontalPlatform",
+            "moveObject": {
+                "move": "true",
+                "velocity_translation": [
+                    10.0,
+                    0.0,
+                    0.0
+                ],
+                "velocity_rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "velocity_scale": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "loop": "true",
+                "reverse": "true",
+                "runtime": 4.0,
+                "enable_spawner": "false"
+            }
+        },
+        {
+            "type": "MESH",
+            "name": "DL_LiftPlatform",
+            "transform": {
+                "translation": [
+                    55.0,
+                    62.0,
+                    0.5
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    2.5,
+                    2.5,
+                    0.5
+                ]
+            },
+            "file_name": "trap_LiftPlatform",
+            "moveObject": {
+                "move": "true",
+                "velocity_translation": [
+                    0.0,
+                    6.0,
+                    0.0
+                ],
+                "velocity_rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "velocity_scale": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "loop": "true",
+                "reverse": "true",
+                "runtime": 6.0,
+                "enable_spawner": "false"
+            }
+        },
+        {
+            "type": "MESH",
+            "name": "DL_SlideGate",
+            "transform": {
+                "translation": [
+                    31.0,
+                    84.0,
+                    1.5
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    0.6000000238418579,
+                    1.5
+                ]
+            },
+            "file_name": "trap_SlideGate",
+            "moveObject": {
+                "move": "true",
+                "velocity_translation": [
+                    12.0,
+                    0.0,
+                    0.0
+                ],
+                "velocity_rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "velocity_scale": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "loop": "true",
+                "reverse": "true",
+                "runtime": 4.0,
+                "enable_spawner": "false"
+            }
+        },
+        {
+            "type": "MESH",
+            "name": "DL_LiftGate",
+            "transform": {
+                "translation": [
+                    55.0,
+                    84.0,
+                    1.5
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    2.0,
+                    0.6000000238418579,
+                    1.5
+                ]
+            },
+            "file_name": "trap_LiftGate",
+            "moveObject": {
+                "move": "true",
+                "velocity_translation": [
+                    0.0,
+                    4.0,
+                    0.0
+                ],
+                "velocity_rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "velocity_scale": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "loop": "true",
+                "reverse": "true",
+                "runtime": 5.0,
+                "enable_spawner": "false"
+            }
+        },
+        {
+            "type": "MESH",
+            "name": "DL_RotateAABB",
+            "transform": {
+                "translation": [
+                    44.0,
+                    74.0,
+                    1.2000000476837158
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    4.0,
+                    0.4000000059604645,
+                    0.4000000059604645
+                ]
+            },
+            "file_name": "trap_RotateAABB",
+            "moveObject": {
+                "move": "true",
+                "velocity_translation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "velocity_rotation": [
+                    0.0,
+                    180.0,
+                    0.0
+                ],
+                "velocity_scale": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "loop": "true",
+                "reverse": "true",
+                "runtime": 4.0,
+                "enable_spawner": "false"
+            }
+        },
+        {
+            "type": "MESH",
+            "name": "DL_START",
+            "transform": {
+                "translation": [
+                    0,
+                    51,
+                    0.08
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "file_name": "startpoint",
+            "moveObject": {
+                "move": "false"
+            }
+        },
+        {
+            "type": "MESH",
+            "name": "DL_GOAL",
+            "transform": {
+                "translation": [
+                    61.0,
+                    -18.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    -0.0,
+                    0.0
+                ],
+                "scaling": [
+                    1.5,
+                    1.5,
+                    1.2000000476837158
+                ]
+            },
+            "file_name": "goal",
+            "moveObject": {
+                "move": "false"
+            }
+        }
+    ]
+}

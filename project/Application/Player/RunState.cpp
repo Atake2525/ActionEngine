@@ -2,7 +2,6 @@
 #include "Player.h"
 
 void RunState::Enter(Player& player) {
-
 }
 
 void RunState::Update(Player& player) {
@@ -10,5 +9,4 @@ void RunState::Update(Player& player) {
 }
 
 void RunState::Exit(Player& player) {
-
 }
