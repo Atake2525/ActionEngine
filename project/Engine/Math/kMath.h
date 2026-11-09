@@ -161,3 +161,5 @@ Vector3 Sign(const Vector3& value);
 
 // 桁数の計算
 int GetDigitCount(float value);
+
+Vector3 CalculateOrbitPosition(Vector3 target, float distance, float yaw, float pitch);

@@ -22,6 +22,8 @@ void GameScene::Initialize() {
     m_pCamera->SetPosition({ 0.0f, 1.8f, 0.0f });
     m_pCamera->SetFarClipDistance(0.0f);
 
+    m_orbitCameraController = make_unique<OrbitCameraController>(*m_pCamera);
+
     context.world.skyBox.SetCamera(m_pCamera.get());
     context.world.skyBox.SetTexture("Resources/white1x1.dds");
     context.world.light.SetIntensityDirectionalLight(0.0f);
@@ -111,6 +113,8 @@ void GameScene::Update() {
     case ScenePhase::Game: // プレイフェーズ
         m_pPlayer->Update();
         m_pPlayerUI->Update();
+
+        m_orbitCameraController->Update(m_pPlayer->GetOrbitCameraParam());
         break;
     }
 

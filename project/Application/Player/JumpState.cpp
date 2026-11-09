@@ -4,7 +4,6 @@
 
 void JumpState::Enter(Player& player) {
     player.JumpStart();
-    
 }
 
 void JumpState::Update(Player& player) {

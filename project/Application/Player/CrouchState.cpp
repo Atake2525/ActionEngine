@@ -2,7 +2,6 @@
 #include "Player.h"
 
 void CrouchState::Enter(Player& player) {
-
 }
 
 void CrouchState::Update(Player& player) {

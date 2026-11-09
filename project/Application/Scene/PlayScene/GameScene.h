@@ -18,6 +18,7 @@
 #include "BaseStage.h"
 #include "Pause.h"
 #include "PlayerUI.h"
+#include "OrbitCameraController.h"
 
 #pragma once
 
@@ -50,6 +51,7 @@ public:
 
 private:
 	std::unique_ptr<Camera> m_pCamera = nullptr;
+	std::unique_ptr<OrbitCameraController> m_orbitCameraController = nullptr;
 
 	bool m_finished = false;
 
