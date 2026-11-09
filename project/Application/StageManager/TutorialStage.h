@@ -17,7 +17,7 @@ public:
     /// <summary>
     /// JsonNameの取得
     /// </summary>
-    virtual std::string GetJsonName();
+    std::string GetJsonName() override;
     /// <summary>
     /// 更新処理
     /// </summary>

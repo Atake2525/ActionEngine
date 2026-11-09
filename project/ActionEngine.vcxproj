@@ -121,6 +121,7 @@ xcopy "$(SolutionDir)Resources" "$(TargetDir)Resources\" /E /I /Y /D</Command>
     <ClCompile Include="Application\Setting\AudioConfig.cpp" />
     <ClCompile Include="Application\Player\CrouchState.cpp" />
     <ClCompile Include="Application\Player\ClimbingState.cpp" />
+    <ClCompile Include="Application\StageManager\DebugLab.cpp" />
     <ClCompile Include="Engine\2d\UI\UIElement.cpp" />
     <ClCompile Include="Engine\3d\DebugLine\DebugLine.cpp" />
     <ClCompile Include="Engine\3d\DebugLine\DebugLineBase.cpp" />
@@ -206,6 +207,7 @@ xcopy "$(SolutionDir)Resources" "$(TargetDir)Resources\" /E /I /Y /D</Command>
     <ClInclude Include="Application\Setting\AudioConfig.h" />
     <ClInclude Include="Application\Player\CrouchState.h" />
     <ClInclude Include="Application\Player\ClimbingState.h" />
+    <ClInclude Include="Application\StageManager\DebugLab.h" />
     <ClInclude Include="Engine\3d\Model\Model\ModelLoader.h" />
     <ClInclude Include="Engine\Math\EngineContext.h" />
     <ClInclude Include="Engine\2d\UI\UIElement.h" />

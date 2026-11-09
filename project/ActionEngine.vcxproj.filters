@@ -412,6 +412,7 @@
       <Filter>Engine\LoadManager</Filter>
     </ClCompile>
     <ClCompile Include="Engine\3d\Camera\OrbitCameraController.cpp" />
+    <ClCompile Include="Application\StageManager\DebugLab.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Setting\KeyboardConfig.h">
@@ -718,6 +719,7 @@
       <Filter>Engine\3d\Model\Model</Filter>
     </ClInclude>
     <ClInclude Include="Engine\3d\Camera\OrbitCameraController.h" />
+    <ClInclude Include="Application\StageManager\DebugLab.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\DebugLine\DebugLine.PS.hlsl">
