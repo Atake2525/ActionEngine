@@ -12,7 +12,7 @@ public:
 
     virtual ~BaseStage() = default;
 
-    virtual void SetContext(AppContext& context) { m_pContext = &context; }
+    virtual void SetContext(AppContext& context);
 
     /// <summary>
     /// 初期化

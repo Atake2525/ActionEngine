@@ -119,19 +119,22 @@ void TitleScene::Update() {
 
     std::string pressUI = m_titleSceneUI->GetPressUI();
 
-    if (pressUI == "bootScreen")
+    if (!m_screenChange)
     {
-        m_sceneScreen = TitleSceneScreen::TitleScreen;
-    }
-    else if (pressUI == "start" && !m_showCredit)
-    {
-        m_screenChange = true;
-        m_charModel->ChangePlayAnimation("TitleScreen");
-        m_charModel->ResetAnimationTime();
-    }
-    else if (pressUI == "exit" && !m_showCredit)
-    {
-        finished = true;
+        if (pressUI == "bootScreen")
+        {
+            m_sceneScreen = TitleSceneScreen::TitleScreen;
+        }
+        else if (pressUI == "start" && !m_showCredit)
+        {
+            m_screenChange = true;
+            m_charModel->ChangePlayAnimation("TitleScreen");
+            m_charModel->ResetAnimationTime();
+        }
+        else if (pressUI == "exit" && !m_showCredit)
+        {
+            finished = true;
+        }
     }
 
     switch (m_sceneScreen)
