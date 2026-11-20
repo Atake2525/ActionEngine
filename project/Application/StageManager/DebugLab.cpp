@@ -11,7 +11,7 @@ void DebugLab::Initialize(Player* player, Camera* camera) {
 
     EngineContext& enContext = m_pContext->engine;
 
-    m_pStageObject = 
+    //m_pStageObject = 
 }
 
 std::string DebugLab::GetJsonName() {

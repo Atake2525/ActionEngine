@@ -208,7 +208,7 @@ void Player::Update()
         m_orbitCameraParam.target = { m_transform.position.x, m_transform.position.y + m_cameraHeight, m_transform.position.z };
         m_orbitCameraParam.pitch = m_cameraBaseTransform.rotate.x;
         m_orbitCameraParam.yaw = m_cameraBaseTransform.rotate.y;
-        //UpdateCameraParent();
+        UpdateCameraParent();
     }
 }
 

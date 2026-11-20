@@ -22,7 +22,7 @@ void GameScene::Initialize() {
     m_pCamera->SetPosition({ 0.0f, 1.8f, 0.0f });
     m_pCamera->SetFarClipDistance(0.0f);
 
-    m_orbitCameraController = make_unique<OrbitCameraController>(*m_pCamera);
+    //m_orbitCameraController = make_unique<OrbitCameraController>(*m_pCamera);
 
     context.world.skyBox.SetCamera(m_pCamera.get());
     context.world.skyBox.SetTexture("Resources/white1x1.dds");
@@ -114,7 +114,7 @@ void GameScene::Update() {
         m_pPlayer->Update();
         m_pPlayerUI->Update();
 
-        m_orbitCameraController->Update(m_pPlayer->GetOrbitCameraParam());
+        //m_orbitCameraController->Update(m_pPlayer->GetOrbitCameraParam());
         break;
     }
 
@@ -147,7 +147,7 @@ void GameScene::Draw() {
     context.engine.graphics.object3DBase.ShaderDraw();
 
     m_pStage->DrawObject3d();
-    m_pPlayer->Draw();
+    //m_pPlayer->Draw();
 
     context.engine.graphics.render2DBase.ShaderDraw();
 
