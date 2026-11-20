@@ -220,8 +220,15 @@ void Object3d::UpdateSkinCluster(std::vector<SkinCluster>& skinCluster, const Sk
         for (size_t jointIndex = 0; jointIndex < skeleton.joints.size(); ++jointIndex)
         {
             assert(jointIndex < skinCluster[skinIndex].inverseBindPoseMatrices.size());
-            skinCluster[skinIndex].mappedPalette[jointIndex].skeletonSpaceMatrix = Multiply(skinCluster[skinIndex].inverseBindPoseMatrices[jointIndex], skeleton.joints[jointIndex].skeletonSpaceMatrix);
-            skinCluster[skinIndex].mappedPalette[jointIndex].skeletonSpaceInverseTransposeMatrix = Transpose(Inverse(skinCluster[skinIndex].mappedPalette[jointIndex].skeletonSpaceMatrix));
+            // UPLOADヒープはCPUで読み返さず、通常のCPUメモリ上で計算を完了してから書き込む。
+            const Matrix4x4 skeletonSpaceMatrix = Multiply(
+                skinCluster[skinIndex].inverseBindPoseMatrices[jointIndex],
+                skeleton.joints[jointIndex].skeletonSpaceMatrix);
+            const WellForGPU palette{
+                skeletonSpaceMatrix,
+                Transpose(Inverse(skeletonSpaceMatrix))
+            };
+            skinCluster[skinIndex].mappedPalette[jointIndex] = palette;
         }
     }
 }

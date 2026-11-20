@@ -102,10 +102,15 @@ void Model::SkinningUpdate(const Skeleton& skeleton) {
         const size_t jointCount = (std::min)(skeleton.joints.size(), skinCluster[meshIndex].inverseBindPoseMatrices.size());
         for (size_t jointIndex = 0; jointIndex < jointCount; ++jointIndex)
         {
-            mappedPalette[meshIndex][jointIndex].skeletonSpaceMatrix =
-                Multiply(skinCluster[meshIndex].inverseBindPoseMatrices[jointIndex], skeleton.joints[jointIndex].skeletonSpaceMatrix);
-            mappedPalette[meshIndex][jointIndex].skeletonSpaceInverseTransposeMatrix =
-                Transpose(Inverse(mappedPalette[meshIndex][jointIndex].skeletonSpaceMatrix));
+            // GPU転送用メモリは書き込みだけに使い、逆転置行列もCPU側で計算する。
+            const Matrix4x4 skeletonSpaceMatrix = Multiply(
+                skinCluster[meshIndex].inverseBindPoseMatrices[jointIndex],
+                skeleton.joints[jointIndex].skeletonSpaceMatrix);
+            const WellForGPU palette{
+                skeletonSpaceMatrix,
+                Transpose(Inverse(skeletonSpaceMatrix))
+            };
+            mappedPalette[meshIndex][jointIndex] = palette;
         }
 
         ++meshIndex;
